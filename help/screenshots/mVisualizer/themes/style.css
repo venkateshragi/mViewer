@@ -1,0 +1,258 @@
+html, body, hr, div, dl, dt, dd, ul, ol, li, h1, h2, h3, h4, h5, h6, pre, form, fieldset, input, legend, textarea, p, blockquote, th, td {
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    float: left;
+    height: auto;
+    width: 100%;
+    background: #fbfbfb none repeat scroll 0 0;
+    font-family: Arial, Helvetica, sans-serif;
+    color: #0e2137;
+    font-size: 12px;
+}
+
+.gen-float {
+    float: left;
+}
+
+.clear {
+    clear: both;
+}
+
+a:link, a:visited, a:active {
+    color: #3399cc;
+    text-decoration: none;
+}
+
+a:hover {
+    color: #3399cc;
+    text-decoration: underline;
+}
+
+.wrapper {
+    margin: 0 auto;
+    width: 900px;
+}
+
+.header {
+    background: #161616;
+    width: 880px;
+    height: 60px;
+    padding: 0 10px;
+}
+
+a.logo {
+    background: url("images/logo.png") no-repeat;
+    width: 119px;
+    height: 19px;
+    margin-top: 20px;
+    margin-right: 50px;
+}
+
+ul.nav-cont {
+    list-style-type: none;
+}
+
+ul.nav-cont li {
+    display: inline-block;
+}
+
+ul.nav-cont li a {
+    background: #161616;
+    color: #bfbfbf;
+    text-transform: uppercase;
+    padding: 22px 15px;
+    font-weight: bold;
+    font-size: 12px;
+    height: 30px;
+    line-height: 60px
+}
+
+ul.lists li:hover, ul.nav-cont li a.sel, ul.nav-cont li a:hover {
+    text-decoration: none;
+    background-color:#444;
+    background: -moz-linear-gradient(top,  #444,  #232323);
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#444', endColorstr='#232323');
+    background-image: -webkit-linear-gradient(#444, #232323); 
+    color: #fff;
+    
+}
+ul.lists li:hover{
+	cursor: pointer;
+	}
+
+ul.user-menu {
+    float: right;
+}
+
+ul.user-menu li {
+    display: inline-block;
+}
+
+ul.user-menu li label {
+    color: #979797;
+    float: left;
+    font-weight: bold;
+    height: 30px;
+    margin-left: 5px;
+    margin-top: 25px;
+}
+
+ul.user-menu li label.logout {
+    color: #ccc !important;
+    cursor: pointer
+}
+
+.body-cont {
+    padding: 0;
+    text-align: left;
+    width: 898px;
+    border: 1px solid #B2D4D3;
+    background: #fbfbfb;
+}
+
+.title-head {
+    background: #B5E3F2;
+    width: 878px;
+    height: 30px;
+    padding: 0 10px;
+}
+
+.title-head label {
+    font-size: 14px;
+    font-weight: bold;
+    color: #0e2137;
+    line-height: 27px;
+}
+
+.title-head label span {
+    font-weight: normal !important;
+}
+
+.left-cont {
+    width: 190px;
+    padding-left: 10px;
+}
+
+.left-cont .list-head {
+    background: #fff;
+    border: 1px solid #e3eaee;
+    border-right: 0 !important;
+    padding: 10px;
+    margin: 20px 0 10px 0;
+    height: 16px;
+    text-transform: uppercase;
+    color: #0e2137;
+    font-size: 16px;
+    font-weight: bold;
+}
+
+.db {
+    background: url("images/db.png") no-repeat;
+    padding-left: 22px;
+}
+
+.collections {
+    background: url("images/collections.png") no-repeat;
+    padding-left: 22px;
+    height: 16px;
+}
+
+ul.lists li {
+    list-style-type: none;
+    padding: 10px 0;
+}
+
+ul.lists li.sel {
+    background: #e6ebec;
+}
+
+ul.lists li label {
+    background: url("images/bullet.png") no-repeat scroll 0 4px transparent;
+    padding: 0 0 0 12px;
+    height: 12px;
+    display: block;
+    font-weight: bold;
+    margin-left: 10px;
+}
+
+.right-cont {
+    width: 697px;
+    background: #fff;
+    border-left: 1px solid #E3EAEE;
+    min-height:500px;
+}
+
+.form-cont {
+    background: #ececec;
+    width: 677px;
+    padding: 10px 10px;
+}
+
+.form-cont textarea, .form-cont select {
+    border: 1px solid #B7DCEA;
+    border-top: 1px solid #93BAC7;
+}
+
+.form-cont select {
+    vertical-align: top;
+    width: 160px;
+    margin-left: 10px;
+}
+
+.btn {
+    background: #3472ab;
+    padding: 10px;
+    color: #fff;
+    text-shadow: 0.1em 0.1em 0.05em #999;
+    -moz-border-radius: 10px;
+    -webkit-border-radius: 10px;
+    border: none;
+    font-weight: bold;
+    margin-top: 10px;
+    cursor: pointer;
+}
+
+.tab-cont {
+    font-size: 12px;
+    height: 29px;
+    background: #e5e5e5;
+    padding-left:5px;
+}
+
+.tab {
+    float:left;
+    height:auto;
+    width:auto;
+    padding:7px 10px;
+    -moz-border-radius: 2px;
+    -webkit-border-radius: 2px;
+    border:1px solid #888;
+    border-bottom:0;
+    margin-right:2px;
+    background:#999;
+    font-size:11px;
+    font-weight:bold;
+    color:#fff;
+}
+
+.tab-cont .sel {
+    background:#f8f8f8 !important;
+    color:#333 !important;
+}
+
+table {
+    width:100%;
+}
+
+table tr td {
+    padding:10px 5px;
+    border-bottom:1px solid #E4F6FD;
+}
+
+
+
+
+

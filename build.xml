@@ -1,0 +1,102 @@
+<project name="mViewer" default="dist" xmlns:ac="antlib:net.sf.antcontrib" xmlns:jsl="antlib:com.googlecode.jslint4java">
+
+	<property name="app.name" value="mViewer" />
+	<property name="app.war" value="${app.name}.war" />
+	<property name="app.jar" value="${app.name}.jar" />
+	<property name="src.dir" value="${basedir}/src" />
+	<property name="java.src.dir" value="${src.dir}/main/java" />
+	<property name="js.src.dir" value="${src.dir}/main/js" />
+	<property name="src.resources.dir" value="${src.dir}/resources" />
+	<property name="lib.dir" value="${src.resources.dir}" />
+
+	<property name="staging.dir" value="${basedir}/staging" />
+	<property name="classes.dir" value="${staging.dir}/classes" />
+
+
+	<taskdef uri="antlib:net.sf.antcontrib" resource="net/sf/antcontrib/antlib.xml" classpath=" ${src.dir}/plugin/ant-contrib.jar" />
+
+	<taskdef uri="antlib:com.googlecode.jslint4java" resource="com/googlecode/jslint4java/antlib.xml" classpath="${src.dir}/plugin/jslint4java.jar" />
+
+	<taskdef name="jsdoctoolkit" classname="uk.co.darrenhurley.ant.tasks.JsDocToolkit" classpath="${src.dir}/plugin/jsdoc-toolkit-ant-task-1.1.2.jar;${src.dir}/plugin/jsdoc-toolkit/jsrun.jar" />
+
+
+
+	<jsdoctoolkit jsdochome="${src.dir}/plugin/jsdoc-toolkit/" includeundocumented="true" template="jsdoc" outputdir="${basedir}/docs" inputdir="${js.src.dir}" />
+	<target name="jslint-code">
+		<jsl:jslint haltOnFailure="true" options="es5,evil,fragment,forin,continue">
+			<formatter type="plain" />
+			<fileset dir="${js.src.dir}" includes="*.js" />
+		</jsl:jslint>
+	</target>
+
+	<target name="init" depends="jslint-code">
+		<mkdir dir="${staging.dir}" />
+		<path id="compile.class.path">
+			<fileset dir="${lib.dir}">
+				<include name="**/*.jar" />
+			</fileset>
+		</path>
+	</target>
+
+
+	<!-- compile -->
+	<target name="compile" depends="init">
+		<mkdir dir="${classes.dir}" />
+		<javac srcdir="${java.src.dir}" destdir="${classes.dir}" classpathref="compile.class.path" nowarn="yes" debug="yes">
+			<!-- <compilerarg value="-Xlint:unchecked"/> -->
+		</javac>
+	</target>
+
+	<!-- jar -->
+	<target name="jar" depends="compile">
+		<jar jarfile="${staging.dir}/${app.jar}">
+			<fileset dir="${classes.dir}">
+				<include name="**/*.class" />
+			</fileset>
+		</jar>
+	</target>
+
+	<target name="war-staging">
+		<property name="app.dir" value="${staging.dir}/${app.name}" />
+		<echo>${app.dir}</echo>
+		<mkdir dir="${app.dir}" />
+		<copy toDir="${app.dir}">
+			<fileset dir="${src.dir}/webapp">
+			</fileset>
+			<fileset dir="${src.dir}/test/js">
+			</fileset>
+		</copy>
+		<mkdir dir="${app.dir}/js" />
+		<copy toDir="${app.dir}/js">
+			<fileset dir="${js.src.dir}">
+			</fileset>
+		</copy>
+		<mkdir dir="${app.dir}/WEB-INF" />
+		<mkdir dir="${app.dir}/WEB-INF/lib" />
+		<copy toDir="${app.dir}/WEB-INF/lib">
+			<fileset dir="${lib.dir}">
+				<exclude name="**/*spec*.jar" />
+			</fileset>
+			<fileset dir="${staging.dir}">
+				<include name="*.jar" />
+			</fileset>
+		</copy>
+
+	</target>
+
+	<target name="war" depends="war-staging">
+		<war warfile="${staging.dir}/${app.war}" needxmlfile="false">
+			<fileset dir="${app.dir}">
+			</fileset>
+		</war>
+	</target>
+
+	<target name="dist" description="Prepares a dist, is not incremental" depends="clean, compile, jar, war">
+	</target>
+
+	<target name="dev" description="prepares a dev build, is incremental" depends="clean, compile, jar, war-staging" />
+
+	<target name="clean" description="Cleans up all the staging resources">
+		<delete dir="${staging.dir}" />
+	</target>
+</project>
