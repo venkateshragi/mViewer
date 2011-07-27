@@ -1,0 +1,73 @@
+8
+
+dir
+8112
+http://192.168.2.146/repos/pramatilabs/nevala/src/plugin
+http://192.168.2.146/repos
+
+
+
+2011-07-19T09:32:46.477802Z
+7732
+adityag
+
+
+svn:special svn:externals svn:needs-lock
+
+
+
+
+
+
+
+
+
+
+
+0e25e8f0-b78c-4b55-a4fc-03b202cce7fc
+
+jslint4java.jar
+file
+
+
+
+
+2011-07-27T14:12:15.283025Z
+f7dd5617270edfacfda72524c5a4c3c8
+2011-07-19T09:32:46.477802Z
+7732
+adityag
+has-props
+
+jsdoc-toolkit
+dir
+
+ant-contrib.jar
+file
+
+
+
+
+2011-07-27T14:12:15.290025Z
+a6495d687a143cbaefa2ab812c69b42e
+2011-07-19T09:32:46.477802Z
+7732
+adityag
+has-props
+
+jsunit
+dir
+
+jsdoc-toolkit-ant-task-1.1.2.jar
+file
+
+
+
+
+2011-07-27T14:12:15.294026Z
+7d9932aeff79e96c42592cdfd0290ddd
+2011-07-19T09:32:46.477802Z
+7732
+adityag
+has-props
+

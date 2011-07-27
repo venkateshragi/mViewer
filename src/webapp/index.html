@@ -1,157 +1,78 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
 <html>
-    <head>
-        <meta http-equiv="content-type" content="text/html; charset=utf-8">
-        <title>New Connection</title>
-        <link type="text/css" rel="stylesheet" href="lib/yui/build/cssfonts/fonts-min.css" />
-        <script type="text/javascript" src="lib/yui/build/yui/yui-min.js"></script>
-        <LINK REL="SHORTCUT ICON" HREF="images/icon.png">
-        <link href="css/style.css" rel="stylesheet" type="text/css">
-        <link href="css/anim.css" rel="stylesheet" type="text/css">
-        <script type="text/javascript">
-            YUI({ filter: 'raw' }).use("anim", function(Y) {
-                var anim = new Y.Anim({
-                    node: '#demo',
-                    from:{
-                        height: 0
+<head>
+<meta http-equiv="content-type" content="text/html; charset=utf-8">
+<title>New Connection</title>
+<link type="text/css" rel="stylesheet"
+	href="lib/yui/build/cssfonts/fonts-min.css" />
+<script type="text/javascript" src="lib/yui/build/yui/yui-min.js"></script>
+<LINK REL="SHORTCUT ICON" HREF="images/icon.png">
+<link href="css/style.css" rel="stylesheet" type="text/css">
+<link href="css/anim.css" rel="stylesheet" type="text/css">
+<script type="text/javascript" src="js/login.js"></script>
+<script type="text/javascript" src="js/utility.js"></script>
+<link rel="stylesheet" type="text/css"
+	href="lib/yui2/build/container/assets/skins/sam/container.css">
+<!-- Dependencies -->
+<script src="lib/yui2/build/yahoo-dom-event/yahoo-dom-event.js"></script>
+<script src="lib/yui2/build/animation/animation-min.js"></script>
+<script src="lib/yui2/build/element/element-min.js"></script>
+<script src="lib/yui2/build/button/button-min.js"></script>
+<!-- Source file -->
+<script src="lib/yui2/build/container/container-min.js"></script>
+</head>
+<body class="login">
+	<center>
 
-                    },
-                    to: {height: function(node){
-                            return node.get('scrollHeight');
-                        }
-                    },
-                    easing: Y.Easing.easeOut
-                });
-
-                var onClick = function(e) {
-                    var div = Y.one('#demo');
-                    var s="<form id='newConnect' action='Connect' method='POST'><table class='table' align='center'>";
-                    s+="<thead><tr><th>Key</th><th>Value</th></tr></thead>";
-                    s+="<tbody  class='tbody'>";
-                    s+="<tr> <td><code>Name</code></td><td ><input type='text' id='conName' name='Name'/> </td></tr>";
-                    s+="<tr><td><code>Host</code></td><td ><input type='text' id='host' name='Host' value='localhost'/></td></tr>";
-                    s+="<tr><td><code>Port</code></td><td ><input type='text' id='port' name='Port' value='27017'/></td></tr>";
-                    s+="<tr><td><code>UserName</code></td><td ><input type='text'  id='username' name='Username'/></td></tr>";
-                    s+="<tr><td><code>Password</code></td><td><input type='password' id='password' name='Password'/></td></tr>";
-                    s+="</tbody></table>";
-                    //                    s+="<div align='right'>";
-                    s+="<label> Add to favourites</label>";
-                    s+="<input type='checkbox' id='favourite' name='favourite'><br/>";
-                    s+="<br><input  class='btn' type='submit' id='login' value='Go'>  <button align='right'  class='btn' type='reset'>Clear</button></form>";
-                    //                    s+="</div>";
-                    div.set("innerHTML", s);
-                    e.preventDefault();
-                    anim.run();
-                   
-
-                };
-                Y.one('#add').on('click', onClick);
-
-            });
-
-        </script>
-
-        <!-- The following script reads the favoourite.xml file and lists all the favourite connections stored
-            NOTE: animation part is not working need to see
-        -->
-        <script type="text/javascript">
-            YUI({ filter: 'raw' }).use("anim", function(Y){
-                var anim = new Y.Anim({
-                    node: '#demo',
-                    from:{
-                        height: 0
-
-                    },
-                    to: {height: function(node){
-                            return node.get('scrollHeight');
-                        }
-                    },
-                    easing: Y.Easing.easeOut
-                });
-                var onClick = function(e) {
-                    var div = Y.one('#demo');
-                    var s="";
-                    if (window.XMLHttpRequest)
-                    {// code for IE7+, Firefox, Chrome, Opera, Safari
-                        xmlhttp=new XMLHttpRequest();
-                    }
-                    else
-                    {// code for IE6, IE5
-                        xmlhttp=new ActiveXObject("Microsoft.XMLHTTP");
-                    }
-                    xmlhttp.open("GET","favourite.xml",false);
-                    xmlhttp.send();
-                    xmlDoc=xmlhttp.responseXML;
-                    
-                    
-                    var x=xmlDoc.getElementsByTagName("fav");
-                    if(x.length>0){
-                        s+="<table id='demo' >";
-                        s+="<thead><tr><th>Name</th><th>Host</th> <th>Port</th><th>Username</th></tr></thead>"
-                    }
-                    for (i=0;i<x.length;i++)
-                    {
-
-                        s+="<tr><td>";
-                        s+=x[i].getElementsByTagName("Name")[0].childNodes[0].nodeValue;
-                        s+="</td><td>";
-                        s+=(x[i].getElementsByTagName("Host")[0].childNodes[0].nodeValue);
-                        s+="</td><td>";
-                        s+=(x[i].getElementsByTagName("Port")[0].childNodes[0].nodeValue);
-                        s+="</td><td>";
-                        s+=(x[i].getElementsByTagName("Username")[0].childNodes[0].nodeValue);
-                        s+="</td></tr>";
-                    }
-                    s+="</table>";
-                    div.set("innerHTML", s);
-                    e.preventDefault();
-                    anim.run();
-                };
-                Y.one('#favButton').on('click', onClick);
-
-            });
-              
-        </script>
-<!--        <script type="text/javascript">
-            YUI({ filter: 'raw' }).use("anim", function(Y) {
-                var anim = new Y.Anim({
-                    node: '#logo',
-                    from:{
-                        height: 0,
-                        width: 0
-                    },
-                    to: {
-                        height: 150,
-                        width: 227
-                    },
-                    easing: Y.Easing.easeOut,
-                    duration: 2
-                });
-
-                var onClick = function(e) {
-                    e.preventDefault();
-                    anim.run();
-
-
-                };
-                Y.on('load', onClick);
-                
-
-            });
-
-        </script>-->
-
-    </head>
-    <body class="login" >
-    <center>
-
-        <img src="images/index_logo.png" alt="logo" align="center" id="logo">
-
-        <br>
-        <button id="add"  class="btn"> New Connection</button>
-        <button id ="favButton" class="btn" name="favButton" > Favourites </button>
-    <br><br>
-    <div id="demo" ></div>
-</center>
+		<img src="images/index_logo.png" alt="logo" align="center" id="logo">
+		
+		<br>
+		<!-- <button id="add" class="btn">New Connection</button> -->
+		<fieldset id="field">
+			<legend align="center">Login Details</legend>
+			<br> <br>
+			<div id="loginForm">
+				<table class='table' align='center'>
+					<thead>
+						<tr>
+							<th>Key</th>
+							<th>Value</th>
+						</tr>
+					</thead>
+					<tbody class='tbody'>
+						<tr>
+							<td><code>Host</code>
+							</td>
+							<td><input type='text' id='host' name='host'
+								value='localhost' />
+							</td>
+						</tr>
+						<tr>
+							<td><code>Port</code>
+							</td>
+							<td><input type='text' id='port' name='port' value='27017' />
+							</td>
+						</tr>
+						<tr>
+							<td><code>UserName</code>
+							</td>
+							<td><input type='text' id='username' name='username' />
+							</td>
+						</tr>
+						<tr>
+							<td><code>Password</code>
+							</td>
+							<td><input type='password' id='password' name='password' />
+							</td>
+						</tr>
+					</tbody>
+				</table>
+				<br>
+				<button class='btn' id='login'>GO</button>
+			</div>
+			<br> <br>
+		</fieldset>
+		<div class="notify" id="errorMsg"></div>
+	</center>
 </body>
 </html>

@@ -1,0 +1,29 @@
+K 25
+svn:wc:ra_dav:version-url
+V 93
+/repos/!svn/ver/8068/pramatilabs/nevala/src/test/java/com/imaginea/mongodb/requestdispatchers
+END
+DatabaseRequestDispatcherTest.java
+K 25
+svn:wc:ra_dav:version-url
+V 128
+/repos/!svn/ver/8045/pramatilabs/nevala/src/test/java/com/imaginea/mongodb/requestdispatchers/DatabaseRequestDispatcherTest.java
+END
+StatisticsRequestDispatcherTest.java
+K 25
+svn:wc:ra_dav:version-url
+V 130
+/repos/!svn/ver/8045/pramatilabs/nevala/src/test/java/com/imaginea/mongodb/requestdispatchers/StatisticsRequestDispatcherTest.java
+END
+CollectionRequestDispatcherTest.java
+K 25
+svn:wc:ra_dav:version-url
+V 130
+/repos/!svn/ver/8045/pramatilabs/nevala/src/test/java/com/imaginea/mongodb/requestdispatchers/CollectionRequestDispatcherTest.java
+END
+DocumentRequestDispatcherTest.java
+K 25
+svn:wc:ra_dav:version-url
+V 128
+/repos/!svn/ver/8068/pramatilabs/nevala/src/test/java/com/imaginea/mongodb/requestdispatchers/DocumentRequestDispatcherTest.java
+END

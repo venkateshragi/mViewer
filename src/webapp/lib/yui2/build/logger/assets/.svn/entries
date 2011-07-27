@@ -1,0 +1,55 @@
+8
+
+dir
+8112
+http://192.168.2.146/repos/pramatilabs/nevala/src/webapp/lib/yui2/build/logger/assets
+http://192.168.2.146/repos
+
+
+
+2011-07-19T09:37:37.393560Z
+7736
+adityag
+
+
+svn:special svn:externals svn:needs-lock
+
+
+
+
+
+
+
+
+
+
+
+0e25e8f0-b78c-4b55-a4fc-03b202cce7fc
+
+logger.css
+file
+
+
+
+
+2011-07-27T14:12:29.764853Z
+fb3b73f5209626d7168be0b90054bfac
+2011-07-19T09:37:37.393560Z
+7736
+adityag
+
+skins
+dir
+
+logger-core.css
+file
+
+
+
+
+2011-07-27T14:12:29.769854Z
+a530db5c4c553d635927c044028045d0
+2011-07-19T09:37:37.393560Z
+7736
+adityag
+

@@ -23,41 +23,32 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 // TODO send a custom handler if not provided run the default one
-YUI.add('alert-dialog', function(Y) {
-	Y.namespace('com.imaginea.mongoV');
-	Y.com.imaginea.mongoV.showAlertDialog = function(msg, ico, handler) {
-		if (ico === undefined) {
-			ico = YAHOO.widget.SimpleDialog.ICON_INFO;
-		}
-		var simpleDialog = new YAHOO.widget.SimpleDialog("simpledialog", {
-			width : "300px",
-			fixedcenter : true,
-			visible : false,
-			draggable : true,
-			close : false,
-			text : msg,
-			icon : ico,
-			constraintoviewport : true,
-			buttons : [{
-				text : "OK",
-				handler : (function (){
-					if(handler === undefined){
-						return function(){
-							this.hide();
-						};
-					}
-					else {
-						return handler;
-					}
-					
-				}()),
-				isDefault : true
-			}]
-		});
-		simpleDialog.setHeader("Info");
-		simpleDialog.render("alertDialogContainer");
-		simpleDialog.show();
-	};
+YUI.add('alert-dialog', function (Y) {
+    Y.namespace('com.imaginea.mongoV');
+    Y.com.imaginea.mongoV.showAlertDialog = function (msg, ico, handler) {
+        var simpleDialog = new YAHOO.widget.SimpleDialog("simpledialog", {
+            width: "300px",
+            fixedcenter: true,
+            visible: false,
+            draggable: true,
+            close: false,
+            text: msg,
+            icon: ico || YAHOO.widget.SimpleDialog.ICON_INFO,
+            constraintoviewport: true,
+            zIndex : 10,
+            buttons: [{
+                text: "OK",
+                handler: handler ||
+                function () {
+                    this.hide();
+                },
+                isDefault: true
+            }]
+        });
+        simpleDialog.setHeader("Info");
+        simpleDialog.render("alertDialogContainer");
+        simpleDialog.show();
+    };
 }, '3.3.0', {
-	requires : []
+    requires: []
 });

@@ -1,0 +1,49 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<title>mViewer-Help Page</title>
+<META http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<META name="description"
+	content="This is the help page for mViewer- a MongoDB UI" />
+<LINK rel="SHORTCUT ICON" href="images/icon.png" />
+<link href="css/style.css" rel="stylesheet" type="text/css">
+</head>
+<body width="100%">
+	<center>
+		<img src="images/index_logo.png" alt="logo" align="center" id="logo">
+		<br>
+	</center>
+	<div class="wrapper">
+	<div class="body-cont gen-float">
+		<div class="gen-float">
+			<div class="left-cont gen-float">
+				<div class="list-head">
+					<label>Help Options</label>
+				</div>
+				<ul class="lists">
+					<li><a href="#login">Login</a>
+					</li>
+					<li><a href="#logout">Log out</a>
+					</li>
+				</ul>
+			</div>
+			<div class="right-cont gen-float">
+				<div class="list-head">
+					<label id="login">Login</label>
+				</div>
+				<div class="helpDescription">
+				<p>Before logging into the mViewer tool you need to add a user to the <strong>admin</strong> database of the <strong>mongoDB</strong>. To do this first install mongoDB. The installation process for mongoDB can be found <a href="http://www.mongodb.org/display/DOCS/Quickstart">here</a>.</p> 
+				<p> After <strong>mongoDB</strong> is running. Start the <strong>mongod</strong> process and do the following:
+				<img class="helpDescriptionImg" alt="add user " src="images/add_user.png"></img>
+				<p> Now you can go to the mViewer login page and fill in the required details.</p>
+				</div>    
+				<div class="list-head">
+					<label id="logout">Log out</label>
+				</div>
+			</div>
+		</div>
+	</div>
+	</div>
+</body>
+</html>
+

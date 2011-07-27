@@ -1,0 +1,43 @@
+8
+
+dir
+8112
+http://192.168.2.146/repos/pramatilabs/nevala/src/webapp/lib/yui2/build/autocomplete/assets
+http://192.168.2.146/repos
+
+
+
+2011-07-19T09:37:37.393560Z
+7736
+adityag
+
+
+svn:special svn:externals svn:needs-lock
+
+
+
+
+
+
+
+
+
+
+
+0e25e8f0-b78c-4b55-a4fc-03b202cce7fc
+
+skins
+dir
+
+autocomplete-core.css
+file
+
+
+
+
+2011-07-27T14:12:41.797542Z
+a530db5c4c553d635927c044028045d0
+2011-07-19T09:37:37.393560Z
+7736
+adityag
+

@@ -1,0 +1,56 @@
+8
+
+dir
+8112
+http://192.168.2.146/repos/pramatilabs/nevala/src/webapp/lib/yui2/build/carousel/assets
+http://192.168.2.146/repos
+
+
+
+2011-07-19T09:37:37.393560Z
+7736
+adityag
+
+
+svn:special svn:externals svn:needs-lock
+
+
+
+
+
+
+
+
+
+
+
+0e25e8f0-b78c-4b55-a4fc-03b202cce7fc
+
+skins
+dir
+
+carousel-core.css
+file
+
+
+
+
+2011-07-27T14:12:43.967666Z
+47a804ceff3a6a0736c816d75fdd5160
+2011-07-19T09:37:37.393560Z
+7736
+adityag
+
+ajax-loader.gif
+file
+
+
+
+
+2011-07-27T14:12:43.971666Z
+734023ef4fd81fb5638c9d5c3d6a8fdf
+2011-07-19T09:37:37.393560Z
+7736
+adityag
+has-props
+

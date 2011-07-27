@@ -1,0 +1,157 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=utf-8">
+<title>Utility Testing</title>
+
+<style type="text/css">
+/*margin and padding on body element
+  can introduce errors in determining
+  element position and are not recommended;
+  we turn them off as a foundation for YUI
+  CSS treatments. */
+body {
+	margin:0;
+	padding:0;
+}
+</style>
+<!-- Dependencies -->
+<script src="lib/yui2/build/yahoo-dom-event/yahoo-dom-event.js"></script>
+<script src="lib/yui2/build/animation/animation-min.js"></script>
+<script src="lib/yui2/build/element/element-min.js"></script>
+<script src="lib/yui2/build/button/button-min.js"></script>
+ <!-- Source file -->
+<script src="lib/yui2/build/container/container-min.js"></script>
+<!--YUI 3 JS files imported   -->
+<LINK type="text/css" rel="stylesheet" href="lib/yui/build/cssfonts/fonts-min.css"/>
+<script type="text/javascript" src="lib/yui/build/yui/yui-min.js"></script>
+
+<script type="text/javascript" src="js/utility.js"></script>
+<!--begin custom header content for this example-->
+
+<style type="text/css">
+#testLogger {
+    margin-bottom: 1em;
+}
+
+#testLogger .yui3-console .yui3-console-title {
+    border: 0 none;
+    color: #000;
+    font-size: 13px;
+    font-weight: bold;
+    margin: 0;
+    text-transform: none;
+}
+#testLogger .yui3-console .yui3-console-entry-meta {
+    margin: 0;
+}
+
+.yui3-skin-sam .yui3-console-entry-pass .yui3-console-entry-cat {
+    background: #070;
+    color: #fff;
+}
+</style>
+
+<!--end custom header content for this example-->
+
+</head>
+
+<body class="yui3-skin-sam  yui-skin-sam">
+
+<h1>Testing</h1>
+
+
+<div id="testLogger"></div>
+<script type="text/javascript">
+YUI({ filter: 'raw' }).use("node", "console", "test","utility",function (Y) {
+
+    Y.namespace("com.imaginea.mongoV");
+    var MV = Y.com.imaginea.mongoV;
+    MV.TestCase = new Y.Test.Case({
+    
+        //name of the test case - if not provided, one is auto-generated
+        name : "Data Type Tests",
+        /*
+         * Sets up data that is needed by each test.
+         */
+        setUp : function () {
+           this.obj = {
+        		   		aa:"a",
+        		   		bb:"b",
+        		   		aFunc : function () {}
+        		   		};
+           this.arr = [1,2,3];
+           this.num = 10;
+           this.response = {
+        		meta :{
+        			totalRecords: 100, 
+        			recordsReturned: 50,
+        			startIndex: 0
+        		}
+           };
+		   this.finalObject = {
+				   response : {
+					   result : this.arr
+				   },
+				   total_records:100,
+				   records_returned:50,
+				   first_index:0
+		   };           
+        },
+        
+        /*
+         * Cleans up everything that was created by setUp().
+         */
+        tearDown : function () {
+            delete this.obj;
+            delete this.arr;
+        },
+            
+        testObj : function () {
+            var Assert = Y.Assert;
+            Assert.areEqual(false, MV.isArray(this.obj));            
+            Assert.areEqual(true, MV.isArray(this.arr));    
+        },
+        
+        testArr : function () {
+            var Assert = Y.Assert;
+            Assert.areEqual(true, MV.isObject(this.obj));            
+            Assert.areEqual(false, MV.isObject(this.arr));                       
+        },
+        
+        testGetProperties : function () {
+        	var Assert = Y.Assert;
+        	Assert.areEqual("aa",MV.getProperties(this.obj)[0]);
+        	Assert.areEqual("bb",MV.getProperties(this.obj)[1]);
+        	Assert.areEqual("aFunc",MV.getProperties(this.obj)[2]);
+        },
+        testPrepareReturnObject : function(){
+        	var Assert = Y.Assert;
+        	Assert.areEqual(this.finalObject,MV.prepareReturnObject(this.response,this.arr));
+        }
+       
+    });
+    
+    MV.UtilitySuite = new Y.Test.Suite("Utility Suite");
+    MV.UtilitySuite.add(MV.TestCase);
+
+
+    //create the console
+    var r = new Y.Console({
+        newestOnTop : false,
+        style: 'block' // to anchor in the example content
+    });
+    
+    r.render('#testLogger');
+    
+    Y.Test.Runner.add(MV.UtilitySuite);
+
+    //run the tests
+    Y.Test.Runner.run();
+
+});
+</script>
+
+
+</body>
+</html>
