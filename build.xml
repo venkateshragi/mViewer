@@ -11,6 +11,10 @@
 
 	<property name="staging.dir" value="${basedir}/staging" />
 	<property name="classes.dir" value="${staging.dir}/classes" />
+	<property name="app.dir" value="${staging.dir}/${app.name}" /> 
+	<!-- Test Logs and Test Reports -->
+	<property name="test.logs.dir" value="${basedir}/logs" />
+	<property name="test.dir" value="${src.dir}/test" />
 
 
 	<taskdef uri="antlib:net.sf.antcontrib" resource="net/sf/antcontrib/antlib.xml" classpath=" ${src.dir}/plugin/ant-contrib.jar" />
@@ -30,12 +34,31 @@
 	</target>
 
 	<target name="init" depends="jslint-code">
+
 		<mkdir dir="${staging.dir}" />
+		<mkdir dir="${app.dir}" /> 
+		<mkdir dir="${test.logs.dir}" />
+
 		<path id="compile.class.path">
 			<fileset dir="${lib.dir}">
 				<include name="**/*.jar" />
 			</fileset>
 		</path>
+		<!-- Class path of .jar and .class required during test files compiling -->
+		<path id="test.class.path">
+			<fileset dir="${classes.dir}">
+				<include name="com/imaginea/mongodb/services/**" />
+				<include name="com/imaginea/mongodb/common/**" />
+				<include name="com/imaginea/mongodb/common/exceptions/**" />
+				<include name="com/imaginea/mongodb/requestdispatchers/**" />
+				<include name="com/imaginea/mongodb/services/servlet/**" />
+			</fileset>
+			<fileset dir="${lib.dir}">
+				<include name="**/*.jar" />
+			</fileset>
+		</path>
+
+
 	</target>
 
 
@@ -43,12 +66,32 @@
 	<target name="compile" depends="init">
 		<mkdir dir="${classes.dir}" />
 		<javac srcdir="${java.src.dir}" destdir="${classes.dir}" classpathref="compile.class.path" nowarn="yes" debug="yes">
-			<!-- <compilerarg value="-Xlint:unchecked"/> -->
+			<!-- <compiler arg value="-Xlint:unchecked"/> -->
 		</javac>
 	</target>
 
+	<!-- compile test-->
+	<target name="compile-test" depends="compile">
+		<javac srcdir="${test.dir}" destdir="${classes.dir}" classpathref="test.class.path" nowarn="yes" debug="yes">
+		</javac>
+	</target>
+
+	<!-- Run test-->
+	<echo> Running Test </echo>
+	<target name="test" depends="compile-test">
+		<junit printsummary="yes" haltonfailure="no">
+			<classpath refid="test.class.path" />
+			<formatter type="plain" />
+			<batchtest todir="${test.logs.dir}">
+				<fileset dir="${classes.dir}">
+					<include name="**/*TestSuite.class" />
+				</fileset>
+			</batchtest>
+		</junit>
+	</target>
+<!-- To automate test target yet-->
 	<!-- jar -->
-	<target name="jar" depends="compile">
+	<target name="jar" depends="compile-test">
 		<jar jarfile="${staging.dir}/${app.jar}">
 			<fileset dir="${classes.dir}">
 				<include name="**/*.class" />
@@ -57,11 +100,10 @@
 	</target>
 
 	<target name="war-staging">
-		<property name="app.dir" value="${staging.dir}/${app.name}" />
 		<echo>${app.dir}</echo>
-		<mkdir dir="${app.dir}" />
 		<copy toDir="${app.dir}">
 			<fileset dir="${src.dir}/webapp">
+				<exclude name="web.xml" />
 			</fileset>
 			<fileset dir="${src.dir}/test/js">
 			</fileset>
@@ -81,7 +123,11 @@
 				<include name="*.jar" />
 			</fileset>
 		</copy>
-
+		<copy toDir="${app.dir}/WEB-INF">
+			<fileset dir="${src.dir}/webapp">
+				<include name="web.xml" />
+			</fileset>
+		</copy>
 	</target>
 
 	<target name="war" depends="war-staging">
@@ -96,7 +142,8 @@
 
 	<target name="dev" description="prepares a dev build, is incremental" depends="clean, compile, jar, war-staging" />
 
-	<target name="clean" description="Cleans up all the staging resources">
+	<target name="clean" description="Cleans up all the staging resources and log files">
 		<delete dir="${staging.dir}" />
+		<delete dir="${test.logs.dir}" />
 	</target>
 </project>
