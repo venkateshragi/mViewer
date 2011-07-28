@@ -24,7 +24,7 @@
  */
 package com.imaginea.mongodb.common;
 
-import com.imaginea.mongodb.services.servlet.UserLogin;
+import com.imaginea.mongodb.requestdispatchers.UserLogin;
 import com.mongodb.Mongo;
 
 /**

@@ -32,7 +32,7 @@ package com.imaginea.mongodb.common.exceptions;
  * @author Rachit Mittal
  *
  */
-public class ValidationException extends Exception {
+public class ValidationException extends RuntimeException {
 
 	private static final long serialVersionUID = 1L;
 	private String errorCode;

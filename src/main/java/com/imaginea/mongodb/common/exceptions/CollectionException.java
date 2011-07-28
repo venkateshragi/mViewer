@@ -23,8 +23,7 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 package com.imaginea.mongodb.common.exceptions;
-
-import com.mongodb.MongoException;
+ 
 
 /**
  * Defines all the Exceptions generated while performing any operation on
@@ -38,7 +37,7 @@ import com.mongodb.MongoException;
  * @author Rachit Mittal
  *
  */
-public class CollectionException extends MongoException {
+public class CollectionException extends RuntimeException {
 
 	private static final long serialVersionUID = 1L;
 

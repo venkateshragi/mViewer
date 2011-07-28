@@ -24,7 +24,6 @@
  */
 package com.imaginea.mongodb.common;
 
-import com.imaginea.mongodb.common.exceptions.DatabaseException;
 import com.mongodb.Mongo;
 
 /**
@@ -41,7 +40,6 @@ public interface MongoInstanceProvider {
 	 * implements it.
 	 *
 	 * @return a Mongo Instance
-	 * @throws DatabaseException
 	 */
 	public Mongo getMongoInstance();
 

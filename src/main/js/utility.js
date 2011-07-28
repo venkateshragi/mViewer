@@ -274,19 +274,19 @@ YUI.add('utility', function (Y) {
             return "services/stats?tokenId=" + Y.one("#tokenID").get("value");
         },
         login: function () {
-            return "login";
+            return "services/login";
         },
         logout: function () {
-            return "logout?tokenId=" + Y.one("#tokenID").get("value");
+            return "services/logout?tokenId=" + Y.one("#tokenID").get("value");
         },
         graphs: function () {
             return "graphs.html?tokenId=" + Y.one("#tokenID").get("value");
         },
         graphInitiate: function () {
-            return "graphs/initiate?tokenId=" + Y.one("#tokenID").get("value");
+            return "services/graphs/initiate?tokenId=" + Y.one("#tokenID").get("value");
         },
         graphQuery: function () {
-            return "graphs/query?tokenId=" + Y.one("#tokenID").get("value");
+            return "services/graphs/query?tokenId=" + Y.one("#tokenID").get("value");
         },
         insertDoc: function () {
             return "services/" + Y.one("#currentDB").get("value") + "/" + Y.one("#currentColl").get("value") + "/document?tokenId=" + Y.one("#tokenID").get("value") + "&action=PUT";

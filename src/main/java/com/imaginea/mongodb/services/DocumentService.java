@@ -26,125 +26,190 @@ package com.imaginea.mongodb.services;
 
 import java.util.ArrayList;
 
-import org.bson.types.ObjectId;
+import org.bson.types.ObjectId;  
 
-import com.imaginea.mongodb.common.exceptions.DeleteDocumentException;
+import com.imaginea.mongodb.common.exceptions.CollectionException;
+import com.imaginea.mongodb.common.exceptions.DatabaseException;
 import com.imaginea.mongodb.common.exceptions.DocumentException;
-import com.imaginea.mongodb.common.exceptions.EmptyCollectionNameException;
-import com.imaginea.mongodb.common.exceptions.EmptyDatabaseNameException;
-import com.imaginea.mongodb.common.exceptions.EmptyDocumentDataException;
-import com.imaginea.mongodb.common.exceptions.InsertDocumentException;
-import com.imaginea.mongodb.common.exceptions.UndefinedCollectionException;
-import com.imaginea.mongodb.common.exceptions.UndefinedDatabaseException;
-import com.imaginea.mongodb.common.exceptions.UndefinedDocumentException;
-import com.imaginea.mongodb.common.exceptions.UpdateDocumentException;
+import com.imaginea.mongodb.common.exceptions.ValidationException;
 import com.mongodb.DBObject;
 
 /**
- * Defines the Interface for all the operations defined on documents inside
- * collections in databases in Mongo.
- *
+ * Defines services definitions for performing operations like
+ * create/update/delete on documents inside a collection in a database present
+ * in mongo to which we are connected to. Also provides service to get list of
+ * all documents present.
+ * 
  * @author Rachit Mittal
- *
+ * @since 6 July 2011
+ * 
+ * 
  */
 public interface DocumentService {
 	/**
-	 * GET List of Documents present in a <collectionName> inside a <dbName>
-	 * after performing <query> and containing only <keys> keys.
-	 *
+	 * Gets the list of documents inside a collection in a database in mongo to
+	 * which user is connected to.
+	 * 
 	 * @param dbName
-	 *            : Name of Database
+	 *            Name of Database
 	 * @param collectionName
-	 *            : Name of Collection from which to get all Documents
-	 *
+	 *            Name of Collection from which to get all Documents
+	 * 
 	 * @param query
-	 *            : query to be performed. In case of empty query {} return all
+	 *            query to be performed. In case of empty query {} return all
 	 *            docs.
-	 *
+	 * 
 	 * @param keys
-	 *            : Keys to be present in the resulted docs.
-	 *
+	 *            Keys to be present in the resulted docs.
+	 * 
 	 * @param limit
-	 *            : Number of docs to show.
-	 *
+	 *            Number of docs to show.
+	 * 
 	 * @param skip
-	 *            : Docs to skip from the front.
-	 *
-	 * @return : List of all documents in <dbName> and <collectionName>
-	 * @throws EmptyDatabaseNameException
-	 *             , EmptyCollectionNameException,DocumentException
+	 *            Docs to skip from the front.
+	 * 
+	 * @return List of all documents.
+	 * @exception EmptyDatabaseNameException
+	 *                If database name is null
+	 * @exception EmptyCollectionNameException
+	 *                If Collection name is null
+	 * @exception UndefinedDatabaseException
+	 *                If database is not present
+	 * @exception UndefinedCollectionException
+	 *                If Collection is not present
+	 * @exception DatabaseException
+	 *                throw super type of UndefinedDatabaseException
+	 * @exception ValidationException
+	 *                throw super type of
+	 *                EmptyDatabaseNameException,EmptyCollectionNameException
+	 * @exception CollectionException
+	 *                throw super type of UndefinedCollectionException
+	 * @exception DocumentException
+	 *                exception while performing get doc list
+	 * 
 	 */
-	public ArrayList<DBObject> getDocuments(String dbName,
-			String collectionName, DBObject query, DBObject keys, int limit,
-			int skip) throws EmptyDatabaseNameException,
-			EmptyCollectionNameException, DocumentException;
+
+	public ArrayList<DBObject> getQueriedDocsList(String dbName, String collectionName, DBObject query, DBObject keys, int limit, int skip)
+			throws DatabaseException, CollectionException, DocumentException, ValidationException;
 
 	/**
-	 * Insert <documentData> in a <collectionName> inside a <dbName>
-	 *
+	 * Insert a document inside a collection in a database in mongo to which
+	 * user is connected to.
+	 * 
 	 * @param dbName
-	 *            : Name of Database
+	 *            Name of Database
 	 * @param collectionName
-	 *            : Name of Collection in which to insert a document
+	 *            Name of Collection from which to get all Documents
+	 * 
 	 * @param document
 	 *            : Document data to be inserted
 	 * @return : Insertion Status
-	 * @throws EmptyDatabaseNameException
-	 *             EmptyCollectionNameException EmptyDocumentDataException
-	 *             ,UndefinedDatabaseException
-	 *             ,UndefinedCollectionException,InsertDocumentException
+	 * @exception EmptyDatabaseNameException
+	 *                If database name is null
+	 * @exception EmptyCollectionNameException
+	 *                If Collection name is null
+	 * @exception EmptyDocumentDataException
+	 *                If Document data is null
+	 * @exception UndefinedDatabaseException
+	 *                If database is not present
+	 * @exception UndefinedCollectionException
+	 *                If Collection is not present
+	 * @exception InsertDocumentException
+	 *                Any exception while inserting document
+	 * @exception DatabaseException
+	 *                throw super type of UndefinedDatabaseException
+	 * @exception ValidationException
+	 *                throw super type of
+	 *                EmptyDatabaseNameException,EmptyCollectionNameException
+	 *                ,EmptyDocumentDataException
+	 * @exception CollectionException
+	 *                throw super type of UndefinedCollectionException
+	 * @exception DocumentException
+	 *                throw super type of InsertDocumentException
+	 * 
 	 */
-	public String insertDocument(String dbName, String collectionName,
-			DBObject document) throws EmptyDatabaseNameException,
-			EmptyCollectionNameException, EmptyDocumentDataException,
-			UndefinedDatabaseException, UndefinedCollectionException,
-			InsertDocumentException;
+
+	public String insertDocument(String dbName, String collectionName, DBObject document) throws DatabaseException, CollectionException,
+			DocumentException, ValidationException;
 
 	/**
-	 * Updates a document with Id <id> with <newData> in a <collectionName>
-	 * inside a <dbName>
-	 *
+	 * Updates a document inside a collection in a database in mongo to which
+	 * user is connected to.
+	 * 
 	 * @param dbName
-	 *            : Name of Database
+	 *            Name of Database
 	 * @param collectionName
-	 *            : Name of Collection in which to update a document
+	 *            Name of Collection from which to get all Documents
 	 * @param id
-	 *            : Id of Document to be deleted
+	 *            Id of Document to be updated
 	 * @param newData
-	 *            : Object with _id of the document to be updated and the keys
-	 *            along with new values.
-	 * @return : Update status
-	 * @throws EmptyDatabaseNameException
-	 *             , UndefinedDatabaseException, EmptyCollectionNameException,
-	 *             UndefinedCollectionException, UndefinedDocumentException,
-	 *             EmptyDocumentDataException, UpdateDocumentException
+	 *            new Document value.
+	 * @return Update status
+	 * @exception EmptyDatabaseNameException
+	 *                If database name is null
+	 * @exception EmptyCollectionNameException
+	 *                If Collection name is null
+	 * @exception EmptyDocumentDataException
+	 *                If Document data is null
+	 * @exception UndefinedDatabaseException
+	 *                If database is not present
+	 * @exception UndefinedCollectionException
+	 *                If Collection is not present
+	 * @exception UpdateDocumentException
+	 *                Any exception while updating document
+	 * @exception DatabaseException
+	 *                throw super type of UndefinedDatabaseException
+	 * @exception ValidationException
+	 *                throw super type of
+	 *                EmptyDatabaseNameException,EmptyCollectionNameException
+	 *                ,EmptyDocumentDataException
+	 * @exception CollectionException
+	 *                throw super type of UndefinedCollectionException
+	 * @exception DocumentException
+	 *                throw super type of UpdateDocumentException
+	 * 
 	 */
-	public String updateDocument(String dbName, String collectionName,
-			ObjectId id, DBObject newData) throws EmptyDatabaseNameException,
-			UndefinedDatabaseException, EmptyCollectionNameException,
-			UndefinedCollectionException, UndefinedDocumentException,
-			EmptyDocumentDataException, UpdateDocumentException,
-			DocumentException;
+
+	public String updateDocument(String dbName, String collectionName, ObjectId id, DBObject newData) throws DatabaseException, CollectionException,
+			DocumentException, ValidationException;
 
 	/**
-	 * Deletes a document with Id <id> in a <collectionName> inside a <dbName>
-	 *
+	 * Deletes a document inside a collection in a database in mongo to which
+	 * user is connected to.
+	 * 
 	 * @param dbName
-	 *            : Name of Database
+	 *            Name of Database
 	 * @param collectionName
-	 *            : Name of Collection from which to delete a document
+	 *            Name of Collection from which to get all Documents
 	 * @param id
-	 *            : Delete Document with this Id.
-	 * @return : Deletion Status
-	 * @throws EmptyDatabaseNameException
-	 *             , UndefinedDatabaseException, EmptyCollectionNameException,
-	 *             UndefinedCollectionException, UndefinedDocumentException,
-	 *             EmptyDocumentDataException, DeleteDocumentException
+	 *            Id of Document to be updated
+	 * @return Deletion status
+	 * @exception EmptyDatabaseNameException
+	 *                If database name is null
+	 * @exception EmptyCollectionNameException
+	 *                If Collection name is null
+	 * @exception EmptyDocumentDataException
+	 *                If Document data is null
+	 * @exception UndefinedDatabaseException
+	 *                If database is not present
+	 * @exception UndefinedCollectionException
+	 *                If Collection is not present
+	 * @exception DeleteDocumentException
+	 *                Any exception while deleting document
+	 * @exception DatabaseException
+	 *                throw super type of UndefinedDatabaseException
+	 * @exception ValidationException
+	 *                throw super type of
+	 *                EmptyDatabaseNameException,EmptyCollectionNameException
+	 *                ,EmptyDocumentDataException
+	 * @exception CollectionException
+	 *                throw super type of UndefinedCollectionException
+	 * @exception DocumentException
+	 *                throw super type of DeleteDocumentException
+	 * 
 	 */
-	public String deleteDocument(String dbName, String collectionName,
-			ObjectId id) throws EmptyDatabaseNameException,
-			UndefinedDatabaseException, EmptyCollectionNameException,
-			UndefinedCollectionException, UndefinedDocumentException,
-			EmptyDocumentDataException, DeleteDocumentException;
+
+	public String deleteDocument(String dbName, String collectionName, ObjectId id) throws DatabaseException, CollectionException, DocumentException,
+			ValidationException;
 
 }
