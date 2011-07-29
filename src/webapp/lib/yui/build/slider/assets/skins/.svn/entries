@@ -1,52 +1,0 @@
-8
-
-dir
-8112
-http://192.168.2.146/repos/pramatilabs/nevala/src/webapp/lib/yui/build/slider/assets/skins
-http://192.168.2.146/repos
-
-
-
-2011-07-19T09:37:37.393560Z
-7736
-adityag
-
-
-svn:special svn:externals svn:needs-lock
-
-
-
-
-
-
-
-
-
-
-
-0e25e8f0-b78c-4b55-a4fc-03b202cce7fc
-
-sam-dark
-dir
-
-sam
-dir
-
-audio
-dir
-
-audio-light
-dir
-
-round-dark
-dir
-
-round
-dir
-
-capsule-dark
-dir
-
-capsule
-dir
-
