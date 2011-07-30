@@ -24,16 +24,9 @@
  */
 package com.imaginea.mongodb.requestdispatchers;
 
-import java.io.IOException;
 import java.util.Set;
-
-import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
-import org.apache.log4j.SimpleLayout;
-import org.apache.log4j.FileAppender;
-
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -48,454 +41,190 @@ import org.json.JSONObject;
 
 import com.imaginea.mongodb.common.DateProvider;
 import com.imaginea.mongodb.common.exceptions.CollectionException;
-import com.imaginea.mongodb.common.exceptions.DeleteCollectionException;
-import com.imaginea.mongodb.common.exceptions.EmptyCollectionNameException;
-import com.imaginea.mongodb.common.exceptions.EmptyDatabaseNameException;
+import com.imaginea.mongodb.common.exceptions.DatabaseException;
 import com.imaginea.mongodb.common.exceptions.ErrorCodes;
-import com.imaginea.mongodb.common.exceptions.InsertCollectionException;
 import com.imaginea.mongodb.common.exceptions.InvalidHTTPRequestException;
-import com.imaginea.mongodb.common.exceptions.UndefinedCollectionException;
-import com.imaginea.mongodb.common.exceptions.UndefinedDatabaseException;
+import com.imaginea.mongodb.common.exceptions.ValidationException;
 import com.imaginea.mongodb.services.CollectionService;
 import com.imaginea.mongodb.services.CollectionServiceImpl;
-import com.imaginea.mongodb.services.servlet.UserLogin;
+import com.imaginea.mongodb.requestdispatchers.UserLogin;
 
 /**
- * Defines the Resource file for Collection Resource and map a HTTP Request to
- * the relevant collection service function. Defines GET and POST resources for
- * collections in MongoDb. PUT and DELETE Functionality achieved using an
- * <action> query parameter. GET Collection Stats Resource also present.
- *
+ * Defines resources for performing create/drop operations on collections
+ * present inside databases in Mongo we are currently connected to. Also provide
+ * resources to get list of all collections in a database present in mongo and
+ * also statistics of a particular collection.
+ * <p>
+ * These resources map different HTTP equests made by the client to access these
+ * resources to services file which performs these operations. The resources
+ * also form a JSON response using the output recieved from the serives files.
+ * GET and POST request resources for collections are defined here. For PUT and
+ * DELETE functionality , a POST request with an action parameter taking values
+ * PUT and DELETE is made.
+ * 
  * @author Rachit Mittal
- *
- */
-
-/**
- * @Path Defines the path to which Jersey servlet maps this Resource. <dbName>
- *       is the name of database inside which a collection is present and
- *       <collection> is the Resource name specific to all collections. For
- *       accessing a particular collection , an added parameter <collectionName>
- *       in URL is used.
+ * @since 4 July 2011
+ * 
  */
 @Path("/{dbName}/collection")
-public class CollectionRequestDispatcher {
+public class CollectionRequestDispatcher extends BaseRequestDispatcher {
+
+	// TODO Configure Logger and use.
+	private final static Logger logger = Logger.getLogger(CollectionRequestDispatcher.class);
 
 	/**
-	 * Define Logger for this class
+	 * Default Constructor
 	 */
-	private static Logger logger = Logger
-			.getLogger(CollectionRequestDispatcher.class);
-
-	/**
-	 * Constructor that configures Logger
-	 *
-	 * @throws IOException
-	 */
-	public CollectionRequestDispatcher() throws IOException {
-
-		// TODO Configure by file
-		SimpleLayout layout = new SimpleLayout();
-		FileAppender appender = new FileAppender(layout,
-				"logs/mViewer_CollectionOperationsLogs.txt", true);
-
-		logger.setLevel(Level.INFO);
-		logger.addAppender(appender);
+	public CollectionRequestDispatcher() {
 	}
 
 	/**
-	 * Respond to a GET Request and map it to getCollections() Service function
-	 * that gets all Collections in a <dbName>.
-	 *
+	 * Maps GET Request to get list of collections inside databases present in
+	 * mongo db to a service function that returns the list. Also forms the JSON
+	 * response for this request and sent it to client. In case of any exception
+	 * from the service files an error object if formed.
+	 * 
 	 * @param dbName
-	 *            : Name of Database
+	 *            Name of database
 	 * @param tokenId
-	 *            : a token Id given to every user at Login.
+	 *            a token Id given to every user at Login.
+	 * 
 	 * @param request
-	 *            : Get the HTTP request context to extract session parameters
-	 * @return : A String of JSON Format with key <result> and value
-	 *         List<String>Collections in a <dbName>
-	 *
-	 * @throws JSONException
-	 *             : If Error While Writing JSONObject
+	 *            Get the HTTP request context to extract session parameters
+	 * @return String of JSON Format with list of all collections.
 	 */
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
-	public String getCollListRequest(@PathParam("dbName") String dbName,
-			@QueryParam("tokenId") String tokenId,
-			@Context HttpServletRequest request) throws JSONException {
-
-		logger.info("Recieved GET Request for Collection  ["
-				+ DateProvider.getDateTime() + "]");
-		// Contains JSON Resposne which is converted to String for sending a
-		// response
-		JSONObject response = new JSONObject();
-
-		// Declare Error Object in case of error
-		JSONObject error = new JSONObject();
-
+	public String getCollList(@PathParam("dbName") String dbName, @QueryParam("tokenId") String tokenId, @Context HttpServletRequest request) {
+		if (logger.isInfoEnabled()) {
+			logger.info("Recieved GET Request for Collection  [" + DateProvider.getDateTime() + "]");
+		}
+		String response = null;
 		try {
-			if (tokenId == null) {
-				InvalidHTTPRequestException e = new InvalidHTTPRequestException(
-						ErrorCodes.TOKEN_ID_ABSENT, "Token Id not provided");
-
-				error.put("message", e.getMessage());
-				error.put("code", e.getErrorCode());
-				logger.fatal(error);
-
-				JSONObject temp = new JSONObject();
-				temp.put("error", error);
-				response.put("response", temp);
-
-			} else {
-
-				// Check if tokenId is in session
-				HttpSession session = request.getSession();
-
-				if (session.getAttribute("tokenId") == null) {
-					InvalidHTTPRequestException e = new InvalidHTTPRequestException(
-							ErrorCodes.INVALID_SESSION,
-							"Session Expired(Token Id not set in session).");
-					error.put("message", e.getMessage());
-					error.put("code", e.getErrorCode());
-
-					logger.fatal(error);
-					JSONObject temp = new JSONObject();
-					temp.put("error", error);
-					response.put("response", temp);
-				} else {
-					if (!session.getAttribute("tokenId").equals(tokenId)) {
-						InvalidHTTPRequestException e = new InvalidHTTPRequestException(
-								ErrorCodes.INVALID_SESSION,
-								"Invalid Session(Token Id does not match with the one in session)");
-						error.put("message", e.getMessage());
-						error.put("code", e.getErrorCode());
-
-						logger.fatal(error);
-						JSONObject temp = new JSONObject();
-						temp.put("error", error);
-						response.put("response", temp);
-
-					} else {
-						JSONObject temp = new JSONObject();
-
-						// Get User for a given Token Id
-						String userMappingkey = UserLogin.tokenIDToUserMapping
-								.get(tokenId);
-						if (userMappingkey == null) {
-							// Invalid User
-							error.put("message", "INVALID_USER");
-							error.put("code", ErrorCodes.INVALID_USER);
-							logger.fatal(error);
-							temp.put("error", error);
-							response.put("response", temp);
-
-						} else {
-							// Create Instance of Service File.
-							CollectionService collectionService = new CollectionServiceImpl(
-									userMappingkey);
-
-							// Get the result;
-							Set<String> collectionNames = collectionService
-									.getCollections(dbName);
-							temp.put("result", collectionNames);
-
-							response.put("response", temp);
-							response.put("totalRecords", collectionNames.size());
-							logger.info("Request Completed ["
-									+ DateProvider.getDateTime() + "]");
-						}
-					}
-				}
+			response = validateTokenId(tokenId, logger, request);
+			if (response != null) {
+				return response;
 			}
-		} catch (EmptyDatabaseNameException e) {
-
-			error.put("message", e.getMessage());
-			error.put("code", e.getErrorCode());
-			error.put("stackTrace", e.getStackTrace());
-
-			logger.error(error);
+			// Get User for a given Token Id
+			String userMappingkey = UserLogin.tokenIDToUserMapping.get(tokenId);
+			if (userMappingkey == null) {
+				return formErrorResponse(logger, "User not mapped to token Id", ErrorCodes.INVALID_USER, null, "FATAL");
+			}
 			JSONObject temp = new JSONObject();
-			temp.put("error", error);
-			response.put("response", temp);
-
-		} catch (UndefinedDatabaseException e) {
-			error.put("message", e.getMessage());
-			error.put("code", e.getErrorCode());
-			error.put("stackTrace", e.getStackTrace());
-
-			logger.error(error);
-			JSONObject temp = new JSONObject();
-			temp.put("error", error);
-			response.put("response", temp);
-
-		} catch (CollectionException e) {
-			error.put("message", e.getMessage());
-			error.put("code", e.getErrorCode());
-			error.put("stackTrace", e.getStackTrace());
-			logger.error(error);
-
-			JSONObject temp = new JSONObject();
-			temp.put("error", error);
-			response.put("response", temp);
+			JSONObject resp = new JSONObject();
+			// Create Instance of Service File.
+			CollectionService collectionService = new CollectionServiceImpl(userMappingkey);
+			// Get the result;
+			Set<String> collectionNames = collectionService.getCollList(dbName);
+			temp.put("result", collectionNames);
+			resp.put("response", temp);
+			resp.put("totalRecords", collectionNames.size());
+			response=resp.toString();
+			
+			if (logger.isInfoEnabled()) {
+				logger.info("Request Completed [" + DateProvider.getDateTime() + "]");
+			}
 
 		} catch (JSONException e) {
-			error.put("message", e.getMessage());
-			error.put("code", ErrorCodes.JSON_EXCEPTION);
-			error.put("stackTrace", e.getStackTrace());
-			logger.error(error);
-
-			JSONObject temp = new JSONObject();
-			temp.put("error", error);
-			response.put("response", temp);
-
+			response = "{\"code\":" + "\"" + ErrorCodes.JSON_EXCEPTION + "\"," + "\"message\": \"Error while forming JSON Object\"}";
+		} catch (DatabaseException e) {
+			response = formErrorResponse(logger, e.getMessage(), e.getErrorCode(), e.getStackTrace(), "ERROR");
+		} catch (CollectionException e) {
+			response = formErrorResponse(logger, e.getMessage(), e.getErrorCode(), e.getStackTrace(), "ERROR");
+		} catch (ValidationException e) {
+			response = formErrorResponse(logger, e.getMessage(), e.getErrorCode(), e.getStackTrace(), "ERROR");
 		} catch (Exception e) {
-			// For any other exception like if ConfigMongoProvider used then
-			// FileNotFoundException
-			// Form a JSON Error Object
-			error.put("message", e.getMessage());
-			error.put("code", ErrorCodes.ANY_OTHER_EXCEPTION);
-			error.put("stackTrace", e.getStackTrace());
-
-			logger.error(error);
-
-			JSONObject temp = new JSONObject();
-			temp.put("error", error);
-			response.put("response", temp);
+			response = formErrorResponse(logger, e.getMessage(), ErrorCodes.ANY_OTHER_EXCEPTION, e.getStackTrace(), "ERROR");
 		}
-
-		return response.toString();
+		return response;
 
 	}
 
 	/**
-	 * Maps POST Request on Collection to a Collection service depending on
-	 * <action> parameter.
-	 *
+	 * Maps POST Request to perform create/drop on collections inside databases
+	 * present in mongo db to a service function that returns the list. Also
+	 * forms the JSON response for this request and sent it to client. In case
+	 * of any exception from the service files an error object if formed.
+	 * 
 	 * @param dbName
-	 *            : Name of Database
-	 * @param collectionName
-	 *            : Name of Collection for which to perform PUT,POST,DELETE
-	 *            operation depending on <action> patameter
-	 *
-	 * @param action
-	 *            : Query Paramater which decides which service to mapped to
-	 *            (POST, PUT or DELETE).
-	 *
-	 * @param tokenId
-	 *            : a token Id given to every user at Login.
-	 *
+	 *            Name of Database
 	 * @param capped
-	 *            : Specify if the collection is capped
+	 *            Specify if the collection is capped
 	 * @param size
-	 *            : Specify the size of collection
+	 *            Specify the size of collection
 	 * @param maxDocs
-	 *            : specify maximum no of documents in the collection
-	 *
+	 *            specify maximum no of documents in the collection
+	 * 
+	 * @param collectionName
+	 *            Name of Database for which to perform create/drop operation
+	 *            depending on action patameter
+	 * 
+	 * @param action
+	 *            Query Paramater with value PUT for identifying a create
+	 *            database request and value DELETE for dropping a database.
+	 * 
 	 * @param request
-	 *            : Get the HTTP request context to extract session parameters
-	 * @return : String with Status of performed operation.
-	 *
-	 * @throws JSONException
-	 *             : Forming JSON Error Object Failed
+	 *            Get the HTTP request context to extract session parameters
+	 * 
+	 * @param tokenId
+	 *            a token Id given to every user at Login.
+	 * @return String with status of operation performed.
 	 */
 
 	@POST
 	@Path("/{collectionName}")
 	@Produces(MediaType.APPLICATION_JSON)
-	public String postCollRequest(@PathParam("dbName") String dbName,
-			@PathParam("collectionName") String collectionName,
-			@QueryParam("capped") boolean capped, @QueryParam("size") int size,
-			@QueryParam("max") int maxDocs,
-			@QueryParam("action") String action,
-			@QueryParam("tokenId") String tokenId,
-			@Context HttpServletRequest request) throws JSONException {
-		logger.info("Recieved POST Request for Collection with action [ "
-				+ action + "] [" + DateProvider.getDateTime() + "]");
-		// Contains JSON Resposne which is converted to String for sending a
-		// response
-		JSONObject response = new JSONObject();
+	public String postCollRequest(@PathParam("dbName") String dbName, @PathParam("collectionName") String collectionName,
+			@QueryParam("capped") boolean capped, @QueryParam("size") int size, @QueryParam("max") int maxDocs, @QueryParam("action") String action,
+			@QueryParam("tokenId") String tokenId, @Context HttpServletRequest request) {
 
-		// Declare Error Object in case of error
-		JSONObject error = new JSONObject();
-
+		if (logger.isInfoEnabled()) {
+			logger.info("Recieved POST Request for Collection  [" + DateProvider.getDateTime() + "]");
+		}
+		if (action == null) {
+			InvalidHTTPRequestException e = new InvalidHTTPRequestException(ErrorCodes.ACTION_PARAMETER_ABSENT, "ACTION_PARAMETER_ABSENT");
+			return formErrorResponse(logger, e.getMessage(), e.getErrorCode(), null,"ERROR");
+		}
+		String response = null;
 		try {
-			if (tokenId == null) {
-				InvalidHTTPRequestException e = new InvalidHTTPRequestException(
-						ErrorCodes.TOKEN_ID_ABSENT, "Token Id not provided");
-
-				error.put("message", e.getMessage());
-				error.put("code", e.getErrorCode());
-				logger.fatal(error);
-
-				JSONObject temp = new JSONObject();
-				temp.put("error", error);
-				response.put("response", temp);
-
-			} else {
-
-				// Check if tokenId is in session
-				HttpSession session = request.getSession();
-
-				if (session.getAttribute("tokenId") == null) {
-					InvalidHTTPRequestException e = new InvalidHTTPRequestException(
-							ErrorCodes.INVALID_SESSION,
-							"Session Expired(Token Id not set in session).");
-					error.put("message", e.getMessage());
-					error.put("code", e.getErrorCode());
-
-					logger.fatal(error);
-					JSONObject temp = new JSONObject();
-					temp.put("error", error);
-					response.put("response", temp);
-				} else {
-					if (!session.getAttribute("tokenId").equals(tokenId)) {
-						InvalidHTTPRequestException e = new InvalidHTTPRequestException(
-								ErrorCodes.INVALID_SESSION,
-								"Invalid Session(Token Id does not match with the one in session)");
-						error.put("message", e.getMessage());
-						error.put("code", e.getErrorCode());
-
-						logger.fatal(error);
-						JSONObject temp = new JSONObject();
-						temp.put("error", error);
-						response.put("response", temp);
-
-					} else {
-						JSONObject temp = new JSONObject();
-
-						// Get User for a given Token Id
-						String userMappingkey = UserLogin.tokenIDToUserMapping
-								.get(tokenId);
-						if (userMappingkey == null) {
-							// Invalid User
-							error.put("message", "User not mapped to token Id");
-							error.put("code", ErrorCodes.INVALID_USER);
-							logger.fatal(error);
-							temp.put("error", error);
-							response.put("response", temp);
-
-						} else {
-							// Create Instance of Service File.
-							CollectionService collectionService = new CollectionServiceImpl(
-									userMappingkey);
-
-							if (action.equals("PUT")) {
-								temp.put("result", collectionService
-										.insertCollection(dbName,
-												collectionName, capped, size,
-												maxDocs));
-
-							} else if (action.equals("DELETE")) {
-								temp.put("result", collectionService
-										.deleteCollection(dbName,
-												collectionName));
-							}
-							response.put("response", temp);
-
-							logger.info("Request Completed ["
-									+ DateProvider.getDateTime() + "]");
-						}
-					}
-				}
+			response = validateTokenId(tokenId, logger, request);
+			if (response != null) {
+				return response;
 			}
-		} catch (EmptyDatabaseNameException e) {
-
-			error.put("message", e.getMessage());
-			error.put("code", e.getErrorCode());
-			error.put("stackTrace", e.getStackTrace());
-			logger.error(error);
-
+			// Get User for a given Token Id
+			String userMappingkey = UserLogin.tokenIDToUserMapping.get(tokenId);
+			if (userMappingkey == null) {
+				return formErrorResponse(logger, "User not mapped to token Id", ErrorCodes.INVALID_USER, null, "FATAL");
+			}
 			JSONObject temp = new JSONObject();
-			temp.put("error", error);
-			response.put("response", temp);
+			JSONObject resp = new JSONObject();
+			// Create Instance of Service File.
+			CollectionService collectionService = new CollectionServiceImpl(userMappingkey);
 
-		} catch (UndefinedDatabaseException e) {
-			error.put("message", e.getMessage());
-			error.put("code", e.getErrorCode());
-			error.put("stackTrace", e.getStackTrace());
-			logger.error(error);
+			if (action.equals("PUT")) {
+				temp.put("result", collectionService.insertCollection(dbName, collectionName, capped, size, maxDocs));
 
-			JSONObject temp = new JSONObject();
-			temp.put("error", error);
-			response.put("response", temp);
-
-		} catch (DeleteCollectionException e) {
-			error.put("message", e.getMessage());
-			error.put("code", e.getErrorCode());
-			error.put("stackTrace", e.getStackTrace());
-			logger.error(error);
-
-			JSONObject temp = new JSONObject();
-			temp.put("error", error);
-			response.put("response", temp);
-
-		} catch (EmptyCollectionNameException e) {
-			error.put("message", e.getMessage());
-			error.put("code", e.getErrorCode());
-			error.put("stackTrace", e.getStackTrace());
-			logger.error(error);
-
-			JSONObject temp = new JSONObject();
-			temp.put("error", error);
-			response.put("response", temp);
-
-		} catch (UndefinedCollectionException e) {
-			error.put("message", e.getMessage());
-			error.put("code", e.getErrorCode());
-			error.put("stackTrace", e.getStackTrace());
-			logger.error(error);
-
-			JSONObject temp = new JSONObject();
-			temp.put("error", error);
-			response.put("response", temp);
-
-		} catch (InsertCollectionException e) {
-			error.put("message", e.getMessage());
-			error.put("code", e.getErrorCode());
-			error.put("stackTrace", e.getStackTrace());
-			logger.error(error);
-
-			JSONObject temp = new JSONObject();
-			temp.put("error", error);
-			response.put("response", temp);
-
-		} catch (CollectionException e) {
-			error.put("message", e.getMessage());
-			error.put("code", e.getErrorCode());
-			error.put("stackTrace", e.getStackTrace());
-			logger.error(error);
-
-			JSONObject temp = new JSONObject();
-			temp.put("error", error);
-			response.put("response", temp);
+			} else if (action.equals("DELETE")) {
+				temp.put("result", collectionService.deleteCollection(dbName, collectionName));
+			}
+			resp.put("response", temp);
+			response=resp.toString();
+			if (logger.isInfoEnabled()) {
+				logger.info("Request Completed [" + DateProvider.getDateTime() + "]");
+			}
 
 		} catch (JSONException e) {
-
-			// Form a JSON Error Object
-			error.put("message", e.getMessage());
-			error.put("code", ErrorCodes.JSON_EXCEPTION);
-			error.put("stackTrace", e.getStackTrace());
-			logger.error(error);
-
-			JSONObject temp = new JSONObject();
-			temp.put("error", error);
-			response.put("response", temp);
-
+			response = "{\"code\":" + "\"" + ErrorCodes.JSON_EXCEPTION + "\"," + "\"message\": \"Error while forming JSON Object\"}";
+		} catch (DatabaseException e) {
+			response = formErrorResponse(logger, e.getMessage(), e.getErrorCode(), e.getStackTrace(), "ERROR");
+		} catch (CollectionException e) {
+			response = formErrorResponse(logger, e.getMessage(), e.getErrorCode(), e.getStackTrace(), "ERROR");
+		} catch (ValidationException e) {
+			response = formErrorResponse(logger, e.getMessage(), e.getErrorCode(), e.getStackTrace(), "ERROR");
 		} catch (Exception e) {
-			// For any other exception like if ConfigMongoProvider used then
-			// FileNotFoundException
-			// Form a JSON Error Object
-			error.put("message", e.getMessage());
-			error.put("code", ErrorCodes.ANY_OTHER_EXCEPTION);
-			error.put("stackTrace", e.getStackTrace());
-			logger.error(error);
-
-			JSONObject temp = new JSONObject();
-			temp.put("error", error);
-			response.put("response", temp);
+			response = formErrorResponse(logger, e.getMessage(), ErrorCodes.ANY_OTHER_EXCEPTION, e.getStackTrace(), "ERROR");
 		}
-
-		return response.toString();
+		return response;
 
 	}
 }

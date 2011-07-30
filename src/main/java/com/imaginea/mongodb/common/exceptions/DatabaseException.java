@@ -24,7 +24,7 @@
  */
 package com.imaginea.mongodb.common.exceptions;
 
-import com.mongodb.MongoException;
+
 
 /**
  * Defines all the Exceptions generated while performing any operation on
@@ -37,10 +37,11 @@ import com.mongodb.MongoException;
  * @author Rachit Mittal
  *
  */
-public class DatabaseException extends MongoException {
+public class DatabaseException extends RuntimeException {//TODO should not extend com.mongodb exceptions
+	//TODO read about runtime and checked exceptions
 
-	private static final long serialVersionUID = 1L; // TODO Read about it more
-														// why?
+	private static final long serialVersionUID = 1L;
+
 	private String errorCode;
 
 	/**

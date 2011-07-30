@@ -1,0 +1,53 @@
+<html><head><meta http-equiv="content-type" content="text/html; charset=UTF-8"> <style>
+	.KEYW {color: #933;}
+	.COMM {color: #bbb; font-style: italic;}
+	.NUMB {color: #393;}
+	.STRN {color: #393;}
+	.REGX {color: #339;}
+	.line {border-right: 1px dotted #666; color: #666; font-style: normal;}
+	</style></head><body><pre><span class='line'>  1</span> <span class="COMM">/*
+<span class='line'>  2</span>  * Copyright (c) 2011 Imaginea Technologies Private Ltd. 
+<span class='line'>  3</span>  * Hyderabad, India
+<span class='line'>  4</span>  *
+<span class='line'>  5</span>  * Redistribution and use in source and binary forms, with or without
+<span class='line'>  6</span>  * modification, are permitted provided that the following condition
+<span class='line'>  7</span>  * is met:
+<span class='line'>  8</span>  *
+<span class='line'>  9</span>  *     + Neither the name of Imaginea, nor the
+<span class='line'> 10</span>  *       names of its contributors may be used to endorse or promote
+<span class='line'> 11</span>  *       products derived from this software.
+<span class='line'> 12</span>  *
+<span class='line'> 13</span>  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+<span class='line'> 14</span>  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+<span class='line'> 15</span>  * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+<span class='line'> 16</span>  * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE REGENTS OR
+<span class='line'> 17</span>  * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+<span class='line'> 18</span>  * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+<span class='line'> 19</span>  * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+<span class='line'> 20</span>  * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+<span class='line'> 21</span>  * LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+<span class='line'> 22</span>  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+<span class='line'> 23</span>  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+<span class='line'> 24</span>  */</span><span class="WHIT">
+<span class='line'> 25</span> </span><span class="NAME">YUI.add</span><span class="PUNC">(</span><span class="STRN">'stylize'</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="KEYW">function</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="NAME">Y</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'> 26</span> </span><span class="WHIT">    </span><span class="NAME">Y.namespace</span><span class="PUNC">(</span><span class="STRN">'com.imaginea.mongoV'</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'> 27</span> </span><span class="WHIT">    </span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">MV</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">Y.com.imaginea.mongoV</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'> 28</span> </span><span class="WHIT">    </span><span class="COMM">/**
+<span class='line'> 29</span>      * &lt;p>toggleClass adds a class to the menu option as soon as it is clicked&lt;/p>
+<span class='line'> 30</span>      *
+<span class='line'> 31</span>      * @module mViewer
+<span class='line'> 32</span>      * @namespace com.imaginea.mongov
+<span class='line'> 33</span>      * @requires node
+<span class='line'> 34</span>      * @constructor
+<span class='line'> 35</span>      * @param node
+<span class='line'> 36</span>      *		  &lt;dd>(required) The node that is clicked&lt;/dd>
+<span class='line'> 37</span>      * @param otherNodes
+<span class='line'> 38</span>      *		  &lt;dd>(required) Nodes which are there in the menu &lt;/dd>
+<span class='line'> 39</span>      */</span><span class="WHIT">
+<span class='line'> 40</span> </span><span class="WHIT">    </span><span class="NAME">MV.toggleClass</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="KEYW">function</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="NAME">node</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">otherNodes</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'> 41</span> </span><span class="WHIT">        </span><span class="NAME">otherNodes.removeClass</span><span class="PUNC">(</span><span class="STRN">'sel'</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'> 42</span> </span><span class="WHIT">        </span><span class="NAME">node.addClass</span><span class="PUNC">(</span><span class="STRN">'sel'</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'> 43</span> </span><span class="WHIT">    </span><span class="PUNC">}</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'> 44</span> </span><span class="PUNC">}</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="STRN">'3.3.0'</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'> 45</span> </span><span class="WHIT">    </span><span class="NAME">requires</span><span class="PUNC">:</span><span class="WHIT"> </span><span class="PUNC">[</span><span class="STRN">"node"</span><span class="PUNC">]</span><span class="WHIT">
+<span class='line'> 46</span> </span><span class="PUNC">}</span><span class="PUNC">)</span><span class="PUNC">;</span></pre></body></html>

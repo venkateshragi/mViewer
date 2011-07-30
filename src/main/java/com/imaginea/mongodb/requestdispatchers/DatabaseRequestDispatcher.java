@@ -24,11 +24,9 @@
  */
 package com.imaginea.mongodb.requestdispatchers;
 
-import java.io.IOException;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -38,419 +36,181 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 
+import org.apache.log4j.Logger;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.imaginea.mongodb.common.DateProvider;
 import com.imaginea.mongodb.common.exceptions.DatabaseException;
-import com.imaginea.mongodb.common.exceptions.DuplicateDatabaseException;
-import com.imaginea.mongodb.common.exceptions.EmptyDatabaseNameException;
 import com.imaginea.mongodb.common.exceptions.ErrorCodes;
-import com.imaginea.mongodb.common.exceptions.InsertDatabaseException;
 import com.imaginea.mongodb.common.exceptions.InvalidHTTPRequestException;
-import com.imaginea.mongodb.common.exceptions.UndefinedDatabaseException;
+import com.imaginea.mongodb.common.exceptions.ValidationException;
 import com.imaginea.mongodb.services.DatabaseService;
 import com.imaginea.mongodb.services.DatabaseServiceImpl;
-import com.imaginea.mongodb.services.servlet.UserLogin;
-
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
-import org.apache.log4j.SimpleLayout;
-import org.apache.log4j.FileAppender;
+import com.imaginea.mongodb.requestdispatchers.UserLogin;
 
 /**
- * Defines the Resource file for Database Resource and map a HTTP Request to
- * the relevant database service function. Defines GET and POST resources for
- * Databases in MongoDb. PUT and DELETE Functionality achieved using an
- * <action> query parameter. GET database Stats Resource also present.
- *
- *
+ * Defines resources for performing create/drop operations on databases present
+ * in Mongo we are currently connected to. Also provide resources to get list of
+ * all databases present in mongo and also statistics of a particular database.
+ * <p>
+ * These resources map different HTTP equests made by the client to access these
+ * resources to services file which performs these operations. The resources
+ * also form a JSON response using the output recieved from the serives files.
+ * GET and POST request resources for databases are defined here. For PUT and
+ * DELETE functionality , a POST request with an action parameter taking values
+ * PUT and DELETE is made.
+ * 
  * @author Rachit Mittal
- *
+ * @since 2 July 2011
+ * 
  */
 
-/**
- * @Path Defines the path to which Jersey servlet maps this Resource. <db> is
- *       the Resource name specific to all databases. For accessing a particular
- *       database , an added parameter <dbName> in URL is used.
- *
- *
- */
 @Path("/db")
-public class DatabaseRequestDispatcher {
+public class DatabaseRequestDispatcher extends BaseRequestDispatcher {
+
+	private final static Logger logger = Logger.getLogger(DatabaseRequestDispatcher.class);
 
 	/**
-	 * Define Logger for this class
+	 * Default constructor
 	 */
-	private static Logger logger = Logger
-			.getLogger(DatabaseRequestDispatcher.class);
-
-	/**
-	 * Constructor that configures Logger
-	 *
-	 * @throws IOException
-	 */
-	public DatabaseRequestDispatcher() throws IOException {
-
-		// TODO Configure by file
-		SimpleLayout layout = new SimpleLayout();
-		FileAppender appender = new FileAppender(layout,
-				"logs/mViewer_DatabaseOperationsLogs.txt", true);
-		logger.setLevel(Level.INFO);
-		logger.addAppender(appender);
+	public DatabaseRequestDispatcher() {
 	}
 
 	/**
-	 * Maps Get Request on Database to getAllDb() Database service. <path>
-	 * defined for this resource is </services/db>
-	 *
+	 * Maps GET Request to get list of databases present in mongo db to a
+	 * service function that returns the list. Also forms the JSON response for
+	 * this request and sent it to client. In case of any exception from the
+	 * service files an error object if formed.
+	 * 
 	 * @param tokenId
-	 *            : a token Id given to every user at Login.
-	 *
+	 *            a token Id given to every user at Login.
+	 * 
 	 * @param request
-	 *            : Get the HTTP request context to extract session parameters
-	 * @return : String of JSON Format with list of all Databases.
-	 *
-	 * @throws JSONException
-	 *             : Forming JSON Error Object Failed
+	 *            Get the HTTP request context to extract session parameters
+	 * @return String of JSON Format with list of all Databases.
 	 */
-
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
-	public String getDbListRequest(@QueryParam("tokenId") String tokenId,
-			@Context HttpServletRequest request) throws JSONException {
-		logger.info("Recieved a Get DB List Request ["
-				+ DateProvider.getDateTime() + "]");
+	public String getDbList(@QueryParam("tokenId") String tokenId, @Context HttpServletRequest request) {
 
-		// Contains JSON Resposne which is converted to String for sending a
-		// response
-		JSONObject response = new JSONObject();
+		// TODO @Context can we write somewhere else
+		// TODO how is JSONException is provided to the consumer/client, try in
+		// REST client, can just write a simple json string ourself in worst
+		// case
 
-		// Declare Error Object in case of error
-		JSONObject error = new JSONObject();
-
+		String response = null;
+		if (logger.isInfoEnabled()) {
+			logger.info("Recieved a Get DB List Request [" + DateProvider.getDateTime() + "]");
+		}
 		try {
-			if (tokenId == null) {
-				InvalidHTTPRequestException e = new InvalidHTTPRequestException(
-						ErrorCodes.TOKEN_ID_ABSENT, "Token Id not provided");
-
-				error.put("message", e.getMessage());
-				error.put("code", e.getErrorCode());
-				logger.fatal(error);
-
-				JSONObject temp = new JSONObject();
-				temp.put("error", error);
-				response.put("response", temp);
-
-			} else {
-
-				// Check if tokenId is in session
-				HttpSession session = request.getSession();
-
-				if (session.getAttribute("tokenId") == null) {
-					InvalidHTTPRequestException e = new InvalidHTTPRequestException(
-							ErrorCodes.INVALID_SESSION,
-							"Session Expired(Token Id not set in session).");
-					error.put("message", e.getMessage());
-					error.put("code", e.getErrorCode());
-
-					logger.fatal(error);
-					JSONObject temp = new JSONObject();
-					temp.put("error", error);
-					response.put("response", temp);
-				} else {
-					if (!session.getAttribute("tokenId").equals(tokenId)) {
-						InvalidHTTPRequestException e = new InvalidHTTPRequestException(
-								ErrorCodes.INVALID_SESSION,
-								"Invalid Session(Token Id does not match with the one in session)");
-						error.put("message", e.getMessage());
-						error.put("code", e.getErrorCode());
-
-						logger.fatal(error);
-						JSONObject temp = new JSONObject();
-						temp.put("error", error);
-						response.put("response", temp);
-
-					} else {
-						JSONObject temp = new JSONObject();
-
-						// Get User for a given Token Id
-						String userMappingkey = UserLogin.tokenIDToUserMapping
-								.get(tokenId);
-						if (userMappingkey == null) {
-							// Invalid User
-							error.put("message", "User not mapped to token Id");
-							error.put("code", ErrorCodes.INVALID_USER);
-							logger.fatal(error);
-
-							temp.put("error", error);
-							response.put("response", temp);
-
-						} else {// Create Instance of Service File.
-							DatabaseService databaseService = new DatabaseServiceImpl(
-									userMappingkey);
-							// Get the result;
-							List<String> dbNames = databaseService.getAllDb();
-							temp.put("result", dbNames);
-
-							response.put("response", temp);
-							response.put("totalRecords", dbNames.size());
-							logger.info("Request Completed ["
-									+ DateProvider.getDateTime() + "]");
-						}
-
-					}
-				}
+			response = validateTokenId(tokenId, logger, request);
+			if (response != null) {
+				return response;
+			}
+			// Get User for a given Token Id
+			String userMappingkey = UserLogin.tokenIDToUserMapping.get(tokenId);
+			if (userMappingkey == null) {
+				return formErrorResponse(logger, "User not mapped to token Id", ErrorCodes.INVALID_USER, null, "FATAL");
 			}
 
-		} catch (JSONException e) {
-
-			// Form a JSON Error Object
-			error.put("message", e.getMessage());
-			error.put("code", ErrorCodes.JSON_EXCEPTION);
-			error.put("stackTrace", e.getStackTrace());
-			logger.error(error);
-
 			JSONObject temp = new JSONObject();
-			temp.put("error", error);
-			response.put("response", temp);
+			JSONObject resp = new JSONObject();
+			// Create Instance of Service File.
+			DatabaseService databaseService = new DatabaseServiceImpl(userMappingkey);
+			// Get the result;
+			List<String> dbNames = databaseService.getDbList();
+			temp.put("result", dbNames);
+			resp.put("response", temp);
+			resp.put("totalRecords", dbNames.size());
+			response = resp.toString();
+			if (logger.isInfoEnabled()) {
+				logger.info("Request Completed [" + DateProvider.getDateTime() + "]");
+			}
+		} catch (JSONException e) {
+			response = "{\"code\":" + "\"" + ErrorCodes.JSON_EXCEPTION + "\"," + "\"message\": \"Error while forming JSON Object\"}";
 
 		} catch (DatabaseException e) {
-			// Form a JSON Error Object
-			error.put("message", e.getMessage());
-			error.put("code", e.getErrorCode());
-			error.put("stackTrace", e.getStackTrace());
-
-			logger.error(error);
-			JSONObject temp = new JSONObject();
-			temp.put("error", error);
-			response.put("response", temp);
+			response = formErrorResponse(logger, e.getMessage(), e.getErrorCode(), e.getStackTrace(), "ERROR");
 
 		} catch (Exception e) {
-			// For any other exception like if ConfigMongoProvider used then
-			// FileNotFoundException
-			// Form a JSON Error Object
-			error.put("message", e.getMessage());
-			error.put("code", "ANY_OTHER_EXCEPTION");
-			error.put("stackTrace", e.getStackTrace());
-
-			logger.error(error);
-			JSONObject temp = new JSONObject();
-			temp.put("error", error);
-			response.put("response", temp);
+			response = formErrorResponse(logger, e.getMessage(), ErrorCodes.ANY_OTHER_EXCEPTION, e.getStackTrace(), "ERROR");
 
 		}
-		return response.toString();
+		return response;
 
 	}
 
 	/**
-	 * Maps POST Request on Database to a Database service depending on <action>
-	 * parameter. <path> defined for this resource is </rest/db/{dbName}>
-	 *
+	 * Maps POST Request to perform create/drop operations on databases present
+	 * in mongo db to a service function that returns the list. Also forms the
+	 * JSON response for this request and sent it to client. In case of any
+	 * exception from the service files an error object if formed.
+	 * 
 	 * @param dbName
-	 *            : Name of Database for which to perform PUT,POST,DELETE
-	 *            operation depending on <action> patameter
-	 *
+	 *            Name of Database for which to perform create/drop operation
+	 *            depending on action patameter
+	 * 
 	 * @param action
-	 *            : Query Paramater which decides which service to mapped to
-	 *            (POST, PUT or DELETE).
-	 *
+	 *            Query Paramater with value PUT for identifying a create
+	 *            database request and value DELETE for dropping a database.
+	 * 
 	 * @param request
-	 *            : Get the HTTP request context to extract session parameters
-	 *
+	 *            Get the HTTP request context to extract session parameters
+	 * 
 	 * @param tokenId
-	 *            : a token Id given to every user at Login.
+	 *            a token Id given to every user at Login.
 	 * @return : String with status of operation performed.
-	 *
+	 * 
 	 */
 	@POST
 	@Path("/{dbName}")
 	@Produces(MediaType.APPLICATION_JSON)
-	public String postDbRequest(@PathParam("dbName") String dbName,
-			@QueryParam("action") String action,
-			@QueryParam("tokenId") String tokenId,
-			@Context HttpServletRequest request) throws JSONException {
+	public String postDbRequest(@PathParam("dbName") String dbName, @QueryParam("action") String action, @QueryParam("tokenId") String tokenId,
+			@Context HttpServletRequest request) {
 
-		logger.info("Recieved POST Request for Db with action [ " + action
-				+ "] [" + DateProvider.getDateTime() + "]");
-		// Contains JSON Resposne which is converted to String for sending a
-		// response
-		JSONObject response = new JSONObject();
-
-		// Declare Error Object in case of error
-		JSONObject error = new JSONObject();
-		try {
-			if (action == null) {
-
-				InvalidHTTPRequestException e = new InvalidHTTPRequestException(
-						ErrorCodes.ACTION_PARAMETER_ABSENT,
-						"ACTION_PARAMETER_ABSENT");
-				error.put("message", e.getMessage());
-				error.put("code", e.getErrorCode());
-				logger.error(error);
-
-				JSONObject temp = new JSONObject();
-				temp.put("error", error);
-				response.put("response", temp);
-
-			} else {
-				if (tokenId == null) {
-					InvalidHTTPRequestException e = new InvalidHTTPRequestException(
-							ErrorCodes.TOKEN_ID_ABSENT, "Token Id not provided");
-
-					error.put("message", e.getMessage());
-					error.put("code", e.getErrorCode());
-					logger.fatal(error);
-
-					JSONObject temp = new JSONObject();
-					temp.put("error", error);
-					response.put("response", temp);
-
-				} else {
-
-					// Check if tokenId is in session
-					HttpSession session = request.getSession();
-
-					if (session.getAttribute("tokenId") == null) {
-						InvalidHTTPRequestException e = new InvalidHTTPRequestException(
-								ErrorCodes.INVALID_SESSION,
-								"Session Expired(Token Id not set in session).");
-						error.put("message", e.getMessage());
-						error.put("code", e.getErrorCode());
-
-						logger.fatal(error);
-						JSONObject temp = new JSONObject();
-						temp.put("error", error);
-						response.put("response", temp);
-					} else {
-						if (!session.getAttribute("tokenId").equals(tokenId)) {
-							InvalidHTTPRequestException e = new InvalidHTTPRequestException(
-									ErrorCodes.INVALID_SESSION,
-									"Invalid Session(Token Id does not match with the one in session)");
-							error.put("message", e.getMessage());
-							error.put("code", e.getErrorCode());
-
-							logger.fatal(error);
-							JSONObject temp = new JSONObject();
-							temp.put("error", error);
-							response.put("response", temp);
-
-						} else {
-							JSONObject temp = new JSONObject();
-							// Get User for a given Token Id
-							String userMappingkey = UserLogin.tokenIDToUserMapping
-									.get(tokenId);
-							if (userMappingkey == null) {
-								// Invalid User
-								error.put("message",
-										"User not mapped to token Id");
-								error.put("code", ErrorCodes.INVALID_USER);
-								logger.error(error);
-								temp.put("error", error);
-								response.put("response", temp);
-
-							} else {
-								// Create Instance of Service File.
-								DatabaseService databaseService = new DatabaseServiceImpl(
-										userMappingkey);
-
-								if (action.equals("PUT")) {
-
-									temp.put("result",
-											databaseService.createDb(dbName));
-
-								} else if (action.equals("DELETE")) {
-									temp.put("result",
-											databaseService.dropDb(dbName));
-
-								}
-
-								response.put("response", temp);
-							}
-						}
-					}
-				}
-			}
-		} catch (DuplicateDatabaseException e) {
-
-			error.put("message", e.getMessage());
-			error.put("code", e.getErrorCode());
-			error.put("stackTrace", e.getStackTrace());
-
-			logger.error(error);
-			JSONObject temp = new JSONObject();
-			temp.put("error", error);
-			response.put("response", temp);
-
-		} catch (EmptyDatabaseNameException e) {
-			error.put("message", e.getMessage());
-			error.put("code", e.getErrorCode());
-			error.put("stackTrace", e.getStackTrace());
-
-			logger.error(error);
-
-			JSONObject temp = new JSONObject();
-			temp.put("error", error);
-			response.put("response", temp);
-
-		} catch (UndefinedDatabaseException e) {
-			error.put("message", e.getMessage());
-			error.put("code", e.getErrorCode());
-			error.put("stackTrace", e.getStackTrace());
-			logger.error(error);
-
-			JSONObject temp = new JSONObject();
-			temp.put("error", error);
-			response.put("response", temp);
-
-		} catch (InsertDatabaseException e) {
-			error.put("message", e.getMessage());
-			error.put("code", e.getErrorCode());
-			error.put("stackTrace", e.getStackTrace());
-
-			logger.error(error);
-			JSONObject temp = new JSONObject();
-			temp.put("error", error);
-			response.put("response", temp);
-
-		} catch (DatabaseException e) {
-			error.put("message", e.getMessage());
-			error.put("code", e.getErrorCode());
-			error.put("stackTrace", e.getStackTrace());
-			logger.error(error);
-
-			JSONObject temp = new JSONObject();
-			temp.put("error", error);
-			response.put("response", temp);
-
-		} catch (JSONException e) {
-			error.put("message", e.getMessage());
-			error.put("code", ErrorCodes.JSON_EXCEPTION);
-			error.put("stackTrace", e.getStackTrace());
-
-			logger.error(error);
-
-			JSONObject temp = new JSONObject();
-			temp.put("error", error);
-			response.put("response", temp);
-
-		} catch (Exception e) {
-			// For any other exception like if ConfigMongoProvider used then
-			// FileNotFoundException
-			// Form a JSON Error Object
-			error.put("message", e.getMessage());
-			error.put("code", "ANY_OTHER_EXCEPTION");
-			error.put("stackTrace", e.getStackTrace());
-
-			logger.error(error);
-
-			JSONObject temp = new JSONObject();
-			temp.put("error", error);
-			response.put("response", temp);
+		if (logger.isInfoEnabled()) {
+			logger.info("Recieved POST Request for Db with action [ " + action + "] [" + DateProvider.getDateTime() + "]");
 		}
-
-		return response.toString();
+		if (action == null) {
+			InvalidHTTPRequestException e = new InvalidHTTPRequestException(ErrorCodes.ACTION_PARAMETER_ABSENT, "ACTION_PARAMETER_ABSENT");
+			return formErrorResponse(logger, e.getMessage(), e.getErrorCode(), null, "ERROR");
+		}
+		String response = null;
+		try {
+			response = validateTokenId(tokenId, logger, request);
+			if (response != null) {
+				return response;
+			}
+			// Get User for a given Token Id
+			String userMappingkey = UserLogin.tokenIDToUserMapping.get(tokenId);
+			if (userMappingkey == null) {
+				return formErrorResponse(logger, "User not mapped to token Id", ErrorCodes.INVALID_USER, null, "FATAL");
+			}
+			// Create Instance of Service File.
+			DatabaseService databaseService = new DatabaseServiceImpl(userMappingkey);
+			JSONObject temp = new JSONObject();
+			JSONObject resp = new JSONObject();
+			if (action.equals("PUT")) {
+				temp.put("result", databaseService.createDb(dbName));
+			} else if (action.equals("DELETE")) {
+				temp.put("result", databaseService.dropDb(dbName));
+			}
+			resp.put("response", temp);
+			response = resp.toString();
+			if (logger.isInfoEnabled()) {
+				logger.info("Request Completed [" + DateProvider.getDateTime() + "]");
+			}
+		} catch (JSONException e) {
+			response = "{\"code\":" + "\"" + ErrorCodes.JSON_EXCEPTION + "\"," + "\"message\": \"Error while forming JSON Object\"}";
+		} catch (DatabaseException e) {
+			response = formErrorResponse(logger, e.getMessage(), e.getErrorCode(), e.getStackTrace(), "ERROR");
+		} catch (ValidationException e) {
+			response = formErrorResponse(logger, e.getMessage(), e.getErrorCode(), e.getStackTrace(), "ERROR");
+		} catch (Exception e) {
+			response = formErrorResponse(logger, e.getMessage(), ErrorCodes.ANY_OTHER_EXCEPTION, e.getStackTrace(), "ERROR");
+		}
+		return response;
 
 	}
 }

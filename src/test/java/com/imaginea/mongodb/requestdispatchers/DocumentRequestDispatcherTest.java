@@ -48,7 +48,7 @@ import com.imaginea.mongodb.common.MongoInstanceProvider;
 import com.imaginea.mongodb.common.exceptions.DatabaseException;
 import com.imaginea.mongodb.common.exceptions.ErrorCodes;
 import com.imaginea.mongodb.common.exceptions.MongoHostUnknownException;
-import com.imaginea.mongodb.services.servlet.UserLogin;
+import com.imaginea.mongodb.requestdispatchers.UserLogin;
 
 import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
@@ -163,7 +163,7 @@ public class DocumentRequestDispatcherTest {
 	 */
 	@Before
 	public void instantiateTestClass() throws JSONException {
-		try {
+	 
 
 			// Creates Mongo Instance.
 			mongoInstance = mongoInstanceBehaviour.getMongoInstance();
@@ -176,18 +176,7 @@ public class DocumentRequestDispatcherTest {
 			UserLogin.tokenIDToUserMapping.put(testTokenId, user);
 			UserLogin.userToMongoInstanceMapping.put(user, mongoInstance);
 
-		} catch (IOException e) {
-			JSONObject error = new JSONObject();
-			error.put("message", e.getMessage());
-			error.put("code", "IO_EXCEPTION");
-			error.put("stackTrace", e.getStackTrace());
-
-			JSONObject temp = new JSONObject();
-			temp.put("error", error);
-			JSONObject response = new JSONObject();
-			response.put("response", temp);
-			logger.info(response.toString());
-		}
+		 
 	}
 
 	/**
@@ -250,7 +239,7 @@ public class DocumentRequestDispatcherTest {
 						request.setSession(session);
 						String fields = "test,_id";
 
-						String docList = testDocResource.getDocsRequest(dbName,
+						String docList = testDocResource.getQueriedDocsList(dbName,
 								collName, null, testTokenId, fields, "100",
 								"0", request);
 
@@ -466,21 +455,7 @@ public class DocumentRequestDispatcherTest {
 							}
 						}
 
-					} catch (JSONException e) {
-						// log error
-						JSONObject error = new JSONObject();
-						error.put("message", e.getMessage());
-						error.put("code", ErrorCodes.JSON_EXCEPTION);
-						error.put("stackTrace", e.getStackTrace());
-
-						JSONObject temp = new JSONObject();
-						temp.put("error", error);
-						JSONObject response = new JSONObject();
-						response.put("response", temp);
-						logger.info(response.toString());
-
-						throw e;
-					} catch (MongoException m) {
+					}  catch (MongoException m) {
 						DatabaseException e = new DatabaseException(
 								ErrorCodes.DB_CREATION_EXCEPTION,
 								"DB_CREATION_EXCEPTION", m.getCause());

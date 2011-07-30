@@ -49,7 +49,7 @@ import com.imaginea.mongodb.common.exceptions.DatabaseException;
 import com.imaginea.mongodb.common.exceptions.ErrorCodes;
 import com.imaginea.mongodb.common.exceptions.MongoHostUnknownException;
 import com.imaginea.mongodb.requestdispatchers.DatabaseRequestDispatcher;
-import com.imaginea.mongodb.services.servlet.UserLogin;
+import com.imaginea.mongodb.requestdispatchers.UserLogin;
 
 import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
@@ -68,6 +68,7 @@ import com.mongodb.util.JSON;
  * are tested for all of them.
  *
  * @author Rachit Mittal
+ * @since 14 July 2011
  *
  */
 public class DatabaseRequestDispatcherTest {

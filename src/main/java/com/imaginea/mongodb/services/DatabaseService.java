@@ -30,65 +30,100 @@ import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONException;
 
-import com.imaginea.mongodb.common.exceptions.DatabaseException;
-import com.imaginea.mongodb.common.exceptions.DeleteDatabaseException;
-import com.imaginea.mongodb.common.exceptions.DuplicateDatabaseException;
-import com.imaginea.mongodb.common.exceptions.EmptyDatabaseNameException;
-import com.imaginea.mongodb.common.exceptions.InsertDatabaseException;
-import com.imaginea.mongodb.common.exceptions.UndefinedDatabaseException;
+import com.imaginea.mongodb.common.exceptions.DatabaseException;  
 import com.imaginea.mongodb.common.exceptions.ValidationException;
 
 /**
- * Defines operations to create/update/drop/query databases of mongo instance
- * we are currently connected to. Also provides the statistics for the database.
- *
+ * Defines services for performing operations like create/drop on databases
+ * present in mongo to whic we are connected to. Also provides service to get
+ * list of all databases present and Statistics of a particular database.
+ * 
  * @author Rachit Mittal
- *
+ * @since 2 July 2011
+ * 
+ * 
  */
 public interface DatabaseService {
-	/**
-	 * Get All Databases present in Mongo Db.
-	 *
-	 * @return List of Database Names.
-	 * @throws DatabaseException
-	 */
-	public List<String> getAllDb() throws DatabaseException;//TODO method names to follow convention
 
 	/**
-	 * Return Stats of a particular Database
-	 *
+	 * Gets the list of databases present in mongo to which user is
+	 * connected to.
+	 * 
+	 * @return List of All Databases present in MongoDb
+	 * 
+	 * @throws DatabaseException
+	 *             If any error while getting database list.
+	 */
+
+	public List<String> getDbList() throws DatabaseException; 
+	/**
+	 * Return Stats of a particular Database in mongo to which user is connected
+	 * to.
+	 * 
 	 * @param dbName
-	 *            : Name of Database
-	 * @return : Array of JSON Objects each containing a key value pair in Db
+	 *            Name of Database
+	 * @return Array of JSON Objects each containing a key value pair in Db
 	 *         Stats.
-	 * @throws DatabaseException
-	 *             : If creation of MongoInstance is failed.
-	 * @throws ValidationException
-	 *             : If dbName is null.
+	 * @exception EmptyDatabaseNameException
+	 *                DbName is empty
+	 * @exception UndefinedDatabaseException
+	 *                Db not present
+	 * @exception JSONException
+	 *                While parsing JSON
+	 * @exception DatabaseException
+	 *                Error while performing this operation
+	 * @exception ValidationException
+	 *                throw super type of EmptyDatabaseNameException
 	 */
-	public JSONArray getDbStats(String dbName)
-			throws EmptyDatabaseNameException, UndefinedDatabaseException,
-			DatabaseException, JSONException;
+	public JSONArray getDbStats(String dbName) throws DatabaseException, ValidationException, JSONException;
 
 	/**
-	 * Create a Databse with a name <dbName>
-	 *
+	 * Creates a Database with the specified name in mongo database to which
+	 * user is connected to.
+	 * 
 	 * @param dbName
-	 *            : Name of Database to be created
-	 * @return : Success if Created else throws Exception
+	 *            Name of Database to be created
+	 * @return Success if Created else throws Exception
+	 * 
+	 * @exception EmptyDatabaseNameException
+	 *                When dbName is null
+	 * @exception DuplicateDatabaseException
+	 *                When database is already present
+	 * @exception InsertDatabaseException
+	 *                Any exception while trying to create db
+	 * @exception DatabaseException
+	 *                throw super type of
+	 *                DuplicateDatabaseException,InsertDatabaseException
+	 * @exception ValidationException
+	 *                throw super type of EmptyDatabaseNameException
+	 * 
+	 * 
 	 */
 
-	public String createDb(String dbName) throws EmptyDatabaseNameException,
-			DuplicateDatabaseException, InsertDatabaseException;
+	public String createDb(String dbName) throws DatabaseException, ValidationException;
 
 	/**
-	 * Delete a Databse with a name <dbName>
-	 *
+	 * Deletes a Database with the specified name in mongo database to which
+	 * user is connected to.
+	 * 
 	 * @param dbName
-	 *            : Name of Database to be created
-	 * @return : Success if Deleted else throws Exception
+	 *            Name of Database to be deleted
+	 * @return Success if deleted else throws Exception
+	 * 
+	 * @exception EmptyDatabaseNameException
+	 *                When dbName is null
+	 * @exception UndefinedDatabaseException
+	 *                When database is not present
+	 * @exception DeleteDatabaseException
+	 *                Any exception while trying to create db
+	 * @exception DatabaseException
+	 *                throw super type of
+	 *                UndefinedDatabaseException,DeleteDatabaseException
+	 * @exception ValidationException
+	 *                throw super type of EmptyDatabaseNameException
+	 * 
+	 * 
 	 */
-	public String dropDb(String dbName) throws EmptyDatabaseNameException,
-			UndefinedDatabaseException, DeleteDatabaseException;
+	public String dropDb(String dbName) throws DatabaseException, ValidationException;
 
 }

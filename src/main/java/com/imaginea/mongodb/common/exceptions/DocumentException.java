@@ -24,8 +24,7 @@
  */
 
 package com.imaginea.mongodb.common.exceptions;
-
-import com.mongodb.MongoException;
+ 
 
 /**
  * Defines all the Exceptions generated while performing any operation on
@@ -39,7 +38,7 @@ import com.mongodb.MongoException;
  * @author Rachit Mittal
  *
  */
-public class DocumentException extends MongoException {
+public class DocumentException extends RuntimeException {
 
 	private static final long serialVersionUID = 1L;
 

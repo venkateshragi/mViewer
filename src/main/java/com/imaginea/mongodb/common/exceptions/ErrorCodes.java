@@ -24,12 +24,10 @@
  */
 package com.imaginea.mongodb.common.exceptions;
 
-
-
 /**
  * Defines Error Codes for Exceptions thrown in MongoDb while performing
  * operations in Services Files.
- *
+ * 
  */
 
 public interface ErrorCodes {
@@ -66,8 +64,13 @@ public interface ErrorCodes {
 	String INVALID_USERNAME = "INVALID_USERNAME";
 	String ERROR_INITIATING_GRAPH = "ERROR_INITIATING_GRAPH";
 	String PORT_OUT_OF_RANGE = "PORT_OUT_OF_RANGE";
-	String ERROR_PARSING_PORT="ERROR_PARSING_PORT";
 	// For General Exception catching at the end
 	String ANY_OTHER_EXCEPTION = "ANY_OTHER_EXCEPTION";
+	String ERROR_PARSING_PORT = "ERROR_PARSING_PORT";
+	// mongo.config file not found ni configMongoInstanceProvider
+	String FILE_NOT_FOUND_EXCEPTION = "FILE_NOT_FOUND_EXCEPTION";
+	String IO_EXCEPTION = "IO_EXCEPTION";
+	// In Graph
+	String ERROR_PARSING_POLLING_INTERVAL  = "ERROR_PARSING_POLLING_INTERVAL";
 
 }

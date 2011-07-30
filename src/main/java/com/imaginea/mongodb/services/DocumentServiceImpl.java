@@ -26,13 +26,18 @@
 package com.imaginea.mongodb.services;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
 import org.bson.types.ObjectId;
+import org.json.JSONException;
 
 import com.imaginea.mongodb.common.MongoInstanceProvider;
 import com.imaginea.mongodb.common.SessionMongoInstanceProvider;
+import com.imaginea.mongodb.common.exceptions.CollectionException;
+import com.imaginea.mongodb.common.exceptions.DatabaseException;
 import com.imaginea.mongodb.common.exceptions.DeleteDocumentException;
 import com.imaginea.mongodb.common.exceptions.DocumentException;
 import com.imaginea.mongodb.common.exceptions.EmptyCollectionNameException;
@@ -44,6 +49,7 @@ import com.imaginea.mongodb.common.exceptions.UndefinedCollectionException;
 import com.imaginea.mongodb.common.exceptions.UndefinedDatabaseException;
 import com.imaginea.mongodb.common.exceptions.UndefinedDocumentException;
 import com.imaginea.mongodb.common.exceptions.UpdateDocumentException;
+import com.imaginea.mongodb.common.exceptions.ValidationException;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBCollection;
 import com.mongodb.DBCursor;
@@ -51,60 +57,90 @@ import com.mongodb.DBObject;
 import com.mongodb.Mongo;
 import com.mongodb.MongoException;
 
+/**
+ * Defines services definitions for performing operations like
+ * create/update/delete on documents inside a collection in a database present
+ * in mongo to which we are connected to. Also provides service to get list of
+ * all documents present.
+ * 
+ * @author Rachit Mittal
+ * @since 6 July 2011
+ * 
+ * 
+ */
+
+// TODO check update
 public class DocumentServiceImpl implements DocumentService {
 	/**
-	 * MongoInstanceProvider Instance
+	 * Instance variable used to get a mongo instance after binding to an
+	 * implementation.
 	 */
 	private MongoInstanceProvider mongoInstanceProvider;
 	/**
-	 * Mongo Instance
+	 * Mongo Instance to communicate with mongo
 	 */
 	private Mongo mongoInstance;
 
 	/**
-	 * Creates an instance of MongoInstanceProvider based on userMappingKey
-	 * recieved from Document Request Dispatcher.
-	 *
+	 * Creates an instance of MongoInstanceProvider which is used to get a mongo
+	 * instance to perform operations on documents. The instance is created
+	 * based on a userMappingKey which is recieved from the database request
+	 * dispatcher and is obtained from tokenId of user.
+	 * 
 	 * @param userMappingKey
-	 *            : A combination of username , mongo Host and mongoPort
+	 *            A combination of username,mongoHost and mongoPort
 	 */
 	public DocumentServiceImpl(String userMappingKey) {
-
-		// TODO Beans
 		mongoInstanceProvider = new SessionMongoInstanceProvider(userMappingKey);
 	}
 
 	/**
-	 * GET List of Documents present in a <collectionName> inside a <dbName>
-	 * after performing <query> and containing only <keys> keys.
-	 *
+	 * Gets the list of documents inside a collection in a database in mongo to
+	 * which user is connected to.
+	 * 
 	 * @param dbName
-	 *            : Name of Database
+	 *            Name of Database
 	 * @param collectionName
-	 *            : Name of Collection from which to get all Documents
-	 *
+	 *            Name of Collection from which to get all Documents
+	 * 
 	 * @param query
-	 *            : query to be performed. In case of empty query {} return all
+	 *            query to be performed. In case of empty query {} return all
 	 *            docs.
-	 *
+	 * 
 	 * @param keys
-	 *            : Keys to be present in the resulted docs.
-	 *
+	 *            Keys to be present in the resulted docs.
+	 * 
 	 * @param limit
-	 *            : Number of docs to show.
-	 *
+	 *            Number of docs to show.
+	 * 
 	 * @param skip
-	 *            : Docs to skip from the front.
-	 *
-	 * @return : List of all documents in <dbName> and <collectionName>
-	 * @throws EmptyDatabaseNameException
-	 *             , EmptyCollectionNameException,DocumentException
+	 *            Docs to skip from the front.
+	 * 
+	 * @return List of all documents.
+	 * @exception EmptyDatabaseNameException
+	 *                If database name is null
+	 * @exception EmptyCollectionNameException
+	 *                If Collection name is null
+	 * @exception UndefinedDatabaseException
+	 *                If database is not present
+	 * @exception UndefinedCollectionException
+	 *                If Collection is not present
+	 * @exception DatabaseException
+	 *                throw super type of UndefinedDatabaseException
+	 * @exception ValidationException
+	 *                throw super type of
+	 *                EmptyDatabaseNameException,EmptyCollectionNameException
+	 * @exception CollectionException
+	 *                throw super type of UndefinedCollectionException
+	 * @exception DocumentException
+	 *                exception while performing get doc list
+	 * 
 	 */
-	@Override
-	public ArrayList<DBObject> getDocuments(String dbName,
+
+	public ArrayList<DBObject> getQueriedDocsList(String dbName,
 			String collectionName, DBObject query, DBObject keys, int limit,
-			int skip) throws EmptyDatabaseNameException,
-			EmptyCollectionNameException, DocumentException {
+			int skip) throws DatabaseException, CollectionException,
+			DocumentException, ValidationException {
 
 		mongoInstance = mongoInstanceProvider.getMongoInstance();
 
@@ -125,9 +161,19 @@ public class DocumentServiceImpl implements DocumentService {
 
 		ArrayList<DBObject> dataList = new ArrayList<DBObject>();
 		try {
+			if (!mongoInstance.getDatabaseNames().contains(dbName)) {
+				throw new UndefinedDatabaseException("DB with name [" + dbName
+						+ "]DOES_NOT_EXIST");
+			}
+
+			if (!mongoInstance.getDB(dbName).getCollectionNames()
+					.contains(collectionName)) {
+				throw new UndefinedCollectionException("Collection with name ["
+						+ collectionName + "] DOES NOT EXIST in Database ["
+						+ dbName + "]");
+			}
 			if (keys.keySet().isEmpty()) {
-				keys.put("_id", 1); // For empty keys return all _id of all
-									// Docs.
+				keys.put("_id", 1); // For empty keys return all _id of all docs
 			}
 
 			// Return Queried Documents
@@ -150,26 +196,45 @@ public class DocumentServiceImpl implements DocumentService {
 	}
 
 	/**
-	 * Insert <documentData> in a <collectionName> inside a <dbName>
-	 *
+	 * Insert a document inside a collection in a database in mongo to which
+	 * user is connected to.
+	 * 
 	 * @param dbName
-	 *            : Name of Database
+	 *            Name of Database
 	 * @param collectionName
-	 *            : Name of Collection in which to insert a document
+	 *            Name of Collection from which to get all Documents
+	 * 
 	 * @param document
 	 *            : Document data to be inserted
 	 * @return : Insertion Status
-	 * @throws EmptyDatabaseNameException
-	 *             EmptyCollectionNameException EmptyDocumentDataException
-	 *             ,UndefinedDatabaseException,UndefinedCollectionException
+	 * @exception EmptyDatabaseNameException
+	 *                If database name is null
+	 * @exception EmptyCollectionNameException
+	 *                If Collection name is null
+	 * @exception EmptyDocumentDataException
+	 *                If Document data is null
+	 * @exception UndefinedDatabaseException
+	 *                If database is not present
+	 * @exception UndefinedCollectionException
+	 *                If Collection is not present
+	 * @exception InsertDocumentException
+	 *                Any exception while inserting document
+	 * @exception DatabaseException
+	 *                throw super type of UndefinedDatabaseException
+	 * @exception ValidationException
+	 *                throw super type of
+	 *                EmptyDatabaseNameException,EmptyCollectionNameException
+	 *                ,EmptyDocumentDataException
+	 * @exception CollectionException
+	 *                throw super type of UndefinedCollectionException
+	 * @exception DocumentException
+	 *                throw super type of InsertDocumentException
+	 * 
 	 */
 
-	@Override
 	public String insertDocument(String dbName, String collectionName,
-			DBObject document) throws EmptyDatabaseNameException,
-			EmptyCollectionNameException, EmptyDocumentDataException,
-			UndefinedDatabaseException, UndefinedCollectionException,
-			InsertDocumentException {
+			DBObject document) throws DatabaseException, CollectionException,
+			DocumentException, ValidationException {
 		mongoInstance = mongoInstanceProvider.getMongoInstance();
 		if (dbName == null) {
 			throw new EmptyDatabaseNameException("Database name is null");
@@ -185,7 +250,6 @@ public class DocumentServiceImpl implements DocumentService {
 		if (collectionName.equals("")) {
 			throw new EmptyCollectionNameException("Collection Name Empty");
 		}
-
 
 		String result = null;
 		try {
@@ -203,7 +267,6 @@ public class DocumentServiceImpl implements DocumentService {
 
 			// MongoDb permits Duplicate document Insert
 
-
 			mongoInstance.getDB(dbName).getCollection(collectionName)
 					.insert(document);
 			result = "Inserted Document with Data : [" + document + "]";
@@ -215,33 +278,47 @@ public class DocumentServiceImpl implements DocumentService {
 	}
 
 	/**
-	 *
-	 * Updates a document with Id <id> with <newData> in a <collectionName>
-	 * inside a <dbName>
-	 *
+	 * Updates a document inside a collection in a database in mongo to which
+	 * user is connected to.
+	 * 
 	 * @param dbName
-	 *            : Name of Database
+	 *            Name of Database
 	 * @param collectionName
-	 *            : Name of Collection in which to update a document
+	 *            Name of Collection from which to get all Documents
 	 * @param id
-	 *            : Id of Document to be deleted
-	 *
+	 *            Id of Document to be updated
 	 * @param newData
-	 *            : Object with _id of the document to be updated and the keys
-	 *            along with new values.
-	 * @return : Update status
-	 * @throws EmptyDatabaseNameException
-	 *             , UndefinedDatabaseException, EmptyCollectionNameException,
-	 *             UndefinedCollectionException,
-	 *             DocumentException,UpdateDocumentException
+	 *            new Document value.
+	 * @return Update status
+	 * @exception EmptyDatabaseNameException
+	 *                If database name is null
+	 * @exception EmptyCollectionNameException
+	 *                If Collection name is null
+	 * @exception EmptyDocumentDataException
+	 *                If Document data is null
+	 * @exception UndefinedDatabaseException
+	 *                If database is not present
+	 * @exception UndefinedCollectionException
+	 *                If Collection is not present
+	 * @exception UpdateDocumentException
+	 *                Any exception while updating document
+	 * @exception DatabaseException
+	 *                throw super type of UndefinedDatabaseException
+	 * @exception ValidationException
+	 *                throw super type of
+	 *                EmptyDatabaseNameException,EmptyCollectionNameException
+	 *                ,EmptyDocumentDataException
+	 * @exception CollectionException
+	 *                throw super type of UndefinedCollectionException
+	 * @exception DocumentException
+	 *                throw super type of UpdateDocumentException
+	 * @exception JSONException
+	 * 
 	 */
-	@Override
+
 	public String updateDocument(String dbName, String collectionName,
-			ObjectId id, DBObject newData) throws EmptyDatabaseNameException,
-			UndefinedDatabaseException, EmptyCollectionNameException,
-			UndefinedCollectionException, UndefinedDocumentException,
-			EmptyDocumentDataException, UpdateDocumentException,
-			DocumentException {
+			ObjectId id, DBObject newData) throws DatabaseException,
+			CollectionException, DocumentException, ValidationException {
 
 		mongoInstance = mongoInstanceProvider.getMongoInstance();
 		if (dbName == null) {
@@ -260,7 +337,6 @@ public class DocumentServiceImpl implements DocumentService {
 		}
 		String result = null;
 		DBObject documentData = null;
-
 		try {
 			if (!mongoInstance.getDatabaseNames().contains(dbName)) {
 				throw new UndefinedDatabaseException("DB [" + dbName
@@ -308,6 +384,7 @@ public class DocumentServiceImpl implements DocumentService {
 			BasicDBObject set = new BasicDBObject();
 			DBObject newValues = new BasicDBObject();
 
+			// Updates and add new fields
 			while (keyIterator.hasNext()) {
 				String key = keyIterator.next();
 				newValues = new BasicDBObject(key, newData.get(key));
@@ -321,13 +398,33 @@ public class DocumentServiceImpl implements DocumentService {
 			collection = mongoInstance.getDB(dbName).getCollection(
 					collectionName);
 			cursor = collection.find(query);
+
+			DBObject doc = new BasicDBObject();
 			if (cursor.hasNext()) {
 				documentData = cursor.next();
+				doc = documentData;
 			}
-		} catch (MongoException e) {
-			throw new UpdateDocumentException(
 
-			"DOCUMENT_UPDATE_EXCEPTION");
+			// Remove Old Fields
+			keySet = documentData.keySet();
+			Set<String> deleteKeys = new HashSet<String>();
+			keyIterator = keySet.iterator();
+			while (keyIterator.hasNext()) {
+				String key = keyIterator.next();
+
+				if (newData.get(key) == null) {
+					deleteKeys.add(key);
+				}
+			}
+			for(String key : deleteKeys)
+			{
+				documentData.removeField(key);
+			} 
+			collection.remove(doc);
+			collection.insert(documentData);
+
+		} catch (MongoException e) {
+			throw new UpdateDocumentException("DOCUMENT_UPDATE_EXCEPTION");
 		}
 		result = "Updated Document: [" + documentData + "]";
 
@@ -335,23 +432,44 @@ public class DocumentServiceImpl implements DocumentService {
 	}
 
 	/**
-	 * Deletes a document with Id <id> in a <collectionName> inside a <dbName>
-	 *
+	 * Deletes a document inside a collection in a database in mongo to which
+	 * user is connected to.
+	 * 
 	 * @param dbName
-	 *            : Name of Database
+	 *            Name of Database
 	 * @param collectionName
-	 *            : Name of Collection from which to delete a document
+	 *            Name of Collection from which to get all Documents
 	 * @param id
-	 *            : Delete Document with this Id.
-	 * @return : Deletion Status
+	 *            Id of Document to be updated
+	 * @return Deletion status
+	 * @exception EmptyDatabaseNameException
+	 *                If database name is null
+	 * @exception EmptyCollectionNameException
+	 *                If Collection name is null
+	 * @exception EmptyDocumentDataException
+	 *                If Document data is null
+	 * @exception UndefinedDatabaseException
+	 *                If database is not present
+	 * @exception UndefinedCollectionException
+	 *                If Collection is not present
+	 * @exception DeleteDocumentException
+	 *                Any exception while deleting document
+	 * @exception DatabaseException
+	 *                throw super type of UndefinedDatabaseException
+	 * @exception ValidationException
+	 *                throw super type of
+	 *                EmptyDatabaseNameException,EmptyCollectionNameException
+	 *                ,EmptyDocumentDataException
+	 * @exception CollectionException
+	 *                throw super type of UndefinedCollectionException
+	 * @exception DocumentException
+	 *                throw super type of DeleteDocumentException
+	 * 
 	 */
 
-	@Override
 	public String deleteDocument(String dbName, String collectionName,
-			ObjectId id) throws EmptyDatabaseNameException,
-			UndefinedDatabaseException, EmptyCollectionNameException,
-			UndefinedCollectionException, UndefinedDocumentException,
-			EmptyDocumentDataException, DeleteDocumentException {
+			ObjectId id) throws DatabaseException, CollectionException,
+			DocumentException, ValidationException {
 		mongoInstance = mongoInstanceProvider.getMongoInstance();
 		if (dbName == null) {
 			throw new EmptyDatabaseNameException("Database name is null");
@@ -393,9 +511,7 @@ public class DocumentServiceImpl implements DocumentService {
 			DBCursor cursor = collection.find(query);
 
 			if (cursor.hasNext()) {
-				documentData = cursor.next(); // _id is primary key so one time
-												// loop
-												// execution only
+				documentData = cursor.next();
 			} else {
 				throw new UndefinedDocumentException("DOCUMENT_DOES_NOT_EXIST");
 			}

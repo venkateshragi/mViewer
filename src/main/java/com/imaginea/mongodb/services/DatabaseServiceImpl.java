@@ -40,62 +40,66 @@ import com.imaginea.mongodb.common.exceptions.EmptyDatabaseNameException;
 import com.imaginea.mongodb.common.exceptions.ErrorCodes;
 import com.imaginea.mongodb.common.exceptions.InsertDatabaseException;
 import com.imaginea.mongodb.common.exceptions.UndefinedDatabaseException;
+import com.imaginea.mongodb.common.exceptions.ValidationException;
 import com.mongodb.CommandResult;
 import com.mongodb.DB;
 import com.mongodb.Mongo;
 import com.mongodb.MongoException;
 
 /**
- * Defines All the Operations available on Databases in MongoDb
- *
+ * Defines services definitions for performing operations like create/drop on
+ * databases present in mongo to which we are connected to. Also provides service
+ * to get list of all databases present and Statistics of a particular database.
+ * 
  * @author Rachit Mittal
- *
+ * @since  2 July 2011
+ * 
+ * 
  */
 public class DatabaseServiceImpl implements DatabaseService {
 
 	/**
-	 * MongoInstanceProvider Instance
+	 * Instance variable used to get a mongo instance after binding to an
+	 * implementation.
 	 */
 	private MongoInstanceProvider mongoInstanceProvider;
 	/**
-	 * Mongo Instance
+	 * Mongo Instance to communicate with mongo
 	 */
 	private Mongo mongoInstance;
 
 	/**
-	 * Creates an instance of MongoInstanceProvider based on userMappingKey
-	 * recieved from Database Request Dispatcher.
-	 *
+	 * Creates an instance of MongoInstanceProvider which is used to get a mongo
+	 * instance to perform operations on databases. The instance is created
+	 * based on a userMappingKey which is recieved from the database request
+	 * dispatcher and is obtained from tokenId of user.
+	 * 
 	 * @param userMappingKey
-	 *            : A combination of username , mongo Host and mongoPort
+	 *            A combination of username,mongoHost and mongoPort
 	 */
 	public DatabaseServiceImpl(String userMappingKey) {
-
-		// TODO Beans
 		mongoInstanceProvider = new SessionMongoInstanceProvider(userMappingKey);
 	}
 
 	/**
-	 * Service function to get list of all databases.
-	 *
+	 * Gets the list of databases present in mongo database to which user is
+	 * connected to.
+	 * 
 	 * @return List of All Databases present in MongoDb
-	 *
+	 * 
 	 * @throws DatabaseException
-	 *             : If Cannot get DB List.
+	 *             If any error while getting database list.
 	 */
 
 	@Override
-	public List<String> getAllDb() throws DatabaseException {
+	public List<String> getDbList() throws DatabaseException {
 
 		mongoInstance = mongoInstanceProvider.getMongoInstance();
 		List<String> dbNames;
 		try {
 			dbNames = mongoInstance.getDatabaseNames();
 		} catch (MongoException m) {
-			DatabaseException e = new DatabaseException(
-					ErrorCodes.GET_DB_LIST_EXCEPTION, "GET_DB_LIST_EXCEPTION",
-					m.getCause());
-
+			DatabaseException e = new DatabaseException(ErrorCodes.GET_DB_LIST_EXCEPTION, "GET_DB_LIST_EXCEPTION", m.getCause());
 			throw e;
 		}
 		return dbNames;
@@ -103,23 +107,29 @@ public class DatabaseServiceImpl implements DatabaseService {
 	}
 
 	/**
-	 * Creates a Database with a name <dbName>
-	 *
+	 * Creates a Database with the specified name in mongo database to which
+	 * user is connected to.
+	 * 
 	 * @param dbName
-	 *            : Name of Database to be created
-	 * @return : Success if Created else throws Exception
-	 * @throws EmptyDatabaseNameException
-	 *             : When dbName is null
-	 * @throws DuplicateDatabaseException
-	 *             : when db Already present
-	 * @throws InsertDatabaseException
-	 *             : When tries to create Db and getting collections list
-	 *
+	 *            Name of Database to be created
+	 * @return Success if Created else throws Exception
+	 * 
+	 * @exception EmptyDatabaseNameException
+	 *                When dbName is null
+	 * @exception DuplicateDatabaseException
+	 *                When database is already present
+	 * @exception InsertDatabaseException
+	 *                Any exception while trying to create db
+	 * @exception DatabaseException
+	 *                throw super type of
+	 *                DuplicateDatabaseException,InsertDatabaseException
+	 * @exception ValidationException
+	 *                throw super type of EmptyDatabaseNameException
+	 * 
+	 * 
 	 */
 
-	@Override
-	public String createDb(String dbName) throws EmptyDatabaseNameException,
-			DuplicateDatabaseException, InsertDatabaseException {
+	public String createDb(String dbName) throws DatabaseException, ValidationException {
 		mongoInstance = mongoInstanceProvider.getMongoInstance();
 
 		if (dbName == null) {
@@ -131,18 +141,15 @@ public class DatabaseServiceImpl implements DatabaseService {
 		}
 
 		try {
-			boolean dbAlreadyPresent = mongoInstance.getDatabaseNames()
-					.contains(dbName);
+			boolean dbAlreadyPresent = mongoInstance.getDatabaseNames().contains(dbName);
 			if (dbAlreadyPresent) {
-				throw new DuplicateDatabaseException("DB with name [" + dbName
-						+ "] ALREADY EXISTS");
+				throw new DuplicateDatabaseException("DB with name [" + dbName + "] ALREADY EXISTS");
 			}
 
 			mongoInstance.getDB(dbName).getCollectionNames();
 		} catch (MongoException e) {
 
-			throw new InsertDatabaseException("DB_CREATION_EXCEPTION",
-					e.getCause());
+			throw new InsertDatabaseException("DB_CREATION_EXCEPTION", e.getCause());
 		}
 
 		String result = "Created DB with name [" + dbName + "]";
@@ -150,24 +157,28 @@ public class DatabaseServiceImpl implements DatabaseService {
 	}
 
 	/**
-	 * Delete a Databse with a name <dbName>
-	 *
+	 * Deletes a Database with the specified name in mongo database to which
+	 * user is connected to.
+	 * 
 	 * @param dbName
-	 *            : Name of Database to be created
-	 * @return : Success if Deleted else throws Exception
-	 *
-	 * @throws EmptyDatabaseNameException
-	 *             :When DbName Empty
-	 * @throws UndefinedDatabaseException
-	 *             : When Db not present and try to delete it
-	 *
-	 * @throws DeleteDatabaseException
-	 *             : Error while performing this operation
+	 *            Name of Database to be deleted
+	 * @return Success if deleted else throws Exception
+	 * 
+	 * @exception EmptyDatabaseNameException
+	 *                When dbName is null
+	 * @exception UndefinedDatabaseException
+	 *                When database is not present
+	 * @exception DeleteDatabaseException
+	 *                Any exception while trying to create db
+	 * @exception DatabaseException
+	 *                throw super type of
+	 *                UndefinedDatabaseException,DeleteDatabaseException
+	 * @exception ValidationException
+	 *                throw super type of EmptyDatabaseNameException
+	 * 
+	 * 
 	 */
-	@Override
-	public String dropDb(String dbName) throws EmptyDatabaseNameException,
-			UndefinedDatabaseException, DeleteDatabaseException {
-
+	public String dropDb(String dbName) throws DatabaseException, ValidationException {
 		mongoInstance = mongoInstanceProvider.getMongoInstance();
 		if (dbName == null) {
 			throw new EmptyDatabaseNameException("Database name is null");
@@ -177,18 +188,15 @@ public class DatabaseServiceImpl implements DatabaseService {
 			throw new EmptyDatabaseNameException("Database Name Empty");
 		}
 		try {
-			boolean dbPresent = mongoInstance.getDatabaseNames().contains(
-					dbName);
+			boolean dbPresent = mongoInstance.getDatabaseNames().contains(dbName);
 			if (!dbPresent) {
-				throw new UndefinedDatabaseException("DB with name [" + dbName
-						+ "]  DOES NOT EXIST");
+				throw new UndefinedDatabaseException("DB with name [" + dbName + "]  DOES NOT EXIST");
 			}
 
 			mongoInstance.dropDatabase(dbName);
 		} catch (MongoException e) {
 
-			throw new DeleteDatabaseException("DB_DELETION_EXCEPTION",
-					e.getCause());
+			throw new DeleteDatabaseException("DB_DELETION_EXCEPTION", e.getCause());
 		}
 
 		String result = "Deleted DB with name [" + dbName + "]";
@@ -196,25 +204,26 @@ public class DatabaseServiceImpl implements DatabaseService {
 	}
 
 	/**
-	 * Return Stats of a particular Database
-	 *
+	 * Return Stats of a particular Database in mongo to which user is connected
+	 * to.
+	 * 
 	 * @param dbName
-	 *            : Name of Database
-	 * @return : Array of JSON Objects each containing a key value pair in Db
+	 *            Name of Database
+	 * @return Array of JSON Objects each containing a key value pair in Db
 	 *         Stats.
-	 * @throws EmptyDatabaseNameException
-	 *             : DbName is empty
-	 * @throws UndefinedDatabaseException
-	 *             : Db not present
-	 * @throws JSONParseException
-	 *             : While parsing JSON
-	 * @throws DatabaseException
-	 *             : Error while performing this operation
+	 * @exception EmptyDatabaseNameException
+	 *                DbName is empty
+	 * @exception UndefinedDatabaseException
+	 *                Db not present
+	 * @exception JSONException
+	 *                While parsing JSON
+	 * @exception DatabaseException
+	 *                Error while performing this operation
+	 * @exception ValidationException
+	 *                throw super type of EmptyDatabaseNameException
 	 */
 	@Override
-	public JSONArray getDbStats(String dbName)
-			throws EmptyDatabaseNameException, UndefinedDatabaseException,
-			DatabaseException, JSONException {
+	public JSONArray getDbStats(String dbName) throws DatabaseException, ValidationException, JSONException {
 
 		mongoInstance = mongoInstanceProvider.getMongoInstance();
 		if (dbName == null) {
@@ -227,11 +236,9 @@ public class DatabaseServiceImpl implements DatabaseService {
 
 		JSONArray dbStats = new JSONArray();
 		try {
-			boolean dbPresent = mongoInstance.getDatabaseNames().contains(
-					dbName);
+			boolean dbPresent = mongoInstance.getDatabaseNames().contains(dbName);
 			if (!dbPresent) {
-				throw new UndefinedDatabaseException("DB with name [" + dbName
-						+ "]  DOES NOT EXIST");
+				throw new UndefinedDatabaseException("DB with name [" + dbName + "]  DOES NOT EXIST");
 			}
 
 			DB db = mongoInstance.getDB(dbName);
@@ -255,9 +262,7 @@ public class DatabaseServiceImpl implements DatabaseService {
 		} catch (JSONException e) {
 			throw e;
 		} catch (MongoException m) {
-			throw new DatabaseException(ErrorCodes.GET_DB_STATS_EXCEPTION,
-					"GET_DB_STATS_EXCEPTION");
-
+			throw new DatabaseException(ErrorCodes.GET_DB_STATS_EXCEPTION, "GET_DB_STATS_EXCEPTION");
 		}
 
 		return dbStats;
