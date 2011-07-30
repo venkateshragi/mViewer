@@ -220,7 +220,7 @@ YUI.add('utility', function (Y) {
     formUpperPart += "</textarea>";
     formUpperPart += "<label for='fields' ></label><ul id='fields' class='checklist'>";
     formLowerPart += "</ul><br>";
-    formLowerPart += "<label for='limit'> Limit: </label><input id='limit' type='text' name='limit' value='5' size='5' />";
+    formLowerPart += "<label for='limit'> Limit: </label><input id='limit' type='text' name='limit' value='0' size='5' />";
     formLowerPart += "<label for='skip'> Skip: </label><input id='skip' type='text' name='skip' value='0' size='5' />";
     formLowerPart += "<button id='execQueryButton' class='btn'>Execute Query</button>";
     MV.getForm = function (data) {
@@ -293,17 +293,29 @@ YUI.add('utility', function (Y) {
         },
         updateDoc: function () {
             return "services/" + Y.one("#currentDB").get("value") + "/" + Y.one("#currentColl").get("value") + "/document?tokenId=" + Y.one("#tokenID").get("value");
-        }
+        },
+        deleteDoc: function () {
+            return "services/" + Y.one("#currentDB").get("value") + "/" + Y.one("#currentColl").get("value") + "/document?tokenId=" + Y.one("#tokenID").get("value") + "&action=DELETE";
+        },
+        help: function () {
+            return "help.html";
+        },
+        troubleShootPage: function () {
+            return "troubleshoot.html";
+        },
+        troubleShoot: function () {
+            return "admin?level=" + Y.one("#level").get("value");
+        },
     };
     MV.errorCodeMap = {
-        "HOST_UNKNOWN": "Please check if Mongo is running on the given host and port !",
+        "HOST_UNKNOWN": "Please check if Mongod is running on the given host and port !",
         "MISSING_LOGIN_FIELDS": "Please fill in all the login fields !",
         "ERROR_PARSING_PORT": "You have entered an invalid port number !",
         "PORT_OUT_OF_RANGE": "You have entered an invalid port number !",
         "INVALID_USERNAME": "You have entered an invalid username and password combination ! To access you need to add user in admin database of mongodb.",
         "INVALID_SESSION": "Your session is corrupted or timed out! Please login again from the login page.",
         "GET_DB_LIST_EXCEPTION": "Could not load the DB list! Please check if mongo is still running and then refresh the page.",
-        "GET_COLLECTION_LIST_EXCEPTION": "Please check if mongo is still running and then refresh the page.",
+        "GET_COLLECTION_LIST_EXCEPTION": "Please check if mongod is still running and then refresh the page.",
         "DB_DELETION_EXCEPTION": "Please check if mongo is running and then refresh the page and try again.",
         "DB_DOES_NOT_EXISTS": "The db you are trying to delete does not exist! Refresh the page.",
         "DB_NAME_EMPTY": "Received an empty name for the database which is invalid",
@@ -311,15 +323,19 @@ YUI.add('utility', function (Y) {
         "COLLECTION_ALREADY_EXISTS": "A collection with the given name already exists! Try another name.",
         "COLLECTION_DOES_NOT_EXIST": "The collection you are trying to delete does not exist! Refresh the page.",
         "COLLECTION_NAME_EMPTY": "Recieved an empty collection name",
-        "GET_DOCUMENT_LIST_EXCEPTION": "Please check if mongo is running and refresh the page.",
-        "DOCUMENT_DELETION_EXCEPTION": " Please check if mongo is running and refresh the page.",
-        "DOCUMENT_CREATION_EXCEPTION": "Please check if mongo is running and refresh the page.",
-        "DOCUMENT_UPDATE_EXCEPTION": "Please check if mongo is running and refresh the page.",
+        "GET_DOCUMENT_LIST_EXCEPTION": "Please check if mongod is running and refresh the page.",
+        "DOCUMENT_DELETION_EXCEPTION": " Please check if mongod is running and refresh the page.",
+        "DOCUMENT_CREATION_EXCEPTION": "Please check if mongod is running and refresh the page.",
+        "DOCUMENT_UPDATE_EXCEPTION": "Please check if mongod is running and refresh the page.",
         "INVALID_USER": "Your session is corrupted or timed out! Please login again from the login page.",
         "TOKEN_ID_ABSENT": "Your session is corrupted or timed out! Please login again from the login page.",
-        "GET_DB_STATS_EXCEPTION": "Please check if mongo is running and refresh the page.",
-        "GET_COLL_STATS_EXCEPTION": "Please check if mongo is running and refresh the page.",
-        "COLLECTION_CREATION_EXCEPTION": "Please check if mongo is running and refresh the page.",
+        "GET_DB_STATS_EXCEPTION": "Please check if mongod is running and refresh the page.",
+        "GET_COLL_STATS_EXCEPTION": "Please check if mongod is running and refresh the page.",
+        "COLLECTION_CREATION_EXCEPTION": "Please check if mongod is running and refresh the page.",
+        "COLLECTION_DELETION_EXCEPTION": "Please check if mongod is running and refresh the page.",
+        "INVALID_OBJECT_ID": "You cannot update the _id key",
+        "ANY_OTHER_EXCEPTION": "An unknown exception occured. Please try to login again.",
+        "ERROR_INITIATING_GRAPH": "Could not initiate the graph. Please check if mongod is running"
     };
 }, '3.3.0', {
     requires: ["node"]

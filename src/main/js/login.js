@@ -3,7 +3,7 @@
  */
 YUI({
     filter: 'raw'
-}).use("anim", "io-base", "json-parse", "node", "utility", function (Y) {
+}).use("io", "json", "node", "utility", function (Y) {
     var MV = Y.com.imaginea.mongoV;
     var tryLogin = function (e) {
             var username = Y.one("#username").get("value").trim();

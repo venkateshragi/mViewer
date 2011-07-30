@@ -62,10 +62,13 @@ YUI({
                 window.location = "home.html?tokenID=" + Y.one("#tokenID").get("value") + "&username=" + Y.one("#username").get("value") + "&host=" + Y.one("#host").get("value");
             } else if (menuOpt === "serverStats") {
                 showServerStats();
-                MV.header.set("innerHTML","Server Statistics");
+                MV.header.set("innerHTML", "Server Statistics");
             } else if (menuOpt === 'graphs') {
                 MV.header.set("innerHTML", "");
                 window.open(MV.URLMap.graphs(), '_newtab');
+            } else if (menuOpt === 'help') {
+                MV.header.set("innerHTML", "");
+                window.open(MV.URLMap.help(), '_newtab');
             }
         };
     var logout = function (eventObject) {

@@ -24,7 +24,7 @@
  */
 YUI({
     filter: 'raw'
-}).use("alert-dialog", "io-base", "json-parse", "node-event-simulate", "node", "event-delegate", "stylize", "json-stringify", "utility", function (Y) {
+}).use("yes-no-dialog", "alert-dialog", "io-base", "json-parse", "node-event-simulate", "node", "event-delegate", "stylize", "json-stringify", "utility", function (Y) {
     Y.namespace('com.imaginea.mongoV');
     var MV = Y.com.imaginea.mongoV;
     MV.treebleData = {};
@@ -112,9 +112,7 @@ YUI({
                         MV.showAlertDialog("Cannot parse Response to get keys!", MV.warnIcon);
                     }
                 };
-            var getKeyRequest = Y.io(MV.URLMap.documentKeys(),
-            // configuration for loading the queryBox
-            {
+            var getKeyRequest = Y.io(MV.URLMap.documentKeys(), {
                 method: "GET",
                 on: {
                     success: showQueryBox,
@@ -202,13 +200,10 @@ YUI({
                             Y.one("#" + Y.one("#currentColl").get("value")).simulate("click");
                         });
                         Y.log("Could not update Document! [0]".format(MV.errorCodeMap[error.code]), "error");
-
                     }
                 };
             var sendUpdateDocRequest = function (doc, id) {
-                    var updateDocumentRequest = Y.io(MV.URLMap.updateDoc(),
-                    // configuration for loading the queryBox
-                    {
+                    var updateDocumentRequest = Y.io(MV.URLMap.updateDoc(), {
                         method: "POST",
                         data: "_id=" + id + "&keys=" + doc,
                         on: {
@@ -218,6 +213,65 @@ YUI({
                                 Y.log("Could not send the request to update the document. Response Status: [0]".format(responseObject.statusText), "error");
                             }
                         }
+                    });
+                };
+            var allKeysSelected = function () {
+                    var fields = Y.all('#fields input');
+                    var index;
+                    for (index = 0; index < fields.size(); index++) {
+                        var item = fields.item(index);
+                        if (!item.get("checked")) {
+                            return false;
+                        }
+                    }
+                    return true;
+                };
+            var selectAllKeys = function () {
+                    var fields = Y.all('#fields input');
+                    var index;
+                    for (index = 0; index < fields.size(); index++) {
+                        var item = fields.item(index);
+                        item.set("checked", "true");
+                    }
+                    executeQuery();
+                    this.hide();
+                };
+            var deleteDoc = function (eventObject) {
+                    var sendDeleteDocRequest = function () {
+                            var targetNode = eventObject.currentTarget;
+                            var index = getButtonIndex(targetNode);
+                            var doc = Y.one('#doc' + index).one("pre").one("textarea").get("value");
+                            parsedDoc = Y.JSON.parse(doc);
+                            var id = parsedDoc._id;
+                            var request = Y.io(MV.URLMap.deleteDoc(),
+                            // configuration for dropping the document
+                            {
+                                method: "POST",
+                                data: "_id=" + id,
+                                on: {
+                                    success: function (ioId, responseObj) {
+                                        var parsedResponse = Y.JSON.parse(responseObj.responseText);
+                                        response = parsedResponse.response.result;
+                                        if (response !== undefined) {
+                                            MV.showAlertDialog("Document deleted", MV.infoIcon);
+                                            Y.log("Document with _id= [0] deleted. Response: [1]".format(id, response), "info");
+                                            Y.one("#" + Y.one("#currentColl").get("value")).simulate("click");
+                                        } else {
+                                            var error = parsedResponse.response.error;
+                                            MV.showAlertDialog("Could not delete the document with _id [0]. [1]".format(id, MV.errorCodeMap[error.code]), MV.warnIcon);
+                                            Y.log("Could not delete the document with _id =  [0], Error message: [1], Error Code: [2]".format(id, error.message, error.code), "error");
+                                        }
+                                    },
+                                    failure: function (ioId, responseObj) {
+                                        Y.log("Could not delete the document .Status text: ".format(Y.one("#currentColl").get("value"), responseObj.statusText), "error");
+                                        MV.showAlertDialog("Could not drop the document! Please check if your app server is running and try again. Status Text: [1]".format(responseObj.statusText), MV.warnIcon);
+                                    }
+                                }
+                            });
+                            this.hide();
+                        };
+                    MV.showYesNoDialog("Do you really want to drop the document ?", sendDeleteDocRequest, function () {
+                        this.hide();
                     });
                 };
             var saveDoc = function (eventObject) {
@@ -235,19 +289,24 @@ YUI({
                     sendUpdateDocRequest(Y.JSON.stringify(parsedDoc), idMap.index);
                 };
             var editDoc = function (eventObject) {
-                    var targetNode = eventObject.currentTarget;
-                    var index = getButtonIndex(targetNode);
-                    toggleSaveEdit(targetNode, index, actionMap.edit);
-                    var doc = Y.one('#doc' + index).one("pre").one("textarea").get("value");
-                    parsedDoc = Y.JSON.parse(doc);
-                    idMap.index = parsedDoc._id;
+                    if (!allKeysSelected()) {
+                        MV.showYesNoDialog("To edit a document you need check all keys in query box. Click YES to do so, NO to cancel", selectAllKeys, function () {
+                            this.hide();
+                        });
+                    } else {
+                        var targetNode = eventObject.currentTarget;
+                        var index = getButtonIndex(targetNode);
+                        toggleSaveEdit(targetNode, index, actionMap.edit);
+                        var doc = Y.one('#doc' + index).one("pre").one("textarea").get("value");
+                        parsedDoc = Y.JSON.parse(doc);
+                        idMap.index = parsedDoc._id;
+                    }
                 };
             var writeOnJSONTab = function (response) {
                     var documents = "<table>",
                         i;
                     for (i = 0; i < response.length; i++) {
-                        documents = documents + "<tr><td id='doc" + i + "'><pre><textarea id='ta" + i + "' class='disabled' disabled='disabled' cols='80' >" + Y.JSON.stringify(response[i], null, 4) + "</textarea></pre></td>" + "<td><button id='edit" + i + "' class='btn editbtn'>Edit</button></td></tr>";
-                        Y.on("click", editDoc, "#edit" + i);
+                        documents = documents + "<tr><td id='doc" + i + "'><pre><textarea id='ta" + i + "' class='disabled' disabled='disabled' cols='80' >" + Y.JSON.stringify(response[i], null, 4) + "</textarea></pre></td>" + "<td><button id='edit" + i + "' class='btn editbtn'>Edit</button></td>" + "<td><button id='delete" + i + "' class='btn deletebtn'>delete</button></td></tr>";
                     }
                     if (i === 0) {
                         documents = documents + "No documents to be displayed";
@@ -256,6 +315,10 @@ YUI({
                     tabView.getTab(0).setAttributes({
                         content: documents
                     }, false);
+                    for (i = 0; i < response.length; i++) {
+                        Y.on("click", editDoc, "#edit" + i);
+                        Y.on("click", deleteDoc, "#delete" + i);
+                    }
                     for (i = 0; i < response.length; i++) {
                         fitToContent(500, document.getElementById("ta" + i));
                     }

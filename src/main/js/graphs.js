@@ -3,37 +3,25 @@ YUI({
 }).use("io-base", "node", "json-parse", "utility", function (Y) {
     Y.namespace('com.imaginea.mongoV');
     var MV = Y.com.imaginea.mongoV;
+    var pollingTime = 5000;
     var combinedChart;
-//    var toggleChartVisibility = function (e) {
-//            var target = e.currentTarget;
-//            var match = target.get("id").match(/\d+/);
-//            var index = parseInt(match[0], 10);
-//            alert(index);
-//            combinedChart.setSeriesStylesByIndex(index, {
-//                visibility: target.get("checked") ? "visible" : "hidden"
-//            });
-//        };
-//    var chartOptions = "<table width='30%'>";
-//    chartOptions += "<tr>";
-//    chartOptions += "<td style='color:#FF4848;font-weight:bold'> Show Query/Sec:</td>";
-//    chartOptions += "<td><input id='checkbutton1' type='checkbox' name='series1' value='1' checked='true'></td>";
-//    chartOptions += "</tr>";
-//    chartOptions += "<tr>";
-//    chartOptions += "<td style='color:#AE70ED;font-weight:bold'> Show Update/Sec:</td>";
-//    chartOptions += "<td><input id='checkbutton2' type='checkbox' name='series2' value='2' checked='true'></td>";
-//    chartOptions += "</tr>";
-//    chartOptions += "<tr>";
-//    chartOptions += "<td style='color:#62D0FF;font-weight:bold'>Show Delete/Sec:</td>";
-//    chartOptions += "<td><input id='checkbutton3' type='checkbox' name='series3' value='3' checked='true' ></td>";
-//    chartOptions += "</tr>";
-//    chartOptions += "<tr>";
-//    chartOptions += "<td style='color:#2DC800;font-weight:bold'>Show Insert/Sec:</td>";
-//    chartOptions += "<td><input id='checkbutton4' type='checkbox' name='series4' value='4' checked='true' ></td>";
-//    chartOptions += "</tr>";
-//    chartOptions += "<tr>";
-//    chartOptions += "<td><button id='animation' class='button'>Stop Animation</button></td>";
-//    chartOptions += "</tr>";
-//    chartOptions += "</table>";
+    var chartOptions = "<table width='30%'>";
+    chartOptions += "<tr>";
+    chartOptions += "<td style='color:#FF4848;font-weight:bold'>Query/Sec:</td>";
+    chartOptions += "</tr>";
+    chartOptions += "<tr>";
+    chartOptions += "<td style='color:#AE70ED;font-weight:bold'>Update/Sec:</td>";
+    chartOptions += "</tr>";
+    chartOptions += "<tr>";
+    chartOptions += "<td style='color:#62D0FF;font-weight:bold'>Delete/Sec:</td>";
+    chartOptions += "</tr>";
+    chartOptions += "<tr>";
+    chartOptions += "<td style='color:#2DC800;font-weight:bold'>Insert/Sec:</td>";
+    chartOptions += "</tr>";
+    chartOptions += "<tr>";
+    chartOptions += "<td><button id='animation' class='button'>Stop Animation</button></td>";
+    chartOptions += "</tr>";
+    chartOptions += "</table>";
     var drawChart = function () {
             YAHOO.widget.Chart.SWFURL = "lib/yui2/build/charts/assets/charts.swf";
             //Create a TabView
@@ -41,7 +29,7 @@ YUI({
             //Add a tab for the Query
             tabView.addTab(new YAHOO.widget.Tab({
                 label: 'Combined View',
-                content: '<span class="chart_title">Combined View</span> <div class="chart" id="combinedChart"></div><center><span class="chart_title">Time Stamp</span></center>' /*+ chartOptions*/,
+                content: '<span class="chart_title">Combined View</span> <div class="chart" id="combinedChart"></div><center><span class="chart_title">Time Stamp</span></center>' + chartOptions,
                 active: true,
                 width: '100%'
             }));
@@ -66,7 +54,7 @@ YUI({
             tabView.addTab(new YAHOO.widget.Tab({
                 label: 'Inserts',
                 content: '<span class="chart_title">Inserts/Second</span><div class="chart" id="insertChart"></div><center><span class="chart_title">Time Stamp</span></center>',
-                  width: '100%'
+                width: '100%'
             }));
             //Append TabView to its container div
             tabView.appendTo('tabContainer');
@@ -78,7 +66,6 @@ YUI({
                 resultsList: "response.result",
                 fields: ["TimeStamp", "QueryValue", "UpdateValue", "DeleteValue", "InsertValue"]
             };
-            var pollingTime = 1000;
             var seriesDef = [{
                 displayName: "Query",
                 yField: "QueryValue",
@@ -106,7 +93,18 @@ YUI({
             }];
             combinedChart = new YAHOO.widget.LineChart("combinedChart", queryData, {
                 xField: "TimeStamp",
-                series: seriesDef
+                series: seriesDef,
+                style: {
+                    legend: {
+                        display: "right",
+                        padding: 10,
+                        spacing: 5,
+                        font: {
+                            family: "Arial",
+                            size: 13
+                        }
+                    }
+                }
             });
             var queryChart = new YAHOO.widget.LineChart("queryChart", queryData, {
                 xField: "TimeStamp",
@@ -137,7 +135,7 @@ YUI({
                 }
             };
             queryData.setInterval(pollingTime, null, myCallback);
-//            Y.on("click", toggleChartVisibility, ["#checkButton1", "#checkButton2", "#checkButton3", "#checkbutton4"]);
+            //            Y.on("click", toggleChartVisibility, ["#checkButton1", "#checkButton2", "#checkButton3", "#checkbutton4"]);
         };
     //A function handler to use for successful requests:
     var handleSuccess = function (ioId, responseObject) {
@@ -157,7 +155,8 @@ YUI({
             Y.log("Sending request to initiate the graph failed. Response Status: [0]".format(responseObject.statusText), "error", "chart");
         };
     var cfg = {
-        method: "GET"
+        method: "GET",
+        data: "pollingTime=" + pollingTime / 1000
     };
     var makeRequest = function () {
             var fullUrl = window.location.search;

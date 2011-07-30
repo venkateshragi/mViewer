@@ -65,31 +65,26 @@
 <script type="text/javascript" src="js/Treeble.js"></script>
 <script type="text/javascript" src="js/headerOperations.js"></script>
 <script type="text/javascript" src="js/console.js"></script>
-
-<style type="text/css">
-
-</style>
-<!-- <link href="css/anim.css" rel="stylesheet" type="text/css"> -->
 <link href="css/style.css" rel="stylesheet" type="text/css">
-<!-- Script to load the main body data depending on the main menu option selected-->
-<script type="text/javascript">
-	// Create a YUI instance and request the console module and its dependencies
-	
-</script>
 </head>
 <body bgcolor="#EEEEEE" class="yui3-skin-sam yui-skin-sam">
 	<div class="wrapper">
 		<div class="header">
 			<a href="" class="logo gen-float"></a>
 			<ul class="nav-cont gen-float">
-				<li><a id="home" class="sel">Home</a></li>
-				<li><a id="serverStats">Server Statistics</a></li>
-				<li><a id="graphs">Mongo Graphs</a></li>
+				<li><a id="home" class="sel">Home</a>
+				</li>
+				<li><a id="serverStats">Server Statistics</a>
+				</li>
+				<li><a id="graphs">Mongo Graphs</a>
+				</li>
+				<li><a id="help">Help</a>
+				</li>
 			</ul>
 			<ul class="user-menu">
-				<li><label id="user"></label>
+				<li><label id="user"></label></li>
+				<li><label id="logout" class="logout">Logout</label>
 				</li>
-				<li><label id="logout" class="logout">Logout</label></li>
 			</ul>
 		</div>
 		<div class="body-cont gen-float">
@@ -126,7 +121,9 @@
 						<img src="images/index_logo.png" alt="mViewer Logo"
 							title="mViewer Logo">
 						<p>a mongoDB management Tool</p>
-						<h3>Pramati Technologies</h3><br><br>
+						<h3>Pramati Technologies</h3>
+						<br>
+						<br>
 						<p>Please click on the database name to start working</p>
 					</center>
 				</div>
@@ -141,7 +138,7 @@
 	<div id="addColDialog" class="yui-pe-content">
 		<div class="hd">Please enter collection details</div>
 		<div class="bd">
-			<form method="POST" >
+			<form method="POST">
 				<label class="dialogLabel" for="name">Name:</label><input
 					type="text" name="name" />
 				<div class="clear"></div>
@@ -160,13 +157,14 @@
 	<div id="addDocDialog" class="yui-pe-content">
 		<div class="hd">Please enter Document</div>
 		<div class="bd">
-			<form method="POST" >
-				<label class="dialogLabel" for="document">JSON format: </label><textarea rows='5' cols='50' name="document">{}</textarea>
+			<form method="POST">
+				<label class="dialogLabel" for="document">JSON format: </label>
+				<textarea rows='5' cols='50' name="document">{}</textarea>
 				<div class="clear"></div>
 			</form>
 		</div>
 	</div>
-<input type="hidden" id="currentColl"  name="currentColl" value="">
+	<input type="hidden" id="currentColl" name="currentColl" value="">
 	<input type="hidden" id="currentDB" name="currentDB" value="">
 	<input type="hidden" id="username" name="user" value="">
 	<input type="hidden" id="host" name="host" value="">

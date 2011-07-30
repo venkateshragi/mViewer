@@ -24,7 +24,7 @@
  */
 YUI({
     filter: 'raw'
-}).use("alert-dialog", "utility", "dialog-box", "yes-no-dialog", "io-base", "node", "json-parse", "event-delegate", "node-event-simulate", "stylize", "custom-datatable", function (Y) {
+}).use("alert-dialog", "utility", "dialog-box", "yes-no-dialog", "io", "node", "json-parse", "event-delegate", "node-event-simulate", "stylize", "custom-datatable", function (Y) {
     var MV = Y.com.imaginea.mongoV;
     var collDiv = Y.one("#collNames ul.lists");
     // TODO make loading panel generic
