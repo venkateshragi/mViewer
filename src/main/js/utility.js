@@ -1,5 +1,17 @@
-/**
- *
+/*
+ * Copyright (c) 2011 Imaginea Technologies Private Ltd.
+ * Hyderabad, India
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 YUI.add('utility', function (Y) {
     Y.namespace('com.imaginea.mongoV');
@@ -283,10 +295,10 @@ YUI.add('utility', function (Y) {
             return "graphs.html?tokenId=" + Y.one("#tokenID").get("value");
         },
         graphInitiate: function () {
-            return "services/graphs/initiate?tokenId=" + Y.one("#tokenID").get("value");
+            return "graphs/initiate?tokenId=" + Y.one("#tokenID").get("value");
         },
         graphQuery: function () {
-            return "services/graphs/query?tokenId=" + Y.one("#tokenID").get("value");
+            return "graphs/query?tokenId=" + Y.one("#tokenID").get("value");
         },
         insertDoc: function () {
             return "services/" + Y.one("#currentDB").get("value") + "/" + Y.one("#currentColl").get("value") + "/document?tokenId=" + Y.one("#tokenID").get("value") + "&action=PUT";
@@ -304,7 +316,7 @@ YUI.add('utility', function (Y) {
             return "troubleshoot.html";
         },
         troubleShoot: function () {
-            return "admin?level=" + Y.one("#level").get("value");
+            return "admin";
         },
     };
     MV.errorCodeMap = {
@@ -312,7 +324,7 @@ YUI.add('utility', function (Y) {
         "MISSING_LOGIN_FIELDS": "Please fill in all the login fields !",
         "ERROR_PARSING_PORT": "You have entered an invalid port number !",
         "PORT_OUT_OF_RANGE": "You have entered an invalid port number !",
-        "INVALID_USERNAME": "You have entered an invalid username and password combination ! To access you need to add user in admin database of mongodb.",
+        "INVALID_USERNAME": "You have entered an invalid username and password combination ! To access you need to add user in admin database of mongodb OR leave both the fields empty.",
         "INVALID_SESSION": "Your session is corrupted or timed out! Please login again from the login page.",
         "GET_DB_LIST_EXCEPTION": "Could not load the DB list! Please check if mongo is still running and then refresh the page.",
         "GET_COLLECTION_LIST_EXCEPTION": "Please check if mongod is still running and then refresh the page.",

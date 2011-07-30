@@ -18,6 +18,10 @@
 		<servlet-name>TroubleShoot Servlet</servlet-name>
 		<servlet-class>com.imaginea.mongodb.requestdispatchers.TroubleShoot</servlet-class>		 
 	</servlet> 
+	<servlet>
+		<servlet-name>Mongo Graphs</servlet-name>
+		<servlet-class>com.imaginea.mongodb.requestdispatchers.Graphs</servlet-class>		 
+	</servlet> 
 	
 	<!-- Servlet Mapping -->
 	<servlet-mapping>
@@ -27,5 +31,10 @@
 	<servlet-mapping>
 		<servlet-name>TroubleShoot Servlet</servlet-name>
 		<url-pattern>/admin</url-pattern>
+	</servlet-mapping> 
+	<servlet-mapping>
+		<servlet-name>Mongo Graphs</servlet-name>
+		<url-pattern>/graphs/initiate</url-pattern>
+		<url-pattern>/graphs/query</url-pattern>
 	</servlet-mapping> 
 </web-app>

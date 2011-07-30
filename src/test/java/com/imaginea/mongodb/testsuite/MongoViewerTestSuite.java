@@ -24,8 +24,8 @@
  */
 
 package com.imaginea.mongodb.testsuite;
-
-import java.io.IOException;
+  
+import java.io.IOException; 
 
 import com.imaginea.mongodb.requestdispatchers.CollectionRequestDispatcherTest;
 import com.imaginea.mongodb.requestdispatchers.DatabaseRequestDispatcherTest;
@@ -36,10 +36,11 @@ import com.imaginea.mongodb.services.DatabaseServiceImplTest;
 import com.imaginea.mongodb.services.DocumentServiceImplTest;
 import com.imaginea.mongodb.services.servlet.UserLoginTest;
 import com.imaginea.mongodb.services.servlet.UserLogoutTest;
+ 
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
-
+  
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 
@@ -54,7 +55,7 @@ public class MongoViewerTestSuite {
 
 	public static Test suite() throws IOException {
 		TestSuite suite = new TestSuite(MongoViewerTestSuite.class.getName());
-
+		 
 		// Start Mongod
 		Runtime run = Runtime.getRuntime();
 		Process p = run.exec("c:\\mongo\\bin\\mongod");

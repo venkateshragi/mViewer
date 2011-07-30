@@ -1,28 +1,18 @@
 /*
  * Copyright (c) 2011 Imaginea Technologies Private Ltd.
  * Hyderabad, India
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following condition
- * is met:
- *
- *     + Neither the name of Imaginea, nor the
- *       names of its contributors may be used to endorse or promote
- *       products derived from this software.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
- * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE REGENTS OR
- * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
- * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
- * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
- * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
- * LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
- * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
-
 package com.imaginea.mongodb.requestdispatchers;
 
 import java.util.ArrayList;
@@ -84,7 +74,8 @@ import com.mongodb.util.JSON;
 @Path("/{dbName}/{collectionName}/document")
 public class DocumentRequestDispatcher extends BaseRequestDispatcher {
 
-	private final static Logger logger = Logger.getLogger(DocumentRequestDispatcher.class);
+	private final static Logger logger = Logger
+			.getLogger(DocumentRequestDispatcher.class);
 
 	/**
 	 * Default Constructor
@@ -114,12 +105,17 @@ public class DocumentRequestDispatcher extends BaseRequestDispatcher {
 	 */
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
-	public String getQueriedDocsList(@PathParam("dbName") String dbName, @PathParam("collectionName") String collectionName,
-			@QueryParam("query") String query, @QueryParam("tokenId") String tokenId, @QueryParam("fields") String fields,
-			@QueryParam("limit") String limit, @QueryParam("skip") String skip, @Context HttpServletRequest request) throws JSONException {
+	public String getQueriedDocsList(@PathParam("dbName") String dbName,
+			@PathParam("collectionName") String collectionName,
+			@QueryParam("query") String query,
+			@QueryParam("tokenId") String tokenId,
+			@QueryParam("fields") String fields,
+			@QueryParam("limit") String limit, @QueryParam("skip") String skip,
+			@Context HttpServletRequest request) throws JSONException {
 
 		if (logger.isInfoEnabled()) {
-			logger.info("Recieved GET Request for Document  [" + DateProvider.getDateTime() + "]");
+			logger.info("Recieved GET Request for Document  ["
+					+ DateProvider.getDateTime() + "]");
 		}
 		String response = null;
 		try {
@@ -130,12 +126,14 @@ public class DocumentRequestDispatcher extends BaseRequestDispatcher {
 			// Get User for a given Token Id
 			String userMappingkey = UserLogin.tokenIDToUserMapping.get(tokenId);
 			if (userMappingkey == null) {
-				return formErrorResponse(logger, "User not mapped to token Id", ErrorCodes.INVALID_USER, null, "FATAL");
+				return formErrorResponse(logger, "User not mapped to token Id",
+						ErrorCodes.INVALID_USER, null, "FATAL");
 			}
 			JSONObject temp = new JSONObject();
 			JSONObject resp = new JSONObject();
 			// Create Instance of Service File
-			DocumentService documentService = new DocumentServiceImpl(userMappingkey);
+			DocumentService documentService = new DocumentServiceImpl(
+					userMappingkey);
 			// Get query
 			DBObject queryObj = (DBObject) JSON.parse(query);
 			// Get all fields to be returned
@@ -150,32 +148,41 @@ public class DocumentRequestDispatcher extends BaseRequestDispatcher {
 			int docsLimit = Integer.parseInt(limit);
 			int docsSkip = Integer.parseInt(skip);
 
-			ArrayList<DBObject> documentList = documentService.getQueriedDocsList(dbName, collectionName, queryObj, keyObj, docsLimit, docsSkip);
+			ArrayList<DBObject> documentList = documentService
+					.getQueriedDocsList(dbName, collectionName, queryObj,
+							keyObj, docsLimit, docsSkip);
 			temp.put("result", documentList);
 			resp.put("response", temp);
 			resp.put("totalRecords", documentList.size());
-			response=resp.toString();
+			response = resp.toString();
 			if (logger.isInfoEnabled()) {
-				logger.info("Request Completed [" + DateProvider.getDateTime() + "]");
+				logger.info("Request Completed [" + DateProvider.getDateTime()
+						+ "]");
 			}
 
 		} catch (JSONException e) {
-			response = "{\"code\":" + "\"" + ErrorCodes.JSON_EXCEPTION + "\"," + "\"message\": \"Error while forming JSON Object\"}";
+			response = "{\"code\":" + "\"" + ErrorCodes.JSON_EXCEPTION + "\","
+					+ "\"message\": \"Error while forming JSON Object\"}";
 
 		} catch (DatabaseException e) {
-			response = formErrorResponse(logger, e.getMessage(), e.getErrorCode(), e.getStackTrace(), "ERROR");
+			response = formErrorResponse(logger, e.getMessage(),
+					e.getErrorCode(), e.getStackTrace(), "ERROR");
 
 		} catch (CollectionException e) {
-			response = formErrorResponse(logger, e.getMessage(), e.getErrorCode(), e.getStackTrace(), "ERROR");
+			response = formErrorResponse(logger, e.getMessage(),
+					e.getErrorCode(), e.getStackTrace(), "ERROR");
 
 		} catch (DocumentException e) {
-			response = formErrorResponse(logger, e.getMessage(), e.getErrorCode(), e.getStackTrace(), "ERROR");
+			response = formErrorResponse(logger, e.getMessage(),
+					e.getErrorCode(), e.getStackTrace(), "ERROR");
 
 		} catch (ValidationException e) {
-			response = formErrorResponse(logger, e.getMessage(), e.getErrorCode(), e.getStackTrace(), "ERROR");
+			response = formErrorResponse(logger, e.getMessage(),
+					e.getErrorCode(), e.getStackTrace(), "ERROR");
 
 		} catch (Exception e) {
-			response = formErrorResponse(logger, e.getMessage(), ErrorCodes.ANY_OTHER_EXCEPTION, e.getStackTrace(), "ERROR");
+			response = formErrorResponse(logger, e.getMessage(),
+					ErrorCodes.ANY_OTHER_EXCEPTION, e.getStackTrace(), "ERROR");
 		}
 		return response;
 	}
@@ -201,10 +208,13 @@ public class DocumentRequestDispatcher extends BaseRequestDispatcher {
 	@GET
 	@Path("/keys")
 	@Produces(MediaType.APPLICATION_JSON)
-	public String getKeysRequest(@PathParam("dbName") String dbName, @PathParam("collectionName") String collectionName,
-			@QueryParam("tokenId") String tokenId, @Context HttpServletRequest request) {
+	public String getKeysRequest(@PathParam("dbName") String dbName,
+			@PathParam("collectionName") String collectionName,
+			@QueryParam("tokenId") String tokenId,
+			@Context HttpServletRequest request) {
 		if (logger.isInfoEnabled()) {
-			logger.info("Recieved GET Request for getting keys in a collection  [" + DateProvider.getDateTime() + "]");
+			logger.info("Recieved GET Request for getting keys in a collection  ["
+					+ DateProvider.getDateTime() + "]");
 		}
 		String response = null;
 		try {
@@ -215,14 +225,17 @@ public class DocumentRequestDispatcher extends BaseRequestDispatcher {
 			// Get User for a given Token Id
 			String userMappingkey = UserLogin.tokenIDToUserMapping.get(tokenId);
 			if (userMappingkey == null) {
-				return formErrorResponse(logger, "User not mapped to token Id", ErrorCodes.INVALID_USER, null, "FATAL");
+				return formErrorResponse(logger, "User not mapped to token Id",
+						ErrorCodes.INVALID_USER, null, "FATAL");
 			}
 			JSONObject temp = new JSONObject();
 			JSONObject resp = new JSONObject();
 			// Create Instance of Service File.
-			Mongo mongoInstance = UserLogin.userToMongoInstanceMapping.get(userMappingkey);
+			Mongo mongoInstance = UserLogin.userToMongoInstanceMapping
+					.get(userMappingkey);
 
-			DBCursor cursor = mongoInstance.getDB(dbName).getCollection(collectionName).find();
+			DBCursor cursor = mongoInstance.getDB(dbName)
+					.getCollection(collectionName).find();
 
 			DBObject doc = new BasicDBObject();
 			Set<String> completeSet = new HashSet<String>();
@@ -234,15 +247,18 @@ public class DocumentRequestDispatcher extends BaseRequestDispatcher {
 			temp.put("result", completeSet);
 			resp.put("response", temp);
 			resp.put("totalRecords", completeSet.size());
-			response=resp.toString();
+			response = resp.toString();
 			if (logger.isInfoEnabled()) {
-				logger.info("Request Completed [" + DateProvider.getDateTime() + "]");
+				logger.info("Request Completed [" + DateProvider.getDateTime()
+						+ "]");
 			}
 
 		} catch (JSONException e) {
-			response = "{\"code\":" + "\"" + ErrorCodes.JSON_EXCEPTION + "\"," + "\"message\": \"Error while forming JSON Object\"}";
+			response = "{\"code\":" + "\"" + ErrorCodes.JSON_EXCEPTION + "\","
+					+ "\"message\": \"Error while forming JSON Object\"}";
 		} catch (Exception e) {
-			response = formErrorResponse(logger, e.getMessage(), ErrorCodes.ANY_OTHER_EXCEPTION, e.getStackTrace(), "ERROR");
+			response = formErrorResponse(logger, e.getMessage(),
+					ErrorCodes.ANY_OTHER_EXCEPTION, e.getStackTrace(), "ERROR");
 		}
 		return response;
 	}
@@ -258,14 +274,16 @@ public class DocumentRequestDispatcher extends BaseRequestDispatcher {
 	 *            For nested docs. For the key <foo.bar.baz>, the prefix would
 	 *            be <foo.bar>
 	 */
-	private void getNestedKeys(DBObject doc, Set<String> completeSet, String prefix) {
+	private void getNestedKeys(DBObject doc, Set<String> completeSet,
+			String prefix) {
 		Set<String> allKeys = doc.keySet();
 		Iterator<String> it = allKeys.iterator();
 		while (it.hasNext()) {
 			String temp = it.next();
 			completeSet.add(prefix + temp);
 			if (doc.get(temp) instanceof BasicDBObject) {
-				getNestedKeys((DBObject) doc.get(temp), completeSet, prefix + temp + ".");
+				getNestedKeys((DBObject) doc.get(temp), completeSet, prefix
+						+ temp + ".");
 			}
 		}
 	}
@@ -306,12 +324,17 @@ public class DocumentRequestDispatcher extends BaseRequestDispatcher {
 
 	@POST
 	@Produces(MediaType.APPLICATION_JSON)
-	public String postDocsRequest(@PathParam("dbName") String dbName, @PathParam("collectionName") String collectionName,
-			@DefaultValue("POST") @QueryParam("action") String action, @FormParam("document") String documentData, @FormParam("_id") String _id,
-			@FormParam("keys") String keys, @QueryParam("tokenId") String tokenId, @Context HttpServletRequest request) {
+	public String postDocsRequest(@PathParam("dbName") String dbName,
+			@PathParam("collectionName") String collectionName,
+			@DefaultValue("POST") @QueryParam("action") String action,
+			@FormParam("document") String documentData,
+			@FormParam("_id") String _id, @FormParam("keys") String keys,
+			@QueryParam("tokenId") String tokenId,
+			@Context HttpServletRequest request) {
 
 		if (logger.isInfoEnabled()) {
-			logger.info("Recieved POST Request for Document  [" + DateProvider.getDateTime() + "]");
+			logger.info("Recieved POST Request for Document  ["
+					+ DateProvider.getDateTime() + "]");
 		}
 		String response = null;
 		try {
@@ -322,81 +345,107 @@ public class DocumentRequestDispatcher extends BaseRequestDispatcher {
 			// Get User for a given Token Id
 			String userMappingkey = UserLogin.tokenIDToUserMapping.get(tokenId);
 			if (userMappingkey == null) {
-				return formErrorResponse(logger, "User not mapped to token Id", ErrorCodes.INVALID_USER, null, "FATAL");
+				return formErrorResponse(logger, "User not mapped to token Id",
+						ErrorCodes.INVALID_USER, null, "FATAL");
 			}
 			JSONObject temp = new JSONObject();
 			JSONObject resp = new JSONObject();
 			// Create Instance of Service File
-			DocumentService documentService = new DocumentServiceImpl(userMappingkey);
+			DocumentService documentService = new DocumentServiceImpl(
+					userMappingkey);
 
 			if (action.equals("PUT")) {
 
 				if (documentData == null) {
-					UndefinedDocumentException e = new UndefinedDocumentException("Document Data Missing in Request Body");
-					formErrorResponse(logger, e.getMessage(), e.getErrorCode(), null, "ERROR");
+					UndefinedDocumentException e = new UndefinedDocumentException(
+							"Document Data Missing in Request Body");
+					formErrorResponse(logger, e.getMessage(), e.getErrorCode(),
+							null, "ERROR");
 				} else if (documentData.equals("")) {
-					UndefinedDocumentException e = new UndefinedDocumentException("Document Data Missing in Request Body");
-					formErrorResponse(logger, e.getMessage(), e.getErrorCode(), null, "ERROR");
+					UndefinedDocumentException e = new UndefinedDocumentException(
+							"Document Data Missing in Request Body");
+					formErrorResponse(logger, e.getMessage(), e.getErrorCode(),
+							null, "ERROR");
 
 				} else {
 					DBObject document = (DBObject) JSON.parse(documentData);
-					temp.put("result", documentService.insertDocument(dbName, collectionName, document));
+					temp.put("result", documentService.insertDocument(dbName,
+							collectionName, document));
 				}
 			} else if (action.equals("DELETE")) {
 
 				if (_id == null) {
-					UndefinedDocumentException e = new UndefinedDocumentException("Document Data Missing in Request Body");
-					formErrorResponse(logger, e.getMessage(), e.getErrorCode(), null, "ERROR");
+					UndefinedDocumentException e = new UndefinedDocumentException(
+							"Document Data Missing in Request Body");
+					formErrorResponse(logger, e.getMessage(), e.getErrorCode(),
+							null, "ERROR");
 
 				} else if (_id.equals("")) {
-					UndefinedDocumentException e = new UndefinedDocumentException("Document Data Missing in Request Body");
-					formErrorResponse(logger, e.getMessage(), e.getErrorCode(), null, "ERROR");
+					UndefinedDocumentException e = new UndefinedDocumentException(
+							"Document Data Missing in Request Body");
+					formErrorResponse(logger, e.getMessage(), e.getErrorCode(),
+							null, "ERROR");
 
 				} else {
-					// Id of Document to delete
-					ObjectId id = (ObjectId) JSON.parse(_id);
-					temp.put("result", documentService.deleteDocument(dbName, collectionName, id));
+					ObjectId id = new ObjectId(_id);
+					temp.put("result", documentService.deleteDocument(dbName,
+							collectionName, id));
 				}
 			} else if (action.equals("POST")) {
 				if (_id == null || keys == null) {
-					UndefinedDocumentException e = new UndefinedDocumentException("Document Data Missing in Request Body");
-					formErrorResponse(logger, e.getMessage(), e.getErrorCode(), null, "ERROR");
+					UndefinedDocumentException e = new UndefinedDocumentException(
+							"Document Data Missing in Request Body");
+					formErrorResponse(logger, e.getMessage(), e.getErrorCode(),
+							null, "ERROR");
 
 				} else if (_id.equals("") || keys.equals("")) {
-					UndefinedDocumentException e = new UndefinedDocumentException("Document Data Missing in Request Body");
-					formErrorResponse(logger, e.getMessage(), e.getErrorCode(), null, "ERROR");
+					UndefinedDocumentException e = new UndefinedDocumentException(
+							"Document Data Missing in Request Body");
+					formErrorResponse(logger, e.getMessage(), e.getErrorCode(),
+							null, "ERROR");
 
 				} else {
 					// Id of Document to update
 
 					ObjectId id = new ObjectId(_id);
 					// New Document Keys
-					DBObject newDoc = (DBObject) JSON.parse(keys);                  
-					temp.put("result", documentService.updateDocument(dbName, collectionName, id, newDoc));
+					DBObject newDoc = (DBObject) JSON.parse(keys);
+					temp.put("result", documentService.updateDocument(dbName,
+							collectionName, id, newDoc));
 				}
 			}
 			resp.put("response", temp);
-			response=resp.toString();
+			response = resp.toString();
 			if (logger.isInfoEnabled()) {
-				logger.info("Request Completed [" + DateProvider.getDateTime() + "]");
+				logger.info("Request Completed [" + DateProvider.getDateTime()
+						+ "]");
 			}
+		} catch (IllegalArgumentException e) {
+			response = formErrorResponse(logger, e.getMessage(),
+					ErrorCodes.INVALID_OBJECT_ID, e.getStackTrace(), "ERROR");
 		} catch (JSONException e) {
-			response = "{\"code\":" + "\"" + ErrorCodes.JSON_EXCEPTION + "\"," + "\"message\": \"Error while forming JSON Object\"}";
+			response = "{\"code\":" + "\"" + ErrorCodes.JSON_EXCEPTION + "\","
+					+ "\"message\": \"Error while forming JSON Object\"}";
 
 		} catch (DatabaseException e) {
-			response = formErrorResponse(logger, e.getMessage(), e.getErrorCode(), e.getStackTrace(), "ERROR");
+			response = formErrorResponse(logger, e.getMessage(),
+					e.getErrorCode(), e.getStackTrace(), "ERROR");
 
 		} catch (CollectionException e) {
-			response = formErrorResponse(logger, e.getMessage(), e.getErrorCode(), e.getStackTrace(), "ERROR");
+			response = formErrorResponse(logger, e.getMessage(),
+					e.getErrorCode(), e.getStackTrace(), "ERROR");
 
 		} catch (DocumentException e) {
-			response = formErrorResponse(logger, e.getMessage(), e.getErrorCode(), e.getStackTrace(), "ERROR");
+			response = formErrorResponse(logger, e.getMessage(),
+					e.getErrorCode(), e.getStackTrace(), "ERROR");
 
 		} catch (ValidationException e) {
-			response = formErrorResponse(logger, e.getMessage(), e.getErrorCode(), e.getStackTrace(), "ERROR");
+			response = formErrorResponse(logger, e.getMessage(),
+					e.getErrorCode(), e.getStackTrace(), "ERROR");
 
 		} catch (Exception e) {
-			response = formErrorResponse(logger, e.getMessage(), ErrorCodes.ANY_OTHER_EXCEPTION, e.getStackTrace(), "ERROR");
+			response = formErrorResponse(logger, e.getMessage(),
+					ErrorCodes.ANY_OTHER_EXCEPTION, e.getStackTrace(), "ERROR");
 		}
 		return response;
 	}

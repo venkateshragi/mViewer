@@ -32,12 +32,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.log4j.FileAppender;
-import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
-import org.apache.log4j.SimpleLayout;
 import org.json.JSONException;
-import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.mock.web.MockHttpServletRequest;
@@ -45,10 +41,11 @@ import org.springframework.mock.web.MockHttpSession;
 
 import com.imaginea.mongodb.common.ConfigMongoInstanceProvider;
 import com.imaginea.mongodb.common.MongoInstanceProvider;
+import com.imaginea.mongodb.common.exceptions.CollectionException;
 import com.imaginea.mongodb.common.exceptions.DatabaseException;
 import com.imaginea.mongodb.common.exceptions.ErrorCodes;
 import com.imaginea.mongodb.common.exceptions.MongoHostUnknownException;
-import com.imaginea.mongodb.services.servlet.UserLogin;
+import com.imaginea.mongodb.requestdispatchers.UserLogin;
 
 import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
@@ -58,20 +55,17 @@ import com.mongodb.MongoException;
 import com.mongodb.util.JSON;
 
 /**
- * Tests the Database Request Dispatcher Resource that handles the GET and POST
- * request for Databases present in Mongo. Tests the get and post functions
- * metioned in the Resource with some dummy Database names and check the
- * functionality.
- *
- * An ArrayList of various test DbNames possible has been taken and functions
- * are tested for all of them.
- *
+ * Tests the Statistics request dispatcher resource that provides statistics of
+ * Database and Collection.
+ * 
+ * 
  * @author Rachit Mittal
- *
+ * @since 17 Jul 2011
+ * 
  */
-public class StatisticsRequestDispatcherTest {
+public class StatisticsRequestDispatcherTest extends BaseRequestDispatcher {
 
-	private MongoInstanceProvider mongoInstanceBehaviour;
+	private MongoInstanceProvider mongoInstanceProvider;
 	private Mongo mongoInstance;
 	/**
 	 * Object of class to be tested
@@ -80,8 +74,7 @@ public class StatisticsRequestDispatcherTest {
 	/**
 	 * Logger object
 	 */
-	private static Logger logger = Logger
-			.getLogger(StatisticsRequestDispatcherTest.class);
+	private static Logger logger = Logger.getLogger(StatisticsRequestDispatcherTest.class);
 
 	/**
 	 * A test token Id
@@ -89,118 +82,65 @@ public class StatisticsRequestDispatcherTest {
 	private String testTokenId = "123212178917845678910910";
 
 	/**
-	 * Constructs a mongoInstanceProvider Object and configures Logger
-	 *
+	 * Constructs a mongoInstanceProvider Object.
+	 * 
 	 * @throws MongoHostUnknownException
 	 * @throws IOException
 	 * @throws FileNotFoundException
 	 */
-	public StatisticsRequestDispatcherTest() throws MongoHostUnknownException,
-			IOException, FileNotFoundException, JSONException {
-		super();
-
-		// TODO Configure by file
-		SimpleLayout layout = new SimpleLayout();
-		FileAppender appender = new FileAppender(layout,
-				"logs/mViewer_StatisticsResourceTestLogs.txt", true);
-
-		logger.setLevel(Level.INFO);
-		logger.addAppender(appender);
-
+	public StatisticsRequestDispatcherTest() throws MongoHostUnknownException, IOException, FileNotFoundException {
+		 
 		try {
-
-			mongoInstanceBehaviour = new ConfigMongoInstanceProvider(); // TODO
-																		// Beans
-
+			mongoInstanceProvider = new ConfigMongoInstanceProvider();
 		} catch (FileNotFoundException e) {
-			JSONObject error = new JSONObject();
-			error.put("message", e.getMessage());
-			error.put("code", "FILE_NOT_FOUND_EXCEPTION");
-			error.put("stackTrace", e.getStackTrace());
-
-			JSONObject temp = new JSONObject();
-			temp.put("error", error);
-			JSONObject response = new JSONObject();
-			response.put("response", temp);
-
-			logger.info(response.toString());
-
+			formErrorResponse(logger, e.getMessage(), ErrorCodes.FILE_NOT_FOUND_EXCEPTION, e.getStackTrace(), "ERROR");
+			throw e;
 		} catch (MongoHostUnknownException e) {
-			JSONObject error = new JSONObject();
-			error.put("message", e.getMessage());
-			error.put("code", e.getErrorCode());
-			error.put("stackTrace", e.getStackTrace());
-
-			JSONObject temp = new JSONObject();
-			temp.put("error", error);
-			JSONObject response = new JSONObject();
-			response.put("response", temp);
-
-			logger.info(response.toString());
+			formErrorResponse(logger, e.getMessage(), e.getErrorCode(), e.getStackTrace(), "ERROR");
+			throw e;
 
 		} catch (IOException e) {
-			JSONObject error = new JSONObject();
-			error.put("message", e.getMessage());
-			error.put("code", "IO_EXCEPTION");
-			error.put("stackTrace", e.getStackTrace());
-
-			JSONObject temp = new JSONObject();
-			temp.put("error", error);
-			JSONObject response = new JSONObject();
-			response.put("response", temp);
-			logger.info(response.toString());
+			formErrorResponse(logger, e.getMessage(), ErrorCodes.IO_EXCEPTION, e.getStackTrace(), "ERROR");
+			throw e;
 		}
-
 	}
 
 	/**
-	 * Called before each test function and creates a testObject of class to be
-	 * tested and a mongoInstance . Also add a MongoInstance for this user in
-	 * UserLogin class.
-	 *
-	 * @throws JSONException
-	 *             While writing Error Object
+	 * Instantiates the object of class under test and also creates an instance
+	 * of mongo using the mongo service provider that reads from config file in
+	 * order to test resources.Here we also put our tokenId in session and in
+	 * mappings defined in UserLogin class so that user is authentcated.
+	 * 
 	 */
 	@Before
-	public void instantiateTestClass() throws JSONException {
-		try {
+	public void instantiateTestClass() {
 
-			// Creates Mongo Instance.
-			mongoInstance = mongoInstanceBehaviour.getMongoInstance();
-			// Class to be tested
-			testStatResource = new StatisticsRequestDispatcher();
+		// Creates Mongo Instance.
+		mongoInstance = mongoInstanceProvider.getMongoInstance();
+		// Class to be tested
+		testStatResource = new StatisticsRequestDispatcher();
+		if (logger.isInfoEnabled()) {
 			logger.info("Add User to maps in UserLogin servlet");
-			String user = "username_" + mongoInstance.getAddress() + "_"
-					+ mongoInstance.getConnectPoint();
-			UserLogin.tokenIDToUserMapping.put(testTokenId, user);
-			UserLogin.userToMongoInstanceMapping.put(user, mongoInstance);
-
-		} catch (IOException e) {
-			JSONObject error = new JSONObject();
-			error.put("message", e.getMessage());
-			error.put("code", "IO_EXCEPTION");
-			error.put("stackTrace", e.getStackTrace());
-
-			JSONObject temp = new JSONObject();
-			temp.put("error", error);
-			JSONObject response = new JSONObject();
-			response.put("response", temp);
-			logger.info(response.toString());
 		}
+		// Add user to mappings in userLogin for authentication
+		String user = "username_" + mongoInstance.getAddress() + "_" + mongoInstance.getConnectPoint();
+		UserLogin.tokenIDToUserMapping.put(testTokenId, user);
+		UserLogin.userToMongoInstanceMapping.put(user, mongoInstance);
+
 	}
 
 	/**
 	 * Tests the GET Request which gets stats of all databases present in Mongo.
 	 * Here we construct an empty database first and will test if number of
 	 * collections in that Db are 0.
-	 *
-	 * @throws JSONException
-	 *
-	 *
+	 * 
+	 * @throws DatabaseException
+	 * 
+	 * 
 	 */
 
 	@Test
-	public void getdbStatsRequest() throws JSONException, MongoException {
+	public void getdbStatsRequest() throws DatabaseException, JSONException {
 		// ArrayList of several test Objects - possible inputs
 		List<String> testDbNames = new ArrayList<String>();
 		// Add some test Cases.
@@ -208,23 +148,33 @@ public class StatisticsRequestDispatcherTest {
 		testDbNames.add("");
 		testDbNames.add(null);
 
-		logger.info("Testing GetDbStats Resource");
+		if (logger.isInfoEnabled()) {
+			logger.info("Testing GetDb Stats Resource");
+		}
 		for (String dbName : testDbNames) {
-			logger.info("Test Case  [" + dbName + "]");
+			if (logger.isInfoEnabled()) {
+				logger.info("Test Case  [" + dbName + "]");
+			}
 			try {
 
 				if (dbName != null) {
 					if (!dbName.equals("")) {
-						logger.info("Delete this Db first");
+						if (logger.isInfoEnabled()) {
+							logger.info("Delete this Db first");
+						}
 						mongoInstance.getDB(dbName).dropDatabase();
 						if (!mongoInstance.getDatabaseNames().contains(dbName)) {
-							logger.info("Create a Db first");
+							if (logger.isInfoEnabled()) {
+								logger.info("Create a Db first");
+							}
 							mongoInstance.getDB(dbName).getCollectionNames();
 						}
 					}
 				}
 
-				logger.info("Sends a MockHTTP Request with a Mock Session parameter tokenId");
+				if (logger.isInfoEnabled()) {
+					logger.info("Sends a MockHTTP Request with a Mock Session parameter tokenId");
+				}
 
 				MockHttpSession session = new MockHttpSession();
 				session.setAttribute("tokenId", testTokenId);
@@ -232,22 +182,18 @@ public class StatisticsRequestDispatcherTest {
 				MockHttpServletRequest request = new MockHttpServletRequest();
 				request.setSession(session);
 
-				String resp = testStatResource.getDbStatsRequest(dbName,
-						testTokenId,
-						request);
+				String resp = testStatResource.getDbStats(dbName, testTokenId, request);
 
 				if (dbName == null) {
 					DBObject response = (BasicDBObject) JSON.parse(resp);
 					DBObject error = (BasicDBObject) response.get("response");
-					String code = (String) ((BasicDBObject) error.get("error"))
-							.get("code");
+					String code = (String) ((BasicDBObject) error.get("error")).get("code");
 					assertEquals(ErrorCodes.DB_NAME_EMPTY, code);
 
 				} else if (dbName.equals("")) {
 					DBObject response = (BasicDBObject) JSON.parse(resp);
 					DBObject error = (BasicDBObject) response.get("response");
-					String code = (String) ((BasicDBObject) error.get("error"))
-							.get("code");
+					String code = (String) ((BasicDBObject) error.get("error")).get("code");
 					assertEquals(ErrorCodes.DB_NAME_EMPTY, code);
 				} else {
 					DBObject response = (BasicDBObject) JSON.parse(resp);
@@ -255,15 +201,17 @@ public class StatisticsRequestDispatcherTest {
 
 					BasicDBList dbStats = (BasicDBList) result.get("result");
 
-					logger.info("Response : [ " + dbStats + "]");
+					if (logger.isInfoEnabled()) {
+						logger.info("Response : [ " + dbStats + "]");
+					}
 
 					for (int i = 0; i < dbStats.size(); i++) {
 						BasicDBObject temp = (BasicDBObject) dbStats.get(i);
 						if (temp.get("Key").equals("collections")) {
-							int noOfCollections = Integer
-									.parseInt((String) temp.get("Value"));
-							logger.info("Number of Collections : "
-									+ noOfCollections);
+							int noOfCollections = Integer.parseInt((String) temp.get("Value"));
+							if (logger.isInfoEnabled()) {
+								logger.info("Number of Collections : " + noOfCollections);
+							}
 							assertEquals(0, noOfCollections); // As Empty Db
 							break;
 						}
@@ -271,57 +219,37 @@ public class StatisticsRequestDispatcherTest {
 					mongoInstance.dropDatabase(dbName);
 
 				}
-				logger.info("Test Completed");
+				if (logger.isInfoEnabled()) {
+					logger.info("Test Completed");
+				}
 
 			} catch (JSONException e) {
 
-				// log error
-				JSONObject error = new JSONObject();
-				error.put("message", e.getMessage());
-				error.put("code", ErrorCodes.JSON_EXCEPTION);
-				error.put("stackTrace", e.getStackTrace());
-
-				JSONObject temp = new JSONObject();
-				temp.put("error", error);
-				JSONObject response = new JSONObject();
-				response.put("response", temp);
-				logger.info(response.toString());
-
+				formErrorResponse(logger, e.getMessage(), ErrorCodes.JSON_EXCEPTION, e.getStackTrace(), "ERROR");
 				throw e;
 			} catch (MongoException m) {
-				DatabaseException e = new DatabaseException(
-						ErrorCodes.GET_DB_LIST_EXCEPTION,
-						"GET_DB_LIST_EXCEPTION", m.getCause());
-
-				JSONObject error = new JSONObject();
-				error.put("message", e.getMessage());
-				error.put("code", e.getErrorCode());
-				error.put("stackTrace", e.getStackTrace());
-
-				JSONObject temp = new JSONObject();
-				temp.put("error", error);
-				JSONObject response = new JSONObject();
-				response.put("response", temp);
-				logger.info(response.toString());
-
+				DatabaseException e = new DatabaseException(ErrorCodes.GET_DB_LIST_EXCEPTION, "GET_DB_LIST_EXCEPTION", m.getCause());
+				formErrorResponse(logger, e.getMessage(), e.getErrorCode(), e.getStackTrace(), "ERROR");
 				throw e;
 			}
-			logger.info("Test Completed");
+			if (logger.isInfoEnabled()) {
+				logger.info("Test Completed");
+			}
 		}
 	}
 
 	/**
 	 * Tests the GET Request which gets stats of all collections present in
 	 * Mongo. Here we construct an empty collection first and will test if
-	 * number of documents in that Db are 0.
-	 *
-	 * @throws JSONException
-	 *
-	 *
+	 * number of documents in that collection are 0.
+	 * 
+	 * @throws CollectionException
+	 * 
+	 * 
 	 */
 
 	@Test
-	public void getCollStatsRequest() throws JSONException, MongoException {
+	public void getCollStatsRequest() throws CollectionException, JSONException {
 		// ArrayList of several test Objects - possible inputs
 		List<String> testDbNames = new ArrayList<String>();
 		// Add some test Cases.
@@ -330,35 +258,43 @@ public class StatisticsRequestDispatcherTest {
 		testDbNames.add(null);
 
 		String testCollName = "test";
-		logger.info("Testing GetCollStats Resource");
+		if (logger.isInfoEnabled()) {
+			logger.info("Testing Get Collection Stats Resource");
+		}
 		for (String dbName : testDbNames) {
-			logger.info("Test Case  [" + dbName + "]");
+			if (logger.isInfoEnabled()) {
+				logger.info("Test Case  [" + dbName + "]");
+			}
 			try {
 
 				if (dbName != null) {
 					if (!dbName.equals("")) {
 						if (!mongoInstance.getDatabaseNames().contains(dbName)) {
-							logger.info("Create a Db first");
+							if (logger.isInfoEnabled()) {
+								logger.info("Create a Db first");
+							}
 							mongoInstance.getDB(dbName).getCollectionNames();
 
-							logger.info("Delete the collection first if exist");
-							if (mongoInstance.getDB(dbName)
-									.getCollectionNames()
-									.contains(testCollName)) {
+							if (logger.isInfoEnabled()) {
+								logger.info("Delete the collection first if exist");
+							}
+							if (mongoInstance.getDB(dbName).getCollectionNames().contains(testCollName)) {
 
-								mongoInstance.getDB(dbName)
-										.getCollection(testCollName).drop();
+								mongoInstance.getDB(dbName).getCollection(testCollName).drop();
 							}
 
-							logger.info(" Create an empty collection");
+							if (logger.isInfoEnabled()) {
+								logger.info(" Create an empty collection");
+							}
 							DBObject options = new BasicDBObject();
-							mongoInstance.getDB(dbName).createCollection(
-									testCollName, options);
+							mongoInstance.getDB(dbName).createCollection(testCollName, options);
 						}
 					}
 				}
 
-				logger.info("Sends a MockHTTP Request with a Mock Session parameter tokenId");
+				if (logger.isInfoEnabled()) {
+					logger.info("Sends a MockHTTP Request with a Mock Session parameter tokenId");
+				}
 
 				MockHttpSession session = new MockHttpSession();
 				session.setAttribute("tokenId", testTokenId);
@@ -366,21 +302,18 @@ public class StatisticsRequestDispatcherTest {
 				MockHttpServletRequest request = new MockHttpServletRequest();
 				request.setSession(session);
 
-				String resp = testStatResource.getCollStatsRequest(dbName,
-						testCollName, testTokenId, request);
+				String resp = testStatResource.getCollStats(dbName, testCollName, testTokenId, request);
 
 				if (dbName == null) {
 					DBObject response = (BasicDBObject) JSON.parse(resp);
 					DBObject error = (BasicDBObject) response.get("response");
-					String code = (String) ((BasicDBObject) error.get("error"))
-							.get("code");
+					String code = (String) ((BasicDBObject) error.get("error")).get("code");
 					assertEquals(ErrorCodes.DB_NAME_EMPTY, code);
 
 				} else if (dbName.equals("")) {
 					DBObject response = (BasicDBObject) JSON.parse(resp);
 					DBObject error = (BasicDBObject) response.get("response");
-					String code = (String) ((BasicDBObject) error.get("error"))
-							.get("code");
+					String code = (String) ((BasicDBObject) error.get("error")).get("code");
 					assertEquals(ErrorCodes.DB_NAME_EMPTY, code);
 				} else {
 					DBObject response = (BasicDBObject) JSON.parse(resp);
@@ -391,10 +324,10 @@ public class StatisticsRequestDispatcherTest {
 					for (int i = 0; i < collStats.size(); i++) {
 						BasicDBObject temp = (BasicDBObject) collStats.get(i);
 						if (temp.get("Key").equals("count")) {
-							int noOfDocuments = Integer.parseInt((String) temp
-									.get("Value"));
-							logger.info("Number of Documents : "
-									+ noOfDocuments);
+							int noOfDocuments = Integer.parseInt((String) temp.get("Value"));
+							if (logger.isInfoEnabled()) {
+								logger.info("Number of Documents : " + noOfDocuments);
+							}
 							assertEquals(noOfDocuments, 0); // As Empty
 															// Collection
 							break;
@@ -402,42 +335,22 @@ public class StatisticsRequestDispatcherTest {
 					}
 
 				}
-				logger.info("Test Completed");
+				if (logger.isInfoEnabled()) {
+					logger.info("Test Completed");
+				}
 
 			} catch (JSONException e) {
 
-				// log error
-				JSONObject error = new JSONObject();
-				error.put("message", e.getMessage());
-				error.put("code", ErrorCodes.JSON_EXCEPTION);
-				error.put("stackTrace", e.getStackTrace());
-
-				JSONObject temp = new JSONObject();
-				temp.put("error", error);
-				JSONObject response = new JSONObject();
-				response.put("response", temp);
-				logger.info(response.toString());
-
+				formErrorResponse(logger, e.getMessage(), ErrorCodes.JSON_EXCEPTION, e.getStackTrace(), "ERROR");
 				throw e;
 			} catch (MongoException m) {
-				DatabaseException e = new DatabaseException(
-						ErrorCodes.GET_DB_LIST_EXCEPTION,
-						"GET_DB_LIST_EXCEPTION", m.getCause());
-
-				JSONObject error = new JSONObject();
-				error.put("message", e.getMessage());
-				error.put("code", e.getErrorCode());
-				error.put("stackTrace", e.getStackTrace());
-
-				JSONObject temp = new JSONObject();
-				temp.put("error", error);
-				JSONObject response = new JSONObject();
-				response.put("response", temp);
-				logger.info(response.toString());
-
+				CollectionException e = new CollectionException(ErrorCodes.GET_COLL_STATS_EXCEPTION, "GET_COLL_STATS_EXCEPTION", m.getCause());
+				formErrorResponse(logger, e.getMessage(), e.getErrorCode(), e.getStackTrace(), "ERROR");
 				throw e;
 			}
-			logger.info("Test Completed");
+			if (logger.isInfoEnabled()) {
+				logger.info("Test Completed");
+			}
 		}
 	}
 }

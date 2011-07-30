@@ -32,30 +32,24 @@ import java.util.ArrayList;
 
 import java.util.List;
 
-import org.apache.log4j.FileAppender;
-import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
-import org.apache.log4j.SimpleLayout;
 import org.bson.types.ObjectId;
 import org.json.JSONException;
-import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 
 import com.imaginea.mongodb.common.ConfigMongoInstanceProvider;
 import com.imaginea.mongodb.common.MongoInstanceProvider;
+import com.imaginea.mongodb.common.exceptions.CollectionException;
+import com.imaginea.mongodb.common.exceptions.DatabaseException;
 import com.imaginea.mongodb.common.exceptions.DeleteDocumentException;
 import com.imaginea.mongodb.common.exceptions.DocumentException;
-import com.imaginea.mongodb.common.exceptions.EmptyCollectionNameException;
-import com.imaginea.mongodb.common.exceptions.EmptyDatabaseNameException;
-import com.imaginea.mongodb.common.exceptions.EmptyDocumentDataException;
 import com.imaginea.mongodb.common.exceptions.ErrorCodes;
 import com.imaginea.mongodb.common.exceptions.InsertDocumentException;
 import com.imaginea.mongodb.common.exceptions.MongoHostUnknownException;
-import com.imaginea.mongodb.common.exceptions.UndefinedCollectionException;
-import com.imaginea.mongodb.common.exceptions.UndefinedDatabaseException;
-import com.imaginea.mongodb.common.exceptions.UndefinedDocumentException;
 import com.imaginea.mongodb.common.exceptions.UpdateDocumentException;
+import com.imaginea.mongodb.common.exceptions.ValidationException;
+import com.imaginea.mongodb.requestdispatchers.BaseRequestDispatcher;
 import com.imaginea.mongodb.requestdispatchers.UserLogin;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBCollection;
@@ -65,13 +59,14 @@ import com.mongodb.Mongo;
 import com.mongodb.MongoException;
 
 /**
- * Test all the Service functions on Documents in Collections inside Databases
- * present in MongoDb.
- *
+ * Test all the service functions like create/update/delete documents in
+ * collections inside databases present in MongoDb.
+ * 
  * @author Rachit Mittal
- *
+ * @since 16 July 2011
+ * 
  */
-public class DocumentServiceImplTest {
+public class DocumentServiceImplTest extends BaseRequestDispatcher {
 
 	/**
 	 * Instance of class to be tested.
@@ -80,7 +75,7 @@ public class DocumentServiceImplTest {
 	/**
 	 * Provides Mongo Instance.
 	 */
-	private MongoInstanceProvider mongoInstanceBehaviour;
+	private MongoInstanceProvider mongoInstanceProvider;
 	private Mongo mongoInstance;
 
 	/**
@@ -90,126 +85,90 @@ public class DocumentServiceImplTest {
 			.getLogger(DocumentServiceImplTest.class);
 
 	/**
-	 * A test User used in forming a <mappingKey> from which services file pick
-	 * up mongo Instance. <mappingKey> is related to Token Id.
-	 */
-	private String testUsername = "name";
-
-	/**
-	 * Constructs a mongoInstanceProvider Object and configures logger.
-	 *
+	 * Constructs a mongoInstanceProvider Object.
+	 * 
 	 * @throws MongoHostUnknownException
 	 * @throws IOException
 	 * @throws FileNotFoundException
 	 */
 	public DocumentServiceImplTest() throws MongoHostUnknownException,
 			IOException, FileNotFoundException, JSONException {
-		super();
-
-		// TODO Configure by file
-		SimpleLayout layout = new SimpleLayout();
-		FileAppender appender = new FileAppender(layout,
-				"logs/DocumentTestLogs.txt", true);
-
-		logger.setLevel(Level.INFO);
-		logger.addAppender(appender);
-
 		try {
-
-			mongoInstanceBehaviour = new ConfigMongoInstanceProvider();
-
+			mongoInstanceProvider = new ConfigMongoInstanceProvider();
 		} catch (FileNotFoundException e) {
-			JSONObject error = new JSONObject();
-			error.put("message", e.getMessage());
-			error.put("code", "FILE_NOT_FOUND_EXCEPTION");
-			error.put("stackTrace", e.getStackTrace());
-
-			JSONObject temp = new JSONObject();
-			temp.put("error", error);
-			JSONObject response = new JSONObject();
-			response.put("response", temp);
-
-			logger.info(response.toString());
-
+			formErrorResponse(logger, e.getMessage(),
+					ErrorCodes.FILE_NOT_FOUND_EXCEPTION, e.getStackTrace(),
+					"ERROR");
+			throw e;
 		} catch (MongoHostUnknownException e) {
-			JSONObject error = new JSONObject();
-			error.put("message", e.getMessage());
-			error.put("code", e.getErrorCode());
-			error.put("stackTrace", e.getStackTrace());
-
-			JSONObject temp = new JSONObject();
-			temp.put("error", error);
-			JSONObject response = new JSONObject();
-			response.put("response", temp);
-
-			logger.info(response.toString());
+			formErrorResponse(logger, e.getMessage(), e.getErrorCode(),
+					e.getStackTrace(), "ERROR");
+			throw e;
 
 		} catch (IOException e) {
-			JSONObject error = new JSONObject();
-			error.put("message", e.getMessage());
-			error.put("code", "IO_EXCEPTION");
-			error.put("stackTrace", e.getStackTrace());
-
-			JSONObject temp = new JSONObject();
-			temp.put("error", error);
-			JSONObject response = new JSONObject();
-			response.put("response", temp);
-			logger.info(response.toString());
+			formErrorResponse(logger, e.getMessage(), ErrorCodes.IO_EXCEPTION,
+					e.getStackTrace(), "ERROR");
+			throw e;
 		}
-
 	}
 
 	/**
-	 * Called before each test function and creates a testObject of class to be
-	 * tested and a mongoInstance . Also add a MongoInstance for this user in
-	 * UserLogin class.
-	 *
-	 * @throws JSONException
-	 *             While writing Error Object
+	 * Instantiates the object of class under test and also creates an instance
+	 * of mongo using the mongo service provider that reads from config file in
+	 * order to test resources.Here we also put our tokenId in session and in
+	 * mappings defined in UserLogin class so that user is authentcated.
+	 * 
 	 */
 	@Before
-	public void setUp() {
+	public void instantiateTestClass() {
 
 		// Creates Mongo Instance.
-		mongoInstance = mongoInstanceBehaviour.getMongoInstance();
+		mongoInstance = mongoInstanceProvider.getMongoInstance();
 
-		// Add User to queue in UserLogin class which service file uses.
-		String userMappingKey = testUsername + "_" + mongoInstance.getAddress()
-				+ "_" + mongoInstance.getConnectPoint();
+		if (logger.isInfoEnabled()) {
+			logger.info("Add User to maps in UserLogin servlet");
+		}
+		// Add user to mappings in userLogin for authentication
+		String userMappingKey = "username_" + mongoInstance.getAddress() + "_"
+				+ mongoInstance.getConnectPoint();
 
 		UserLogin.userToMongoInstanceMapping.put(userMappingKey, mongoInstance);
-
 		// Class to be tested
 		testDocService = new DocumentServiceImpl(userMappingKey);
-
 	}
 
 	/**
-	 * Tests getDocument() Service to get all Documents in a Collection inside a
-	 * Database. Here we will create a test document in a collection inside a
+	 * Tests get documents service to get all documents in a collection inside a
+	 * database. Here we will create a test document in a collection inside a
 	 * Database and will check if that document exists in the document list from
 	 * the service.
-	 *
-	 * @throws JSONException
-	 * @throws InsertDocumentException
+	 * 
+	 * @throws DatabaseException
+	 *             , CollectionException, DocumentException, ValidationException
 	 */
 	@Test
-	public void testGetDocuments() throws JSONException,
-			InsertDocumentException {
+	public void getDocList() throws DatabaseException, CollectionException,
+			DocumentException, ValidationException {
+
 		// ArrayList of several test Objects - possible inputs
 		List<String> testDbNames = new ArrayList<String>();
 		testDbNames.add("random");
 		List<String> testCollectionNames = new ArrayList<String>();
 		testCollectionNames.add("foo");
 		List<DBObject> testDocumentNames = new ArrayList<DBObject>();
-		testDocumentNames.add(new BasicDBObject("test", "test"));
+		testDocumentNames.add(new BasicDBObject("p", "q"));
 
-		logger.info("Testing Get Documents Service.");
+		if (logger.isInfoEnabled()) {
+			logger.info("Testing Get Documents Service.");
+		}
 		for (String dbName : testDbNames) {
 			for (String collectionName : testCollectionNames) {
 				for (DBObject documentName : testDocumentNames)
 					try {
-						logger.info(" Insert document [" + documentName + "]");
+						if (logger.isInfoEnabled()) {
+							logger.info(" Insert document [" + documentName
+									+ "]");
+						}
 						if (!mongoInstance.getDB(dbName).getCollectionNames()
 								.contains(collectionName)) {
 
@@ -221,14 +180,17 @@ public class DocumentServiceImplTest {
 								.getCollection(collectionName)
 								.insert(documentName);
 
-						// Test with null query and all keys
+						// Test with null query and with  keys "p" 
 						DBObject keys = new BasicDBObject();
-						keys.put("test", 1);
+						keys.put("p", 1);
 						ArrayList<DBObject> documentList = testDocService
-								.getQueriedDocsList(dbName, collectionName, null,
-										keys, 0, 0);
-						logger.info("List of Document from Response: ["
-								+ documentList + "]");
+								.getQueriedDocsList(dbName, collectionName,
+										null, keys, 0, 0);
+						if (logger.isInfoEnabled()) {
+							logger.info("List of Document from Response: ["
+									+ documentList + "]");
+						}
+					 
 						boolean flag = false;
 						for (DBObject document : documentList) {
 							for (String key : documentName.keySet()) {
@@ -248,66 +210,57 @@ public class DocumentServiceImplTest {
 						// Db not populate by test Cases
 						mongoInstance.dropDatabase(dbName);
 
-					} catch (EmptyDatabaseNameException e) {
-						JSONObject error = new JSONObject();
-						JSONObject response = new JSONObject();
-						error.put("message", e.getMessage());
-						error.put("code", e.getErrorCode());
-						error.put("stackTrace", e.getStackTrace());
-
-						JSONObject temp = new JSONObject();
-						temp.put("error", error);
-						response.put("response", temp);
-
-						logger.info(response);
+					} catch (DatabaseException e) {
+						formErrorResponse(logger, e.getMessage(),
+								e.getErrorCode(), e.getStackTrace(), "ERROR");
 						assert (true);
 
-					} catch (EmptyCollectionNameException e) {
-						JSONObject error = new JSONObject();
-						JSONObject response = new JSONObject();
-						error.put("message", e.getMessage());
-						error.put("code", e.getErrorCode());
-						error.put("stackTrace", e.getStackTrace());
-
-						JSONObject temp = new JSONObject();
-						temp.put("error", error);
-						response.put("response", temp);
-
-						logger.info(response);
+					} catch (CollectionException e) {
+						formErrorResponse(logger, e.getMessage(),
+								e.getErrorCode(), e.getStackTrace(), "ERROR");
 						assert (true);
-					} catch (MongoException m) {
-						InsertDocumentException e = new InsertDocumentException(
-								"DOCUMENT_CREATION_EXCEPTION", m.getCause());
-						JSONObject error = new JSONObject();
-						JSONObject response = new JSONObject();
-						error.put("message", e.getMessage());
-						error.put("code", e.getErrorCode());
-						error.put("stackTrace", e.getStackTrace());
 
-						JSONObject temp = new JSONObject();
-						temp.put("error", error);
-						response.put("response", temp);
+					} catch (DocumentException e) {
+						formErrorResponse(logger, e.getMessage(),
+								e.getErrorCode(), e.getStackTrace(), "ERROR");
+						assert (true);
 
-						logger.info(response);
+					} catch (ValidationException e) {
+						formErrorResponse(logger, e.getMessage(),
+								e.getErrorCode(), e.getStackTrace(), "ERROR");
+						assert (true);
+
+					} catch (MongoException m) // while dropping Db
+					{
+						DocumentException e = new DocumentException(
+								ErrorCodes.GET_DOCUMENT_LIST_EXCEPTION,
+								"Error Testing Document List", m.getCause());
+						formErrorResponse(logger, e.getMessage(),
+								e.getErrorCode(), e.getStackTrace(), "ERROR");
 						throw e;
 					}
+			}
+			if (logger.isInfoEnabled()) {
+				logger.info("Test Completed");
 			}
 		}
 
 	}
 
 	/**
-	 * Tests insertDocument() Service to insert Document in a Collection inside
-	 * a Database. Here we will create a test document in a collection inside a
+	 * Tests insert document service to insert Document in a Collection inside a
+	 * Database. Here we will create a test document in a collection inside a
 	 * Database using the service and will check if that document exists in the
 	 * document list.
-	 *
-	 * @throws JSONException
-	 *             , DocumentException, InsertDocumentException
+	 * 
+	 * @throws DatabaseException
+	 *             , CollectionException, DocumentException, ValidationException
+	 * 
 	 */
 	@Test
-	public void testInsertDocument() throws JSONException, DocumentException,
-			InsertDocumentException {
+	public void testInsertDocument() throws DatabaseException,
+			CollectionException, DocumentException, ValidationException {
+
 		// ArrayList of several test Objects - possible inputs
 		List<String> testDbNames = new ArrayList<String>();
 		testDbNames.add("random");
@@ -316,7 +269,9 @@ public class DocumentServiceImplTest {
 		List<DBObject> testDocumentNames = new ArrayList<DBObject>();
 		testDocumentNames.add(new BasicDBObject("test", "test"));
 
-		logger.info("Testing Insert Document Service.");
+		if (logger.isInfoEnabled()) {
+			logger.info("Testing Insert Document Service.");
+		}
 
 		for (String dbName : testDbNames) {
 			for (String collectionName : testCollectionNames) {
@@ -333,8 +288,10 @@ public class DocumentServiceImplTest {
 									collectionName, options);
 						}
 
-						logger.info("Insert the document [ " + documentName
-								+ "]");
+						if (logger.isInfoEnabled()) {
+							logger.info("Insert the document [ " + documentName
+									+ "]");
+						}
 						testDocService.insertDocument(dbName, collectionName,
 								documentName);
 
@@ -345,7 +302,10 @@ public class DocumentServiceImplTest {
 						while (cursor.hasNext()) {
 							documentList.add(cursor.next());
 						}
-						logger.info("Get Document List: [" + documentList + "]");
+						if (logger.isInfoEnabled()) {
+							logger.info("Get Document List: [" + documentList
+									+ "]");
+						}
 
 						boolean flag = false;
 						for (DBObject document : documentList) {
@@ -368,120 +328,54 @@ public class DocumentServiceImplTest {
 								.getCollection(collectionName)
 								.remove(documentName);
 
-					} catch (EmptyCollectionNameException e) {
-						JSONObject error = new JSONObject();
-						JSONObject response = new JSONObject();
-						error.put("message", e.getMessage());
-						error.put("code", e.getErrorCode());
-						error.put("stackTrace", e.getStackTrace());
-
-						JSONObject temp = new JSONObject();
-						temp.put("error", error);
-						response.put("response", temp);
-
-						logger.info(response);
+					} catch (DatabaseException e) {
+						formErrorResponse(logger, e.getMessage(),
+								e.getErrorCode(), e.getStackTrace(), "ERROR");
 						assert (true);
-					} catch (EmptyDatabaseNameException e) {
-						JSONObject error = new JSONObject();
-						JSONObject response = new JSONObject();
-						error.put("message", e.getMessage());
-						error.put("code", e.getErrorCode());
-						error.put("stackTrace", e.getStackTrace());
 
-						JSONObject temp = new JSONObject();
-						temp.put("error", error);
-						response.put("response", temp);
-
-						logger.info(response);
+					} catch (CollectionException e) {
+						formErrorResponse(logger, e.getMessage(),
+								e.getErrorCode(), e.getStackTrace(), "ERROR");
 						assert (true);
-					} catch (EmptyDocumentDataException e) {
-						JSONObject error = new JSONObject();
-						JSONObject response = new JSONObject();
-						error.put("message", e.getMessage());
-						error.put("code", e.getErrorCode());
-						error.put("stackTrace", e.getStackTrace());
 
-						JSONObject temp = new JSONObject();
-						temp.put("error", error);
-						response.put("response", temp);
-
-						logger.info(response);
+					} catch (DocumentException e) {
+						formErrorResponse(logger, e.getMessage(),
+								e.getErrorCode(), e.getStackTrace(), "ERROR");
 						assert (true);
-					} catch (UndefinedDatabaseException e) {
-						JSONObject error = new JSONObject();
-						JSONObject response = new JSONObject();
-						error.put("message", e.getMessage());
-						error.put("code", e.getErrorCode());
-						error.put("stackTrace", e.getStackTrace());
 
-						JSONObject temp = new JSONObject();
-						temp.put("error", error);
-						response.put("response", temp);
-
-						logger.info(response);
+					} catch (ValidationException e) {
+						formErrorResponse(logger, e.getMessage(),
+								e.getErrorCode(), e.getStackTrace(), "ERROR");
 						assert (true);
-					} catch (UndefinedCollectionException e) {
-						JSONObject error = new JSONObject();
-						JSONObject response = new JSONObject();
-						error.put("message", e.getMessage());
-						error.put("code", e.getErrorCode());
-						error.put("stackTrace", e.getStackTrace());
 
-						JSONObject temp = new JSONObject();
-						temp.put("error", error);
-						response.put("response", temp);
-
-						logger.info(response);
-						assert (true);
-					} catch (InsertDocumentException e) {
-						JSONObject error = new JSONObject();
-						JSONObject response = new JSONObject();
-						error.put("message", e.getMessage());
-						error.put("code", e.getErrorCode());
-						error.put("stackTrace", e.getStackTrace());
-
-						JSONObject temp = new JSONObject();
-						temp.put("error", error);
-						response.put("response", temp);
-
-						logger.info(response);
-						throw e;
 					} catch (MongoException m) // while dropping Db
 					{
-						DocumentException e = new DocumentException(
-								ErrorCodes.GET_DOCUMENT_LIST_EXCEPTION,
-								"GET_DOCUMENT_LIST_EXCEPTION", m.getCause());
-
-						JSONObject error = new JSONObject();
-						JSONObject response = new JSONObject();
-						error.put("message", e.getMessage());
-						error.put("code", e.getErrorCode());
-						error.put("stackTrace", e.getStackTrace());
-
-						JSONObject temp = new JSONObject();
-						temp.put("error", error);
-						response.put("response", temp);
-
-						logger.info(response);
+						InsertDocumentException e = new InsertDocumentException(
+								"Error Testing Document insert", m.getCause());
+						formErrorResponse(logger, e.getMessage(),
+								e.getErrorCode(), e.getStackTrace(), "ERROR");
 						throw e;
 					}
+			}
+			if (logger.isInfoEnabled()) {
+				logger.info("Test Completed");
 			}
 		}
 
 	}
 
 	/**
-	 * Tests updateDocument() Service to update Document in a Collection inside
-	 * a Database. Here we will update a test document in a collection inside a
+	 * Tests update document service to update Document in a Collection inside a
+	 * Database. Here we will update a test document in a collection inside a
 	 * Database using the service and will check if that old document is
 	 * updated.
-	 *
-	 * @throws JSONException
-	 *             , UpdateDocumentException, DocumentException
+	 * 
+	 * @throws DatabaseException
+	 *             , CollectionException, DocumentException, ValidationException
 	 */
 	@Test
-	public void testUpdateDocument() throws JSONException,
-			UpdateDocumentException, DocumentException {
+	public void testUpdateDocument() throws DatabaseException,
+			CollectionException, DocumentException, ValidationException {
 		// ArrayList of several test Objects - possible inputs
 		List<String> testDbNames = new ArrayList<String>();
 		testDbNames.add("random");
@@ -490,7 +384,9 @@ public class DocumentServiceImplTest {
 		List<DBObject> testDocumentNames = new ArrayList<DBObject>();
 		testDocumentNames.add(new BasicDBObject("test", "test"));
 
-		logger.info("Testing Update Document Service");
+		if (logger.isInfoEnabled()) {
+			logger.info("Testing Update Document Service");
+		}
 		for (String dbName : testDbNames) {
 			for (String collectionName : testCollectionNames) {
 				for (DBObject documentName : testDocumentNames)
@@ -508,8 +404,10 @@ public class DocumentServiceImplTest {
 									collectionName, options);
 						}
 
-						logger.info("Insert the old document [ " + documentName
-								+ "]");
+						if (logger.isInfoEnabled()) {
+							logger.info("Insert the old document [ "
+									+ documentName + "]");
+						}
 						mongoInstance.getDB(dbName)
 								.getCollection(collectionName)
 								.insert(documentName);
@@ -520,166 +418,87 @@ public class DocumentServiceImplTest {
 								.findOne(documentName);
 						ObjectId id = (ObjectId) document.get("_id");
 
-						
-						newDocument.put("_id", id.toString()); // same id as
-																// previous
+						newDocument.put("_id", id.toString()); // same id
 
-						logger.info("Update to new document [ " + newDocument
-								+ "]");
-						 
+						if (logger.isInfoEnabled()) {
+							logger.info("Update to new document [ "
+									+ newDocument + "]");
+						}
+
 						testDocService.updateDocument(dbName, collectionName,
 								id, newDocument);
 
-					/*	// Get Document with above id and check the value of
-						// "test" key.
 						DBObject query = new BasicDBObject("_id", id);
-						DBCollection collection = this.mongoInstance.getDB(
-								dbName).getCollection(collectionName);
-						DBCursor cursor = collection.find(query);
+						DBCollection collection = mongoInstance.getDB(dbName)
+								.getCollection(collectionName);
+						document = collection.findOne(query);
 
-						if (cursor.hasNext()) {
-							document = cursor.next(); // _id is primary key
-						} else {
-							// if updated document not found => Test Case Failed
+						if (document == null) {
 							assert (false);
 						}
 						String value = (String) document.get("test");
-						logger.info("Get Value of test key in Document with old document _id : ["
-								+ newDocument.get("test") + "]");
-						// Check is value matches the new Document Value
-						assertEquals(value, newDocument.get("test"));
+						if (logger.isInfoEnabled()) {
+							logger.info("Get Value of test key in Document with old document _id : ["
+									+ newDocument.get("test") + "]");
+						}
+					 
+						assertEquals(newDocument.get("test"),value);
 
 						// Delete the document
 						mongoInstance.getDB(dbName)
 								.getCollection(collectionName)
-								.remove(newDocument);*/
+								.remove(newDocument);
 
-					} catch (EmptyDocumentDataException e) {
-						JSONObject error = new JSONObject();
-						JSONObject response = new JSONObject();
-						error.put("message", e.getMessage());
-						error.put("code", e.getErrorCode());
-						error.put("stackTrace", e.getStackTrace());
-
-						JSONObject temp = new JSONObject();
-						temp.put("error", error);
-						response.put("response", temp);
-
-						logger.info(response);
+					} catch (DatabaseException e) {
+						formErrorResponse(logger, e.getMessage(),
+								e.getErrorCode(), e.getStackTrace(), "ERROR");
 						assert (true);
-					} catch (EmptyCollectionNameException e) {
-						JSONObject error = new JSONObject();
-						JSONObject response = new JSONObject();
-						error.put("message", e.getMessage());
-						error.put("code", e.getErrorCode());
-						error.put("stackTrace", e.getStackTrace());
 
-						JSONObject temp = new JSONObject();
-						temp.put("error", error);
-						response.put("response", temp);
-
-						logger.info(response);
+					} catch (CollectionException e) {
+						formErrorResponse(logger, e.getMessage(),
+								e.getErrorCode(), e.getStackTrace(), "ERROR");
 						assert (true);
-					} catch (EmptyDatabaseNameException e) {
-						JSONObject error = new JSONObject();
-						JSONObject response = new JSONObject();
-						error.put("message", e.getMessage());
-						error.put("code", e.getErrorCode());
-						error.put("stackTrace", e.getStackTrace());
 
-						JSONObject temp = new JSONObject();
-						temp.put("error", error);
-						response.put("response", temp);
-
-						logger.info(response);
+					} catch (DocumentException e) {
+						formErrorResponse(logger, e.getMessage(),
+								e.getErrorCode(), e.getStackTrace(), "ERROR");
 						assert (true);
-					} catch (UndefinedDocumentException e) {
-						JSONObject error = new JSONObject();
-						JSONObject response = new JSONObject();
-						error.put("message", e.getMessage());
-						error.put("code", e.getErrorCode());
-						error.put("stackTrace", e.getStackTrace());
 
-						JSONObject temp = new JSONObject();
-						temp.put("error", error);
-						response.put("response", temp);
-
-						logger.info(response);
+					} catch (ValidationException e) {
+						formErrorResponse(logger, e.getMessage(),
+								e.getErrorCode(), e.getStackTrace(), "ERROR");
 						assert (true);
-					} catch (UndefinedDatabaseException e) {
-						JSONObject error = new JSONObject();
-						JSONObject response = new JSONObject();
-						error.put("message", e.getMessage());
-						error.put("code", e.getErrorCode());
-						error.put("stackTrace", e.getStackTrace());
 
-						JSONObject temp = new JSONObject();
-						temp.put("error", error);
-						response.put("response", temp);
-
-						logger.info(response);
-						assert (true);
-					} catch (UndefinedCollectionException e) {
-						JSONObject error = new JSONObject();
-						JSONObject response = new JSONObject();
-						error.put("message", e.getMessage());
-						error.put("code", e.getErrorCode());
-						error.put("stackTrace", e.getStackTrace());
-
-						JSONObject temp = new JSONObject();
-						temp.put("error", error);
-						response.put("response", temp);
-
-						logger.info(response);
-						assert (true);
-					} catch (UpdateDocumentException e) {
-						JSONObject error = new JSONObject();
-						JSONObject response = new JSONObject();
-						error.put("message", e.getMessage());
-						error.put("code", e.getErrorCode());
-						error.put("stackTrace", e.getStackTrace());
-
-						JSONObject temp = new JSONObject();
-						temp.put("error", error);
-						response.put("response", temp);
-
-						logger.info(response);
-						throw e;
 					} catch (MongoException m) // while dropping Db
 					{
-						DocumentException e = new DocumentException(
-								ErrorCodes.DOCUMENT_CREATION_EXCEPTION,
-								"DOCUMENT_CREATION_EXCEPTION", m.getCause());
-						JSONObject error = new JSONObject();
-						JSONObject response = new JSONObject();
-						error.put("message", e.getMessage());
-						error.put("code", e.getErrorCode());
-						error.put("stackTrace", e.getStackTrace());
-
-						JSONObject temp = new JSONObject();
-						temp.put("error", error);
-						response.put("response", temp);
-
-						logger.info(response);
+						UpdateDocumentException e = new UpdateDocumentException(
+								"Error Testing Document update", m.getCause());
+						formErrorResponse(logger, e.getMessage(),
+								e.getErrorCode(), e.getStackTrace(), "ERROR");
 						throw e;
 					}
+			}
+			if (logger.isInfoEnabled()) {
+				logger.info("Test Completed");
 			}
 		}
 	}
 
 	/**
-	 * Tests deleteDocument() Service to delete Document in a Collection inside
-	 * a Database. Here we will delete a test document in a collection inside a
+	 * Tests delete document service to delete document in a Collection inside a
+	 * Database. Here we will delete a test document in a collection inside a
 	 * Database using the service and will check if that document exists in the
 	 * document list.
-	 *
-	 * @throws JSONException
-	 *             , DeleteDocumentException, DocumentException
+	 * 
+	 * @throws DatabaseException
+	 *             , CollectionException, DocumentException, ValidationException
 	 */
 	@Test
-	public void testDeleteDocument() throws JSONException,
-			DeleteDocumentException, DocumentException {
-		logger.info("Test Delete Document Service");
+	public void testDeleteDocument() throws DatabaseException,
+			CollectionException, DocumentException, ValidationException {
+		if (logger.isInfoEnabled()) {
+			logger.info("Test Delete Document Service");
+		}
 		List<String> testDbNames = new ArrayList<String>();
 		testDbNames.add("random");
 		List<String> testCollectionNames = new ArrayList<String>();
@@ -700,7 +519,10 @@ public class DocumentServiceImplTest {
 									collectionName, options);
 						}
 
-						logger.info("Insert document [ " + documentName + "]");
+						if (logger.isInfoEnabled()) {
+							logger.info("Insert document [ " + documentName
+									+ "]");
+						}
 						mongoInstance.getDB(dbName)
 								.getCollection(collectionName)
 								.insert(documentName);
@@ -715,11 +537,15 @@ public class DocumentServiceImplTest {
 						}
 						ObjectId id = (ObjectId) document.get("_id");
 
-						logger.info("Delete the document with  _id using service");
+						if (logger.isInfoEnabled()) {
+							logger.info("Delete the document with  _id using service");
+						}
 						testDocService.deleteDocument(dbName, collectionName,
 								id);
 
-						logger.info(" Get Document List");
+						if (logger.isInfoEnabled()) {
+							logger.info(" Get Document List");
+						}
 						List<DBObject> documentList = new ArrayList<DBObject>();
 
 						DBCursor cursor = mongoInstance.getDB(dbName)
@@ -744,115 +570,37 @@ public class DocumentServiceImplTest {
 							assert (false);
 						}
 
-					} catch (EmptyDocumentDataException e) {
-						JSONObject error = new JSONObject();
-						JSONObject response = new JSONObject();
-						error.put("message", e.getMessage());
-						error.put("code", e.getErrorCode());
-						error.put("stackTrace", e.getStackTrace());
-
-						JSONObject temp = new JSONObject();
-						temp.put("error", error);
-						response.put("response", temp);
-
-						logger.info(response);
+					} catch (DatabaseException e) {
+						formErrorResponse(logger, e.getMessage(),
+								e.getErrorCode(), e.getStackTrace(), "ERROR");
 						assert (true);
-					} catch (EmptyCollectionNameException e) {
-						JSONObject error = new JSONObject();
-						JSONObject response = new JSONObject();
-						error.put("message", e.getMessage());
-						error.put("code", e.getErrorCode());
-						error.put("stackTrace", e.getStackTrace());
 
-						JSONObject temp = new JSONObject();
-						temp.put("error", error);
-						response.put("response", temp);
-
-						logger.info(response);
+					} catch (CollectionException e) {
+						formErrorResponse(logger, e.getMessage(),
+								e.getErrorCode(), e.getStackTrace(), "ERROR");
 						assert (true);
-					} catch (EmptyDatabaseNameException e) {
-						JSONObject error = new JSONObject();
-						JSONObject response = new JSONObject();
-						error.put("message", e.getMessage());
-						error.put("code", e.getErrorCode());
-						error.put("stackTrace", e.getStackTrace());
 
-						JSONObject temp = new JSONObject();
-						temp.put("error", error);
-						response.put("response", temp);
-
-						logger.info(response);
+					} catch (DocumentException e) {
+						formErrorResponse(logger, e.getMessage(),
+								e.getErrorCode(), e.getStackTrace(), "ERROR");
 						assert (true);
-					} catch (UndefinedDocumentException e) {
-						JSONObject error = new JSONObject();
-						JSONObject response = new JSONObject();
-						error.put("message", e.getMessage());
-						error.put("code", e.getErrorCode());
-						error.put("stackTrace", e.getStackTrace());
 
-						JSONObject temp = new JSONObject();
-						temp.put("error", error);
-						response.put("response", temp);
-
-						logger.info(response);
+					} catch (ValidationException e) {
+						formErrorResponse(logger, e.getMessage(),
+								e.getErrorCode(), e.getStackTrace(), "ERROR");
 						assert (true);
-					} catch (UndefinedDatabaseException e) {
-						JSONObject error = new JSONObject();
-						JSONObject response = new JSONObject();
-						error.put("message", e.getMessage());
-						error.put("code", e.getErrorCode());
-						error.put("stackTrace", e.getStackTrace());
 
-						JSONObject temp = new JSONObject();
-						temp.put("error", error);
-						response.put("response", temp);
-
-						logger.info(response);
-						assert (true);
-					} catch (UndefinedCollectionException e) {
-						JSONObject error = new JSONObject();
-						JSONObject response = new JSONObject();
-						error.put("message", e.getMessage());
-						error.put("code", e.getErrorCode());
-						error.put("stackTrace", e.getStackTrace());
-
-						JSONObject temp = new JSONObject();
-						temp.put("error", error);
-						response.put("response", temp);
-
-						logger.info(response);
-						assert (true);
-					} catch (DeleteDocumentException e) {
-						JSONObject error = new JSONObject();
-						JSONObject response = new JSONObject();
-						error.put("message", e.getMessage());
-						error.put("code", e.getErrorCode());
-						error.put("stackTrace", e.getStackTrace());
-
-						JSONObject temp = new JSONObject();
-						temp.put("error", error);
-						response.put("response", temp);
-
-						logger.info(response);
-						throw e;
 					} catch (MongoException m) // while dropping Db
 					{
-						DocumentException e = new DocumentException(
-								ErrorCodes.DOCUMENT_CREATION_EXCEPTION,
-								"DOCUMENT_CREATION_EXCEPTION", m.getCause());
-						JSONObject error = new JSONObject();
-						JSONObject response = new JSONObject();
-						error.put("message", e.getMessage());
-						error.put("code", e.getErrorCode());
-						error.put("stackTrace", e.getStackTrace());
-
-						JSONObject temp = new JSONObject();
-						temp.put("error", error);
-						response.put("response", temp);
-
-						logger.info(response);
+						DeleteDocumentException e = new DeleteDocumentException(
+								"Error Testing Document delete", m.getCause());
+						formErrorResponse(logger, e.getMessage(),
+								e.getErrorCode(), e.getStackTrace(), "ERROR");
 						throw e;
 					}
+			}
+			if (logger.isInfoEnabled()) {
+				logger.info("Test Completed");
 			}
 		}
 	}

@@ -1,3 +1,18 @@
+/*
+ * Copyright (c) 2011 Imaginea Technologies Private Ltd.
+ * Hyderabad, India
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 YUI({
     filter: 'raw'
 }).use("io-base", "node", "json-parse", "utility", function (Y) {
@@ -7,19 +22,7 @@ YUI({
     var combinedChart;
     var chartOptions = "<table width='30%'>";
     chartOptions += "<tr>";
-    chartOptions += "<td style='color:#FF4848;font-weight:bold'>Query/Sec:</td>";
-    chartOptions += "</tr>";
-    chartOptions += "<tr>";
-    chartOptions += "<td style='color:#AE70ED;font-weight:bold'>Update/Sec:</td>";
-    chartOptions += "</tr>";
-    chartOptions += "<tr>";
-    chartOptions += "<td style='color:#62D0FF;font-weight:bold'>Delete/Sec:</td>";
-    chartOptions += "</tr>";
-    chartOptions += "<tr>";
-    chartOptions += "<td style='color:#2DC800;font-weight:bold'>Insert/Sec:</td>";
-    chartOptions += "</tr>";
-    chartOptions += "<tr>";
-    chartOptions += "<td><button id='animation' class='button'>Stop Animation</button></td>";
+    chartOptions += "<td><button id='animation' class='btn'>Stop Animation</button></td>";
     chartOptions += "</tr>";
     chartOptions += "</table>";
     var drawChart = function () {
@@ -131,6 +134,7 @@ YUI({
                     combinedChart._loadDataHandler.apply(combinedChart, arguments);
                 },
                 failure: function () {
+                    alert("Polling failure for getting Graph info");
                     Y.log("Polling failure for getting Graph info", "error");
                 }
             };

@@ -1,35 +1,22 @@
 /*
  * Copyright (c) 2011 Imaginea Technologies Private Ltd.
  * Hyderabad, India
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following condition
- * is met:
- *
- *     + Neither the name of Imaginea, nor the
- *       names of its contributors may be used to endorse or promote
- *       products derived from this software.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
- * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE REGENTS OR
- * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
- * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
- * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
- * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
- * LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
- * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 package com.imaginea.mongodb.services;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Set;
 
 import org.bson.types.ObjectId;
 import org.json.JSONException;
@@ -69,7 +56,6 @@ import com.mongodb.MongoException;
  * 
  */
 
-// TODO check update
 public class DocumentServiceImpl implements DocumentService {
 	/**
 	 * Instance variable used to get a mongo instance after binding to an
@@ -265,11 +251,22 @@ public class DocumentServiceImpl implements DocumentService {
 						+ dbName + "]");
 			}
 
+			// _id also provided by user
+			if (document.get("_id") != null) {
+				String temp = (String) document.get("_id");
+				ObjectId id = new ObjectId(temp);
+				document.put("_id", id); // Putting object id instead of string
+											// which is there
+			}
 			// MongoDb permits Duplicate document Insert
 
 			mongoInstance.getDB(dbName).getCollection(collectionName)
 					.insert(document);
 			result = "Inserted Document with Data : [" + document + "]";
+		} catch (IllegalArgumentException e) {
+			// When error converting object Id
+			throw new DocumentException(ErrorCodes.INVALID_OBJECT_ID,
+					"INVALID_OBJECT_ID");
 		} catch (MongoException e) {
 			throw new InsertDocumentException("DOCUMENT_CREATION_EXCEPTION",
 					e.getCause());
@@ -352,76 +349,42 @@ public class DocumentServiceImpl implements DocumentService {
 			if (id == null) {
 				throw new EmptyDocumentDataException("Document is empty");
 			}
+
 			String temp = (String) newData.get("_id");
 			if (temp == null) {
 				throw new DocumentException(ErrorCodes.INVALID_OBJECT_ID,
 						"INVALID_OBJECT_ID");
 			}
-			ObjectId newId = new ObjectId(temp);
-			if (newId.equals("")) {
+			if (temp.equals("")) {
 				throw new DocumentException(ErrorCodes.INVALID_OBJECT_ID,
 						"INVALID_OBJECT_ID");
 			}
 
+			ObjectId newId = new ObjectId(temp);
+			if (!newId.equals(id)) {
+				throw new DocumentException(ErrorCodes.INVALID_OBJECT_ID,
+						"Cannot Change Object Id of a document");
+			} else {
+				// Id's equal but putting the id of old document still
+				// as newData as id of string type but we need ObjectId type
+				newData.put("_id", id);
+			}
 			DBObject query = new BasicDBObject("_id", id);
+
 			DBCollection collection = mongoInstance.getDB(dbName)
 					.getCollection(collectionName);
-			DBCursor cursor = collection.find(query);
-
-			if (cursor.hasNext()) {
-				documentData = cursor.next(); // _id is primary key so "if" used
-
-				// execution only
-			} else {
-				throw new UndefinedDocumentException("DOCUMENT_DOES_NOT_EXIST"
-						+ cursor.hasNext());
+			DBObject doc = collection.findOne(query);
+			if (doc == null) {
+				throw new UndefinedDocumentException("DOCUMENT_DOES_NOT_EXIST");
 			}
 
-			// Extract data from Request Body
-			Set<String> keySet = newData.keySet();
-			Iterator<String> keyIterator = keySet.iterator();
+			collection.update(doc, newData, true, false);
+			documentData = collection.findOne(query);
 
-			BasicDBObject set = new BasicDBObject();
-			DBObject newValues = new BasicDBObject();
-
-			// Updates and add new fields
-			while (keyIterator.hasNext()) {
-				String key = keyIterator.next();
-				newValues = new BasicDBObject(key, newData.get(key));
-				set.put("$set", newValues);
-				mongoInstance.getDB(dbName).getCollection(collectionName)
-						.update(query, set);
-			}
-
-			// Get New Document
-			query = new BasicDBObject("_id", newId);
-			collection = mongoInstance.getDB(dbName).getCollection(
-					collectionName);
-			cursor = collection.find(query);
-
-			DBObject doc = new BasicDBObject();
-			if (cursor.hasNext()) {
-				documentData = cursor.next();
-				doc = documentData;
-			}
-
-			// Remove Old Fields
-			keySet = documentData.keySet();
-			Set<String> deleteKeys = new HashSet<String>();
-			keyIterator = keySet.iterator();
-			while (keyIterator.hasNext()) {
-				String key = keyIterator.next();
-
-				if (newData.get(key) == null) {
-					deleteKeys.add(key);
-				}
-			}
-			for(String key : deleteKeys)
-			{
-				documentData.removeField(key);
-			} 
-			collection.remove(doc);
-			collection.insert(documentData);
+		} catch (IllegalArgumentException e) {
+			// When error converting object Id
+			throw new DocumentException(ErrorCodes.INVALID_OBJECT_ID,
+					"INVALID_OBJECT_ID");
 
 		} catch (MongoException e) {
 			throw new UpdateDocumentException("DOCUMENT_UPDATE_EXCEPTION");
@@ -503,16 +466,14 @@ public class DocumentServiceImpl implements DocumentService {
 			if (id == null) {
 				throw new EmptyDocumentDataException("Document is empty");
 			}
-
+ 
 			DBObject query = new BasicDBObject();
-			query.put("_id", id);
+			query.put("_id", id); 
 			DBCollection collection = this.mongoInstance.getDB(dbName)
 					.getCollection(collectionName);
-			DBCursor cursor = collection.find(query);
+			documentData= collection.findOne(query);
 
-			if (cursor.hasNext()) {
-				documentData = cursor.next();
-			} else {
+			if (documentData==null) { 
 				throw new UndefinedDocumentException("DOCUMENT_DOES_NOT_EXIST");
 			}
 

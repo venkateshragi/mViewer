@@ -23,6 +23,7 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 package com.imaginea.mongodb.common.exceptions;
+ 
 
 /**
  * Defines Error Codes for Exceptions thrown in MongoDb while performing
@@ -72,5 +73,6 @@ public interface ErrorCodes {
 	String IO_EXCEPTION = "IO_EXCEPTION";
 	// In Graph
 	String ERROR_PARSING_POLLING_INTERVAL  = "ERROR_PARSING_POLLING_INTERVAL";
+	String  LOGGING_LEVEL_UNDEFINED = "LOGGING_LEVEL_UNDEFINED";
 
 }

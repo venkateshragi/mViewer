@@ -37,8 +37,7 @@ package com.imaginea.mongodb.common.exceptions;
  * @author Rachit Mittal
  *
  */
-public class DatabaseException extends RuntimeException {//TODO should not extend com.mongodb exceptions
-	//TODO read about runtime and checked exceptions
+public class DatabaseException extends Exception {  
 
 	private static final long serialVersionUID = 1L;
 

@@ -37,7 +37,7 @@ package com.imaginea.mongodb.common.exceptions;
  * @author Rachit Mittal
  *
  */
-public class CollectionException extends RuntimeException {
+public class CollectionException extends Exception {
 
 	private static final long serialVersionUID = 1L;
 

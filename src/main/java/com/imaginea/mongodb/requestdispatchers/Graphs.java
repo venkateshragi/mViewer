@@ -1,37 +1,28 @@
 /*
  * Copyright (c) 2011 Imaginea Technologies Private Ltd.
  * Hyderabad, India
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following condition
- * is met:
- *
- *     + Neither the name of Imaginea, nor the
- *       names of its contributors may be used to endorse or promote
- *       products derived from this software.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
- * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE REGENTS OR
- * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
- * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
- * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
- * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
- * LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
- * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package com.imaginea.mongodb.requestdispatchers;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.io.IOException;
+import java.io.PrintWriter;
 
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.Context;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 import org.apache.log4j.Logger;
 import org.json.JSONArray;
@@ -40,218 +31,242 @@ import org.json.JSONObject;
 
 import com.imaginea.mongodb.common.DateProvider;
 import com.imaginea.mongodb.common.exceptions.ErrorCodes;
+import com.imaginea.mongodb.common.exceptions.InvalidHTTPRequestException;
 import com.mongodb.BasicDBObject;
 import com.mongodb.CommandResult;
+import com.mongodb.DB;
 import com.mongodb.Mongo;
-import com.mongodb.MongoException;
 
 /**
  * Return values of queries,updates,inserts and deletes being performed on Mongo
- * Db per second.
+ * Db per sec.
  * 
- * @author Rachit Mittal
- * @since 16 July 2011
+ * @author Aditya Gaur, Rachit Mittal
  */
-@Path("/graphs")
-public class Graphs extends BaseRequestDispatcher {
-	private static final long serialVersionUID = 1L;
+public class Graphs extends HttpServlet {
+	private static final long serialVersionUID = -1539358875210511143L;
 
+	private static JSONArray array;
+	private static int num = 0;
+
+	// TODO For multiple users - static variable do not work. So static variable
+	// per mongoHost
 	/**
-	 * Number of records to be shown on graph
+	 * Keep the record of last values.
 	 */
-	public int maxLen = 20;
+	private static int lastNoOfQueries = 0;
+	private static int lastNoOfInserts = 0;
+	private static int lastNoOfUpdates = 0;
+	private static int lastNoOfDeletes = 0;
+	int maxLen = 20;
+	int jump = 1;
 
-	/**
-	 * Keep the record of last values. These Maps are destroyed as user logs out
-	 * from the application.
-	 */
-
-	public static Map<String, Integer> userToQueriesMap = new HashMap<String, Integer>();
-	public static Map<String, Integer> userToInsertsMap = new HashMap<String, Integer>();
-	public static Map<String, Integer> userToUpdatesMap = new HashMap<String, Integer>();
-	public static Map<String, Integer> userToDeletesMap = new HashMap<String, Integer>();
-	public static Map<String, JSONArray> userTOResponseMap = new HashMap<String, JSONArray>();
-	public static Map<String, Integer> userToPollingIntervalMap = new HashMap<String, Integer>();
-	public static Map<String, Integer> userToTimeStampMap = new HashMap<String, Integer>();
 	private static Logger logger = Logger.getLogger(Graphs.class);
 
 	/**
+	 * Constructor for Servlet and also configures Logger.
 	 * 
-	 * Gets Initialise Request for a Graph ans sets values for queries,inserts
-	 * and updates performed for a mongo Server for a particular user.
-	 * 
-	 * @param interval
-	 *            Polling interval after which each query request is made ( in
-	 *            seconds)
-	 * 
-	 * @param tokenId
-	 *            token Id of user
-	 * @param request
-	 *            Graph initialization request by user.
-	 * @return : Status of Initialization
+	 * @throws IOException
+	 *             If Log file cannot be written
 	 */
-	@GET
-	@Path("/initiate")
-	public String processInitiate(
-			@QueryParam("pollingTime") String interval,
-			@QueryParam("tokenId") String tokenId,
-			@Context HttpServletRequest request) {
-
-		if (logger.isInfoEnabled()) {
-			logger.info("New Graphs Initiate Request [ "
-					+ DateProvider.getDateTime());
-		}
-
-		String response = null;
-		try {
-			response = validateTokenId(tokenId, logger, request);
-			if (response != null) {
-				return response;
-			}
-			// Get user for this tokenId
-			String userMappingkey = UserLogin.tokenIDToUserMapping.get(tokenId);
-			if (userMappingkey == null) {
-				return formErrorResponse(logger, "User not mapped to token Id",
-						ErrorCodes.INVALID_USER, null, "FATAL");
-			}
-			Mongo m = UserLogin.userToMongoInstanceMapping.get(userMappingkey);
-			CommandResult cr = m.getDB("admin").command("serverStatus");
-			BasicDBObject obj = (BasicDBObject) cr.get("opcounters");
-			Integer queries = (Integer) obj.get("query");
-			Integer inserts = (Integer) obj.get("insert");
-			Integer updates = (Integer) obj.get("update");
-			Integer deletes = (Integer) obj.get("delete");
-
-			userToQueriesMap.put(userMappingkey, queries);
-			userToInsertsMap.put(userMappingkey, inserts);
-			userToUpdatesMap.put(userMappingkey, updates);
-			userToDeletesMap.put(userMappingkey, deletes);
-
-			userToPollingIntervalMap.put(userMappingkey,
-					Integer.parseInt(interval));
-			userTOResponseMap.put(userMappingkey, new JSONArray());
-			userToTimeStampMap.put(userMappingkey, 0);
-
-			JSONObject temp = new JSONObject();
-			JSONObject resp = new JSONObject();
-			temp.put("result", "Initiated");
-			resp.put("response", temp);
-			response = resp.toString();
-			if (logger.isInfoEnabled()) {
-				logger.info("Initiated [ " + DateProvider.getDateTime());
-			}
-
-		} catch (NumberFormatException e) {
-			response = formErrorResponse(logger, e.getMessage(),
-					ErrorCodes.ERROR_PARSING_POLLING_INTERVAL,
-					e.getStackTrace(), "ERROR");
-		} catch (JSONException e) {
-			response = formErrorResponse(logger, e.getMessage(),
-					ErrorCodes.JSON_EXCEPTION, e.getStackTrace(), "ERROR");
-		} catch (MongoException e) {
-			response = formErrorResponse(logger, e.getMessage(),
-					ErrorCodes.ERROR_INITIATING_GRAPH, e.getStackTrace(),
-					"ERROR");
-		} catch (Exception e) {
-			response = formErrorResponse(logger, e.getMessage(),
-					ErrorCodes.ANY_OTHER_EXCEPTION, e.getStackTrace(), "ERROR");
-
-		}
-		return response;
+	public Graphs() throws IOException {
+		super();
 	}
 
 	/**
-	 * Process query request made after polling interval time set at
-	 * initialization time
+	 * Handles the HTTP <code>GET</code> method.
 	 * 
-	 * @param tokenId
-	 *            token Id of user
 	 * @param request
-	 *            Graph initialization request by user.
-	 * @return Server stats of opcounters key
+	 *            servlet request
+	 * @param response
+	 *            servlet response
+	 * @throws ServletException
+	 *             if a servlet-specific error occurs
+	 * @throws IOException
+	 *             if an I/O error occurs
 	 */
-	@GET
-	@Path("/query")
-	public String processQuery(@QueryParam("tokenId") String tokenId,
-			@Context HttpServletRequest request) {
-		if (logger.isInfoEnabled()) {
-			logger.info("New Graphs Query Request [ "
-					+ DateProvider.getDateTime());
-		}
+	@Override
+	protected void doGet(HttpServletRequest request,
+			HttpServletResponse response) throws ServletException, IOException {
 
-		String response = null;
+		logger.info("Graphs Request Recieved [" + DateProvider.getDateTime()
+				+ "]");
+
+		// Declare Response Objects and PrintWriter
+		response.setContentType("application/x-json");
+		JSONObject respObj = new JSONObject();
+		PrintWriter out = response.getWriter();
+
+		// Error JSON Object to be sent in case of any exception caught
+		JSONObject error = new JSONObject();
+		String tokenId = request.getParameter("tokenId");
+
+		logger.info("Token Id : [" + tokenId + "]");
+
 		try {
-			response = validateTokenId(tokenId, logger, request);
-			if (response != null) {
-				return response;
-			}
-			// Get user for this tokenId
-			String userMappingkey = UserLogin.tokenIDToUserMapping.get(tokenId);
-			if (userMappingkey == null) {
-				return formErrorResponse(logger, "User not mapped to token Id",
-						ErrorCodes.INVALID_USER, null, "FATAL");
-			}
-			Mongo m = UserLogin.userToMongoInstanceMapping.get(userMappingkey);
-			CommandResult cr = m.getDB("admin").command("serverStatus");
-			BasicDBObject obj = (BasicDBObject) cr.get("opcounters");
+			if (tokenId == null) {
+				InvalidHTTPRequestException e = new InvalidHTTPRequestException(
+						ErrorCodes.TOKEN_ID_ABSENT, "Token Id not provided");
 
-			JSONObject resp = new JSONObject();
-			JSONObject temp = new JSONObject();
+				error.put("message", e.getMessage());
+				error.put("code", e.getErrorCode());
+				logger.fatal(error);
 
-			Integer timeStamp = userToTimeStampMap.get(userMappingkey)
-					+ userToPollingIntervalMap.get(userMappingkey);
-			userToTimeStampMap.put(userMappingkey, timeStamp);
-			temp.put("TimeStamp", timeStamp);
+				JSONObject temp = new JSONObject();
+				temp.put("error", error);
+				respObj.put("response", temp);
 
-			Integer oldQueries = userToQueriesMap.get(userMappingkey);
-			Integer newQueries = (Integer) obj.get("query");
-			userToQueriesMap.put(userMappingkey, newQueries);
-			temp.put("QueryValue", newQueries - oldQueries);
+			} else {
 
-			Integer oldInserts = userToInsertsMap.get(userMappingkey);
-			Integer newInserts = (Integer) obj.get("insert");
-			userToInsertsMap.put(userMappingkey, newInserts);
-			temp.put("InsertValue", newInserts - oldInserts);
+				// Check if tokenId is in session
+				HttpSession session = request.getSession();
 
-			Integer oldUpdates = userToUpdatesMap.get(userMappingkey);
-			Integer newUpdates = (Integer) obj.get("update");
-			userToUpdatesMap.put(userMappingkey, newUpdates);
-			temp.put("UpdateValue", newUpdates - oldUpdates);
+				if (session.getAttribute("tokenId") == null) {
+					InvalidHTTPRequestException e = new InvalidHTTPRequestException(
+							ErrorCodes.INVALID_SESSION,
+							"Session Expired(Token Id not set in session).");
+					error.put("message", e.getMessage());
+					error.put("code", e.getErrorCode());
 
-			Integer oldDeletes = userToDeletesMap.get(userMappingkey);
-			Integer newDeletes = (Integer) obj.get("delete");
-			userToDeletesMap.put(userMappingkey, newDeletes);
-			temp.put("DeleteValue", newDeletes - oldDeletes);
+					logger.fatal(error);
+					JSONObject temp = new JSONObject();
+					temp.put("error", error);
+					respObj.put("response", temp);
+				} else {
+					if (!session.getAttribute("tokenId").equals(tokenId)) {
+						InvalidHTTPRequestException e = new InvalidHTTPRequestException(
+								ErrorCodes.INVALID_SESSION,
+								"Invalid Session(Token Id does not match with the one in session)");
+						error.put("message", e.getMessage());
+						error.put("code", e.getErrorCode());
 
-			JSONArray array = userTOResponseMap.get(userMappingkey);
-			// Shift the values by one after 20 records reached
-			if (array.length() == maxLen) {
-				JSONArray tempArray = new JSONArray();
-				for (int i = 1; i < maxLen; i++) {
-					tempArray.put(array.get(i));
+						logger.fatal(error);
+						JSONObject temp = new JSONObject();
+						temp.put("error", error);
+						respObj.put("response", temp);
+
+					} else {
+						// Present in Session
+						String user = UserLogin.tokenIDToUserMapping
+								.get(tokenId);
+						Mongo mongoInstance = UserLogin.userToMongoInstanceMapping
+								.get(user);
+						// Need a Db to get ServerStats
+						DB db = mongoInstance.getDB("admin");
+						String uri = request.getRequestURI();
+						JSONObject temp = new JSONObject();
+						if (uri != null) {
+							if (uri.substring(uri.lastIndexOf('/')).equals(
+									"/query")) {
+								temp = processQuery(db);
+							} else if (uri.substring(uri.lastIndexOf('/'))
+									.equals("/initiate")) {
+								if (request.getParameter("pollingTime") != null) {
+									jump = Integer.parseInt(request
+											.getParameter("pollingTime"));
+								}
+								temp = processInitiate(db);
+							}
+
+							respObj.put("response", temp);
+						}
+						logger.info("Response: [" + respObj + "]");
+
+						out.print(respObj);
+					}
 				}
-				array = tempArray;
-			}
-			array.put(temp);
-			userTOResponseMap.put(userMappingkey, array);
-			resp.put("result", array);
-			response = resp.toString();
-			if (logger.isInfoEnabled()) {
-				logger.info("Query Send [ " + DateProvider.getDateTime());
 			}
 		} catch (JSONException e) {
-			response = formErrorResponse(logger, e.getMessage(),
-					ErrorCodes.JSON_EXCEPTION, e.getStackTrace(), "ERROR");
-		} catch (MongoException e) {
-			response = formErrorResponse(logger, e.getMessage(),
-					ErrorCodes.ERROR_INITIATING_GRAPH, e.getStackTrace(),
-					"ERROR");
-		} catch (Exception e) {
-			response = formErrorResponse(logger, e.getMessage(),
-					ErrorCodes.ANY_OTHER_EXCEPTION, e.getStackTrace(), "ERROR");
+			ServletException s = new ServletException(
+					"Error forming JSON Response", e.getCause());
+			logger.error("Exception");
+			logger.error("Message:  [ " + s.getMessage() + "]");
+			logger.error("StackTrace: " + s.getStackTrace() + "]");
 
+			throw s;
 		}
-		return response;
 	}
 
+	/**
+	 * Process <opcounters> query request made after each second by Front end
+	 * 
+	 * @param db
+	 *            : Db Name to egt Server Stats <admin>
+	 * @return Server stats of <opcounters> key
+	 * @throws IOException
+	 * @throws JSONException
+	 */
+	private JSONObject processQuery(DB db) throws IOException, JSONException {
+
+		CommandResult cr = db.command("serverStatus");
+		BasicDBObject obj = (BasicDBObject) cr.get("opcounters");
+		int currentValue;
+		JSONObject respObj = new JSONObject();
+		JSONObject temp = new JSONObject();
+
+		num = num + jump;
+		temp.put("TimeStamp", num);
+		currentValue = (Integer) obj.get("query");
+		temp.put("QueryValue", currentValue - lastNoOfQueries);
+		lastNoOfQueries = currentValue;
+		currentValue = (Integer) obj.get("insert");
+		temp.put("InsertValue", currentValue - lastNoOfInserts);
+		lastNoOfInserts = currentValue;
+		currentValue = (Integer) obj.get("update");
+		temp.put("UpdateValue", currentValue - lastNoOfUpdates);
+		lastNoOfUpdates = currentValue;
+		currentValue = (Integer) obj.get("delete");
+		temp.put("DeleteValue", currentValue - lastNoOfDeletes);
+		lastNoOfDeletes = currentValue;
+
+		if (array.length() == maxLen) {
+			JSONArray tempArray = new JSONArray();
+			for (int i = 1; i < maxLen; i++) {
+				tempArray.put(array.get(i));
+			}
+			array = tempArray;
+		}
+		array.put(temp);
+		respObj.put("result", array);
+
+		return respObj;
+	}
+
+	/**
+	 * 
+	 * Initialize by previous <opcounter> value.
+	 * 
+	 * @param db
+	 *            : Name of Database
+	 * @return : Status of Initialization
+	 * @throws RuntimeException
+	 */
+
+	private JSONObject processInitiate(DB db) throws RuntimeException,
+			JSONException {
+
+		JSONObject respObj = new JSONObject();
+		array = new JSONArray();
+		num = 0;
+		try {
+
+			CommandResult cr = db.command("serverStatus");
+			BasicDBObject obj = (BasicDBObject) cr.get("opcounters");
+			lastNoOfQueries = (Integer) obj.get("query");
+			lastNoOfInserts = (Integer) obj.get("insert");
+			lastNoOfUpdates = (Integer) obj.get("update");
+			lastNoOfDeletes = (Integer) obj.get("delete");
+
+			respObj.put("result", "Initiated");
+		} catch (Exception e) {
+			// Invalid User
+			JSONObject error = new JSONObject();
+			error.put("message", e.getMessage());
+			error.put("code", ErrorCodes.ERROR_INITIATING_GRAPH);
+
+			respObj.put("error", error);
+			logger.info(respObj);
+		}
+		return respObj;
+	}
 }

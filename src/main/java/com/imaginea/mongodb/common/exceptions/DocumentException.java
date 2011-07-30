@@ -38,7 +38,7 @@ package com.imaginea.mongodb.common.exceptions;
  * @author Rachit Mittal
  *
  */
-public class DocumentException extends RuntimeException {
+public class DocumentException extends Exception {
 
 	private static final long serialVersionUID = 1L;
 

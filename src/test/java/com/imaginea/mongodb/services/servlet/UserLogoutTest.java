@@ -27,40 +27,40 @@ package com.imaginea.mongodb.services.servlet;
 import static org.junit.Assert.*;
 
 import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import javax.servlet.ServletException;
-
-import org.apache.log4j.FileAppender;
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
-import org.apache.log4j.SimpleLayout;
-import org.json.JSONException;
-import org.json.JSONObject;
+import java.io.IOException; 
+ 
+import org.apache.log4j.Logger; 
+import org.json.JSONException; 
 import org.junit.Before;
 import org.junit.Test;
-import org.springframework.mock.web.MockHttpServletRequest;
-import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.mock.web.MockHttpServletRequest; 
 import org.springframework.mock.web.MockHttpSession;
 
 import com.imaginea.mongodb.common.ConfigMongoInstanceProvider;
 import com.imaginea.mongodb.common.MongoInstanceProvider;
 import com.imaginea.mongodb.common.exceptions.ErrorCodes;
 import com.imaginea.mongodb.common.exceptions.MongoHostUnknownException;
-import com.mongodb.Mongo;
-import com.mongodb.MongoException;
+import com.imaginea.mongodb.requestdispatchers.BaseRequestDispatcher;
+import com.imaginea.mongodb.requestdispatchers.UserLogin;
+import com.imaginea.mongodb.requestdispatchers.UserLogout;
+import com.mongodb.Mongo; 
 
 /**
- * Tests the UserLogout Servlet functionality. Here we will register a user
- * first and then will check if logout invalidates a user's tokenId.
- *
+ * Tests the GET request made by user to logout from the application. Here we
+ * will register a user first and then will check if logout invalidates a user's
+ * tokenId.
+ * 
+ * @author Rachit Mittal
+ * @since 15 July 2011
  */
-public class UserLogoutTest {
+public class UserLogoutTest extends BaseRequestDispatcher {
+	private MongoInstanceProvider mongoInstanceProvider;
+	private Mongo mongoInstance;
 
 	/**
 	 * Class to be tested
 	 */
-	private UserLogout testClassObj;
+	private UserLogout testLogoutResource;
 
 	/**
 	 * Logger object
@@ -70,161 +70,67 @@ public class UserLogoutTest {
 	private String testTokenId = "123212178917845678910910";
 	private String testUserMapping = "user";
 
-	/**
-	 * Configure Logger.
-	 *
-	 * @throws IOException
-	 * @throws FileNotFoundException
-	 * @throws JSONException
-	 */
-
-	public UserLogoutTest() throws IOException, FileNotFoundException,
-			JSONException {
-		super();
+	public UserLogoutTest() throws MongoHostUnknownException, IOException, FileNotFoundException, JSONException {
 		try {
-			// TODO Configure by file
-			SimpleLayout layout = new SimpleLayout();
-			FileAppender appender = new FileAppender(layout,
-					"logs/LogoutTestLogs.txt", true);
 
-			logger.setLevel(Level.INFO);
-			logger.addAppender(appender);
+			mongoInstanceProvider = new ConfigMongoInstanceProvider();
 
 		} catch (FileNotFoundException e) {
-			JSONObject error = new JSONObject();
-			error.put("message", e.getMessage());
-			error.put("code", "FILE_NOT_FOUND_EXCEPTION");
-			error.put("stackTrace", e.getStackTrace());
+			formErrorResponse(logger, e.getMessage(), ErrorCodes.FILE_NOT_FOUND_EXCEPTION, e.getStackTrace(), "ERROR");
+			throw e;
 
-			JSONObject temp = new JSONObject();
-			temp.put("error", error);
-			JSONObject response = new JSONObject();
-			response.put("response", temp);
-
-			logger.info(response.toString());
+		} catch (MongoHostUnknownException e) {
+			formErrorResponse(logger, e.getMessage(), e.getErrorCode(), e.getStackTrace(), "ERROR");
+			throw e;
 
 		} catch (IOException e) {
-			JSONObject error = new JSONObject();
-			error.put("message", e.getMessage());
-			error.put("code", "IO_EXCEPTION");
-			error.put("stackTrace", e.getStackTrace());
-
-			JSONObject temp = new JSONObject();
-			temp.put("error", error);
-			JSONObject response = new JSONObject();
-			response.put("response", temp);
-			logger.info(response.toString());
+			formErrorResponse(logger, e.getMessage(), ErrorCodes.IO_EXCEPTION, e.getStackTrace(), "ERROR");
 		}
 
 	}
 
 	/**
-	 * Sets up the test enviornment
-	 *
-	 * @throws Exception
+	 * Instantiates the class UserLogin which is to be tested and also gets a
+	 * mongo instance from mongo instance provider.
 	 */
 	@Before
-	public void setUpTestEnvironment() throws IOException, JSONException {
-		try {
-			testClassObj = new UserLogout();
-
-		} catch (IOException e) {
-			JSONObject error = new JSONObject();
-			error.put("message", e.getMessage());
-			error.put("code", "IO_EXCEPTION");
-			error.put("stackTrace", e.getStackTrace());
-
-			JSONObject temp = new JSONObject();
-			temp.put("error", error);
-			JSONObject response = new JSONObject();
-			response.put("response", temp);
-			logger.info(response.toString());
-		}
+	public void setUpTestEnvironment() {
+		testLogoutResource = new UserLogout();
+		mongoInstance = mongoInstanceProvider.getMongoInstance();
 	}
 
 	/**
-	 * Test GET Request made by User to UserLogout.
-	 *
-	 * @throws MongoHostUnknownException
+	 * Test GET Request made by User to logout from the application.
+	 * 
 	 */
 	@Test
-	public void testUserLoginRequest() throws JSONException,
-			MongoHostUnknownException {
-		logger.info("Testing Get Request for User Logout");
-
-		try {
+	public void testUserLoginRequest() {
+		if (logger.isInfoEnabled()) {
+			logger.info("Testing Get Request for User Logout");
 			logger.info(" Insert a testTokenId in user mapping table");
-			UserLogin.tokenIDToUserMapping.put(testTokenId, testUserMapping);
-			logger.info(" Insert a Mongo instance for this  user in mapping table");
-			MongoInstanceProvider m = new ConfigMongoInstanceProvider();
-			Mongo mongoInstance = m.getMongoInstance();
-			UserLogin.userToMongoInstanceMapping.put(testUserMapping,
-					mongoInstance);
+		}
 
-			// Dummy request create.
-			String URI = "http://localhost:8080/MongoViewer/logout";
-			logger.info("URL: " + URI);
-			MockHttpServletRequest request = new MockHttpServletRequest("GET",
-					URI);
-			request.addParameter("tokenId", testTokenId);
-			MockHttpSession session = new MockHttpSession();
-			session.setAttribute("tokenId", testTokenId);
-			request.setSession(session);
+		UserLogin.tokenIDToUserMapping.put(testTokenId, testUserMapping);
+		if (logger.isInfoEnabled()) {
+			logger.info(" Insert a Mongo instance for this user in mapping table");
+		}
 
-			MockHttpServletResponse response = new MockHttpServletResponse();
+		UserLogin.userToMongoInstanceMapping.put(testUserMapping, mongoInstance);
 
-			testClassObj.doGet(request, response);
-			logger.info("After Logout mapping Value of Token Id: "
-					+ UserLogin.tokenIDToUserMapping.get(testTokenId));
-			assertNull(UserLogin.tokenIDToUserMapping.get(testTokenId));
+		MockHttpSession session = new MockHttpSession();
+		session.setAttribute("tokenId", testTokenId);
+		MockHttpServletRequest request = new MockHttpServletRequest();
+		request.setSession(session);
 
+		testLogoutResource.doGet(testTokenId, request);
+
+		if (logger.isInfoEnabled()) {
+			logger.info("After Logout mapping Value of Token Id: " + UserLogin.tokenIDToUserMapping.get(testTokenId));
+		}
+		assertNull(UserLogin.tokenIDToUserMapping.get(testTokenId));
+
+		if (logger.isInfoEnabled()) {
 			logger.info("Test Completed");
-
-		} catch (MongoException m) {
-
-			JSONObject error = new JSONObject();
-			error.put("message", m.getMessage());
-			error.put("code", ErrorCodes.DOCUMENT_CREATION_EXCEPTION);
-			error.put("stackTrace", m.getStackTrace());
-
-			JSONObject temp = new JSONObject();
-			temp.put("error", error);
-			JSONObject response = new JSONObject();
-			response.put("response", temp);
-			logger.info(response.toString());
-		} catch (ServletException e) {
-			JSONObject error = new JSONObject();
-			error.put("message", e.getMessage());
-			error.put("code", "SERVLET_EXCEPTION");
-			error.put("stackTrace", e.getStackTrace());
-
-			JSONObject temp = new JSONObject();
-			temp.put("error", error);
-			JSONObject response = new JSONObject();
-			response.put("response", temp);
-			logger.info(response.toString());
-		} catch (UnsupportedEncodingException e) {
-			JSONObject error = new JSONObject();
-			error.put("message", e.getMessage());
-			error.put("code", "UNSUPPORTED_ENCODING_EXCEPTION");
-			error.put("stackTrace", e.getStackTrace());
-
-			JSONObject temp = new JSONObject();
-			temp.put("error", error);
-			JSONObject response = new JSONObject();
-			response.put("response", temp);
-			logger.info(response.toString());
-		} catch (IOException e) {
-			JSONObject error = new JSONObject();
-			error.put("message", e.getMessage());
-			error.put("code", "IO_EXCEPTION");
-			error.put("stackTrace", e.getStackTrace());
-
-			JSONObject temp = new JSONObject();
-			temp.put("error", error);
-			JSONObject response = new JSONObject();
-			response.put("response", temp);
-			logger.info(response.toString());
 		}
 
 	}

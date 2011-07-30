@@ -1,5 +1,6 @@
 <project name="mViewer" default="dist" xmlns:ac="antlib:net.sf.antcontrib" xmlns:jsl="antlib:com.googlecode.jslint4java">
 
+
 	<property name="app.name" value="mViewer" />
 	<property name="app.war" value="${app.name}.war" />
 	<property name="app.jar" value="${app.name}.jar" />
@@ -11,21 +12,23 @@
 
 	<property name="staging.dir" value="${basedir}/staging" />
 	<property name="classes.dir" value="${staging.dir}/classes" />
-	<property name="app.dir" value="${staging.dir}/${app.name}" /> 
-	<!-- Test Logs and Test Reports -->
-	<property name="test.logs.dir" value="${basedir}/logs" />
+	<property name="test.classes.dir" value="${basedir}/dist/testclasses" />
+	<property name="app.dir" value="${staging.dir}/${app.name}" />
+
+	<!-- Test Reports -->
+	<property name="test.reports.dir" value="${basedir}/testreports" />
 	<property name="test.dir" value="${src.dir}/test" />
 
 
-	<taskdef uri="antlib:net.sf.antcontrib" resource="net/sf/antcontrib/antlib.xml" classpath=" ${src.dir}/plugin/ant-contrib.jar" />
+	<taskdef uri="antlib:net.sf.antcontrib" resource="net/sf/antcontrib/antlib.xml" classpath=" ${src.dir}/tools/ant-contrib.jar" />
 
-	<taskdef uri="antlib:com.googlecode.jslint4java" resource="com/googlecode/jslint4java/antlib.xml" classpath="${src.dir}/plugin/jslint4java.jar" />
+	<taskdef uri="antlib:com.googlecode.jslint4java" resource="com/googlecode/jslint4java/antlib.xml" classpath="${src.dir}/tools/jslint4java.jar" />
 
-	<taskdef name="jsdoctoolkit" classname="uk.co.darrenhurley.ant.tasks.JsDocToolkit" classpath="${src.dir}/plugin/jsdoc-toolkit-ant-task-1.1.2.jar;${src.dir}/plugin/jsdoc-toolkit/jsrun.jar" />
+	<taskdef name="jsdoctoolkit" classname="uk.co.darrenhurley.ant.tasks.JsDocToolkit" classpath="${src.dir}/tools/jsdoc-toolkit-ant-task-1.1.2.jar;${src.dir}/tools/jsdoc-toolkit/jsrun.jar" />
 
 
 
-	<jsdoctoolkit jsdochome="${src.dir}/plugin/jsdoc-toolkit/" includeundocumented="true" template="jsdoc" outputdir="${basedir}/docs" inputdir="${js.src.dir}" />
+	<jsdoctoolkit jsdochome="${src.dir}/tools/jsdoc-toolkit/" includeundocumented="true" template="jsdoc" outputdir="${basedir}/docs/js" inputdir="${js.src.dir}" />
 	<target name="jslint-code">
 		<jsl:jslint haltOnFailure="true" options="es5,evil,fragment,forin,continue">
 			<formatter type="plain" />
@@ -36,16 +39,24 @@
 	<target name="init" depends="jslint-code">
 
 		<mkdir dir="${staging.dir}" />
-		<mkdir dir="${app.dir}" /> 
-		<mkdir dir="${test.logs.dir}" />
+		<mkdir dir="${app.dir}" />
+		<mkdir dir="${test.reports.dir}" />
+		<mkdir dir="${test.classes.dir}" />
+
 
 		<path id="compile.class.path">
+			<fileset dir="${basedir}">
+				<include name="log4j.properties" />
+			</fileset>
 			<fileset dir="${lib.dir}">
 				<include name="**/*.jar" />
 			</fileset>
 		</path>
 		<!-- Class path of .jar and .class required during test files compiling -->
 		<path id="test.class.path">
+			<fileset dir="${basedir}">
+				<include name="log4j.properties" />
+			</fileset>
 			<fileset dir="${classes.dir}">
 				<include name="com/imaginea/mongodb/services/**" />
 				<include name="com/imaginea/mongodb/common/**" />
@@ -53,12 +64,12 @@
 				<include name="com/imaginea/mongodb/requestdispatchers/**" />
 				<include name="com/imaginea/mongodb/services/servlet/**" />
 			</fileset>
+			<pathelement path="${test.classes.dir}" />
+			<pathelement path="${classes.dir}" />
 			<fileset dir="${lib.dir}">
 				<include name="**/*.jar" />
 			</fileset>
 		</path>
-
-
 	</target>
 
 
@@ -72,7 +83,7 @@
 
 	<!-- compile test-->
 	<target name="compile-test" depends="compile">
-		<javac srcdir="${test.dir}" destdir="${classes.dir}" classpathref="test.class.path" nowarn="yes" debug="yes">
+		<javac srcdir="${test.dir}" destdir="${test.classes.dir}" classpathref="test.class.path" nowarn="yes" debug="yes">
 		</javac>
 	</target>
 
@@ -82,16 +93,16 @@
 		<junit printsummary="yes" haltonfailure="no">
 			<classpath refid="test.class.path" />
 			<formatter type="plain" />
-			<batchtest todir="${test.logs.dir}">
-				<fileset dir="${classes.dir}">
-					<include name="**/*TestSuite.class" />
+			<batchtest todir="${test.reports.dir}">
+				<fileset dir="${test.classes.dir}">
+					<include name="**/*Test.class" />
 				</fileset>
 			</batchtest>
 		</junit>
+		<echo> Tests Completed </echo>
 	</target>
-<!-- To automate test target yet-->
 	<!-- jar -->
-	<target name="jar" depends="compile-test">
+	<target name="jar" depends="test">
 		<jar jarfile="${staging.dir}/${app.jar}">
 			<fileset dir="${classes.dir}">
 				<include name="**/*.class" />
@@ -115,6 +126,8 @@
 		</copy>
 		<mkdir dir="${app.dir}/WEB-INF" />
 		<mkdir dir="${app.dir}/WEB-INF/lib" />
+
+
 		<copy toDir="${app.dir}/WEB-INF/lib">
 			<fileset dir="${lib.dir}">
 				<exclude name="**/*spec*.jar" />
@@ -128,6 +141,15 @@
 				<include name="web.xml" />
 			</fileset>
 		</copy>
+		<!-- copy log4j properties file -->
+		<!-- classes folder for properties file. mViewer.jar contains the classes actually-->
+		<mkdir dir="${app.dir}/WEB-INF/classes" />
+		<copy todir="${app.dir}/WEB-INF/classes">
+			<fileset dir="${basedir}">
+				<include name="log4j.properties" />
+			</fileset>
+		</copy>
+
 	</target>
 
 	<target name="war" depends="war-staging">
@@ -137,6 +159,7 @@
 		</war>
 	</target>
 
+
 	<target name="dist" description="Prepares a dist, is not incremental" depends="clean, compile, jar, war">
 	</target>
 
@@ -144,6 +167,23 @@
 
 	<target name="clean" description="Cleans up all the staging resources and log files">
 		<delete dir="${staging.dir}" />
-		<delete dir="${test.logs.dir}" />
+		<delete dir="${test.reports.dir}" />
+		<delete dir="${basdir}/logs" />
 	</target>
+
+	<!--TODO Automate jetty task -->
+	<path id="jetty.plugin.classpath">
+		<fileset dir="${src.resources.dir}/jetty-lib" includes="*.jar" />
+	</path>
+
+	<!--<taskdef classpathref="jetty.plugin.classpath" resource="tasks.properties" loaderref="jetty.loader" /> -->
+
+	<target name="jetty.run" depends="war">
+		<mkdir dir="${basedir}/jetty-temp" />
+		<jetty tempDirectory="${basedir}/jetty-temp">
+			<webApp name="mViewer" warfile="${staging.dir}/mViewer.war" contextpath="/mViewer" />
+		</jetty>
+	</target>
+
+	<!-- TODO automate java docs generation-->
 </project>
