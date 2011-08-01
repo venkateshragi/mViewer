@@ -171,7 +171,8 @@
 
 
 	<!-- Run test-->
-	<target name="test" depends="jtest, jslint-code" />
+	<target name="test" depends="jslint-code" />
+	<target name="integration-test" depends="jtest" />
 
 	<target name="jtest" depends="compile-test">
 		<junit printsummary="yes" haltonfailure="no">

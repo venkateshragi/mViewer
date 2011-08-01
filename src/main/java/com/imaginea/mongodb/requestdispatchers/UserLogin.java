@@ -20,7 +20,6 @@ import java.net.UnknownHostException;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.log4j.Logger;
-import org.apache.log4j.PropertyConfigurator;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
@@ -79,7 +78,6 @@ public class UserLogin extends BaseRequestDispatcher {
 	 * Default Constructor
 	 */
 	public UserLogin() {
-		PropertyConfigurator.configure("log4j.properties");
 	}
 
 	/**
