@@ -35,6 +35,7 @@ import javax.servlet.http.HttpServletRequest;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
 import org.json.JSONException;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.mock.web.MockHttpServletRequest;
@@ -79,37 +80,37 @@ public class UserLoginTest extends BaseRequestDispatcher {
 	private String testUsername = "name";
 	private String testPassword = "pass";
 
+	private static final String logConfigFile = "src/main/resources/log4j.properties";
+	private static final String mongoProcessPath = "c:\\mongo\\bin\\mongod";
+	// Mongod Process to be started
+	private Process p;
+
 	/**
 	 * Default constructor binds mongo instance provider to config mongo
 	 * instance provider that returns according to parameters given in config
 	 * file mongo.config
 	 */
 
-	public UserLoginTest() throws MongoHostUnknownException, IOException,
-			FileNotFoundException, JSONException {
+	public UserLoginTest() throws MongoHostUnknownException, IOException, FileNotFoundException, JSONException {
 		try {
-
-			mongoInstanceProvider = new ConfigMongoInstanceProvider();
-			PropertyConfigurator.configure("log4j.properties");
 			// Start Mongod
 			Runtime run = Runtime.getRuntime();
-			Process p = run.exec("c:\\mongo\\bin\\mongod");
-			p.destroy();
+			p = run.exec(mongoProcessPath);
+
+			mongoInstanceProvider = new ConfigMongoInstanceProvider();
+			PropertyConfigurator.configure(logConfigFile);
 
 		} catch (FileNotFoundException e) {
-			formErrorResponse(logger, e.getMessage(),
-					ErrorCodes.FILE_NOT_FOUND_EXCEPTION, e.getStackTrace(),
-					"ERROR");
+			formErrorResponse(logger, e.getMessage(), ErrorCodes.FILE_NOT_FOUND_EXCEPTION, e.getStackTrace(), "ERROR");
 			throw e;
 
 		} catch (MongoHostUnknownException e) {
-			formErrorResponse(logger, e.getMessage(), e.getErrorCode(),
-					e.getStackTrace(), "ERROR");
+			formErrorResponse(logger, e.getMessage(), e.getErrorCode(), e.getStackTrace(), "ERROR");
 			throw e;
 
 		} catch (IOException e) {
-			formErrorResponse(logger, e.getMessage(), ErrorCodes.IO_EXCEPTION,
-					e.getStackTrace(), "ERROR");
+			formErrorResponse(logger, e.getMessage(), ErrorCodes.IO_EXCEPTION, e.getStackTrace(), "ERROR");
+			System.out.println("Please change the path of mongod.exe as per your machine");
 		}
 
 	}
@@ -133,18 +134,15 @@ public class UserLoginTest extends BaseRequestDispatcher {
 	@Test
 	public void testUserLoginRequest() {
 		if (logger.isInfoEnabled()) {
-			logger.info("Testing Post Request for User Login ["
-					+ DateProvider.getDateTime() + "]");
+			logger.info("Testing Post Request for User Login [" + DateProvider.getDateTime() + "]");
 			logger.info("Insert User in admin table");
 		}
 		try {
-			mongoInstance.getDB("admin").addUser(testUsername,
-					testPassword.toCharArray());
+			mongoInstance.getDB("admin").addUser(testUsername, testPassword.toCharArray());
 			String host = mongoInstance.getAddress().getHost();
 			Integer port = (Integer) (mongoInstance.getAddress().getPort());
 			HttpServletRequest request = new MockHttpServletRequest();
-			String resp = testLoginResource.authenticateUser(testUsername,
-					testPassword, host, port.toString(), request);
+			String resp = testLoginResource.authenticateUser(testUsername, testPassword, host, port.toString(), request);
 
 			if (logger.isInfoEnabled()) {
 				logger.info("Response: " + resp);
@@ -159,21 +157,23 @@ public class UserLoginTest extends BaseRequestDispatcher {
 
 			// Now check if mongo set for this or not.
 			if (token != null) {
-				String user = UserLogin.tokenIDToUserMapping.get(token
-						.get("id"));
+				String user = UserLogin.tokenIDToUserMapping.get(token.get("id"));
 				Mongo m = UserLogin.userToMongoInstanceMapping.get(user);
 				assertNotNull(m);
 			}
 
 			if (logger.isInfoEnabled()) {
-				logger.info("Test Completed  [" + DateProvider.getDateTime()
-						+ "]");
+				logger.info("Test Completed  [" + DateProvider.getDateTime() + "]");
 			}
 
 		} catch (MongoException e) {
-			formErrorResponse(logger, e.getMessage(), ErrorCodes.HOST_UNKNOWN,
-					e.getStackTrace(), "ERROR");
+			formErrorResponse(logger, e.getMessage(), ErrorCodes.HOST_UNKNOWN, e.getStackTrace(), "ERROR");
 			throw e;
 		}
+	}
+
+	@After
+	public void destroyMongoProcess() {
+		p.destroy();
 	}
 }

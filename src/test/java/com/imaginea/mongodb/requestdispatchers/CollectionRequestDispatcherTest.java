@@ -31,8 +31,10 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set; 
-import org.apache.log4j.Logger; 
+import java.util.Set;
+import org.apache.log4j.Logger;
+import org.apache.log4j.PropertyConfigurator;
+import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.mock.web.MockHttpServletRequest;
@@ -40,7 +42,7 @@ import org.springframework.mock.web.MockHttpSession;
 
 import com.imaginea.mongodb.common.ConfigMongoInstanceProvider;
 import com.imaginea.mongodb.common.MongoInstanceProvider;
-import com.imaginea.mongodb.common.exceptions.CollectionException; 
+import com.imaginea.mongodb.common.exceptions.CollectionException;
 import com.imaginea.mongodb.common.exceptions.ErrorCodes;
 import com.imaginea.mongodb.common.exceptions.MongoHostUnknownException;
 import com.imaginea.mongodb.requestdispatchers.UserLogin;
@@ -81,7 +83,12 @@ public class CollectionRequestDispatcherTest extends BaseRequestDispatcher {
 	 * A test token Id
 	 */
 	private String testTokenId = "123212178917845678910910";
-
+	private static final String logConfigFile = "src/main/resources/log4j.properties";
+	private static final String mongoProcessPath = "c:\\mongo\\bin\\mongod";
+	// Mongod Process to be started
+	private static Process p;
+	
+	
 	/**
 	 * Constructs a mongoInstanceProvider Object.
 	 * 
@@ -90,13 +97,14 @@ public class CollectionRequestDispatcherTest extends BaseRequestDispatcher {
 	 * @throws FileNotFoundException
 	 */
 	public CollectionRequestDispatcherTest() throws MongoHostUnknownException, IOException, FileNotFoundException {
-	 
+
 		try {
-			mongoInstanceProvider = new ConfigMongoInstanceProvider();
 			// Start Mongod
 			Runtime run = Runtime.getRuntime();
-			Process p = run.exec("c:\\mongo\\bin\\mongod");
-			p.destroy();
+			p = run.exec(mongoProcessPath);
+			mongoInstanceProvider = new ConfigMongoInstanceProvider();
+			PropertyConfigurator.configure(logConfigFile);
+			
 		} catch (FileNotFoundException e) {
 			formErrorResponse(logger, e.getMessage(), ErrorCodes.FILE_NOT_FOUND_EXCEPTION, e.getStackTrace(), "ERROR");
 			throw e;
@@ -115,8 +123,7 @@ public class CollectionRequestDispatcherTest extends BaseRequestDispatcher {
 	 * of mongo using the mongo service provider that reads from config file in
 	 * order to test resources.Here we also put our tokenId in session and in
 	 * mappings defined in UserLogin class so that user is authentcated.
-	 *
-	 
+	 * 
 	 */
 	@Before
 	public void instantiateTestClass() {
@@ -427,5 +434,10 @@ public class CollectionRequestDispatcherTest extends BaseRequestDispatcher {
 				}
 			}
 		}
+	}
+
+	@AfterClass
+	public static void destroyMongoProcess() {
+		p.destroy();
 	}
 }

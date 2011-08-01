@@ -56,13 +56,14 @@ public class ConfigMongoInstanceProvider implements MongoInstanceProvider {
 		try {
 
 			Properties prop = new Properties();
-			String fileName = "mongo.config";
+			String fileName = "src/test/resources/mongo.config";
 			InputStream is = new FileInputStream(fileName);
 			prop.load(is);
 
 			if (prop != null) {
 				mongoHost = prop.getProperty("mongoHost");
 				mongoPort = Integer.parseInt(prop.getProperty("mongoPort"));
+			 
 				mongoInstance = new Mongo(mongoHost, mongoPort);
 			}
 

@@ -1,4 +1,4 @@
-<project name="mViewer" default="dist" xmlns:ac="antlib:net.sf.antcontrib" xmlns:jsl="antlib:com.googlecode.jslint4java"  xmlns:ivy="antlib:org.apache.ivy.ant" >
+<project name="mViewer" default="dist" xmlns:ac="antlib:net.sf.antcontrib" xmlns:jsl="antlib:com.googlecode.jslint4java" xmlns:ivy="antlib:org.apache.ivy.ant">
 
 
 	<property name="app.name" value="mViewer" />
@@ -52,9 +52,9 @@
 	<target name="test-init">
 		<!-- Class path of .jar and .class required during test files compiling -->
 		<path id="test.class.path">
-            <path refid="compile.class.path" />
+			<path refid="compile.class.path" />
 			<fileset dir="${main.resources.dir}">
-				<include name="log4j.properties" />
+				<include name="**/log4j.properties" />
 			</fileset>
 			<fileset dir="${classes.dir}">
 				<include name="**/**" />
@@ -78,6 +78,7 @@
 		</javac>
 	</target>
 
+
 	<!-- jar -->
 	<target name="jar">
 		<jar jarfile="${staging.dir}/${app.jar}">
@@ -87,6 +88,7 @@
 		</jar>
 	</target>
 
+	<!-- war staging -->
 	<target name="war-staging">
 		<echo>${app.dir}</echo>
 		<copy toDir="${app.dir}">
@@ -126,9 +128,9 @@
 				<include name="log4j.properties" />
 			</fileset>
 		</copy>
-
 	</target>
 
+	<!-- make war -->
 	<target name="war" depends="war-staging">
 		<war warfile="${staging.dir}/${app.war}" needxmlfile="false">
 			<fileset dir="${app.dir}">
@@ -143,8 +145,7 @@
 	</target>
 
 	<!-- docs -->
-	<target name="doc" depends="init, doc-init, jdoc, jsdoc" />
-
+	<target name="doc" depends="init, doc-init, jsdoc" />
 	<target name="doc-init">
 		<mkdir dir="${staging.dir}" />
 		<mkdir dir="${docs.dir}" />
@@ -152,17 +153,7 @@
 		<mkdir dir="${js.docs.dir}" />
 	</target>
 
-	<target name="jdoc" depends="compile">
-		<javadoc access="public" author="false" doctitle="Imagine mViewer" destdir="${java.docs.dir}" nodeprecated="false" nodeprecatedlist="false" noindex="false" nonavbar="false" notree="false" overview="${java.src.dir}/overview.html" excludepackagenames="*" sourcepath="${java.src.dir}" splitindex="true" use="true" version="false">
-			<fileset dir="${java.src.dir}">
-				<include name="**/*.java" />
-			</fileset>
-			<classpath>
-				<path refid="compile.class.path" />
-			</classpath>
-		</javadoc>
-		<echo> Java Docs generated at ${java.docs.dir} </echo>
-	</target>
+
 
 	<target name="jsdoc">
 		<jsdoctoolkit jsdochome="${src.dir}/tools/jsdoc-toolkit/" includeundocumented="true" template="jsdoc" outputdir="${js.docs.dir}" inputdir="${js.src.dir}" />
@@ -171,7 +162,7 @@
 
 
 	<!-- Run test-->
-	<target name="test" depends="jslint-code" />
+	<target name="test" depends="jslint-code,integration-test" />
 	<target name="integration-test" depends="jtest" />
 
 	<target name="jtest" depends="compile-test">
@@ -184,7 +175,6 @@
 				</fileset>
 			</batchtest>
 		</junit>
-
 	</target>
 
 	<target name="jslint-code">
@@ -195,13 +185,13 @@
 	</target>
 
 
-	<target name="dist" description="Prepares a dist, is not incremental" depends="clean, compile, jar, jdoc, war">
-      <echo> Deploy the war ${staging.dir}/${app.war} to your app-server. For detailed instructions please use the README</echo>
+	<target name="dist" description="Prepares a dist, is not incremental" depends="clean, compile, jar,  war">
+		<echo> Deploy the war ${staging.dir}/${app.war} to your app-server. For detailed instructions please use the README</echo>
 	</target>
 
 	<target name="dev" description="prepares a dev build, is incremental" depends="compile, jar, war-staging, test">
-      <echo>Building the war in dev-mode</echo>
-    </target>
+		<echo>Building the war in dev-mode</echo>
+	</target>
 
 	<target name="clean" description="Cleans up all the staging resources and log files">
 		<delete dir="${staging.dir}" />
@@ -209,21 +199,8 @@
 		<delete dir="${basdir}/logs" />
 	</target>
 
-	<!--TODO Automate jetty task -->
-	<path id="jetty.plugin.classpath">
-		<fileset dir="${src.resources.dir}/jetty-lib" includes="*.jar" />
-	</path>
 
-	<!--<taskdef classpathref="jetty.plugin.classpath" resource="tasks.properties" loaderref="jetty.loader" /> -->
+	<target name="start" depends="compile, jar, war-staging" description="Starts the jetty server with the war deployed">
 
-	<target name="jetty.run" depends="war">
-		<mkdir dir="${basedir}/jetty-temp" />
-		<jetty tempDirectory="${basedir}/jetty-temp">
-			<webApp name="mViewer" warfile="${staging.dir}/mViewer.war" contextpath="/mViewer" />
-		</jetty>
 	</target>
-
-    <target name="start" depends="compile, jar, war-staging" description="Starts the jetty server with the war deployed">
-      
-    </target>
 </project>
