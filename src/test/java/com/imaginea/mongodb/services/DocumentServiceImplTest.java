@@ -95,6 +95,10 @@ public class DocumentServiceImplTest extends BaseRequestDispatcher {
 			IOException, FileNotFoundException, JSONException {
 		try {
 			mongoInstanceProvider = new ConfigMongoInstanceProvider();
+			// Start Mongod
+			Runtime run = Runtime.getRuntime();
+			Process p = run.exec("c:\\mongo\\bin\\mongod");
+			p.destroy();
 		} catch (FileNotFoundException e) {
 			formErrorResponse(logger, e.getMessage(),
 					ErrorCodes.FILE_NOT_FOUND_EXCEPTION, e.getStackTrace(),
