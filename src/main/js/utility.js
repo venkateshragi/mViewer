@@ -227,7 +227,7 @@ YUI.add('utility', function (Y) {
     };
     var formUpperPart = "",
         formLowerPart = "";
-    formUpperPart += "<textarea id='queryBox' name='queryBox' rows='3' cols='80' >";
+    formUpperPart += "<textarea id='queryBox' name='queryBox' rows='3' cols='60' >";
     formUpperPart += "{}";
     formUpperPart += "</textarea>";
     formUpperPart += "<label for='fields' ></label><ul id='fields' class='checklist'>";
