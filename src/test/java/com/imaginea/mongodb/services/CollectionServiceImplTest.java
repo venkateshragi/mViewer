@@ -91,6 +91,11 @@ public class CollectionServiceImplTest extends BaseRequestDispatcher {
 	public CollectionServiceImplTest() throws MongoHostUnknownException, IOException, FileNotFoundException, JSONException {
 		try {
 			mongoInstanceProvider = new ConfigMongoInstanceProvider();
+			// Start Mongod
+			Runtime run = Runtime.getRuntime();
+			Process p = run.exec("c:\\mongo\\bin\\mongod");
+
+			p.destroy();
 		} catch (FileNotFoundException e) {
 			formErrorResponse(logger, e.getMessage(), ErrorCodes.FILE_NOT_FOUND_EXCEPTION, e.getStackTrace(), "ERROR");
 			throw e;
@@ -116,6 +121,7 @@ public class CollectionServiceImplTest extends BaseRequestDispatcher {
 
 		// Creates Mongo Instance.
 		mongoInstance = mongoInstanceProvider.getMongoInstance();
+		
 
 		if (logger.isInfoEnabled()) {
 			logger.info("Add User to maps in UserLogin servlet");

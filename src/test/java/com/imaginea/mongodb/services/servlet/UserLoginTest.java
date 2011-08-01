@@ -26,18 +26,18 @@
 package com.imaginea.mongodb.services.servlet;
 
 import static org.junit.Assert.*;
- 
+
 import java.io.FileNotFoundException;
-import java.io.IOException; 
+import java.io.IOException;
 
 import javax.servlet.http.HttpServletRequest;
- 
-import org.apache.log4j.Logger; 
+
+import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
-import org.json.JSONException; 
+import org.json.JSONException;
 import org.junit.Before;
 import org.junit.Test;
-import org.springframework.mock.web.MockHttpServletRequest; 
+import org.springframework.mock.web.MockHttpServletRequest;
 import com.imaginea.mongodb.common.ConfigMongoInstanceProvider;
 import com.imaginea.mongodb.common.DateProvider;
 import com.imaginea.mongodb.common.MongoInstanceProvider;
@@ -45,7 +45,7 @@ import com.imaginea.mongodb.common.exceptions.ErrorCodes;
 import com.imaginea.mongodb.common.exceptions.MongoHostUnknownException;
 import com.imaginea.mongodb.requestdispatchers.BaseRequestDispatcher;
 import com.imaginea.mongodb.requestdispatchers.UserLogin;
-import com.mongodb.BasicDBObject; 
+import com.mongodb.BasicDBObject;
 import com.mongodb.Mongo;
 import com.mongodb.MongoException;
 import com.mongodb.util.JSON;
@@ -85,23 +85,31 @@ public class UserLoginTest extends BaseRequestDispatcher {
 	 * file mongo.config
 	 */
 
-	public UserLoginTest() throws MongoHostUnknownException, IOException, FileNotFoundException, JSONException {
+	public UserLoginTest() throws MongoHostUnknownException, IOException,
+			FileNotFoundException, JSONException {
 		try {
 
-			mongoInstanceProvider = new ConfigMongoInstanceProvider();			  
+			mongoInstanceProvider = new ConfigMongoInstanceProvider();
 			PropertyConfigurator.configure("log4j.properties");
-			
+			// Start Mongod
+			Runtime run = Runtime.getRuntime();
+			Process p = run.exec("c:\\mongo\\bin\\mongod");
+			p.destroy();
 
 		} catch (FileNotFoundException e) {
-			formErrorResponse(logger, e.getMessage(), ErrorCodes.FILE_NOT_FOUND_EXCEPTION, e.getStackTrace(), "ERROR");
+			formErrorResponse(logger, e.getMessage(),
+					ErrorCodes.FILE_NOT_FOUND_EXCEPTION, e.getStackTrace(),
+					"ERROR");
 			throw e;
 
 		} catch (MongoHostUnknownException e) {
-			formErrorResponse(logger, e.getMessage(), e.getErrorCode(), e.getStackTrace(), "ERROR");
+			formErrorResponse(logger, e.getMessage(), e.getErrorCode(),
+					e.getStackTrace(), "ERROR");
 			throw e;
 
 		} catch (IOException e) {
-			formErrorResponse(logger, e.getMessage(), ErrorCodes.IO_EXCEPTION, e.getStackTrace(), "ERROR");
+			formErrorResponse(logger, e.getMessage(), ErrorCodes.IO_EXCEPTION,
+					e.getStackTrace(), "ERROR");
 		}
 
 	}
@@ -125,15 +133,18 @@ public class UserLoginTest extends BaseRequestDispatcher {
 	@Test
 	public void testUserLoginRequest() {
 		if (logger.isInfoEnabled()) {
-			logger.info("Testing Post Request for User Login [" + DateProvider.getDateTime() + "]");
+			logger.info("Testing Post Request for User Login ["
+					+ DateProvider.getDateTime() + "]");
 			logger.info("Insert User in admin table");
 		}
 		try {
-			mongoInstance.getDB("admin").addUser(testUsername, testPassword.toCharArray());
+			mongoInstance.getDB("admin").addUser(testUsername,
+					testPassword.toCharArray());
 			String host = mongoInstance.getAddress().getHost();
 			Integer port = (Integer) (mongoInstance.getAddress().getPort());
 			HttpServletRequest request = new MockHttpServletRequest();
-			String resp = testLoginResource.authenticateUser(testUsername, testPassword, host, port.toString(), request);
+			String resp = testLoginResource.authenticateUser(testUsername,
+					testPassword, host, port.toString(), request);
 
 			if (logger.isInfoEnabled()) {
 				logger.info("Response: " + resp);
@@ -148,19 +159,21 @@ public class UserLoginTest extends BaseRequestDispatcher {
 
 			// Now check if mongo set for this or not.
 			if (token != null) {
-				String user = UserLogin.tokenIDToUserMapping.get(token.get("id"));
+				String user = UserLogin.tokenIDToUserMapping.get(token
+						.get("id"));
 				Mongo m = UserLogin.userToMongoInstanceMapping.get(user);
 				assertNotNull(m);
 			}
- 
-			 
+
 			if (logger.isInfoEnabled()) {
-				logger.info("Test Completed  [" + DateProvider.getDateTime() + "]");
+				logger.info("Test Completed  [" + DateProvider.getDateTime()
+						+ "]");
 			}
 
 		} catch (MongoException e) {
-			formErrorResponse(logger, e.getMessage(), ErrorCodes.HOST_UNKNOWN, e.getStackTrace(), "ERROR");
+			formErrorResponse(logger, e.getMessage(), ErrorCodes.HOST_UNKNOWN,
+					e.getStackTrace(), "ERROR");
 			throw e;
-		}  
+		}
 	}
 }

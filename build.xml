@@ -48,7 +48,7 @@
 		</path>
 	</target>
 
-    <target name="test-init" >
+	<target name="test-init">
 		<!-- Class path of .jar and .class required during test files compiling -->
 		<path id="test.class.path">
 			<fileset dir="${basedir}">
@@ -63,7 +63,7 @@
 				<include name="**/*.jar" />
 			</fileset>
 		</path>
-    </target>
+	</target>
 
 	<!-- compile -->
 	<target name="compile" depends="init">
@@ -120,7 +120,7 @@
 			</fileset>
 		</copy>
 		<!-- copy log4j properties file -->
-		<!-- classes folder for properties file. mViewer.jar contains the classes actually-->
+		<!-- classes folder for properties file. mViewer.jar contains the src classes-->
 		<mkdir dir="${app.dir}/WEB-INF/classes" />
 		<copy todir="${app.dir}/WEB-INF/classes">
 			<fileset dir="${basedir}">
@@ -135,17 +135,23 @@
 			<fileset dir="${app.dir}">
 			</fileset>
 		</war>
+		<!-- Copy war to base directory -->
+		<copy todir="${basedir}">
+			<fileset dir="${staging.dir}">
+				<include name="mViewer.war" />
+			</fileset>
+		</copy>
 	</target>
 
 	<!-- docs -->
-    <target name="doc" depends="init, doc-init, jdoc, jsdoc" />
+	<target name="doc" depends="init, doc-init, jdoc, jsdoc" />
 
 	<target name="doc-init">
-      <mkdir dir="${staging.dir}" />
-      <mkdir dir="${docs.dir}" />
-      <mkdir dir="${java.docs.dir}" />
-      <mkdir dir="${js.docs.dir}" />
-    </target>
+		<mkdir dir="${staging.dir}" />
+		<mkdir dir="${docs.dir}" />
+		<mkdir dir="${java.docs.dir}" />
+		<mkdir dir="${js.docs.dir}" />
+	</target>
 
 	<target name="jdoc" depends="compile">
 		<javadoc access="public" author="false" doctitle="Imagine mViewer" destdir="${java.docs.dir}" nodeprecated="false" nodeprecatedlist="false" noindex="false" nonavbar="false" notree="false" overview="${java.src.dir}/overview.html" excludepackagenames="*" sourcepath="${java.src.dir}" splitindex="true" use="true" version="false">
@@ -153,41 +159,40 @@
 				<include name="**/*.java" />
 			</fileset>
 			<classpath>
-			    <path refid="compile.class.path" />
+				<path refid="compile.class.path" />
 			</classpath>
 		</javadoc>
-        <echo> Docs generated at ${java.docs.dir} </echo>
+		<echo> Java Docs generated at ${java.docs.dir} </echo>
 	</target>
 
 	<target name="jsdoc">
-      <jsdoctoolkit jsdochome="${src.dir}/tools/jsdoc-toolkit/" includeundocumented="true" template="jsdoc" outputdir="${basedir}/docs/js" inputdir="${js.src.dir}" />
-    </target>
+		<jsdoctoolkit jsdochome="${src.dir}/tools/jsdoc-toolkit/" includeundocumented="true" template="jsdoc" outputdir="${js.docs.dir}" inputdir="${js.src.dir}" />
+		<echo> JS Docs generated at ${js.docs.dir} </echo>
+	</target>
 
 
 	<!-- Run test-->
 	<target name="test" depends="jtest, jslint-code" />
 
-    <target name="jtest" depends="compile-test">
-<!-- AN commented out, this fails
-      <junit printsummary="yes" haltonfailure="no">
-        <classpath refid="test.class.path" />
-        <formatter type="plain" />
-        <batchtest todir="${test.reports.dir}">
-          <fileset dir="${java.test.dir}">
-            <include name="**/*Test.java" />
-          </fileset>
-        </batchtest>
-      </junit>
+	<target name="jtest" depends="compile-test">
+		<junit printsummary="yes" haltonfailure="no">
+			<classpath refid="test.class.path" />
+			<formatter type="plain" />
+			<batchtest todir="${test.reports.dir}">
+				<fileset dir="${java.test.dir}">
+					<include name="**/*Test.java" />
+				</fileset>
+			</batchtest>
+		</junit>
 
--->
-    </target>
+	</target>
 
-    <target name="jslint-code">
-      <jsl:jslint haltOnFailure="true" options="es5,evil,fragment,forin,continue">
-        <formatter type="plain" />
-        <fileset dir="${js.src.dir}" includes="*.js" />
-      </jsl:jslint>
-    </target>
+	<target name="jslint-code">
+		<jsl:jslint haltOnFailure="true" options="es5,evil,fragment,forin,continue">
+			<formatter type="plain" />
+			<fileset dir="${js.src.dir}" includes="*.js" />
+		</jsl:jslint>
+	</target>
 
 
 	<target name="dist" description="Prepares a dist, is not incremental" depends="clean, compile, jar, war, doc">
@@ -215,5 +220,4 @@
 		</jetty>
 	</target>
 
-	<!-- TODO automate java docs generation-->
 </project>
