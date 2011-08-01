@@ -53,7 +53,7 @@ public class ValidationException extends RuntimeException {
 	/**
 	 * Return the error code of an exeption.
 	 *
-	 * @return
+	 * @return error code for the given exception
 	 */
 	public String getErrorCode() {
 		return errorCode;

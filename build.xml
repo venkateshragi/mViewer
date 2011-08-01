@@ -11,13 +11,18 @@
 	<property name="lib.dir" value="${src.resources.dir}" />
 
 	<property name="staging.dir" value="${basedir}/staging" />
+	<property name="docs.dir" value="${staging.dir}/docs" />
+	<property name="java.docs.dir" value="${docs.dir}/java" />
+	<property name="js.docs.dir" value="${docs.dir}/js" />
+
 	<property name="classes.dir" value="${staging.dir}/classes" />
-	<property name="test.classes.dir" value="${basedir}/dist/testclasses" />
 	<property name="app.dir" value="${staging.dir}/${app.name}" />
 
-	<!-- Test Reports -->
-	<property name="test.reports.dir" value="${basedir}/testreports" />
+	<!-- Test Properties -->
 	<property name="test.dir" value="${src.dir}/test" />
+	<property name="java.test.dir" value="${src.dir}/test/java" />
+	<property name="test.reports.dir" value="${staging.dir}/testreports" />
+	<property name="test.classes.dir" value="${staging.dir}/testclasses" />
 
 
 	<taskdef uri="antlib:net.sf.antcontrib" resource="net/sf/antcontrib/antlib.xml" classpath=" ${src.dir}/tools/ant-contrib.jar" />
@@ -27,22 +32,11 @@
 	<taskdef name="jsdoctoolkit" classname="uk.co.darrenhurley.ant.tasks.JsDocToolkit" classpath="${src.dir}/tools/jsdoc-toolkit-ant-task-1.1.2.jar;${src.dir}/tools/jsdoc-toolkit/jsrun.jar" />
 
 
-
-	<jsdoctoolkit jsdochome="${src.dir}/tools/jsdoc-toolkit/" includeundocumented="true" template="jsdoc" outputdir="${basedir}/docs/js" inputdir="${js.src.dir}" />
-	<target name="jslint-code">
-		<jsl:jslint haltOnFailure="true" options="es5,evil,fragment,forin,continue">
-			<formatter type="plain" />
-			<fileset dir="${js.src.dir}" includes="*.js" />
-		</jsl:jslint>
-	</target>
-
-	<target name="init" depends="jslint-code">
-
+	<target name="init">
 		<mkdir dir="${staging.dir}" />
 		<mkdir dir="${app.dir}" />
 		<mkdir dir="${test.reports.dir}" />
 		<mkdir dir="${test.classes.dir}" />
-
 
 		<path id="compile.class.path">
 			<fileset dir="${basedir}">
@@ -52,17 +46,16 @@
 				<include name="**/*.jar" />
 			</fileset>
 		</path>
+	</target>
+
+    <target name="test-init" >
 		<!-- Class path of .jar and .class required during test files compiling -->
 		<path id="test.class.path">
 			<fileset dir="${basedir}">
 				<include name="log4j.properties" />
 			</fileset>
 			<fileset dir="${classes.dir}">
-				<include name="com/imaginea/mongodb/services/**" />
-				<include name="com/imaginea/mongodb/common/**" />
-				<include name="com/imaginea/mongodb/common/exceptions/**" />
-				<include name="com/imaginea/mongodb/requestdispatchers/**" />
-				<include name="com/imaginea/mongodb/services/servlet/**" />
+				<include name="**/**" />
 			</fileset>
 			<pathelement path="${test.classes.dir}" />
 			<pathelement path="${classes.dir}" />
@@ -70,37 +63,22 @@
 				<include name="**/*.jar" />
 			</fileset>
 		</path>
-	</target>
-
+    </target>
 
 	<!-- compile -->
 	<target name="compile" depends="init">
 		<mkdir dir="${classes.dir}" />
-		<javac srcdir="${java.src.dir}" destdir="${classes.dir}" classpathref="compile.class.path" nowarn="yes" debug="yes">
+		<javac srcdir="${java.src.dir}" destdir="${classes.dir}" classpathref="compile.class.path" nowarn="yes" debug="yes" includeantruntime="false">
 			<!-- <compiler arg value="-Xlint:unchecked"/> -->
 		</javac>
 	</target>
 
 	<!-- compile test-->
-	<target name="compile-test" depends="compile">
-		<javac srcdir="${test.dir}" destdir="${test.classes.dir}" classpathref="test.class.path" nowarn="yes" debug="yes">
+	<target name="compile-test" depends="test-init, compile">
+		<javac srcdir="${test.dir}" destdir="${test.classes.dir}" classpathref="test.class.path" nowarn="yes" debug="yes" includeantruntime="false">
 		</javac>
 	</target>
 
-	<!-- Run test-->
-	<echo> Running Test </echo>
-	<target name="test" depends="compile-test">
-		<junit printsummary="yes" haltonfailure="no">
-			<classpath refid="test.class.path" />
-			<formatter type="plain" />
-			<batchtest todir="${test.reports.dir}">
-				<fileset dir="${test.classes.dir}">
-					<include name="**/*Test.class" />
-				</fileset>
-			</batchtest>
-		</junit>
-		<echo> Tests Completed </echo>
-	</target>
 	<!-- jar -->
 	<target name="jar" depends="test">
 		<jar jarfile="${staging.dir}/${app.jar}">
@@ -159,8 +137,60 @@
 		</war>
 	</target>
 
+	<!-- docs -->
+    <target name="doc" depends="init, doc-init, jdoc, jsdoc" />
 
-	<target name="dist" description="Prepares a dist, is not incremental" depends="clean, compile, jar, war">
+	<target name="doc-init">
+      <mkdir dir="${staging.dir}" />
+      <mkdir dir="${docs.dir}" />
+      <mkdir dir="${java.docs.dir}" />
+      <mkdir dir="${js.docs.dir}" />
+    </target>
+
+	<target name="jdoc" depends="compile">
+		<javadoc access="public" author="false" doctitle="Imagine mViewer" destdir="${java.docs.dir}" nodeprecated="false" nodeprecatedlist="false" noindex="false" nonavbar="false" notree="false" overview="${java.src.dir}/overview.html" excludepackagenames="*" sourcepath="${java.src.dir}" splitindex="true" use="true" version="false">
+			<fileset dir="${java.src.dir}">
+				<include name="**/*.java" />
+			</fileset>
+			<classpath>
+			    <path refid="compile.class.path" />
+			</classpath>
+		</javadoc>
+        <echo> Docs generated at ${java.docs.dir} </echo>
+	</target>
+
+	<target name="jsdoc">
+      <jsdoctoolkit jsdochome="${src.dir}/tools/jsdoc-toolkit/" includeundocumented="true" template="jsdoc" outputdir="${basedir}/docs/js" inputdir="${js.src.dir}" />
+    </target>
+
+
+	<!-- Run test-->
+	<target name="test" depends="jtest, jslint-code" />
+
+    <target name="jtest" depends="compile-test">
+<!-- AN commented out, this fails
+      <junit printsummary="yes" haltonfailure="no">
+        <classpath refid="test.class.path" />
+        <formatter type="plain" />
+        <batchtest todir="${test.reports.dir}">
+          <fileset dir="${java.test.dir}">
+            <include name="**/*Test.java" />
+          </fileset>
+        </batchtest>
+      </junit>
+
+-->
+    </target>
+
+    <target name="jslint-code">
+      <jsl:jslint haltOnFailure="true" options="es5,evil,fragment,forin,continue">
+        <formatter type="plain" />
+        <fileset dir="${js.src.dir}" includes="*.js" />
+      </jsl:jslint>
+    </target>
+
+
+	<target name="dist" description="Prepares a dist, is not incremental" depends="clean, compile, jar, war, doc">
 	</target>
 
 	<target name="dev" description="prepares a dev build, is incremental" depends="clean, compile, jar, war-staging" />

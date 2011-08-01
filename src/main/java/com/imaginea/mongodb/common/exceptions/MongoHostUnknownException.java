@@ -64,8 +64,8 @@ public class MongoHostUnknownException extends Exception {
 	 *            MongoHostUnknownException formed here.
 	 */
 	public MongoHostUnknownException(String message,
-			Throwable c) {
-		super(message, c);
+			Throwable cause) {
+		super(message, cause);
 		this.errorCode = ErrorCodes.HOST_UNKNOWN;
 	}
 

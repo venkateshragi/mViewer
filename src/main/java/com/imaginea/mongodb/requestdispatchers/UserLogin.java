@@ -35,8 +35,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.imaginea.mongodb.common.DateProvider;
-import com.imaginea.mongodb.common.UserTokenInformation;
-import com.imaginea.mongodb.common.UserTokenInformationProvider;
+import com.imaginea.mongodb.common.UserToken;
 import com.imaginea.mongodb.common.exceptions.ErrorCodes;
 import com.imaginea.mongodb.common.exceptions.MongoHostUnknownException;
 import com.mongodb.DB;
@@ -160,8 +159,7 @@ public class UserLogin extends BaseRequestDispatcher {
 
 			// User Found
 			String mappingKey = username + "_" + mongoHost + "_" + mongoPort;
-			UserTokenInformation userToken = new UserTokenInformationProvider(
-					mongoHost, Integer.parseInt(mongoPort), username);
+			UserToken userToken = new UserToken(mongoHost, Integer.parseInt(mongoPort), username);
 			// Genrate Token Id
 			String tokenId = userToken.generateTokenId();
 

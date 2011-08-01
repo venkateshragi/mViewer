@@ -18,8 +18,8 @@ package com.imaginea.mongodb.common;
 import com.mongodb.Mongo;
 
 /**
- * Returns a MongoInstance based on method defined in its different
- * implentations.
+ * Defines the contract for implementations which provide the notion of 
+ * current mongo instance. For hibernate fans, this is like CurrentSessionContext.
  *
  * @author Rachit Mittal
  *
@@ -27,8 +27,8 @@ import com.mongodb.Mongo;
 public interface MongoInstanceProvider {
 
 	/**
-	 * Returns a MongoInstance according to method defined in classes that
-	 * implements it.
+	 * Returns the current mongo instance, the meaning of current depends 
+     * on the actual implementation class
 	 *
 	 * @return a Mongo Instance
 	 */
