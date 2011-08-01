@@ -1,7 +1,5 @@
 mViewer(Micro/Mongo Viewer) is a light (read web based like Futon for couchdb) GUI for mongo db which does not need any install steps.
 
-We wanted to call it µViewer (but typing µ is kinda tough).
-
 Current Features are:
 
    1. Managed db and collections (usual add/drop of collections and drop of db)

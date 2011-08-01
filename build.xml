@@ -1,4 +1,4 @@
-<project name="mViewer" default="dist" xmlns:ac="antlib:net.sf.antcontrib" xmlns:jsl="antlib:com.googlecode.jslint4java">
+<project name="mViewer" default="dist" xmlns:ac="antlib:net.sf.antcontrib" xmlns:jsl="antlib:com.googlecode.jslint4java"  xmlns:ivy="antlib:org.apache.ivy.ant" >
 
 
 	<property name="app.name" value="mViewer" />
@@ -8,6 +8,7 @@
 	<property name="java.src.dir" value="${src.dir}/main/java" />
 	<property name="js.src.dir" value="${src.dir}/main/js" />
 	<property name="src.resources.dir" value="${src.dir}/resources" />
+	<property name="main.resources.dir" value="${src.dir}/main/resources" />
 	<property name="lib.dir" value="${src.resources.dir}" />
 
 	<property name="staging.dir" value="${basedir}/staging" />
@@ -39,8 +40,8 @@
 		<mkdir dir="${test.classes.dir}" />
 
 		<path id="compile.class.path">
-			<fileset dir="${basedir}">
-				<include name="log4j.properties" />
+			<fileset dir="${main.resources.dir}">
+				<include name="**/log4j.properties" />
 			</fileset>
 			<fileset dir="${lib.dir}">
 				<include name="**/*.jar" />
@@ -51,7 +52,8 @@
     <target name="test-init" >
 		<!-- Class path of .jar and .class required during test files compiling -->
 		<path id="test.class.path">
-			<fileset dir="${basedir}">
+            <path refid="compile.class.path" />
+			<fileset dir="${main.resources.dir}">
 				<include name="log4j.properties" />
 			</fileset>
 			<fileset dir="${classes.dir}">
@@ -59,9 +61,6 @@
 			</fileset>
 			<pathelement path="${test.classes.dir}" />
 			<pathelement path="${classes.dir}" />
-			<fileset dir="${lib.dir}">
-				<include name="**/*.jar" />
-			</fileset>
 		</path>
     </target>
 
@@ -80,7 +79,7 @@
 	</target>
 
 	<!-- jar -->
-	<target name="jar" depends="test">
+	<target name="jar">
 		<jar jarfile="${staging.dir}/${app.jar}">
 			<fileset dir="${classes.dir}">
 				<include name="**/*.class" />
@@ -123,7 +122,7 @@
 		<!-- classes folder for properties file. mViewer.jar contains the classes actually-->
 		<mkdir dir="${app.dir}/WEB-INF/classes" />
 		<copy todir="${app.dir}/WEB-INF/classes">
-			<fileset dir="${basedir}">
+			<fileset dir="${main.resources.dir}">
 				<include name="log4j.properties" />
 			</fileset>
 		</copy>
@@ -160,7 +159,7 @@
 	</target>
 
 	<target name="jsdoc">
-      <jsdoctoolkit jsdochome="${src.dir}/tools/jsdoc-toolkit/" includeundocumented="true" template="jsdoc" outputdir="${basedir}/docs/js" inputdir="${js.src.dir}" />
+      <jsdoctoolkit jsdochome="${src.dir}/tools/jsdoc-toolkit/" includeundocumented="true" template="jsdoc" outputdir="${js.docs.dir}" inputdir="${js.src.dir}" />
     </target>
 
 
@@ -190,10 +189,13 @@
     </target>
 
 
-	<target name="dist" description="Prepares a dist, is not incremental" depends="clean, compile, jar, war, doc">
+	<target name="dist" description="Prepares a dist, is not incremental" depends="clean, compile, jar, jdoc, war">
+      <echo> Deploy the war ${staging.dir}/${app.war} to your app-server. For detailed instructions please use the README</echo>
 	</target>
 
-	<target name="dev" description="prepares a dev build, is incremental" depends="clean, compile, jar, war-staging" />
+	<target name="dev" description="prepares a dev build, is incremental" depends="compile, jar, war-staging, test">
+      <echo>Building the war in dev-mode</echo>
+    </target>
 
 	<target name="clean" description="Cleans up all the staging resources and log files">
 		<delete dir="${staging.dir}" />
@@ -215,5 +217,7 @@
 		</jetty>
 	</target>
 
-	<!-- TODO automate java docs generation-->
+    <target name="start" depends="compile, jar, war-staging" description="Starts the jetty server with the war deployed">
+      
+    </target>
 </project>
