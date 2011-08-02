@@ -83,8 +83,7 @@ public class DatabaseServiceImpl implements DatabaseService {
 	 * @throws DatabaseException
 	 *             If any error while getting database list.
 	 */
-
-	@Override
+ 
 	public List<String> getDbList() throws DatabaseException {
 
 		mongoInstance = mongoInstanceProvider.getMongoInstance();
@@ -215,7 +214,7 @@ public class DatabaseServiceImpl implements DatabaseService {
 	 * @exception ValidationException
 	 *                throw super type of EmptyDatabaseNameException
 	 */
-	@Override
+	 
 	public JSONArray getDbStats(String dbName) throws DatabaseException, ValidationException, JSONException {
 
 		mongoInstance = mongoInstanceProvider.getMongoInstance();

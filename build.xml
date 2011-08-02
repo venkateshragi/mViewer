@@ -176,8 +176,9 @@
 	<target name="test" depends="jslint-code,integration-test" />
 	<target name="integration-test" depends="jtest" />
 
-	<target name="jtest" depends="compile-test">	 
-		<junit printsummary="yes" haltonfailure="no">
+	<target name="jtest" depends="compile-test">
+		<echo> Please Check if Mongo is Running at configurations given in your file src/test/ressources/mongo.config for test cases to pass </echo>
+		<junit printsummary="yes" haltonfailure="yes">
 			<classpath refid="test.class.path" />
 			<formatter type="plain" />
 			<batchtest todir="${test.reports.dir}">
@@ -196,7 +197,7 @@
 	</target>
 
 
-	<target name="dist" description="Prepares a dist, is not incremental" depends="clean, compile, jar,jdoc,war">
+	<target name="dist" description="Prepares a dist, is not incremental" depends="clean, compile, jar,jdoc,war,dev">
 		<echo> Deploy the war ${staging.dir}/${app.war} to your app-server. For detailed instructions please use the README</echo>
 	</target>
 

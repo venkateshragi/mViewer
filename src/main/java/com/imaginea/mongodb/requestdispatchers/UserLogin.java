@@ -210,12 +210,12 @@ public class UserLogin extends BaseRequestDispatcher {
 		} catch (JSONException e) {
 			response = formErrorResponse(logger, e.getMessage(),
 					ErrorCodes.JSON_EXCEPTION, e.getStackTrace(), "ERROR");
-		} catch (MongoException m) {
+		} catch (MongoInternalException m) {
 			MongoHostUnknownException e = new MongoHostUnknownException(
 					"Unknown host", m);
 			response = formErrorResponse(logger, e.getMessage(),
 					e.getErrorCode(), e.getStackTrace(), "ERROR");
-		} catch (MongoInternalException m) {
+		} catch (MongoException m) {
 			MongoHostUnknownException e = new MongoHostUnknownException(
 					"Unknown host", m);
 			response = formErrorResponse(logger, e.getMessage(),

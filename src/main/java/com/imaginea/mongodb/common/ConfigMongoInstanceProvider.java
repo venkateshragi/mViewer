@@ -42,7 +42,7 @@ public class ConfigMongoInstanceProvider implements MongoInstanceProvider {
 
 	private String mongoHost;
 	private int mongoPort;
-	private static final String mongoProcessPath = "C:\\mongo\\bin\\mongod";
+
 	private Process p;
 
 	/**
@@ -62,19 +62,14 @@ public class ConfigMongoInstanceProvider implements MongoInstanceProvider {
 			String fileName = "src/test/resources/mongo.config";
 			InputStream is = new FileInputStream(fileName);
 			prop.load(is);
-			// Start Mongod
-			Runtime run = Runtime.getRuntime();
-			String env = "dbpath=C:\\data\\db";
-			String[] envp = new String[1];
-			envp[0] = env;
-			p = run.exec(mongoProcessPath, envp);
-
+ 
 			if (prop != null) {
 				mongoHost = prop.getProperty("mongoHost");
 				mongoPort = Integer.parseInt(prop.getProperty("mongoPort"));
 				mongoInstance = new Mongo(mongoHost, mongoPort);
 			}
-
+			System.out.println(mongoInstance.getDatabaseNames());
+			
 		} catch (MongoInternalException e) {
 			throw new MongoHostUnknownException(
 					"HOST_UNKNOWN"

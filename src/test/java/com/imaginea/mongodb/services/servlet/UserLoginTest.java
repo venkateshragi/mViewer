@@ -78,10 +78,8 @@ public class UserLoginTest extends BaseRequestDispatcher {
 	 * test username and password
 	 */
 	private String testUsername = "name";
-	private String testPassword = "pass";
-
+	private String testPassword = "pass"; 
 	private static final String logConfigFile = "src/main/resources/log4j.properties";
- 
 
 	/**
 	 * Default constructor binds mongo instance provider to config mongo
@@ -91,6 +89,7 @@ public class UserLoginTest extends BaseRequestDispatcher {
 
 	public UserLoginTest() throws Exception {
 		try {
+
 			mongoInstanceProvider = new ConfigMongoInstanceProvider();
 			PropertyConfigurator.configure(logConfigFile);
 
@@ -107,7 +106,7 @@ public class UserLoginTest extends BaseRequestDispatcher {
 
 		} catch (IOException e) {
 			formErrorResponse(logger, e.getMessage(), ErrorCodes.IO_EXCEPTION,
-					e.getStackTrace(), "ERROR"); 
+					e.getStackTrace(), "ERROR");
 		}
 
 	}
