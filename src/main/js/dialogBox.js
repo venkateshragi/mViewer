@@ -16,47 +16,48 @@
 YUI.add('dialog-box', function (Y) {
     Y.namespace('com.imaginea.mongoV');
     var MV = Y.com.imaginea.mongoV;
+
     MV.getDialog = function Dialog(form, successHandler, failureHandler) {
         YAHOO.util.Dom.removeClass(form, "yui-pe-content");
-        var handleCancel = function () {
-                this.cancel();
-            };
-        var addColDialoghandleSubmit = function () {
-                Y.log("Submit handler for add collection called","info");
-                var newCollInfo = this.getData();
-                if (newCollInfo.name === "") {
-                    MV.showAlertDialog("Please enter the name.");
-                } else {
-                    Y.one("#newName").set("value", newCollInfo.name);
-                    Y.one("#" + form + " .bd form").setAttribute("action", MV.URLMap.insertColl());
-                    this.submit();
-                }
-            };
-        var addDBDialoghandleSubmit = function () {
-                var newDBInfo = this.getData();
-                if (newDBInfo.name === "") {
-                    MV.showAlertDialog("Please enter the name.");
-                } else {
-                    Y.one("#newName").set("value", newDBInfo.name);
-                    Y.one("#" + form + " .bd form").setAttribute("action", MV.URLMap.insertDB());
-                    this.submit();
-                }
-            };
-        var addDocDialoghandleSubmit = function () {
-                var newDoc = this.getData().document;
-                try {
-                    Y.JSON.parse(newDoc);
-                    Y.one("#" + form + " .bd form").setAttribute("action", MV.URLMap.insertDoc());
-                    this.submit();
-                } catch (e) {
-                    MV.showAlertDialog("Please enter the new document in JSON format", MV.warnIcon);
-                    Y.log("New Document format not JSON", "error");
-                }
-            };
+        function cancelCurrent() {
+            this.cancel();
+        }
+        function addCollection() {
+            Y.log("Submit handler for add collection called","info");
+            var newCollInfo = this.getData();
+            if (newCollInfo.name === "") {
+                MV.showAlertDialog("Please enter the name.");
+            } else {
+                Y.one("#newName").set("value", newCollInfo.name);
+                Y.one("#" + form + " .bd form").setAttribute("action", MV.URLMap.insertColl());
+                this.submit();
+            }
+        }
+        function addDB() {
+            var newDBInfo = this.getData();
+            if (newDBInfo.name === "") {
+                MV.showAlertDialog("Please enter the name.");
+            } else {
+                Y.one("#newName").set("value", newDBInfo.name);
+                Y.one("#" + form + " .bd form").setAttribute("action", MV.URLMap.insertDB());
+                this.submit();
+            }
+        }
+        function addDocument() {
+            var newDoc = this.getData().document;
+            try {
+                Y.JSON.parse(newDoc);
+                Y.one("#" + form + " .bd form").setAttribute("action", MV.URLMap.insertDoc());
+                this.submit();
+            } catch (e) {
+                MV.showAlertDialog("Please enter the new document in JSON format", MV.warnIcon);
+                Y.log("New Document format not JSON", "error");
+            }
+        }
         var sumbitHandlerMap = {
-            "addColDialogSubmitHandler": addColDialoghandleSubmit,
-            "addDBDialogSubmitHandler": addDBDialoghandleSubmit,
-            "addDocDialogSubmitHandler": addDocDialoghandleSubmit
+            "addColDialogSubmitHandler": addCollection,
+            "addDBDialogSubmitHandler": addDB,
+            "addDocDialogSubmitHandler": addDocument
         };
         var dialogBox = new YAHOO.widget.Dialog(form, {
             width: "30em",
@@ -70,13 +71,13 @@ YUI.add('dialog-box', function (Y) {
             buttons: [{
                 text: "Submit",
                 handler: sumbitHandlerMap[form + "SubmitHandler"] ||
-                function () {
-                    this.submit();
-                },
+                    function () {
+                        this.submit();
+                    },
                 isDefault: true
             }, {
                 text: "Cancel",
-                handler: handleCancel
+                handler: cancelCurrent
             }]
         });
         dialogBox.callback = {

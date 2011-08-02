@@ -173,7 +173,7 @@
 
 
 	<!-- Run test-->
-	<target name="test" depends="jslint-code,integration-test" />
+	<target name="test" depends="jslint,integration-test" />
 	<target name="integration-test" depends="jtest" />
 
 	<target name="jtest" depends="compile-test">
@@ -189,7 +189,7 @@
 		</junit>
 	</target>
 
-	<target name="jslint-code">
+	<target name="jslint">
 		<jsl:jslint haltOnFailure="true" options="es5,evil,fragment,forin,continue">
 			<formatter type="plain" />
 			<fileset dir="${js.src.dir}" includes="*.js" />
