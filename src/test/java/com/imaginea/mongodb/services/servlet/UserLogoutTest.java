@@ -31,7 +31,7 @@ import java.io.IOException;
 
 import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
-import org.json.JSONException;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -57,7 +57,7 @@ import com.mongodb.Mongo;
  */
 public class UserLogoutTest extends BaseRequestDispatcher {
 	private MongoInstanceProvider mongoInstanceProvider;
-	private Mongo mongoInstance;
+	private static Mongo mongoInstance;
 
 	/**
 	 * Class to be tested
@@ -73,29 +73,27 @@ public class UserLogoutTest extends BaseRequestDispatcher {
 	private String testUserMapping = "user";
 
 	private static final String logConfigFile = "src/main/resources/log4j.properties";
-	private static final String mongoProcessPath = "c:\\mongo\\bin\\mongod";
-	// Mongod Process to be started
-	private Process p;
-	public UserLogoutTest() throws MongoHostUnknownException, IOException, FileNotFoundException, JSONException {
-		try {
 
-			// Start Mongod
-			Runtime run = Runtime.getRuntime();
-			p = run.exec(mongoProcessPath);
+	public UserLogoutTest() throws Exception {
+		try {
 
 			mongoInstanceProvider = new ConfigMongoInstanceProvider();
 			PropertyConfigurator.configure(logConfigFile);
 
 		} catch (FileNotFoundException e) {
-			formErrorResponse(logger, e.getMessage(), ErrorCodes.FILE_NOT_FOUND_EXCEPTION, e.getStackTrace(), "ERROR");
+			formErrorResponse(logger, e.getMessage(),
+					ErrorCodes.FILE_NOT_FOUND_EXCEPTION, e.getStackTrace(),
+					"ERROR");
 			throw e;
 
 		} catch (MongoHostUnknownException e) {
-			formErrorResponse(logger, e.getMessage(), e.getErrorCode(), e.getStackTrace(), "ERROR");
+			formErrorResponse(logger, e.getMessage(), e.getErrorCode(),
+					e.getStackTrace(), "ERROR");
 			throw e;
 
 		} catch (IOException e) {
-			formErrorResponse(logger, e.getMessage(), ErrorCodes.IO_EXCEPTION, e.getStackTrace(), "ERROR");
+			formErrorResponse(logger, e.getMessage(), ErrorCodes.IO_EXCEPTION,
+					e.getStackTrace(), "ERROR");
 		}
 
 	}
@@ -126,7 +124,8 @@ public class UserLogoutTest extends BaseRequestDispatcher {
 			logger.info(" Insert a Mongo instance for this user in mapping table");
 		}
 
-		UserLogin.userToMongoInstanceMapping.put(testUserMapping, mongoInstance);
+		UserLogin.userToMongoInstanceMapping
+				.put(testUserMapping, mongoInstance);
 
 		MockHttpSession session = new MockHttpSession();
 		session.setAttribute("tokenId", testTokenId);
@@ -136,7 +135,8 @@ public class UserLogoutTest extends BaseRequestDispatcher {
 		testLogoutResource.doGet(testTokenId, request);
 
 		if (logger.isInfoEnabled()) {
-			logger.info("After Logout mapping Value of Token Id: " + UserLogin.tokenIDToUserMapping.get(testTokenId));
+			logger.info("After Logout mapping Value of Token Id: "
+					+ UserLogin.tokenIDToUserMapping.get(testTokenId));
 		}
 		assertNull(UserLogin.tokenIDToUserMapping.get(testTokenId));
 
@@ -148,6 +148,6 @@ public class UserLogoutTest extends BaseRequestDispatcher {
 
 	@After
 	public void destroyMongoProcess() {
-		p.destroy();
+		mongoInstance.close();
 	}
 }

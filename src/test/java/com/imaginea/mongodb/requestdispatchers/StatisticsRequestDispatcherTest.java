@@ -68,7 +68,7 @@ import com.mongodb.util.JSON;
 public class StatisticsRequestDispatcherTest extends BaseRequestDispatcher {
 
 	private MongoInstanceProvider mongoInstanceProvider;
-	private Mongo mongoInstance;
+	private static Mongo mongoInstance;
 	/**
 	 * Object of class to be tested
 	 */
@@ -83,9 +83,7 @@ public class StatisticsRequestDispatcherTest extends BaseRequestDispatcher {
 	 */
 	private String testTokenId = "123212178917845678910910";
 	private static final String logConfigFile = "src/main/resources/log4j.properties";
-	private static final String mongoProcessPath = "c:\\mongo\\bin\\mongod";
-	// Mongod Process to be started
-	private static Process p;
+	 
 	
 	/**
 	 * Constructs a mongoInstanceProvider Object.
@@ -94,12 +92,10 @@ public class StatisticsRequestDispatcherTest extends BaseRequestDispatcher {
 	 * @throws IOException
 	 * @throws FileNotFoundException
 	 */
-	public StatisticsRequestDispatcherTest() throws MongoHostUnknownException, IOException, FileNotFoundException {
+	public StatisticsRequestDispatcherTest() throws Exception {
 
 		try {
-			// Start Mongod
-			Runtime run = Runtime.getRuntime();
-			p = run.exec(mongoProcessPath);
+			 
 			mongoInstanceProvider = new ConfigMongoInstanceProvider();
 			PropertyConfigurator.configure(logConfigFile);
 			
@@ -367,6 +363,6 @@ public class StatisticsRequestDispatcherTest extends BaseRequestDispatcher {
 
 	@AfterClass
 	public static void destroyMongoProcess() {
-		p.destroy();
+		mongoInstance.close();
 	}
 }

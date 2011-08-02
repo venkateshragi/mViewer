@@ -18,6 +18,7 @@ package com.imaginea.mongodb.requestdispatchers;
 import java.util.Set;
 import org.apache.log4j.Logger;
 import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -166,7 +167,7 @@ public class CollectionRequestDispatcher extends BaseRequestDispatcher {
 	@Path("/{collectionName}")
 	@Produces(MediaType.APPLICATION_JSON)
 	public String postCollRequest(@PathParam("dbName") String dbName, @PathParam("collectionName") String collectionName,
-			@QueryParam("capped") boolean capped, @QueryParam("size") int size, @QueryParam("max") int maxDocs, @QueryParam("action") String action,
+			@FormParam("isCapped") String capped, @QueryParam("collSize") int size, @QueryParam("collMaxSize") int maxDocs, @QueryParam("action") String action,
 			@QueryParam("tokenId") String tokenId, @Context HttpServletRequest request) {
 
 		if (logger.isInfoEnabled()) {
@@ -191,9 +192,14 @@ public class CollectionRequestDispatcher extends BaseRequestDispatcher {
 			JSONObject resp = new JSONObject();
 			// Create Instance of Service File.
 			CollectionService collectionService = new CollectionServiceImpl(userMappingkey);
-
+            boolean capp =false;
+            if(capped.equals("on"))
+            {
+            	capp =true;
+            }
+            
 			if (action.equals("PUT")) {
-				temp.put("result", collectionService.insertCollection(dbName, collectionName, capped, size, maxDocs));
+				temp.put("result", collectionService.insertCollection(dbName, collectionName, capp, size, maxDocs));
 
 			} else if (action.equals("DELETE")) {
 				temp.put("result", collectionService.deleteCollection(dbName, collectionName));

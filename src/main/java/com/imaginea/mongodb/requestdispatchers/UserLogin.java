@@ -39,6 +39,7 @@ import com.imaginea.mongodb.common.exceptions.ErrorCodes;
 import com.imaginea.mongodb.common.exceptions.MongoHostUnknownException;
 import com.mongodb.DB;
 import com.mongodb.Mongo;
+import com.mongodb.MongoInternalException;
 
 /**
  * Authenticates User to Mongo Db by checking the user in <system.users>
@@ -157,7 +158,8 @@ public class UserLogin extends BaseRequestDispatcher {
 
 			// User Found
 			String mappingKey = username + "_" + mongoHost + "_" + mongoPort;
-			UserToken userToken = new UserToken(mongoHost, Integer.parseInt(mongoPort), username);
+			UserToken userToken = new UserToken(mongoHost,
+					Integer.parseInt(mongoPort), username);
 			// Genrate Token Id
 			String tokenId = userToken.generateTokenId();
 
@@ -213,10 +215,14 @@ public class UserLogin extends BaseRequestDispatcher {
 					"Unknown host", m);
 			response = formErrorResponse(logger, e.getMessage(),
 					e.getErrorCode(), e.getStackTrace(), "ERROR");
+		} catch (MongoInternalException m) {
+			MongoHostUnknownException e = new MongoHostUnknownException(
+					"Unknown host", m);
+			response = formErrorResponse(logger, e.getMessage(),
+					e.getErrorCode(), e.getStackTrace(), "ERROR");
 		} catch (Exception e) {
 			response = formErrorResponse(logger, e.getMessage(),
 					ErrorCodes.ANY_OTHER_EXCEPTION, e.getStackTrace(), "ERROR");
-
 		}
 		return response;
 	}

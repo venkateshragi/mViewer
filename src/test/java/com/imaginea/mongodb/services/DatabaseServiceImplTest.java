@@ -72,7 +72,7 @@ public class DatabaseServiceImplTest extends BaseRequestDispatcher {
 	 * Provides Mongo Instance.
 	 */
 	private MongoInstanceProvider mongoInstanceProvider;
-	private Mongo mongoInstance;
+	private static Mongo mongoInstance;
 
 	/**
 	 * Logger Object
@@ -80,22 +80,15 @@ public class DatabaseServiceImplTest extends BaseRequestDispatcher {
 	private static Logger logger = Logger.getLogger(DatabaseServiceImplTest.class);
 
 	private static final String logConfigFile = "src/main/resources/log4j.properties";
-	private static final String mongoProcessPath = "c:\\mongo\\bin\\mongod";
-	// Mongod Process to be started
-	private static  Process p;
+	 
 	
 	/**
 	 * Constructs a mongoInstanceProvider Object
-	 * 
-	 * @throws MongoHostUnknownException
-	 * @throws IOException
-	 * @throws FileNotFoundException
+	 * @throws Exception 
 	 */
-	public DatabaseServiceImplTest() throws MongoHostUnknownException, IOException, FileNotFoundException, JSONException {
+	public DatabaseServiceImplTest() throws Exception {
 		try {
-			// Start Mongod
-			Runtime run = Runtime.getRuntime();
-			p = run.exec(mongoProcessPath);
+		 
 			mongoInstanceProvider = new ConfigMongoInstanceProvider();
 			PropertyConfigurator.configure(logConfigFile);
 			
@@ -410,6 +403,6 @@ public class DatabaseServiceImplTest extends BaseRequestDispatcher {
 	
 	@AfterClass
 	public static void destroyMongoProcess() {
-		p.destroy();
+		mongoInstance.close();
 	}
 }

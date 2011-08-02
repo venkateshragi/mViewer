@@ -34,8 +34,7 @@ import java.util.List;
 
 import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
-import org.bson.types.ObjectId;
-import org.json.JSONException; 
+import org.bson.types.ObjectId; 
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
@@ -78,7 +77,7 @@ public class DocumentServiceImplTest extends BaseRequestDispatcher {
 	 * Provides Mongo Instance.
 	 */
 	private MongoInstanceProvider mongoInstanceProvider;
-	private Mongo mongoInstance;
+	private static  Mongo mongoInstance;
 
 	/**
 	 * Logger Object
@@ -87,26 +86,17 @@ public class DocumentServiceImplTest extends BaseRequestDispatcher {
 			.getLogger(DocumentServiceImplTest.class);
 
 	private static final String logConfigFile = "src/main/resources/log4j.properties";
-	private static final String mongoProcessPath = "c:\\mongo\\bin\\mongod";
-	// Mongod Process to be started
-	private static Process  p;
-	
+	 
 	
 	/**
 	 * Constructs a mongoInstanceProvider Object.
-	 * 
-	 * @throws MongoHostUnknownException
-	 * @throws IOException
-	 * @throws FileNotFoundException
+	 * @throws Exception 
 	 */
 
 	
-	public DocumentServiceImplTest() throws MongoHostUnknownException,
-			IOException, FileNotFoundException, JSONException {
+	public DocumentServiceImplTest() throws Exception {
 		try {
-			// Start Mongod
-			Runtime run = Runtime.getRuntime();
-			p = run.exec(mongoProcessPath);
+		 
 			mongoInstanceProvider = new ConfigMongoInstanceProvider();
 			PropertyConfigurator.configure(logConfigFile);
 		} catch (FileNotFoundException e) {
@@ -620,6 +610,6 @@ public class DocumentServiceImplTest extends BaseRequestDispatcher {
 	}
 	@AfterClass
 	public static void destroyMongoProcess() {
-		p.destroy();
+		mongoInstance.close();
 	}
 }

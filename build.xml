@@ -145,7 +145,7 @@
 	</target>
 
 	<!-- docs -->
-	<target name="doc" depends="init, doc-init, jsdoc" />
+	<target name="doc" depends="init, doc-init,jdoc, jsdoc" />
 	<target name="doc-init">
 		<mkdir dir="${staging.dir}" />
 		<mkdir dir="${docs.dir}" />
@@ -154,6 +154,17 @@
 	</target>
 
 
+	<target name="jdoc" depends="compile">
+		<javadoc access="public" author="false" doctitle="Imagine mViewer" destdir="${java.docs.dir}" nodeprecated="false" nodeprecatedlist="false" noindex="false" nonavbar="false" notree="false" overview="${java.src.dir}/overview.html" excludepackagenames="*" sourcepath="${java.src.dir}" splitindex="true" use="true" version="false">
+			<fileset dir="${java.src.dir}">
+				<include name="**/*.java" />
+			</fileset>
+			<classpath>
+				<path refid="compile.class.path" />
+			</classpath>
+		</javadoc>
+		<echo> Java Docs generated at ${java.docs.dir} </echo>
+	</target>
 
 	<target name="jsdoc">
 		<jsdoctoolkit jsdochome="${src.dir}/tools/jsdoc-toolkit/" includeundocumented="true" template="jsdoc" outputdir="${js.docs.dir}" inputdir="${js.src.dir}" />
@@ -165,7 +176,7 @@
 	<target name="test" depends="jslint-code,integration-test" />
 	<target name="integration-test" depends="jtest" />
 
-	<target name="jtest" depends="compile-test">
+	<target name="jtest" depends="compile-test">	 
 		<junit printsummary="yes" haltonfailure="no">
 			<classpath refid="test.class.path" />
 			<formatter type="plain" />
@@ -185,7 +196,7 @@
 	</target>
 
 
-	<target name="dist" description="Prepares a dist, is not incremental" depends="clean, compile, jar,  war">
+	<target name="dist" description="Prepares a dist, is not incremental" depends="clean, compile, jar,jdoc,war">
 		<echo> Deploy the war ${staging.dir}/${app.war} to your app-server. For detailed instructions please use the README</echo>
 	</target>
 
@@ -200,7 +211,7 @@
 	</target>
 
 
-	<target name="start" depends="compile, jar, war-staging" description="Starts the jetty server with the war deployed">
+	<target name="start" depends="compile, jar, war-staging" description="Starts the jetty server with the war deployed. Working on it yet.">
 
 	</target>
 </project>
