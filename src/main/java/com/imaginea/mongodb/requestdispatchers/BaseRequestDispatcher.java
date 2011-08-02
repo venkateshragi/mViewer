@@ -101,6 +101,7 @@ public class BaseRequestDispatcher {
             try {
                 response = callback.execute();
             } catch (JSONException e) {
+                logger.error(e);
                 response = "{\"code\":" + "\"" + ErrorCodes.JSON_EXCEPTION + "\"," + "\"message\": \"Error while forming JSON Object\"}";
             } catch (DatabaseException e) {
                 response = formErrorResponse(logger, e.getMessage(), e.getErrorCode(), e.getStackTrace(), "ERROR");
