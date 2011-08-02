@@ -14,9 +14,7 @@
  * limitations under the License.
  */
 package com.imaginea.mongodb.requestdispatchers;
-
-import com.mongodb.MongoException;
-import java.net.UnknownHostException;
+ 
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.log4j.Logger;
@@ -29,17 +27,14 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
-
-import org.json.JSONException;
+ 
 import org.json.JSONObject;
 
 import com.imaginea.mongodb.common.DateProvider;
 import com.imaginea.mongodb.common.UserToken;
-import com.imaginea.mongodb.common.exceptions.ErrorCodes;
-import com.imaginea.mongodb.common.exceptions.MongoHostUnknownException;
+import com.imaginea.mongodb.common.exceptions.ErrorCodes; 
 import com.mongodb.DB;
-import com.mongodb.Mongo;
-import com.mongodb.MongoInternalException;
+import com.mongodb.Mongo; 
 
 /**
  * Authenticates User to Mongo Db by checking the user in <system.users>
@@ -113,117 +108,104 @@ public class UserLogin extends BaseRequestDispatcher {
 
 	@POST
 	@Produces(MediaType.APPLICATION_JSON)
-	public String authenticateUser(@FormParam("username") String username,
-			@FormParam("password") String password,
-			@FormParam("host") String mongoHost,
-			@FormParam("port") String mongoPort,
-			@Context HttpServletRequest request) {
+	public String authenticateUser(@FormParam("username") String user,
+			@FormParam("password") final String password,
+			@FormParam("host") final String mongoHost,
+			@FormParam("port") final String mongoPort,
+			@Context final HttpServletRequest request) {
 		if (logger.isInfoEnabled()) {
 			logger.info("New Connection Request [" + DateProvider.getDateTime()
 					+ "]");
-			logger.info("Response Recieved : UserName [" + username
-					+ "] , host [" + mongoHost + "] ,port [" + mongoPort + "]");
+			logger.info("Response Recieved : UserName [" + user + "] , host ["
+					+ mongoHost + "] ,port [" + mongoPort + "]");
 		}
-		String response = null;
-		try {
-			if (username == null || password == null || mongoHost == null
-					|| mongoPort == null) {
-				return formErrorResponse(logger, "Missing Login Fields",
-						ErrorCodes.MISSING_LOGIN_FIELDS, null, "FATAL");
-			}
-			if (mongoHost.equals("") || mongoPort.equals("")) {
-				return formErrorResponse(logger, "Missing Login Fields",
-						ErrorCodes.MISSING_LOGIN_FIELDS, null, "FATAL");
-			}
-
-			// Try to connect to Mongo
-			Mongo m = new Mongo(mongoHost, Integer.parseInt(mongoPort));
-
-			boolean loginStatus = false;
-			if (username.equals("") && password.equals("")) {
-				// Guest Login
-				username = "guest";
-				loginStatus = true;
-			} else {
-				// Authorize User using <admin> Db
-
-				DB db = m.getDB("admin");
-				loginStatus = db.authenticate(username, password.toCharArray());
-			}
-			if (!loginStatus) {
-				return formErrorResponse(logger,
-						"Invalid UserName or Password",
-						ErrorCodes.INVALID_USERNAME, null, "FATAL");
-			}
-
-			// User Found
-			String mappingKey = username + "_" + mongoHost + "_" + mongoPort;
-			UserToken userToken = new UserToken(mongoHost,
-					Integer.parseInt(mongoPort), username);
-			// Genrate Token Id
-			String tokenId = userToken.generateTokenId();
-
-			// Sets tokenId for this user in session
-			HttpSession session = request.getSession();
-			session.setAttribute("tokenId", tokenId);
-
-			// Store ID in the Map against <mappingkey>
-			tokenIDToUserMapping.put(tokenId, mappingKey);
-
-			// Store a MongoInstance
-			if (!userToMongoInstanceMapping.containsKey(mappingKey)) {
-				Mongo mongoInstance = new Mongo(mongoHost,
-						Integer.parseInt(mongoPort));
-				userToMongoInstanceMapping.put(mappingKey, mongoInstance);
-
-			}
-			// Form a JSON format token.
-			String x = userToken.getTokenId();
-			JSONObject token = new JSONObject();
-			token.put("id", x);
-			token.put("username", userToken.getUsername());
-			token.put("host", userToken.getMongoHost());
-			token.put("port", userToken.getMongoPort());
-
-			if (logger.isInfoEnabled()) {
-				logger.info("Token provided [" + token + ']');
-			}
-			// Write in response
-			JSONObject temp = new JSONObject();
-			JSONObject resp = new JSONObject();
-			temp.put("result", token);
-			resp.put("response", temp);
-			response = resp.toString();
-
-		} catch (NumberFormatException e) {
-			response = formErrorResponse(logger, "Invalid Port",
-					ErrorCodes.ERROR_PARSING_PORT, e.getStackTrace(), "ERROR");
-		} catch (IllegalArgumentException e) {
-			// When port out of range
-			response = formErrorResponse(logger, "Port out of range",
-					ErrorCodes.PORT_OUT_OF_RANGE, e.getStackTrace(), "ERROR");
-		} catch (UnknownHostException m) {
-			MongoHostUnknownException e = new MongoHostUnknownException(
-					"Unknown host", m);
-			response = formErrorResponse(logger, e.getMessage(),
-					e.getErrorCode(), e.getStackTrace(), "ERROR");
-		} catch (JSONException e) {
-			response = formErrorResponse(logger, e.getMessage(),
-					ErrorCodes.JSON_EXCEPTION, e.getStackTrace(), "ERROR");
-		} catch (MongoInternalException m) {
-			MongoHostUnknownException e = new MongoHostUnknownException(
-					"Unknown host", m);
-			response = formErrorResponse(logger, e.getMessage(),
-					e.getErrorCode(), e.getStackTrace(), "ERROR");
-		} catch (MongoException m) {
-			MongoHostUnknownException e = new MongoHostUnknownException(
-					"Unknown host", m);
-			response = formErrorResponse(logger, e.getMessage(),
-					e.getErrorCode(), e.getStackTrace(), "ERROR");
-		} catch (Exception e) {
-			response = formErrorResponse(logger, e.getMessage(),
-					ErrorCodes.ANY_OTHER_EXCEPTION, e.getStackTrace(), "ERROR");
+		if (user.equals("") && password.equals("")) {
+			// Guest Login
+			user = "guest";
 		}
+		final String username = user;
+
+		String response = new ResponseTemplate().execute(logger,
+				new ResponseCallback() {
+					public String execute() throws Exception {
+						String response = null;
+						if (username == null || password == null
+								|| mongoHost == null || mongoPort == null) {
+							return formErrorResponse(logger,
+									"Missing Login Fields",
+									ErrorCodes.MISSING_LOGIN_FIELDS, null,
+									"FATAL");
+						}
+						if (mongoHost.equals("") || mongoPort.equals("")) {
+							return formErrorResponse(logger,
+									"Missing Login Fields",
+									ErrorCodes.MISSING_LOGIN_FIELDS, null,
+									"FATAL");
+						}
+
+						// Try to connect to Mongo
+						Mongo m = new Mongo(mongoHost, Integer
+								.parseInt(mongoPort));
+
+						boolean loginStatus = false;
+						if (username.equals("guest") && password.equals("")) {
+							loginStatus = true;
+						} else {
+							// Authorize User using <admin> Db
+							DB db = m.getDB("admin");
+							loginStatus = db.authenticate(username,
+									password.toCharArray());
+						}
+						if (!loginStatus) {
+							return formErrorResponse(logger,
+									"Invalid UserName or Password",
+									ErrorCodes.INVALID_USERNAME, null, "FATAL");
+						}
+
+						// User Found
+						String mappingKey = username + "_" + mongoHost + "_"
+								+ mongoPort;
+						UserToken userToken = new UserToken(mongoHost, Integer
+								.parseInt(mongoPort), username);
+						// Genrate Token Id
+						String tokenId = userToken.generateTokenId();
+
+						// Sets tokenId for this user in session
+						HttpSession session = request.getSession();
+						session.setAttribute("tokenId", tokenId);
+
+						// Store ID in the Map against <mappingkey>
+						tokenIDToUserMapping.put(tokenId, mappingKey);
+
+						// Store a MongoInstance
+						if (!userToMongoInstanceMapping.containsKey(mappingKey)) {
+							Mongo mongoInstance = new Mongo(mongoHost, Integer
+									.parseInt(mongoPort));
+							userToMongoInstanceMapping.put(mappingKey,
+									mongoInstance);
+
+						}
+						// Form a JSON format token.
+						String x = userToken.getTokenId();
+						JSONObject token = new JSONObject();
+						token.put("id", x);
+						token.put("username", userToken.getUsername());
+						token.put("host", userToken.getMongoHost());
+						token.put("port", userToken.getMongoPort());
+
+						// Write in response
+						JSONObject temp = new JSONObject();
+						JSONObject resp = new JSONObject();
+						temp.put("result", token);
+						resp.put("response", temp);
+						response = resp.toString();
+						return response;
+					}
+				});
+		if (logger.isInfoEnabled()) {
+			logger.info("Token provided to user");
+		}
+
 		return response;
 	}
 }
