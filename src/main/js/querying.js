@@ -297,7 +297,7 @@ YUI({
                     var documents = "<table>",
                         i;
                     for (i = 0; i < response.length; i++) {
-                        documents = documents + "<tr><td id='doc" + i + "'><pre><textarea id='ta" + i + "' class='disabled' disabled='disabled' cols='80' >" + Y.JSON.stringify(response[i], null, 4) + "</textarea></pre></td>" + "<td><button id='edit" + i + "' class='btn editbtn'>Edit</button><button id='delete" + i + "' class='btn deletebtn'>Delete</button></td></tr>";
+                        documents = documents + "<tr><td id='doc" + i + "'><pre><textarea id='ta" + i + "' class='disabled' disabled='disabled' cols='80' >" + Y.JSON.stringify(response[i], null, 4) + "</textarea></pre></td>" + "<td><button id='edit" + i + "' class='btn editbtn'>Edit</button></td>" + "<td><button id='delete" + i + "' class='btn deletebtn'>delete</button></td></tr>";
                     }
                     if (i === 0) {
                         documents = documents + "No documents to be displayed";
