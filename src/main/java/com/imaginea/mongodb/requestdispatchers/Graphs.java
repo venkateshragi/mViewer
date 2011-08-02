@@ -35,7 +35,7 @@ import com.imaginea.mongodb.common.exceptions.InvalidHTTPRequestException;
 import com.mongodb.BasicDBObject;
 import com.mongodb.CommandResult;
 import com.mongodb.DB;
-import com.mongodb.Mongo;
+import com.mongodb.Mongo; 
 
 /**
  * Return values of queries,updates,inserts and deletes being performed on Mongo
@@ -88,94 +88,76 @@ public class Graphs extends HttpServlet {
 	@Override
 	protected void doGet(HttpServletRequest request,
 			HttpServletResponse response) throws ServletException, IOException {
-
-		logger.info("Graphs Request Recieved [" + DateProvider.getDateTime()
-				+ "]");
-
+		if (logger.isInfoEnabled()) {
+			logger.info("Graphs Request Recieved ["
+					+ DateProvider.getDateTime() + "]");
+		}
 		// Declare Response Objects and PrintWriter
 		response.setContentType("application/x-json");
 		JSONObject respObj = new JSONObject();
 		PrintWriter out = response.getWriter();
 
-		// Error JSON Object to be sent in case of any exception caught
-		JSONObject error = new JSONObject();
 		String tokenId = request.getParameter("tokenId");
-
-		logger.info("Token Id : [" + tokenId + "]");
-
+		if (logger.isInfoEnabled()) {
+			logger.info("Token Id : [" + tokenId + "]");
+		}
+		String temp = null;
 		try {
 			if (tokenId == null) {
 				InvalidHTTPRequestException e = new InvalidHTTPRequestException(
 						ErrorCodes.TOKEN_ID_ABSENT, "Token Id not provided");
+				temp = BaseRequestDispatcher.formErrorResponse(logger,
+						e.getMessage(), e.getErrorCode(), e.getStackTrace(),
+						"FATAL");
+				out.write(temp);
 
-				error.put("message", e.getMessage());
-				error.put("code", e.getErrorCode());
-				logger.fatal(error);
-
-				JSONObject temp = new JSONObject();
-				temp.put("error", error);
-				respObj.put("response", temp);
-
-			} else {
-
-				// Check if tokenId is in session
-				HttpSession session = request.getSession();
-
-				if (session.getAttribute("tokenId") == null) {
-					InvalidHTTPRequestException e = new InvalidHTTPRequestException(
-							ErrorCodes.INVALID_SESSION,
-							"Session Expired(Token Id not set in session).");
-					error.put("message", e.getMessage());
-					error.put("code", e.getErrorCode());
-
-					logger.fatal(error);
-					JSONObject temp = new JSONObject();
-					temp.put("error", error);
-					respObj.put("response", temp);
-				} else {
-					if (!session.getAttribute("tokenId").equals(tokenId)) {
-						InvalidHTTPRequestException e = new InvalidHTTPRequestException(
-								ErrorCodes.INVALID_SESSION,
-								"Invalid Session(Token Id does not match with the one in session)");
-						error.put("message", e.getMessage());
-						error.put("code", e.getErrorCode());
-
-						logger.fatal(error);
-						JSONObject temp = new JSONObject();
-						temp.put("error", error);
-						respObj.put("response", temp);
-
-					} else {
-						// Present in Session
-						String user = UserLogin.tokenIDToUserMapping
-								.get(tokenId);
-						Mongo mongoInstance = UserLogin.userToMongoInstanceMapping
-								.get(user);
-						// Need a Db to get ServerStats
-						DB db = mongoInstance.getDB("admin");
-						String uri = request.getRequestURI();
-						JSONObject temp = new JSONObject();
-						if (uri != null) {
-							if (uri.substring(uri.lastIndexOf('/')).equals(
-									"/query")) {
-								temp = processQuery(db);
-							} else if (uri.substring(uri.lastIndexOf('/'))
-									.equals("/initiate")) {
-								if (request.getParameter("pollingTime") != null) {
-									jump = Integer.parseInt(request
-											.getParameter("pollingTime"));
-								}
-								temp = processInitiate(db);
-							}
-
-							respObj.put("response", temp);
-						}
-						logger.info("Response: [" + respObj + "]");
-
-						out.print(respObj);
-					}
-				}
 			}
+			// Check if tokenId is in session
+			HttpSession session = request.getSession();
+			if (session.getAttribute("tokenId") == null) {
+				InvalidHTTPRequestException e = new InvalidHTTPRequestException(
+						ErrorCodes.INVALID_SESSION,
+						"Session Expired(Token Id not set in session).");
+				temp = BaseRequestDispatcher.formErrorResponse(logger,
+						e.getMessage(), e.getErrorCode(), e.getStackTrace(),
+						"FATAL");
+				out.write(temp);
+			}
+			if (!session.getAttribute("tokenId").equals(tokenId)) {
+				InvalidHTTPRequestException e = new InvalidHTTPRequestException(
+						ErrorCodes.INVALID_SESSION,
+						"Invalid Session(Token Id does not match with the one in session)");
+				temp = BaseRequestDispatcher.formErrorResponse(logger,
+						e.getMessage(), e.getErrorCode(), e.getStackTrace(),
+						"FATAL");
+				out.write(temp);
+			}
+			// Present in Session
+			String user = UserLogin.tokenIDToUserMapping.get(tokenId);
+			Mongo mongoInstance = UserLogin.userToMongoInstanceMapping
+					.get(user);
+			// Need a Db to get ServerStats
+			DB db = mongoInstance.getDB("admin");
+			String uri = request.getRequestURI();
+			JSONObject temp1 = new JSONObject();
+			if (uri != null) {
+				if (uri.substring(uri.lastIndexOf('/')).equals("/query")) {
+					temp1 = processQuery(db);
+				} else if (uri.substring(uri.lastIndexOf('/')).equals(
+						"/initiate")) {
+					if (request.getParameter("pollingTime") != null) {
+						jump = Integer.parseInt(request
+								.getParameter("pollingTime"));
+					}
+					temp1 = processInitiate(db);
+				}
+				respObj.put("response", temp1);
+				out.write(respObj.toString());
+			}
+			if (logger.isInfoEnabled()) {
+				logger.info("Response: [" + respObj + "]");
+			}
+
 		} catch (JSONException e) {
 			ServletException s = new ServletException(
 					"Error forming JSON Response", e.getCause());
