@@ -62,7 +62,7 @@ YUI({
                 }
             });
         }
-        function sendDocumentRequest(param) {
+        function requestDocuments(param) {
             MV.data.sendRequest(param, {
                 success: showDocuments,
                 failure: function (request, responseObject) {
@@ -75,7 +75,7 @@ YUI({
         function executeQuery(e) {
             var queryParams = getQueryParameters();
             if (queryParams !== undefined) {
-                sendDocumentRequest(queryParams);
+                requestDocuments(queryParams);
             }
         }
         function showQueryBox(ioId, responseObject) {
@@ -91,7 +91,7 @@ YUI({
                     Y.log("QueryBox loaded", "info");
                     Y.on("click", executeQuery, "#execQueryButton");
                     defineDatasource();
-                    sendDocumentRequest(getQueryParameters());
+                    requestDocuments(getQueryParameters());
                 } else {
                     var error = parsedResponse.response.error;
                     Y.log("Could not get keys. Message: [0]".format(error.message), "error");

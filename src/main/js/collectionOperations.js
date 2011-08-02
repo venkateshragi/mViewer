@@ -61,7 +61,7 @@ YUI({
         this.subscribe("click", handleContextMenu);
     }
     //TODO implement
-    function parseAddDocResponse(responseObject) {
+    function addDocument(responseObject) {
         var parsedResponse = Y.JSON.parse(responseObject.responseText);
         response = parsedResponse.response.result;
         if (response !== undefined) {
@@ -93,10 +93,10 @@ YUI({
                 MV.showAlertDialog("Document creation failed! Please check if your app server is running and then refresh the page.", MV.warnIcon);
                 Y.log("Document creation failed. Response Status: [0]".format(responseObject.statusText), "error");
             };
-            MV.getDialog(form, parseAddDocResponse, showErrorMessage);
+            MV.getDialog(form, addDocument, showErrorMessage);
             break;
         case 2:
-            // Show Statistics
+            // click to view details
             MV.hideQueryForm();
             MV.createDatatable(MV.URLMap.collStatistics(), Y.one("#currentColl").get("value"));
             break;
@@ -114,7 +114,9 @@ YUI({
                 var info, index = 0,
                 collections = "";
                 for (index = 0; index < parsedResponse.response.result.length; index++) {
-                    collections += "<li id='[0]' >[1]</li>".format(parsedResponse.response.result[index], parsedResponse.response.result[index]);
+                    var collectionName = parsedResponse.response.result[index];
+                    // Issue 17 https://github.com/Imaginea/mViewer/issues/17
+                    collections += "<li id='[0]' >[1]</li>".format(collectionName.replace(/ /g,'_'), collectionName);
                 }
                 if (index === 0) {
                     collections = "No Collections";
