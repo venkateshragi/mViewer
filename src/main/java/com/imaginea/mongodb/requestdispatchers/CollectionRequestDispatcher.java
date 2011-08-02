@@ -61,8 +61,8 @@ import com.imaginea.mongodb.requestdispatchers.UserLogin;
 @Path("/{dbName}/collection")
 public class CollectionRequestDispatcher extends BaseRequestDispatcher {
 
-	 
-	private final static Logger logger = Logger.getLogger(CollectionRequestDispatcher.class);
+	private final static Logger logger = Logger
+			.getLogger(CollectionRequestDispatcher.class);
 
 	/**
 	 * Default Constructor
@@ -87,9 +87,12 @@ public class CollectionRequestDispatcher extends BaseRequestDispatcher {
 	 */
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
-	public String getCollList(@PathParam("dbName") String dbName, @QueryParam("tokenId") String tokenId, @Context HttpServletRequest request) {
+	public String getCollList(@PathParam("dbName") String dbName,
+			@QueryParam("tokenId") String tokenId,
+			@Context HttpServletRequest request) {
 		if (logger.isInfoEnabled()) {
-			logger.info("Recieved GET Request for Collection  [" + DateProvider.getDateTime() + "]");
+			logger.info("Recieved GET Request for Collection  ["
+					+ DateProvider.getDateTime() + "]");
 		}
 		String response = null;
 		try {
@@ -100,33 +103,41 @@ public class CollectionRequestDispatcher extends BaseRequestDispatcher {
 			// Get User for a given Token Id
 			String userMappingkey = UserLogin.tokenIDToUserMapping.get(tokenId);
 			if (userMappingkey == null) {
-				return formErrorResponse(logger, "User not mapped to token Id", ErrorCodes.INVALID_USER, null, "FATAL");
+				return formErrorResponse(logger, "User not mapped to token Id",
+						ErrorCodes.INVALID_USER, null, "FATAL");
 			}
 			JSONObject temp = new JSONObject();
 			JSONObject resp = new JSONObject();
 			// Create Instance of Service File.
-			CollectionService collectionService = new CollectionServiceImpl(userMappingkey);
+			CollectionService collectionService = new CollectionServiceImpl(
+					userMappingkey);
 			// Get the result;
 			Set<String> collectionNames = collectionService.getCollList(dbName);
 			temp.put("result", collectionNames);
 			resp.put("response", temp);
 			resp.put("totalRecords", collectionNames.size());
-			response=resp.toString();
-			
+			response = resp.toString();
+
 			if (logger.isInfoEnabled()) {
-				logger.info("Request Completed [" + DateProvider.getDateTime() + "]");
+				logger.info("Request Completed [" + DateProvider.getDateTime()
+						+ "]");
 			}
 
 		} catch (JSONException e) {
-			response = "{\"code\":" + "\"" + ErrorCodes.JSON_EXCEPTION + "\"," + "\"message\": \"Error while forming JSON Object\"}";
+			response = "{\"code\":" + "\"" + ErrorCodes.JSON_EXCEPTION + "\","
+					+ "\"message\": \"Error while forming JSON Object\"}";
 		} catch (DatabaseException e) {
-			response = formErrorResponse(logger, e.getMessage(), e.getErrorCode(), e.getStackTrace(), "ERROR");
+			response = formErrorResponse(logger, e.getMessage(),
+					e.getErrorCode(), e.getStackTrace(), "ERROR");
 		} catch (CollectionException e) {
-			response = formErrorResponse(logger, e.getMessage(), e.getErrorCode(), e.getStackTrace(), "ERROR");
+			response = formErrorResponse(logger, e.getMessage(),
+					e.getErrorCode(), e.getStackTrace(), "ERROR");
 		} catch (ValidationException e) {
-			response = formErrorResponse(logger, e.getMessage(), e.getErrorCode(), e.getStackTrace(), "ERROR");
+			response = formErrorResponse(logger, e.getMessage(),
+					e.getErrorCode(), e.getStackTrace(), "ERROR");
 		} catch (Exception e) {
-			response = formErrorResponse(logger, e.getMessage(), ErrorCodes.ANY_OTHER_EXCEPTION, e.getStackTrace(), "ERROR");
+			response = formErrorResponse(logger, e.getMessage(),
+					ErrorCodes.ANY_OTHER_EXCEPTION, e.getStackTrace(), "ERROR");
 		}
 		return response;
 
@@ -166,16 +177,25 @@ public class CollectionRequestDispatcher extends BaseRequestDispatcher {
 	@POST
 	@Path("/{collectionName}")
 	@Produces(MediaType.APPLICATION_JSON)
-	public String postCollRequest(@PathParam("dbName") String dbName, @PathParam("collectionName") String collectionName,
-			@FormParam("isCapped") String capped, @QueryParam("collSize") int size, @QueryParam("collMaxSize") int maxDocs, @QueryParam("action") String action,
-			@QueryParam("tokenId") String tokenId, @Context HttpServletRequest request) {
+	public String postCollRequest(@PathParam("dbName") String dbName,
+			@PathParam("collectionName") String collectionName,
+			@FormParam("isCapped") String capped,
+			@QueryParam("collSize") int size,
+			@QueryParam("collMaxSize") int maxDocs,
+			@QueryParam("action") String action,
+			@QueryParam("tokenId") String tokenId,
+			@Context HttpServletRequest request) {
 
 		if (logger.isInfoEnabled()) {
-			logger.info("Recieved POST Request for Collection  [" + DateProvider.getDateTime() + "]");
+			logger.info("Recieved POST Request for Collection  ["
+					+ DateProvider.getDateTime() + "]");
 		}
 		if (action == null) {
-			InvalidHTTPRequestException e = new InvalidHTTPRequestException(ErrorCodes.ACTION_PARAMETER_ABSENT, "ACTION_PARAMETER_ABSENT");
-			return formErrorResponse(logger, e.getMessage(), e.getErrorCode(), null,"ERROR");
+			InvalidHTTPRequestException e = new InvalidHTTPRequestException(
+					ErrorCodes.ACTION_PARAMETER_ABSENT,
+					"ACTION_PARAMETER_ABSENT");
+			return formErrorResponse(logger, e.getMessage(), e.getErrorCode(),
+					null, "ERROR");
 		}
 		String response = null;
 		try {
@@ -186,40 +206,52 @@ public class CollectionRequestDispatcher extends BaseRequestDispatcher {
 			// Get User for a given Token Id
 			String userMappingkey = UserLogin.tokenIDToUserMapping.get(tokenId);
 			if (userMappingkey == null) {
-				return formErrorResponse(logger, "User not mapped to token Id", ErrorCodes.INVALID_USER, null, "FATAL");
+				return formErrorResponse(logger, "User not mapped to token Id",
+						ErrorCodes.INVALID_USER, null, "FATAL");
 			}
 			JSONObject temp = new JSONObject();
 			JSONObject resp = new JSONObject();
 			// Create Instance of Service File.
-			CollectionService collectionService = new CollectionServiceImpl(userMappingkey);
-            boolean capp =false;
-            if(capped.equals("on"))
-            {
-            	capp =true;
-            }
-            
+			CollectionService collectionService = new CollectionServiceImpl(
+					userMappingkey);
+			boolean capp = false;
+			if (capped == null) {
+               capp=false;
+			}
+			else if (capped.equals("on")) {
+				capp = true;
+			}
+
 			if (action.equals("PUT")) {
-				temp.put("result", collectionService.insertCollection(dbName, collectionName, capp, size, maxDocs));
+				temp.put("result", collectionService.insertCollection(dbName,
+						collectionName, capp, size, maxDocs));
 
 			} else if (action.equals("DELETE")) {
-				temp.put("result", collectionService.deleteCollection(dbName, collectionName));
+				temp.put("result", collectionService.deleteCollection(dbName,
+						collectionName));
 			}
 			resp.put("response", temp);
-			response=resp.toString();
+			response = resp.toString();
 			if (logger.isInfoEnabled()) {
-				logger.info("Request Completed [" + DateProvider.getDateTime() + "]");
+				logger.info("Request Completed [" + DateProvider.getDateTime()
+						+ "]");
 			}
 
 		} catch (JSONException e) {
-			response = "{\"code\":" + "\"" + ErrorCodes.JSON_EXCEPTION + "\"," + "\"message\": \"Error while forming JSON Object\"}";
+			response = "{\"code\":" + "\"" + ErrorCodes.JSON_EXCEPTION + "\","
+					+ "\"message\": \"Error while forming JSON Object\"}";
 		} catch (DatabaseException e) {
-			response = formErrorResponse(logger, e.getMessage(), e.getErrorCode(), e.getStackTrace(), "ERROR");
+			response = formErrorResponse(logger, e.getMessage(),
+					e.getErrorCode(), e.getStackTrace(), "ERROR");
 		} catch (CollectionException e) {
-			response = formErrorResponse(logger, e.getMessage(), e.getErrorCode(), e.getStackTrace(), "ERROR");
+			response = formErrorResponse(logger, e.getMessage(),
+					e.getErrorCode(), e.getStackTrace(), "ERROR");
 		} catch (ValidationException e) {
-			response = formErrorResponse(logger, e.getMessage(), e.getErrorCode(), e.getStackTrace(), "ERROR");
+			response = formErrorResponse(logger, e.getMessage(),
+					e.getErrorCode(), e.getStackTrace(), "ERROR");
 		} catch (Exception e) {
-			response = formErrorResponse(logger, e.getMessage(), ErrorCodes.ANY_OTHER_EXCEPTION, e.getStackTrace(), "ERROR");
+			response = formErrorResponse(logger, e.getMessage(),
+					ErrorCodes.ANY_OTHER_EXCEPTION, e.getStackTrace(), "ERROR");
 		}
 		return response;
 
