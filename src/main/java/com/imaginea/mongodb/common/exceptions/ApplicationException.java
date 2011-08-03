@@ -25,46 +25,60 @@
 package com.imaginea.mongodb.common.exceptions;
 
 /**
- * Defines an Exception thrown when the HTTP Request made is invalid. An invalid
- * request is when it does not contain a tokenID which is must for every
- * authenticated user.
+ * Defines all the Exceptions generated while performing any operation in
+ * MongoDb. This class extends Exception and is used to insert ErrorCode in the
+ * Exception hierarchy for this application.
  * 
  * @author Rachit Mittal
+ * @since 1 Aug 2011
  * 
  */
-public class InvalidHTTPRequestException extends ApplicationException {
+public class ApplicationException extends Exception {
+
     private static final long serialVersionUID = 1L;
 
+    private String errorCode;
+
     /**
-     * Creates a new InvalidHTTPRequestException with errorcode and message.
+     * Creates a new ApplicationException with errorcode and message.
      * 
      * @param errorCode
      *            : ErrorCode of the Exception thrown
      * @param message
      *            : A description about the Error.
-     * 
      */
-    public InvalidHTTPRequestException(String errorCode, String message) {
-        super(errorCode, message);
+
+    public ApplicationException(String errorCode, String message) {
+        super(message);
+        this.errorCode = errorCode;
     }
 
     /**
-     * Creates a new InvalidHTTPRequestException along with cause of caught
-     * Exception to be appended.
+     * Creates a new ApplicationException with errorcode and message and
+     * appending the cause of a caught exception.
      * 
      * @param errorCode
      *            : ErrorCode of the Exception thrown
      * @param message
      *            : A description about the Error.
-     * 
      * @param cause
      *            : Cause of the previous Exception. This is appended in the new
-     *            InvalidHTTPRequestException formed here.
+     *            DatabaseException formed here.
      */
-    public InvalidHTTPRequestException(String errorCode, String message,
-            Throwable cause) {
-        super(errorCode, message, cause);
 
+    public ApplicationException(String errorCode, String message,
+            Throwable cause) {
+        super(message, cause);
+        this.errorCode = errorCode;
+    }
+
+    /**
+     * Return the error code of an exeption.
+     * 
+     * @return the errorcode
+     */
+    public String getErrorCode() {
+        return this.errorCode;
     }
 
 }

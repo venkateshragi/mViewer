@@ -28,12 +28,9 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 
-import org.apache.log4j.Logger; 
-import org.json.JSONObject;
-
-import com.imaginea.mongodb.common.DateProvider; 
+import org.apache.log4j.Logger;  
 import com.imaginea.mongodb.common.exceptions.ErrorCodes;
-import com.imaginea.mongodb.common.exceptions.InvalidHTTPRequestException; 
+import com.imaginea.mongodb.common.exceptions.InvalidHTTPRequestException;
 import com.imaginea.mongodb.services.CollectionService;
 import com.imaginea.mongodb.services.CollectionServiceImpl;
 
@@ -55,171 +52,112 @@ import com.imaginea.mongodb.services.CollectionServiceImpl;
  */
 @Path("/{dbName}/collection")
 public class CollectionRequestDispatcher extends BaseRequestDispatcher {
-	private final static Logger logger = Logger
-			.getLogger(CollectionRequestDispatcher.class);
+    private final static Logger logger = Logger
+            .getLogger(CollectionRequestDispatcher.class);
 
-	/**
-	 * Default Constructor
-	 */
-	public CollectionRequestDispatcher() {
-	}
+    /**
+     * Maps GET Request to get list of collections inside databases present in
+     * mongo db to a service function that returns the list. Also forms the JSON
+     * response for this request and sent it to client. In case of any exception
+     * from the service files an error object if formed.
+     * 
+     * @param dbName
+     *            Name of database
+     * @param dbInfo
+     *            Mongo Db Configuration provided by user to connect to.
+     * @param request
+     *            Get the HTTP request context to extract session parameters
+     * @return String of JSON Format with list of all collections.
+     */
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    public String getCollList(@PathParam("dbName") final String dbName,
+            @QueryParam("dbInfo") final String dbInfo,
+            @Context final HttpServletRequest request) {
 
-	/**
-	 * Maps GET Request to get list of collections inside databases present in
-	 * mongo db to a service function that returns the list. Also forms the JSON
-	 * response for this request and sent it to client. In case of any exception
-	 * from the service files an error object if formed.
-	 * 
-	 * @param dbName
-	 *            Name of database
-	 * @param tokenId
-	 *            a token Id given to every user at Login.
-	 * @param request
-	 *            Get the HTTP request context to extract session parameters
-	 * @return String of JSON Format with list of all collections.
-	 */
-	@GET
-	@Produces(MediaType.APPLICATION_JSON)
-	public String getCollList(@PathParam("dbName") final String dbName,
-			@QueryParam("tokenId") final String tokenId,
-			@Context final HttpServletRequest request) {
-		if (logger.isInfoEnabled()) {
-			logger.info("Recieved GET Request for Collection  ["
-					+ DateProvider.getDateTime() + "]");
-		}
+        String response = new ResponseTemplate().execute(logger, dbInfo,
+                request, new ResponseCallback() {
+                    public Object execute() throws Exception {
 
-		String response = new ResponseTemplate().execute(logger,
-				new ResponseCallback() {
-					public String execute() throws Exception {
-						String response = validateTokenId(tokenId, logger,
-								request);
-						if (response != null) {
-							return response;
-						}
-						// Get User for a given Token Id
-						String userMappingkey = UserLogin.tokenIDToUserMapping
-								.get(tokenId);
-						if (userMappingkey == null) {
-							return formErrorResponse(logger,
-									"User not mapped to token Id",
-									ErrorCodes.INVALID_USER, null, "FATAL");
-						}
-						JSONObject temp = new JSONObject();
-						JSONObject resp = new JSONObject();
-						// Create Instance of Service File.
-						CollectionService collectionService = new CollectionServiceImpl(
-								userMappingkey);
-						// Get the result;
-						Set<String> collectionNames = collectionService
-								.getCollList(dbName);
-						temp.put("result", collectionNames);
-						resp.put("response", temp);
-						resp.put("totalRecords", collectionNames.size());
-						response = resp.toString();
-						return response;
-					}
-				});
-		if (logger.isInfoEnabled()) {
-			logger.info("Request Completed [" + DateProvider.getDateTime()
-					+ "]");
-		}
-		return response;
-	}
+                        CollectionService collectionService = new CollectionServiceImpl(
+                                dbInfo);
+                        Set<String> collectionNames = collectionService
+                                .getCollList(dbName);
 
-	/**
-	 * Maps POST Request to perform create/drop on collections inside databases
-	 * present in mongo db to a service function that returns the list. Also
-	 * forms the JSON response for this request and sent it to client. In case
-	 * of any exception from the service files an error object if formed.
-	 * 
-	 * @param dbName
-	 *            Name of Database
-	 * @param capped
-	 *            Specify if the collection is capped
-	 * @param size
-	 *            Specify the size of collection
-	 * @param maxDocs
-	 *            specify maximum no of documents in the collection
-	 * @param collectionName
-	 *            Name of Database for which to perform create/drop operation
-	 *            depending on action patameter
-	 * @param action
-	 *            Query Paramater with value PUT for identifying a create
-	 *            database request and value DELETE for dropping a database.
-	 * @param request
-	 *            Get the HTTP request context to extract session parameters
-	 * @param tokenId
-	 *            a token Id given to every user at Login.
-	 * @return String with status of operation performed.
-	 */
-	@POST
-	@Path("/{collectionName}")
-	@Produces(MediaType.APPLICATION_JSON)
-	public String postCollRequest(@PathParam("dbName") final String dbName,
-			@PathParam("collectionName") final String collectionName,
-			@FormParam("isCapped") final String capped,
-			@QueryParam("collSize") final int size,
-			@QueryParam("collMaxSize") final int maxDocs,
-			@QueryParam("action") final String action,
-			@QueryParam("tokenId") final String tokenId,
-			@Context final HttpServletRequest request) {
-		if (logger.isInfoEnabled()) {
-			logger.info("Recieved POST Request for Collection  ["
-					+ DateProvider.getDateTime() + "]");
-		}
-		if (action == null) {
-			InvalidHTTPRequestException e = new InvalidHTTPRequestException(
-					ErrorCodes.ACTION_PARAMETER_ABSENT,
-					"ACTION_PARAMETER_ABSENT");
-			return formErrorResponse(logger, e.getMessage(), e.getErrorCode(),
-					null, "ERROR");
-		}
-		String response = new ResponseTemplate().execute(logger,
-				new ResponseCallback() {
-					public String execute() throws Exception {
-						String response = validateTokenId(tokenId, logger,
-								request);
-						if (response != null) {
-							return response;
-						}
-						// Get User for a given Token Id
-						String userMappingkey = UserLogin.tokenIDToUserMapping
-								.get(tokenId);
-						if (userMappingkey == null) {
-							return formErrorResponse(logger,
-									"User not mapped to token Id",
-									ErrorCodes.INVALID_USER, null, "FATAL");
-						}
-						JSONObject temp = new JSONObject();
-						JSONObject resp = new JSONObject();
-						// Create Instance of Service File.
-						CollectionService collectionService = new CollectionServiceImpl(
-								userMappingkey);
-						boolean capp = false;
-						if (capped == null) {
-							capp = false;
-						} else if (capped.equals("on")) {
-							capp = true;
-						}
-						if (action.equals("PUT")) {
-							temp.put("result", collectionService
-									.insertCollection(dbName, collectionName,
-											capp, size, maxDocs));
-						} else if (action.equals("DELETE")) {
-							temp.put("result", collectionService
-									.deleteCollection(dbName, collectionName));
-						}
-						resp.put("response", temp);
-						response = resp.toString();
-						return response;
-					}
-				});
+                        return collectionNames;
+                    }
+                });
+        return response;
+    }
 
-		if (logger.isInfoEnabled()) {
-			logger.info("Request Completed [" + DateProvider.getDateTime()
-					+ "]");
-		}
+    /**
+     * Maps POST Request to perform create/drop on collections inside databases
+     * present in mongo db to a service function that returns the list. Also
+     * forms the JSON response for this request and sent it to client. In case
+     * of any exception from the service files an error object if formed.
+     * 
+     * @param dbName
+     *            Name of Database
+     * @param capped
+     *            Specify if the collection is capped
+     * @param size
+     *            Specify the size of collection
+     * @param maxDocs
+     *            specify maximum no of documents in the collection
+     * @param collectionName
+     *            Name of Database for which to perform create/drop operation
+     *            depending on action patameter
+     * @param action
+     *            Query Paramater with value PUT for identifying a create
+     *            database request and value DELETE for dropping a database.
+     * @param request
+     *            Get the HTTP request context to extract session parameters
+     * @param dbInfo
+     *            Mongo Db Configuration provided by user to connect to.
+     * @return String with status of operation performed.
+     */
+    @POST
+    @Path("/{collectionName}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public String postCollRequest(@PathParam("dbName") final String dbName,
+            @PathParam("collectionName") final String collectionName,
+            @FormParam("isCapped") String capped,
+            @QueryParam("collSize") final int size,
+            @QueryParam("collMaxSize") final int maxDocs,
+            @QueryParam("action") final String action,
+            @QueryParam("dbInfo") final String dbInfo,
+            @Context final HttpServletRequest request) {
 
-		return response;
-	}
+        if (action == null) {
+            InvalidHTTPRequestException e = new InvalidHTTPRequestException(
+                    ErrorCodes.ACTION_PARAMETER_ABSENT,
+                    "ACTION_PARAMETER_ABSENT");
+            return formErrorResponse(logger, e);
+        }
+        // Reassign isCapped according to value from UI 
+        boolean capp = false;
+        if (capped == null) {
+            capp = false;
+        } else if (capped.equals("on")) {
+            capp = true;
+        }
+        final boolean iscapped = capp;
+        String response = new ResponseTemplate().execute(logger, dbInfo,
+                request, new ResponseCallback() {
+                    public Object execute() throws Exception {
+                        CollectionService collectionService = new CollectionServiceImpl(
+                                dbInfo);
+                        String status = null;
+                        if ("PUT".equals(action)) {
+                            status = collectionService.insertCollection(dbName,
+                                    collectionName, iscapped, size, maxDocs);
+                        } else if ("DELETE".equals(action)) {
+                            status = collectionService.deleteCollection(dbName,
+                                    collectionName);
+                        } 
+                        return status;
+                    }
+                }); 
+        return response;
+    }
 }

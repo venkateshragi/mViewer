@@ -82,7 +82,7 @@ public class CollectionRequestDispatcherTest extends BaseRequestDispatcher {
 	/**
 	 * A test token Id
 	 */
-	private String testTokenId = "123212178917845678910910";
+	private String testDbInfo = "localhost_";
 	private static final String logConfigFile = "src/main/resources/log4j.properties";
  
 	

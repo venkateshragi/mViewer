@@ -35,7 +35,7 @@ public class SessionMongoInstanceProvider implements MongoInstanceProvider {
 	 * @param userMappingKey
 	 */
 	public SessionMongoInstanceProvider(String userMappingKey) {
-		mongoInstance = UserLogin.userToMongoInstanceMapping
+		mongoInstance = UserLogin.mongoConfigToInstanceMapping
 				.get(userMappingKey);
 	}
 

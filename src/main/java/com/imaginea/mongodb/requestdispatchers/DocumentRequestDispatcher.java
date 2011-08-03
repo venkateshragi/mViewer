@@ -35,12 +35,8 @@ import javax.ws.rs.core.MediaType;
 
 import org.apache.log4j.Logger;
 import org.bson.types.ObjectId;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import com.imaginea.mongodb.common.DateProvider; 
-import com.imaginea.mongodb.common.exceptions.ErrorCodes;
-import com.imaginea.mongodb.common.exceptions.UndefinedDocumentException; 
+import org.json.JSONException; 
+import com.imaginea.mongodb.common.exceptions.UndefinedDocumentException;
 import com.imaginea.mongodb.services.DocumentService;
 import com.imaginea.mongodb.services.DocumentServiceImpl;
 import com.mongodb.BasicDBObject;
@@ -67,324 +63,222 @@ import com.mongodb.util.JSON;
  */
 @Path("/{dbName}/{collectionName}/document")
 public class DocumentRequestDispatcher extends BaseRequestDispatcher {
-	private final static Logger logger = Logger
-			.getLogger(DocumentRequestDispatcher.class);
+    private final static Logger logger = Logger
+            .getLogger(DocumentRequestDispatcher.class);
 
-	/**
-	 * Default Constructor
-	 */
-	public DocumentRequestDispatcher() {
-	}
+    /**
+     * Maps GET Request to get list of documents inside a collection inside a
+     * database present in mongo db to a service function that returns the list.
+     * Also forms the JSON response for this request and sent it to client. In
+     * case of any exception from the service files an error object if formed.
+     * 
+     * @param dbName
+     *            Name of Database
+     * @param collectionName
+     *            Name of Collection
+     * @param dbInfo
+     *            Mongo Db Configuration provided by user to connect to.
+     * @param request
+     *            Get the HTTP request context to extract session parameters
+     * @return A String of JSON format with list of All Documents in a
+     *         collection.
+     */
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    public String getQueriedDocsList(@PathParam("dbName") final String dbName,
+            @PathParam("collectionName") final String collectionName,
+            @QueryParam("query") final String query,
+            @QueryParam("dbInfo") final String dbInfo,
+            @QueryParam("fields") String keys,
+            @QueryParam("limit") final String limit,
+            @QueryParam("skip") final String skip,
+            @Context final HttpServletRequest request) throws JSONException {
 
-	/**
-	 * Maps GET Request to get list of documents inside a collection inside a
-	 * database present in mongo db to a service function that returns the list.
-	 * Also forms the JSON response for this request and sent it to client. In
-	 * case of any exception from the service files an error object if formed.
-	 * 
-	 * @param dbName
-	 *            Name of Database
-	 * @param collectionName
-	 *            Name of Collection
-	 * @param tokenId
-	 *            a token Id given to every user at Login.
-	 * @param request
-	 *            Get the HTTP request context to extract session parameters
-	 * @return A String of JSON format with list of All Documents in a
-	 *         collection.
-	 */
-	@GET
-	@Produces(MediaType.APPLICATION_JSON)
-	public String getQueriedDocsList(@PathParam("dbName") final String dbName,
-			@PathParam("collectionName") final String collectionName,
-			@QueryParam("query") final String query,
-			@QueryParam("tokenId") final String tokenId,
-			@QueryParam("fields") String keys,
-			@QueryParam("limit") final String limit,
-			@QueryParam("skip") final String skip,
-			@Context final HttpServletRequest request) throws JSONException {
-		if (logger.isInfoEnabled()) {
-			logger.info("Recieved GET Request for Document  ["
-					+ DateProvider.getDateTime() + "]");
-		}
-		// Get all fields to be returned in case of keys = null
-		if (keys == null) {
-			keys = "";
-		}
-		final String fields = keys;
-		String response = new ResponseTemplate().execute(logger,
-				new ResponseCallback() {
-					public String execute() throws Exception {
-						String response = validateTokenId(tokenId, logger,
-								request);
-						if (response != null) {
-							return response;
-						}
-						// Get User for a given Token Id
-						String userMappingkey = UserLogin.tokenIDToUserMapping
-								.get(tokenId);
-						if (userMappingkey == null) {
-							return formErrorResponse(logger,
-									"User not mapped to token Id",
-									ErrorCodes.INVALID_USER, null, "FATAL");
-						}
-						JSONObject temp = new JSONObject();
-						JSONObject resp = new JSONObject();
-						// Create Instance of Service File
-						DocumentService documentService = new DocumentServiceImpl(
-								userMappingkey);
-						// Get query
-						DBObject queryObj = (DBObject) JSON.parse(query);
-						StringTokenizer strtok = new StringTokenizer(fields,
-								",");
-						DBObject keyObj = new BasicDBObject();
-						while (strtok.hasMoreElements()) {
-							keyObj.put(strtok.nextToken(), 1);
-						}
-						int docsLimit = Integer.parseInt(limit);
-						int docsSkip = Integer.parseInt(skip);
-						ArrayList<DBObject> documentList = documentService
-								.getQueriedDocsList(dbName, collectionName,
-										queryObj, keyObj, docsLimit, docsSkip);
-						temp.put("result", documentList);
-						resp.put("response", temp);
-						resp.put("totalRecords", documentList.size());
-						response = resp.toString();
-						return response;
-					}
-				});
-		if (logger.isInfoEnabled()) {
-			logger.info("Request Completed [" + DateProvider.getDateTime()
-					+ "]");
-		}
+        // Get all fields with "_id" in case of keys = null
+        if (keys == null) {
+            keys = "";
+        }
+        final String fields = keys;
 
-		return response;
-	}
+        String response = new ResponseTemplate().execute(logger, dbInfo,
+                request, new ResponseCallback() {
+                    public Object execute() throws Exception {
 
-	/**
-	 * Maps GET Request to get all keys of document inside a collection inside a
-	 * database present in mongo db to a service function that returns the list.
-	 * Also forms the JSON response for this request and sent it to client. In
-	 * case of any exception from the service files an error object if formed.
-	 * 
-	 * @param dbName
-	 *            Name of Database
-	 * @param collectionName
-	 *            Name of Collection
-	 * @param tokenId
-	 *            a token Id given to every user at Login.
-	 * @param request
-	 *            Get the HTTP request context to extract session parameters
-	 * @return A String of JSON format with all keys in a collection.
-	 */
-	@GET
-	@Path("/keys")
-	@Produces(MediaType.APPLICATION_JSON)
-	public String getKeysRequest(@PathParam("dbName") final String dbName,
-			@PathParam("collectionName") final String collectionName,
-			@QueryParam("tokenId") final String tokenId,
-			@Context final HttpServletRequest request) {
-		if (logger.isInfoEnabled()) {
-			logger.info("Recieved GET Request for getting keys in a collection  ["
-					+ DateProvider.getDateTime() + "]");
-		}
-		String response = new ResponseTemplate().execute(logger,
-				new ResponseCallback() {
-					public String execute() throws Exception {
-						String response = validateTokenId(tokenId, logger,
-								request);
-						if (response != null) {
-							return response;
-						}
-						// Get User for a given Token Id
-						String userMappingkey = UserLogin.tokenIDToUserMapping
-								.get(tokenId);
-						if (userMappingkey == null) {
-							return formErrorResponse(logger,
-									"User not mapped to token Id",
-									ErrorCodes.INVALID_USER, null, "FATAL");
-						}
-						JSONObject temp = new JSONObject();
-						JSONObject resp = new JSONObject();
-						// Create Instance of Service File.
-						Mongo mongoInstance = UserLogin.userToMongoInstanceMapping
-								.get(userMappingkey);
-						DBCursor cursor = mongoInstance.getDB(dbName)
-								.getCollection(collectionName).find();
-						DBObject doc = new BasicDBObject();
-						Set<String> completeSet = new HashSet<String>();
-						while (cursor.hasNext()) {
-							doc = cursor.next();
-							getNestedKeys(doc, completeSet, "");
-						}
-						completeSet.remove("_id");
-						temp.put("result", completeSet);
-						resp.put("response", temp);
-						resp.put("totalRecords", completeSet.size());
-						response = resp.toString();
-						return response;
-					}
-				});
-		if (logger.isInfoEnabled()) {
-			logger.info("Request Completed [" + DateProvider.getDateTime()
-					+ "]");
-		}
+                        DocumentService documentService = new DocumentServiceImpl(
+                                dbInfo);
+                        // Get query
+                        DBObject queryObj = (DBObject) JSON.parse(query);
+                        StringTokenizer strtok = new StringTokenizer(fields,
+                                ",");
+                        DBObject keyObj = new BasicDBObject();
+                        while (strtok.hasMoreElements()) {
+                            keyObj.put(strtok.nextToken(), 1);
+                        }
+                        int docsLimit = Integer.parseInt(limit);
+                        int docsSkip = Integer.parseInt(skip);
+                        ArrayList<DBObject> documentList = documentService
+                                .getQueriedDocsList(dbName, collectionName,
+                                        queryObj, keyObj, docsLimit, docsSkip);
+                        return documentList;
+                    }
+                });
 
-		return response;
-	}
+        return response;
+    }
 
-	/**
-	 * Gets the keys within a nested document and adds it to the complete Set.
-	 * 
-	 * @param doc
-	 *            document
-	 * @param completeSet
-	 *            collection of all keys
-	 * @param prefix
-	 *            For nested docs. For the key <foo.bar.baz>, the prefix would
-	 *            be <foo.bar>
-	 */
-	private void getNestedKeys(DBObject doc, Set<String> completeSet,
-			String prefix) {
-		Set<String> allKeys = doc.keySet();
-		Iterator<String> it = allKeys.iterator();
-		while (it.hasNext()) {
-			String temp = it.next();
-			completeSet.add(prefix + temp);
-			if (doc.get(temp) instanceof BasicDBObject) {
-				getNestedKeys((DBObject) doc.get(temp), completeSet, prefix
-						+ temp + ".");
-			}
-		}
-	}
+    /**
+     * Maps GET Request to get all keys of document inside a collection inside a
+     * database present in mongo db to a service function that returns the list.
+     * Also forms the JSON response for this request and sent it to client. In
+     * case of any exception from the service files an error object if formed.
+     * 
+     * @param dbName
+     *            Name of Database
+     * @param collectionName
+     *            Name of Collection
+     * @param dbInfo
+     *            Mongo Db Configuration provided by user to connect to.
+     * @param request
+     *            Get the HTTP request context to extract session parameters
+     * @return A String of JSON format with all keys in a collection.
+     */
+    @GET
+    @Path("/keys")
+    @Produces(MediaType.APPLICATION_JSON)
+    public String getKeysRequest(@PathParam("dbName") final String dbName,
+            @PathParam("collectionName") final String collectionName,
+            @QueryParam("dbInfo") final String dbInfo,
+            @Context final HttpServletRequest request) {
 
-	/**
-	 * Maps POST Request to perform operations like update/delete/insert
-	 * document inside a collection inside a database present in mongo db to a
-	 * service function that returns the list. Also forms the JSON response for
-	 * this request and sent it to client. In case of any exception from the
-	 * service files an error object if formed.
-	 * 
-	 * @param dbName
-	 *            Name of Database
-	 * @param collectionName
-	 *            Name of Collection
-	 * @param documentData
-	 *            Contains the document to be inserted
-	 * @param _id
-	 *            Object id of document to delete or update
-	 * @param keys
-	 *            new Document values in case of update
-	 * @param action
-	 *            Query Paramater with value PUT for identifying a create
-	 *            database request and value DELETE for dropping a database.
-	 * @param tokenId
-	 *            a token Id given to every user at Login.
-	 * @param request
-	 *            Get the HTTP request context to extract session parameters
-	 * @return String with Status of operation performed.
-	 */
-	@POST
-	@Produces(MediaType.APPLICATION_JSON)
-	public String postDocsRequest(@PathParam("dbName") final String dbName,
-			@PathParam("collectionName") final String collectionName,
-			@DefaultValue("POST") @QueryParam("action") final String action,
-			@FormParam("document") final String documentData,
-			@FormParam("_id") final String _id,
-			@FormParam("keys") final String keys,
-			@QueryParam("tokenId") final String tokenId,
-			@Context final HttpServletRequest request) {
-		if (logger.isInfoEnabled()) {
-			logger.info("Recieved POST Request for Document  ["
-					+ DateProvider.getDateTime() + "]");
-		}
-		String response = new ResponseTemplate().execute(logger,
-				new ResponseCallback() {
-					public String execute() throws Exception {
-						String response = validateTokenId(tokenId, logger,
-								request);
-						if (response != null) {
-							return response;
-						}
-						// Get User for a given Token Id
-						String userMappingkey = UserLogin.tokenIDToUserMapping
-								.get(tokenId);
-						if (userMappingkey == null) {
-							return formErrorResponse(logger,
-									"User not mapped to token Id",
-									ErrorCodes.INVALID_USER, null, "FATAL");
-						}
-						JSONObject temp = new JSONObject();
-						JSONObject resp = new JSONObject();
-						// Create Instance of Service File
-						DocumentService documentService = new DocumentServiceImpl(
-								userMappingkey);
-						if (action.equals("PUT")) {
-							if (documentData == null) {
-								UndefinedDocumentException e = new UndefinedDocumentException(
-										"Document Data Missing in Request Body");
-								formErrorResponse(logger, e.getMessage(),
-										e.getErrorCode(), null, "ERROR");
-							} else if (documentData.equals("")) {
-								UndefinedDocumentException e = new UndefinedDocumentException(
-										"Document Data Missing in Request Body");
-								formErrorResponse(logger, e.getMessage(),
-										e.getErrorCode(), null, "ERROR");
-							} else {
-								DBObject document = (DBObject) JSON
-										.parse(documentData);
-								temp.put("result", documentService
-										.insertDocument(dbName, collectionName,
-												document));
-							}
-						} else if (action.equals("DELETE")) {
-							if (_id == null) {
-								UndefinedDocumentException e = new UndefinedDocumentException(
-										"Document Data Missing in Request Body");
-								formErrorResponse(logger, e.getMessage(),
-										e.getErrorCode(), null, "ERROR");
-							} else if (_id.equals("")) {
-								UndefinedDocumentException e = new UndefinedDocumentException(
-										"Document Data Missing in Request Body");
-								formErrorResponse(logger, e.getMessage(),
-										e.getErrorCode(), null, "ERROR");
-							} else {
-								ObjectId id = new ObjectId(_id);
-								temp.put("result", documentService
-										.deleteDocument(dbName, collectionName,
-												id));
-							}
-						} else if (action.equals("POST")) {
-							if (_id == null || keys == null) {
-								UndefinedDocumentException e = new UndefinedDocumentException(
-										"Document Data Missing in Request Body");
-								formErrorResponse(logger, e.getMessage(),
-										e.getErrorCode(), null, "ERROR");
-							} else if (_id.equals("") || keys.equals("")) {
-								UndefinedDocumentException e = new UndefinedDocumentException(
-										"Document Data Missing in Request Body");
-								formErrorResponse(logger, e.getMessage(),
-										e.getErrorCode(), null, "ERROR");
-							} else {
-								// Id of Document to update
-								ObjectId id = new ObjectId(_id);
-								// New Document Keys
-								DBObject newDoc = (DBObject) JSON.parse(keys);
-								temp.put("result", documentService
-										.updateDocument(dbName, collectionName,
-												id, newDoc));
-							}
-						}
-						resp.put("response", temp);
-						response = resp.toString();
-						return response;
-					}
-				});
-		if (logger.isInfoEnabled()) {
-			logger.info("Request Completed [" + DateProvider.getDateTime()
-					+ "]");
-		}
+        String response = new ResponseTemplate().execute(logger, dbInfo,
+                request, new ResponseCallback() {
+                    public Object execute() throws Exception {
+                        // Perform the operation here only.
+                        Mongo mongoInstance = UserLogin.mongoConfigToInstanceMapping
+                                .get(dbInfo);
+                        DBCursor cursor = mongoInstance.getDB(dbName)
+                                .getCollection(collectionName).find();
+                        DBObject doc = new BasicDBObject();
+                        Set<String> completeSet = new HashSet<String>();
+                        while (cursor.hasNext()) {
+                            doc = cursor.next();
+                            getNestedKeys(doc, completeSet, "");
+                        }
+                        completeSet.remove("_id");
+                        return completeSet;
+                    }
+                });
+        return response;
+    }
 
-		return response;
-	}
+    /**
+     * Gets the keys within a nested document and adds it to the complete Set.
+     * Used by getKeysRequest function above.
+     * 
+     * @param doc
+     *            document
+     * @param completeSet
+     *            collection of all keys
+     * @param prefix
+     *            For nested docs. For the key <foo.bar.baz>, the prefix would
+     *            be <foo.bar>
+     */
+    private void getNestedKeys(DBObject doc, Set<String> completeSet,
+            String prefix) {
+        Set<String> allKeys = doc.keySet();
+        Iterator<String> it = allKeys.iterator();
+        while (it.hasNext()) {
+            String temp = it.next();
+            completeSet.add(prefix + temp);
+            if (doc.get(temp) instanceof BasicDBObject) {
+                getNestedKeys((DBObject) doc.get(temp), completeSet, prefix
+                        + temp + ".");
+            }
+        }
+    }
+
+    /**
+     * Maps POST Request to perform operations like update/delete/insert
+     * document inside a collection inside a database present in mongo db to a
+     * service function that returns the list. Also forms the JSON response for
+     * this request and sent it to client. In case of any exception from the
+     * service files an error object if formed.
+     * 
+     * @param dbName
+     *            Name of Database
+     * @param collectionName
+     *            Name of Collection
+     * @param documentData
+     *            Contains the document to be inserted
+     * @param _id
+     *            Object id of document to delete or update
+     * @param keys
+     *            new Document values in case of update
+     * @param action
+     *            Query Paramater with value PUT for identifying a create
+     *            database request and value DELETE for dropping a database.
+     * @param dbInfo
+     *            Mongo Db Configuration provided by user to connect to.
+     * @param request
+     *            Get the HTTP request context to extract session parameters
+     * @return String with Status of operation performed.
+     */
+    @POST
+    @Produces(MediaType.APPLICATION_JSON)
+    public String postDocsRequest(@PathParam("dbName") final String dbName,
+            @PathParam("collectionName") final String collectionName,
+            @DefaultValue("POST") @QueryParam("action") final String action,
+            @FormParam("document") final String documentData,
+            @FormParam("_id") final String _id,
+            @FormParam("keys") final String keys,
+            @QueryParam("dbInfo") final String dbInfo,
+            @Context final HttpServletRequest request) {
+
+        String response = new ResponseTemplate().execute(logger, dbInfo,
+                request, new ResponseCallback() {
+                    public Object execute() throws Exception {
+
+                        DocumentService documentService = new DocumentServiceImpl(
+                                dbInfo);
+                        String result = null;
+                        if ("PUT".equals(action)) {
+                            if ("".equals(documentData)) {
+                                UndefinedDocumentException e = new UndefinedDocumentException(
+                                        "Document Data Missing in Request Body");
+                                result = formErrorResponse(logger, e);
+                            } else {
+                                DBObject document = (DBObject) JSON
+                                        .parse(documentData);
+                                result = documentService.insertDocument(dbName,
+                                        collectionName, document);
+                            }
+                        } else if ("DELETE".equals(action)) {
+                            if ("".equals(_id)) {
+                                UndefinedDocumentException e = new UndefinedDocumentException(
+                                        "Document Data Missing in Request Body");
+                                result = formErrorResponse(logger, e);
+                            } else {
+                                ObjectId id = new ObjectId(_id);
+                                result = documentService.deleteDocument(dbName,
+                                        collectionName, id);
+                            }
+                        } else if ("POST".equals(action)) {
+                            if ("".equals(_id) || "".equals(keys)) {
+                                UndefinedDocumentException e = new UndefinedDocumentException(
+                                        "Document Data Missing in Request Body");
+                                formErrorResponse(logger, e);
+                            } else {
+                                // Id of Document to update
+                                ObjectId id = new ObjectId(_id);
+                                // New Document Keys
+                                DBObject newDoc = (DBObject) JSON.parse(keys);
+                                result = documentService.updateDocument(dbName,
+                                        collectionName, id, newDoc);
+                            }
+                        }
+                        return result;
+                    }
+                });
+        return response;
+    }
 }

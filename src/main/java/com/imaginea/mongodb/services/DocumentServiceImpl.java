@@ -76,8 +76,8 @@ public class DocumentServiceImpl implements DocumentService {
 	 * @param userMappingKey
 	 *            A combination of username,mongoHost and mongoPort
 	 */
-	public DocumentServiceImpl(String userMappingKey) {
-		mongoInstanceProvider = new SessionMongoInstanceProvider(userMappingKey);
+	public DocumentServiceImpl(String dbInfo) {
+		mongoInstanceProvider = new SessionMongoInstanceProvider(dbInfo);
 	}
 
 	/**

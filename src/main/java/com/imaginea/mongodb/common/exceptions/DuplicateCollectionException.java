@@ -47,8 +47,8 @@ public class DuplicateCollectionException extends CollectionException {
 	 *            : A description about the Error.
 	 * 
 	 */
-	public DuplicateCollectionException(String errorCode, String message) {
-		super(errorCode, message);
+	public DuplicateCollectionException(String message) {
+		super(ErrorCodes.COLLECTION_ALREADY_EXISTS, message);
 
 	}
 
@@ -64,9 +64,9 @@ public class DuplicateCollectionException extends CollectionException {
 	 *            : Cause of the previous Exception. This is appended in the new
 	 *            DuplicateCollectionException formed here.
 	 */
-	public DuplicateCollectionException(String errorCode, String message,
+	public DuplicateCollectionException(String message,
 			Throwable cause) {
-		super(errorCode, message, cause);
+		super(ErrorCodes.COLLECTION_ALREADY_EXISTS, message, cause);
 
 	}
 
