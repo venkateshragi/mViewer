@@ -30,7 +30,7 @@ YUI({
                         var response = parsedResponse.response.result;
                         if (response !== undefined) {
                             Y.log("Successfully set the logging level", "info");
-                            Y.one("#logMessage").set("innerHTML", response + "<br> Please send us mViewer.log stored in the logs directory of the application server in case of any problems.<br> agaur111@gmail.com , mtlrachit@gmail.com");
+                            Y.one("#logMessage").set("innerHTML", response + "<br> Please send us mViewer.log stored in the mViewer_logs directory of the application server in case of any problems.<br> aditya.g@imaginea.com , rachit.m@imaginea.com");
                         } else {
                             var error = parsedResponse.response.error;
                             var errorDiv = Y.one("#logMessage");

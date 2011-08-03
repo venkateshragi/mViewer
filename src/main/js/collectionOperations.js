@@ -20,66 +20,62 @@ YUI({
     var collDiv = Y.one("#collNames ul.lists");
     // TODO make loading panel generic
     var loadingPanel;
+
     var collContextMenu = new YAHOO.widget.ContextMenu("collContextMenuID", {
         trigger: "collNames",
         itemData: ["Delete", "Add Document", "Statistics"],
         lazyload: true
-    }); /* HANDLER FUNCTIONS */
-    var dropCollection = function () {
-            var request = Y.io(MV.URLMap.dropColl(),
-            // configuration for dropping the collection
-            {
-                method: "POST",
-                on: {
-                    success: function (ioId, responseObj) {
-                        var parsedResponse = Y.JSON.parse(responseObj.responseText);
-                        response = parsedResponse.response.result;
-                        if (response !== undefined) {
-                            MV.showAlertDialog(Y.one("#currentColl").get("value") + " dropped", MV.infoIcon);
-                            Y.log("[0] dropped. Response: [1]".format(Y.one("#currentColl").get("value"), response), "info");
-                            Y.one("#currentColl").set("value", "");
-                            Y.one("#" + Y.one("#currentDB").get("value")).simulate("click");
-                        } else {
-                            var error = parsedResponse.response.error;
-                            MV.showAlertDialog("Could not drop: [0]. [1]".format(Y.one("#currentColl").get("value"), MV.errorCodeMap[error.code]), MV.warnIcon);
-                            Y.log("Could not drop [0], Error message: [1], Error Code: [2]".format(Y.one("#currentColl").get("value"), error.message, error.code), "error");
-                        }
-                    },
-                    failure: function (ioId, responseObj) {
-                        Y.log("Could not drop [0].Status text: ".format(Y.one("#currentColl").get("value"), responseObj.statusText), "error");
-                        MV.showAlertDialog("Could not drop [0]!  Please check if your app server is running and try again. Status Text: [1]".format(Y.one("#currentColl").get("value"), responseObj.statusText), MV.warnIcon);
-                    }
-                }
-            });
-            this.hide();
-        };
+    }); 
 
-    function initializeHandlers(eventType, args) {
-        this.subscribe("click", excuteContextMenuOption);
+    /* HANDLER FUNCTIONS */
+    function dropCollection() {
+        var request = Y.io(MV.URLMap.dropColl(),
+                           // configuration for dropping the collection
+                           {
+                               method: "POST",
+                               on: {
+                                   success: function (ioId, responseObj) {
+                                       var parsedResponse = Y.JSON.parse(responseObj.responseText);
+                                       response = parsedResponse.response.result;
+                                       if (response !== undefined) {
+                                           MV.showAlertDialog(Y.one("#currentColl").get("value") + " dropped", MV.infoIcon);
+                                           Y.log("[0] dropped. Response: [1]".format(Y.one("#currentColl").get("value"), response), "info");
+                                           Y.one("#currentColl").set("value", "");
+                                           Y.one("#" + Y.one("#currentDB").get("value")).simulate("click");
+                                       } else {
+                                           var error = parsedResponse.response.error;
+                                           MV.showAlertDialog("Could not drop: [0]. [1]".format(Y.one("#currentColl").get("value"), MV.errorCodeMap[error.code]), MV.warnIcon);
+                                           Y.log("Could not drop [0], Error message: [1], Error Code: [2]".format(Y.one("#currentColl").get("value"), error.message, error.code), "error");
+                                       }
+                                   },
+                                   failure: function (ioId, responseObj) {
+                                       Y.log("Could not drop [0].Status text: ".format(Y.one("#currentColl").get("value"), responseObj.statusText), "error");
+                                       MV.showAlertDialog("Could not drop [0]!  Please check if your app server is running and try again. Status Text: [1]".format(Y.one("#currentColl").get("value"), responseObj.statusText), MV.warnIcon);
+                                   }
+                               }
+                           });
+        this.hide();
     }
-    //TODO implement
-    var parseAddDocResponse = function (responseObject) {
-            var parsedResponse = Y.JSON.parse(responseObject.responseText);
-            response = parsedResponse.response.result;
-            if (response !== undefined) {
-                MV.showAlertDialog("New document added to [0]".format(Y.one("#currentColl").get("value")), MV.infoIcon);
-                Y.log("New document added to [0]".format(Y.one("#currentColl").get("value"), "info"));
-                Y.one("#" + Y.one("#currentColl").get("value")).simulate("click");
-            } else {
-                var error = parsedResponse.response.error;
-                MV.showAlertDialog("Could not add Document! [0]".format(MV.errorCodeMap[error.code]), MV.warnIcon);
-                Y.log("Could not add Document! [0]".format(MV.errorCodeMap[error.code]), "error");
-            }
-        };
-    var showError = function (responseObject) {
-            MV.showAlertDialog("Document creation failed! Please check if your app server is running and then refresh the page.", MV.warnIcon);
-            Y.log("Document creation failed. Response Status: [0]".format(responseObject.statusText), "error");
-        };
 
-    function excuteContextMenuOption(eventType, args) {
+
+    function addDocument(responseObject) {
+        var parsedResponse = Y.JSON.parse(responseObject.responseText);
+        response = parsedResponse.response.result;
+        if (response !== undefined) {
+            MV.showAlertDialog("New document added to [0]".format(Y.one("#currentColl").get("value")), MV.infoIcon);
+            Y.log("New document added to [0]".format(Y.one("#currentColl").get("value"), "info"));
+            Y.one("#" + Y.one("#currentColl").get("value").replace(/ /g, '_')).simulate("click");
+        } else {
+            var error = parsedResponse.response.error;
+            MV.showAlertDialog("Could not add Document! [0]".format(MV.errorCodeMap[error.code]), MV.warnIcon);
+            Y.log("Could not add Document! [0]".format(MV.errorCodeMap[error.code]), "error");
+        }
+    }
+
+    function handleContextMenu(eventType, args) {
         var menuItem = args[1]; // The MenuItem that was clicked
-        Y.one("#currentColl").set("value", this.contextEventTarget.id);
-        MV.toggleClass(Y.one("#" + Y.one("#currentColl").get("value")), Y.all("#collNames li"));
+        Y.one("#currentColl").set("value", this.contextEventTarget.innerHTML);
+        MV.toggleClass(Y.one("#" + Y.one("#currentColl").get("value").replace(/ /g,'_')), Y.all("#collNames li"));
         switch (menuItem.index) {
         case 0:
             // Delete
@@ -90,27 +86,38 @@ YUI({
         case 1:
             // Add Document
             var form = "addDocDialog";
-            MV.getDialog(form, parseAddDocResponse, showError);
+            var showErrorMessage = function (responseObject) {
+                MV.showAlertDialog("Document creation failed! Please check if your app server is running and then refresh the page.", MV.warnIcon);
+                Y.log("Document creation failed. Response Status: [0]".format(responseObject.statusText), "error");
+            };
+            MV.getDialog(form, addDocument, showErrorMessage);
             break;
         case 2:
-            // Show Statistics
+            // click to view details
             MV.hideQueryForm();
             MV.createDatatable(MV.URLMap.collStatistics(), Y.one("#currentColl").get("value"));
             break;
         }
     }
-    collContextMenu.subscribe("render", initializeHandlers);
-    // A function handler to use for successful get Collection Names requests:
 
+    collContextMenu.subscribe("render",function(eventType, args) {
+        this.subscribe("click", handleContextMenu);
+    });
+
+    // A function handler to use for successful get Collection Names requests:
     function displayCollectionNames(oId, responseObject) {
         Y.log("Response Recieved of get collection request", "info");
         try {
             var parsedResponse = Y.JSON.parse(responseObject.responseText);
-            if (parsedResponse.response.result !== undefined) {
+            var parsedResult = parsedResponse.response.result;
+
+            if ( parsedResult ) {
                 var info, index = 0,
-                    collections = "";
-                for (index = 0; index < parsedResponse.response.result.length; index++) {
-                    collections += "<li id='[0]' >[1]</li>".format(parsedResponse.response.result[index], parsedResponse.response.result[index]);
+                collections = "";
+                for (index = 0; index < parsedResult.length; index++) {
+                    var collectionName = parsedResult[index];
+                    // Issue 17 https://github.com/Imaginea/mViewer/issues/17
+                    collections += "<li id='[0]' >[1]</li>".format(collectionName.replace(/ /g,'_'), collectionName);
                 }
                 if (index === 0) {
                     collections = "No Collections";
@@ -128,16 +135,16 @@ YUI({
             MV.showAlertDialog(e, MV.warnIcon);
         }
     }
+
     // A function handler to use for unsuccessful get Collection
     // Names requests:
-
     function displayError(ioId, responseObj) {
         if (responseObj.responseText) {
             Y.log("Could not load collections. Status message: [0]".format(responseObj.statusText), "error");
             MV.showAlertDialog("Could not load collections! Check if your app server is running and refresh the page.", MV.warnIcon);
         }
         loadingPanel.hide();
-    } /* FUNCTIONS SENDING XHR REQUESTS */
+    } 
 
     function requestCollNames(e) {
         Y.one("#currentDB").set("value", e.currentTarget.get("id"));

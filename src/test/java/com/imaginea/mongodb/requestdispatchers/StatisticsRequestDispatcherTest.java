@@ -33,7 +33,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.log4j.Logger;
+import org.apache.log4j.PropertyConfigurator;
 import org.json.JSONException;
+import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.mock.web.MockHttpServletRequest;
@@ -66,7 +68,7 @@ import com.mongodb.util.JSON;
 public class StatisticsRequestDispatcherTest extends BaseRequestDispatcher {
 
 	private MongoInstanceProvider mongoInstanceProvider;
-	private Mongo mongoInstance;
+	private static Mongo mongoInstance;
 	/**
 	 * Object of class to be tested
 	 */
@@ -80,7 +82,9 @@ public class StatisticsRequestDispatcherTest extends BaseRequestDispatcher {
 	 * A test token Id
 	 */
 	private String testTokenId = "123212178917845678910910";
-
+	private static final String logConfigFile = "src/main/resources/log4j.properties";
+	 
+	
 	/**
 	 * Constructs a mongoInstanceProvider Object.
 	 * 
@@ -88,10 +92,13 @@ public class StatisticsRequestDispatcherTest extends BaseRequestDispatcher {
 	 * @throws IOException
 	 * @throws FileNotFoundException
 	 */
-	public StatisticsRequestDispatcherTest() throws MongoHostUnknownException, IOException, FileNotFoundException {
-		 
+	public StatisticsRequestDispatcherTest() throws Exception {
+
 		try {
+			 
 			mongoInstanceProvider = new ConfigMongoInstanceProvider();
+			PropertyConfigurator.configure(logConfigFile);
+			
 		} catch (FileNotFoundException e) {
 			formErrorResponse(logger, e.getMessage(), ErrorCodes.FILE_NOT_FOUND_EXCEPTION, e.getStackTrace(), "ERROR");
 			throw e;
@@ -352,5 +359,10 @@ public class StatisticsRequestDispatcherTest extends BaseRequestDispatcher {
 				logger.info("Test Completed");
 			}
 		}
+	}
+
+	@AfterClass
+	public static void destroyMongoProcess() {
+		mongoInstance.close();
 	}
 }

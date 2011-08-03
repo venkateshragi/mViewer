@@ -37,6 +37,7 @@ import org.apache.log4j.PropertyConfigurator;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -71,24 +72,26 @@ public class DatabaseServiceImplTest extends BaseRequestDispatcher {
 	 * Provides Mongo Instance.
 	 */
 	private MongoInstanceProvider mongoInstanceProvider;
-	private Mongo mongoInstance;
+	private static Mongo mongoInstance;
 
 	/**
 	 * Logger Object
 	 */
 	private static Logger logger = Logger.getLogger(DatabaseServiceImplTest.class);
 
+	private static final String logConfigFile = "src/main/resources/log4j.properties";
+	 
+	
 	/**
 	 * Constructs a mongoInstanceProvider Object
-	 * 
-	 * @throws MongoHostUnknownException
-	 * @throws IOException
-	 * @throws FileNotFoundException
+	 * @throws Exception 
 	 */
-	public DatabaseServiceImplTest() throws MongoHostUnknownException, IOException, FileNotFoundException, JSONException {
+	public DatabaseServiceImplTest() throws Exception {
 		try {
+		 
 			mongoInstanceProvider = new ConfigMongoInstanceProvider();
-			PropertyConfigurator.configure("log4j.properties");
+			PropertyConfigurator.configure(logConfigFile);
+			
 		} catch (FileNotFoundException e) {
 			formErrorResponse(logger, e.getMessage(), ErrorCodes.FILE_NOT_FOUND_EXCEPTION, e.getStackTrace(), "ERROR");
 			throw e;
@@ -396,5 +399,10 @@ public class DatabaseServiceImplTest extends BaseRequestDispatcher {
 		if (logger.isInfoEnabled()) {
 			logger.info("Test Completed");
 		}
+	}
+	
+	@AfterClass
+	public static void destroyMongoProcess() {
+		mongoInstance.close();
 	}
 }

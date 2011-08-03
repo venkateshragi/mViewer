@@ -194,6 +194,17 @@ ul.user-menu li label.logout {
 	font-weight: bold;
 }
 
+.sublist-head {
+	text-transform: none;
+}
+
+.main-head {
+	height: 20px;
+	color: #0e2137;
+	font-size: 20px;
+	font-weight: bold;
+}
+
 .db {
 	background: url("../images/db.png") no-repeat;
 	padding-left: 22px;
@@ -439,16 +450,21 @@ fieldset legend {
 #tabContainer {
 	width: '100%';
 }
-.helpDescription{
+.helpDescription {
 	padding-left: 10px;
 	font-family:sans-serif;
 	font-size:medium;
-	}
-.helpDescriptionImg{
+}
+
+.helpDescriptionImg {
 	margin: 18px;
 	padding: 4px;
-	width :600px;
-	height:200px;
 	border:1px solid #ccc; 
-	}
-	
+}
+
+.loginHelp {
+    text-align: right;
+    font-weight: bold;
+    padding-bottom: 1em;
+    padding-right: 3em;
+}

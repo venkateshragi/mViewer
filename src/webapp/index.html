@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta http-equiv="content-type" content="text/html; charset=utf-8">
-<title>New Connection</title>
+<title>Login</title>
 <link type="text/css" rel="stylesheet"
 	href="lib/yui/build/cssfonts/fonts-min.css" />
 <script type="text/javascript" src="lib/yui/build/yui/yui-min.js"></script>
@@ -27,10 +27,12 @@
 		<img src="images/index_logo.png" alt="logo" align="center" id="logo">
 		
 		<br>
-		<!-- <button id="add" class="btn">New Connection</button> -->
 		<fieldset id="field">
 			<legend align="center">Login Details</legend>
-			<br> <br>
+			<br/> 
+            <div id="helpDiv" class="loginHelp" >
+              <a href="help.html" target="_blank">Help</a>
+            </div>
 			<div id="loginForm">
 				<table class='table' align='center'>
 					<thead>
@@ -44,7 +46,7 @@
 							<td><code>Host</code>
 							</td>
 							<td><input type='text' id='host' name='host'
-								value='localhost' />
+								value='localhost.localdomain' />
 							</td>
 						</tr>
 						<tr>

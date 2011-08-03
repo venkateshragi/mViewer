@@ -1,4 +1,4 @@
-<project name="mViewer" default="dist" xmlns:ac="antlib:net.sf.antcontrib" xmlns:jsl="antlib:com.googlecode.jslint4java">
+<project name="mViewer" default="dist" xmlns:ac="antlib:net.sf.antcontrib" xmlns:jsl="antlib:com.googlecode.jslint4java" xmlns:ivy="antlib:org.apache.ivy.ant">
 
 
 	<property name="app.name" value="mViewer" />
@@ -8,16 +8,22 @@
 	<property name="java.src.dir" value="${src.dir}/main/java" />
 	<property name="js.src.dir" value="${src.dir}/main/js" />
 	<property name="src.resources.dir" value="${src.dir}/resources" />
+	<property name="main.resources.dir" value="${src.dir}/main/resources" />
 	<property name="lib.dir" value="${src.resources.dir}" />
 
 	<property name="staging.dir" value="${basedir}/staging" />
+	<property name="docs.dir" value="${staging.dir}/docs" />
+	<property name="java.docs.dir" value="${docs.dir}/java" />
+	<property name="js.docs.dir" value="${docs.dir}/js" />
+
 	<property name="classes.dir" value="${staging.dir}/classes" />
-	<property name="test.classes.dir" value="${basedir}/dist/testclasses" />
 	<property name="app.dir" value="${staging.dir}/${app.name}" />
 
-	<!-- Test Reports -->
-	<property name="test.reports.dir" value="${basedir}/testreports" />
+	<!-- Test Properties -->
 	<property name="test.dir" value="${src.dir}/test" />
+	<property name="java.test.dir" value="${src.dir}/test/java" />
+	<property name="test.reports.dir" value="${staging.dir}/testreports" />
+	<property name="test.classes.dir" value="${staging.dir}/testclasses" />
 
 
 	<taskdef uri="antlib:net.sf.antcontrib" resource="net/sf/antcontrib/antlib.xml" classpath=" ${src.dir}/tools/ant-contrib.jar" />
@@ -27,82 +33,54 @@
 	<taskdef name="jsdoctoolkit" classname="uk.co.darrenhurley.ant.tasks.JsDocToolkit" classpath="${src.dir}/tools/jsdoc-toolkit-ant-task-1.1.2.jar;${src.dir}/tools/jsdoc-toolkit/jsrun.jar" />
 
 
-
-	<jsdoctoolkit jsdochome="${src.dir}/tools/jsdoc-toolkit/" includeundocumented="true" template="jsdoc" outputdir="${basedir}/docs/js" inputdir="${js.src.dir}" />
-	<target name="jslint-code">
-		<jsl:jslint haltOnFailure="true" options="es5,evil,fragment,forin,continue">
-			<formatter type="plain" />
-			<fileset dir="${js.src.dir}" includes="*.js" />
-		</jsl:jslint>
-	</target>
-
-	<target name="init" depends="jslint-code">
-
+	<target name="init">
 		<mkdir dir="${staging.dir}" />
 		<mkdir dir="${app.dir}" />
 		<mkdir dir="${test.reports.dir}" />
 		<mkdir dir="${test.classes.dir}" />
 
-
 		<path id="compile.class.path">
-			<fileset dir="${basedir}">
-				<include name="log4j.properties" />
+			<fileset dir="${main.resources.dir}">
+				<include name="**/log4j.properties" />
 			</fileset>
-			<fileset dir="${lib.dir}">
-				<include name="**/*.jar" />
-			</fileset>
-		</path>
-		<!-- Class path of .jar and .class required during test files compiling -->
-		<path id="test.class.path">
-			<fileset dir="${basedir}">
-				<include name="log4j.properties" />
-			</fileset>
-			<fileset dir="${classes.dir}">
-				<include name="com/imaginea/mongodb/services/**" />
-				<include name="com/imaginea/mongodb/common/**" />
-				<include name="com/imaginea/mongodb/common/exceptions/**" />
-				<include name="com/imaginea/mongodb/requestdispatchers/**" />
-				<include name="com/imaginea/mongodb/services/servlet/**" />
-			</fileset>
-			<pathelement path="${test.classes.dir}" />
-			<pathelement path="${classes.dir}" />
 			<fileset dir="${lib.dir}">
 				<include name="**/*.jar" />
 			</fileset>
 		</path>
 	</target>
 
+	<target name="test-init">
+		<!-- Class path of .jar and .class required during test files compiling -->
+		<path id="test.class.path">
+			<path refid="compile.class.path" />
+			<fileset dir="${main.resources.dir}">
+				<include name="**/log4j.properties" />
+			</fileset>
+			<fileset dir="${classes.dir}">
+				<include name="**/**" />
+			</fileset>
+			<pathelement path="${test.classes.dir}" />
+			<pathelement path="${classes.dir}" />
+		</path>
+	</target>
 
 	<!-- compile -->
 	<target name="compile" depends="init">
 		<mkdir dir="${classes.dir}" />
-		<javac srcdir="${java.src.dir}" destdir="${classes.dir}" classpathref="compile.class.path" nowarn="yes" debug="yes">
+		<javac srcdir="${java.src.dir}" destdir="${classes.dir}" classpathref="compile.class.path" nowarn="yes" debug="yes" includeantruntime="false">
 			<!-- <compiler arg value="-Xlint:unchecked"/> -->
 		</javac>
 	</target>
 
 	<!-- compile test-->
-	<target name="compile-test" depends="compile">
-		<javac srcdir="${test.dir}" destdir="${test.classes.dir}" classpathref="test.class.path" nowarn="yes" debug="yes">
+	<target name="compile-test" depends="test-init, compile">
+		<javac srcdir="${test.dir}" destdir="${test.classes.dir}" classpathref="test.class.path" nowarn="yes" debug="yes" includeantruntime="false">
 		</javac>
 	</target>
 
-	<!-- Run test-->
-	<echo> Running Test </echo>
-	<target name="test" depends="compile-test">
-		<junit printsummary="yes" haltonfailure="no">
-			<classpath refid="test.class.path" />
-			<formatter type="plain" />
-			<batchtest todir="${test.reports.dir}">
-				<fileset dir="${test.classes.dir}">
-					<include name="**/*Test.class" />
-				</fileset>
-			</batchtest>
-		</junit>
-		<echo> Tests Completed </echo>
-	</target>
+
 	<!-- jar -->
-	<target name="jar" depends="test">
+	<target name="jar">
 		<jar jarfile="${staging.dir}/${app.jar}">
 			<fileset dir="${classes.dir}">
 				<include name="**/*.class" />
@@ -110,6 +88,7 @@
 		</jar>
 	</target>
 
+	<!-- war staging -->
 	<target name="war-staging">
 		<echo>${app.dir}</echo>
 		<copy toDir="${app.dir}">
@@ -142,28 +121,89 @@
 			</fileset>
 		</copy>
 		<!-- copy log4j properties file -->
-		<!-- classes folder for properties file. mViewer.jar contains the classes actually-->
+		<!-- classes folder for properties file. mViewer.jar contains the src classes-->
 		<mkdir dir="${app.dir}/WEB-INF/classes" />
 		<copy todir="${app.dir}/WEB-INF/classes">
-			<fileset dir="${basedir}">
+			<fileset dir="${main.resources.dir}">
 				<include name="log4j.properties" />
 			</fileset>
 		</copy>
-
 	</target>
 
+	<!-- make war -->
 	<target name="war" depends="war-staging">
 		<war warfile="${staging.dir}/${app.war}" needxmlfile="false">
 			<fileset dir="${app.dir}">
 			</fileset>
 		</war>
+		<!-- Copy war to base directory -->
+		<copy todir="${basedir}">
+			<fileset dir="${staging.dir}">
+				<include name="mViewer.war" />
+			</fileset>
+		</copy>
+	</target>
+
+	<!-- docs -->
+	<target name="doc" depends="init, doc-init,jdoc, jsdoc" />
+	<target name="doc-init">
+		<mkdir dir="${staging.dir}" />
+		<mkdir dir="${docs.dir}" />
+		<mkdir dir="${java.docs.dir}" />
+		<mkdir dir="${js.docs.dir}" />
 	</target>
 
 
-	<target name="dist" description="Prepares a dist, is not incremental" depends="clean, compile, jar, war">
+	<target name="jdoc" depends="compile">
+		<javadoc access="public" author="false" doctitle="Imagine mViewer" destdir="${java.docs.dir}" nodeprecated="false" nodeprecatedlist="false" noindex="false" nonavbar="false" notree="false" overview="${java.src.dir}/overview.html" excludepackagenames="*" sourcepath="${java.src.dir}" splitindex="true" use="true" version="false">
+			<fileset dir="${java.src.dir}">
+				<include name="**/*.java" />
+			</fileset>
+			<classpath>
+				<path refid="compile.class.path" />
+			</classpath>
+		</javadoc>
+		<echo> Java Docs generated at ${java.docs.dir} </echo>
 	</target>
 
-	<target name="dev" description="prepares a dev build, is incremental" depends="clean, compile, jar, war-staging" />
+	<target name="jsdoc">
+		<jsdoctoolkit jsdochome="${src.dir}/tools/jsdoc-toolkit/" includeundocumented="true" template="jsdoc" outputdir="${js.docs.dir}" inputdir="${js.src.dir}" />
+		<echo> JS Docs generated at ${js.docs.dir} </echo>
+	</target>
+
+
+	<!-- Run test-->
+	<target name="test" depends="jslint,integration-test" />
+	<target name="integration-test" depends="jtest" />
+
+	<target name="jtest" depends="compile-test">
+		<echo> Please Check if Mongo is Running at configurations given in your file src/test/ressources/mongo.config for test cases to pass </echo>
+		<junit printsummary="yes" haltonfailure="yes">
+			<classpath refid="test.class.path" />
+			<formatter type="plain" />
+			<batchtest todir="${test.reports.dir}">
+				<fileset dir="${java.test.dir}">
+					<include name="**/*Test.java" />
+				</fileset>
+			</batchtest>
+		</junit>
+	</target>
+
+	<target name="jslint">
+		<jsl:jslint haltOnFailure="true" options="es5,evil,fragment,forin,continue">
+			<formatter type="plain" />
+			<fileset dir="${js.src.dir}" includes="*.js" />
+		</jsl:jslint>
+	</target>
+
+
+	<target name="dist" description="Prepares a dist, is not incremental" depends="clean, compile, jar,jdoc,war,dev">
+		<echo> Deploy the war ${staging.dir}/${app.war} to your app-server. For detailed instructions please use the README</echo>
+	</target>
+
+	<target name="dev" description="prepares a dev build, is incremental" depends="compile, jar, war-staging">
+		<echo>Building the war in dev-mode</echo>
+	</target>
 
 	<target name="clean" description="Cleans up all the staging resources and log files">
 		<delete dir="${staging.dir}" />
@@ -171,19 +211,8 @@
 		<delete dir="${basdir}/logs" />
 	</target>
 
-	<!--TODO Automate jetty task -->
-	<path id="jetty.plugin.classpath">
-		<fileset dir="${src.resources.dir}/jetty-lib" includes="*.jar" />
-	</path>
 
-	<!--<taskdef classpathref="jetty.plugin.classpath" resource="tasks.properties" loaderref="jetty.loader" /> -->
+	<target name="start" depends="compile, jar, war-staging" description="Starts the jetty server with the war deployed. Working on it yet.">
 
-	<target name="jetty.run" depends="war">
-		<mkdir dir="${basedir}/jetty-temp" />
-		<jetty tempDirectory="${basedir}/jetty-temp">
-			<webApp name="mViewer" warfile="${staging.dir}/mViewer.war" contextpath="/mViewer" />
-		</jetty>
 	</target>
-
-	<!-- TODO automate java docs generation-->
 </project>

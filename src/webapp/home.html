@@ -1,7 +1,7 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <html>
 <head>
-<title>mViewer-Home Page</title>
+<title>mViewer</title>
 <META http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 <META name="description"
 	content="This is the Home page for mViewer a MongoDB UI" />
@@ -57,12 +57,12 @@
 <script type="text/javascript" src="js/styling.js"></script>
 <script type="text/javascript" src="js/querying.js"></script>
 <script type="text/javascript" src="js/dialogBox.js"></script>
-<script type="text/javascript" src="js/SimpleDialog.js"></script>
-<script type="text/javascript" src="js/DBOperations.js"></script>
+<script type="text/javascript" src="js/simpleDialog.js"></script>
+<script type="text/javascript" src="js/dbOperations.js"></script>
 <script type="text/javascript" src="js/collectionOperations.js"></script>
 <script type="text/javascript" src="js/loadingPanel.js"></script>
-<script type="text/javascript" src="js/TreeblePatch.js"></script>
-<script type="text/javascript" src="js/Treeble.js"></script>
+<script type="text/javascript" src="js/treeblePatch.js"></script>
+<script type="text/javascript" src="js/treeble.js"></script>
 <script type="text/javascript" src="js/headerOperations.js"></script>
 <script type="text/javascript" src="js/console.js"></script>
 <link href="css/style.css" rel="stylesheet" type="text/css">
@@ -93,7 +93,7 @@
 		<div class="body-cont gen-float">
 			<div class="title-head">
 				<label>Host: <span id="hostname"></span> </label> 
-				<button id="toggle_console" class="btn">Show Console</button>
+				<button id="toggle_console" class="btn">Show UI Log</button>
 			</div>
 			<div class="gen-float">
 				<div class="left-cont gen-float">
@@ -127,7 +127,7 @@
 						<h3>Pramati Technologies</h3>
 						<br>
 						<br>
-						<p>Please click on the database name to start working</p>
+						<p><h2>Please click on the database name to start working</h2></p>
 					</center>
 				</div>
 
@@ -162,7 +162,8 @@
 		<div class="bd">
 			<form method="POST">
 				<label class="dialogLabel" for="document">JSON format: </label>
-				<textarea rows='5' cols='50' name="document">{}</textarea>
+                <br/>
+				<textarea rows='5' style="display:block; width:100%" name="document">{}</textarea>
 				<div class="clear"></div>
 			</form>
 		</div>
@@ -173,16 +174,5 @@
 	<input type="hidden" id="host" name="host" value="">
 	<input type="hidden" id="tokenID" name="tokenID" value="">
 	<input type="hidden" id="newName" name="newName" value="">
-	<!--
-        <div id="addDBDialog" class="yui-pe-content">
-            <div class="hd">Please enter Database Details</div>
-            <div class="bd">
-                <form method="POST" action="HomePopulate/addDB">
-                    <label  class="dialogLabel" for="name">Name:</label><input type="textbox" name="name" />
-                    <div class="clear"></div>
-                </form>
-            </div>
-        </div>
-        -->
 </body>
 </html>

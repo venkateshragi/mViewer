@@ -20,10 +20,12 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.UnknownHostException;
 import java.util.Properties;
 import com.imaginea.mongodb.common.exceptions.MongoHostUnknownException;
 import com.mongodb.Mongo;
 import com.mongodb.MongoException;
+import com.mongodb.MongoInternalException;
 
 /**
  * Provides an Implementation for MongoInstanceProvider that provides instance
@@ -38,8 +40,10 @@ public class ConfigMongoInstanceProvider implements MongoInstanceProvider {
 
 	private Mongo mongoInstance;
 
-	private String mongoHost = "127.0.0.1"; // From app.config read
-	private int mongoPort = 27017;
+	private String mongoHost;
+	private int mongoPort;
+
+	private Process p;
 
 	/**
 	 * Get the initial MongoIP and mongoPort from config file and returns a
@@ -51,23 +55,34 @@ public class ConfigMongoInstanceProvider implements MongoInstanceProvider {
 	 * @throws FileNotFoundException
 	 * 
 	 */
-	public ConfigMongoInstanceProvider() throws MongoHostUnknownException,
-			IOException, FileNotFoundException {
+	public ConfigMongoInstanceProvider() throws Exception {
 		try {
 
 			Properties prop = new Properties();
-			String fileName = "mongo.config";
+			String fileName = "src/test/resources/mongo.config";
 			InputStream is = new FileInputStream(fileName);
 			prop.load(is);
-
+ 
 			if (prop != null) {
 				mongoHost = prop.getProperty("mongoHost");
 				mongoPort = Integer.parseInt(prop.getProperty("mongoPort"));
 				mongoInstance = new Mongo(mongoHost, mongoPort);
 			}
-
+			System.out.println(mongoInstance.getDatabaseNames());
+			
+		} catch (MongoInternalException e) {
+			throw new MongoHostUnknownException(
+					"HOST_UNKNOWN"
+							+ "Change your mongo data directory path or mongod path in ConfigMongoInstanceProvider",
+					e);
+		} catch (UnknownHostException e) {
+			throw new MongoHostUnknownException("HOST_UNKNOWN", e);
 		} catch (MongoException e) {
 			throw new MongoHostUnknownException("HOST_UNKNOWN", e);
+		} catch (Exception e) {
+
+			throw new Exception("ANY_OTHER_EXCEPTION", e);
+
 		}
 	}
 
@@ -75,9 +90,17 @@ public class ConfigMongoInstanceProvider implements MongoInstanceProvider {
 	 * 
 	 * @return mongo Instance
 	 */
-	@Override
+
 	public Mongo getMongoInstance() {
 		return mongoInstance;
 	}
 
+	/**
+	 * Destroys Mongo Process
+	 * 
+	 * @return
+	 */
+	public void killMongoProcess() {
+		p.destroy();
+	}
 }

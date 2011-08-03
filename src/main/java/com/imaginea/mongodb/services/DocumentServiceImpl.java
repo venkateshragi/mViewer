@@ -463,17 +463,24 @@ public class DocumentServiceImpl implements DocumentService {
 						+ collectionName + "] _DOES_NOT_EXIST in Db [ "
 						+ dbName + "]");
 			}
+			DBCollection coll = mongoInstance.getDB(dbName).getCollection(
+					collectionName);
+			if (coll.isCapped()) {
+				throw new DocumentException(
+						ErrorCodes.DELETING_FROM_CAPPED_COLLECTION,
+						"Cannot Delete From a Capped Collection");
+			}
 			if (id == null) {
 				throw new EmptyDocumentDataException("Document is empty");
 			}
- 
+
 			DBObject query = new BasicDBObject();
-			query.put("_id", id); 
+			query.put("_id", id);
 			DBCollection collection = this.mongoInstance.getDB(dbName)
 					.getCollection(collectionName);
-			documentData= collection.findOne(query);
+			documentData = collection.findOne(query);
 
-			if (documentData==null) { 
+			if (documentData == null) {
 				throw new UndefinedDocumentException("DOCUMENT_DOES_NOT_EXIST");
 			}
 

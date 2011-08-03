@@ -1,102 +1,131 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
-<head>
-<title>mViewer-Help Page</title>
-<META http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-<META name="description"
-	content="This is the help page for mViewer- a MongoDB UI" />
-<LINK rel="SHORTCUT ICON" href="images/icon.png" />
-<link href="css/style.css" rel="stylesheet" type="text/css">
-</head>
-<body width="100%">
+  <head>
+    <title>mViewer-Help Page</title>
+    <META http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <META name="description"
+	      content="This is the help page for mViewer- a MongoDB UI" />
+    <LINK rel="SHORTCUT ICON" href="images/icon.png" />
+    <link href="css/style.css" rel="stylesheet" type="text/css">
+  </head>
+  <body width="100%">
 	<center>
-		<img src="images/index_logo.png" alt="logo" align="center" id="logo">
-		<br>
+	  <img src="images/index_logo.png" alt="logo" align="center" id="logo">
+	  <br>
 	</center>
 	<div class="wrapper">
-		<div class="body-cont gen-float">
-			<div class="gen-float">
-				<div class="left-cont gen-float">
-					<div class="list-head">
-						<label>General</label>
-					</div>
-					<ul class="lists">
-						<li><a href="#login">Login</a></li>
-					</ul>
-					<div class="list-head">
-						<label>DB Operations</label>
-					</div>
-					<ul class="lists">
-						<li><a href="#addDB">Add a Database</a></li>
-						<li><a href="#deleteDB">Delete a Database</a></li>
-						<li><a href="#dbStatistics">Database Statistics</a></li>
-
-					</ul>
-				</div>
-				<div class="right-cont gen-float">
-					<div class="list-head">
-						<label id="login">Login</label>
-					</div>
-					<div class="helpDescription">
-						<p>
-							To use the mViewer tool you need to first install mongoDB. The
-							installation process for mongoDB can be found <a
-								href="http://www.mongodb.org/display/DOCS/Quickstart">here</a>.
-							After the installation, make sure that the mongo daemon is
-							running.
-						</p>
-						<p>
-							For the login process insert the host and port number where the
-							mongod is running. Now either leave the <strong>username</strong>
-							and <strong>password</strong> field <strong>empty</strong> or add
-							a user to the <strong>admin</strong> database of the <strong>mongoDB</strong>.
-						</p>
-						To add user start the <strong>mongo </strong>process and do the
-						following: <img class="helpDescriptionImg" alt="add user "
-							src="images/add_user.png"></img>
-						<p>Now you can go to the mViewer login page and fill in the
-							required details.</p>
-					</div>
-					<div class="list-head">
-						<label id="addDB">Add a database</label>
-					</div>
-					<div class="helpDescription">
-						<p>mViewer tool at the moment does not support the feature to
-							add a Database</p>
-					</div>
-					<div class="list-head">
-						<label id="deleteDB">Delete a database</label>
-					</div>
-					<div class="helpDescription">
-						<p>
-							To delete a Database in mViewer, you need to <strong>right</strong>
-							click on the database name and select the delete option from the
-							context menu. This is depicted in the figure below:
-						</p>
-						<img class="helpDescriptionImg" alt="delete Database"
-							src="images/delete_db.png"></img>
-						<p>An alert box will appear asking for the confirmation to
-							delete the database. If you click "yes", the database will be
-							deleted and the confirmation of successful database deletion will
-							be shown.
-					</div>
-					<div class="list-head">
-						<label id="dbStatistics">Database Statistics</label>
-					</div>
-					<div class="helpDescription">
-						<p>
-							As soon as you click on a database the database statistics are
-							shown. Another way to view the database statistics is to <strong>right</strong>
-							click on a database and click on the statistics option in the
-							context menu. This is depicted in the figure below:
-						</p>
-						<img class="helpDescriptionImg" alt="delete Database"
-							src="images/db_stats.png"></img>
-					</div>
-				</div>
+	  <div class="body-cont gen-float">
+		<div class="gen-float">
+		  <div class="left-cont gen-float">
+			<div class="list-head">
+			  <label>General</label>
 			</div>
-		</div>
-	</div>
-</body>
+			<ul class="lists">
+			  <li><a href="#gettingStarted">Getting Started</a></li>
+			</ul>
+			<div class="list-head">
+			  <label>DB Operations</label>
+			</div>
+			<ul class="lists">
+			  <li><a href="#addDB">Add a Database</a></li>
+			  <li><a href="#deleteDB">Delete a Database</a></li>
+			  <li><a href="#dbStatistics">Database Statistics</a></li>
+			</ul>
+			<div class="list-head">
+			  <label>Troubleshooting</label>
+			</div>
+			<ul class="lists">
+			  <li><a href="#noDBs">No DBs displayed</a></li>
+			  <li><a href="#corruptedSession">Corrupted Session</a></li>
+			  <li><a href="#reportIssue">Reporting Issues</a></li>
+		  </div>
+		  <div class="right-cont gen-float">
+			<div class="main-head list-head">
+			  <label id="General">General</label>
+			</div>
+			<div class="sublist-head list-head">
+			  <label id="gettingStarted">What do I need to get started with mViewer?</label>
+            </div>
+            <div class="helpDescription" >
+			  <p>
+                You just need to install mongoDB and ensure that mongo daemon is running. The installation process for mongoDB can be found <a href="http://www.mongodb.org/display/DOCS/Quickstart">here</a>.
+              </p>
+            </div>
+		    <div class="sublist-head list-head">
+			  <label id="gettingStarted2">I've installed mongoDB. What next?</label>
+		    </div>
+		    <div class="helpDescription">
+			  <p>
+                Make sure that the mongo daemon is running and proceed to the Login page of mViewer. Enter the Host and Port Number of the mongoDB. 
+              </p>
+              <img class="helpDescriptionImg" alt="login screen" src="images/login.png"></img> 
+              
+              <p>
+                If you haven’t been provided with credentials, the UserName and Password field can be left blank. By the way, to add a user to the admin database of mongoDB, read the help below. 
+              </p>
+            </div>
+		    <div class="sublist-head list-head">
+			  <label id="addUser">How do I add a user to the admin database of mongoDB?</label>
+		    </div>
+		    <div class="helpDescription">
+			  <p>To add a user, start the mongo process and follow the sequence in the screenshot below.</p>
+              <img class="helpDescriptionImg" alt="add user " src="images/add_user.png"></img>
+			  <p> Now you can login with these credentials as described in the previous help section.</p>
+		    </div>
+		    <div class="main-head list-head">
+			  <label id="dbOperations">DB Operations</label>
+		    </div>
+		    <div class="sublist-head list-head">
+			  <label id="addDB">How do I add a database?</label>
+		    </div>
+		    <div class="helpDescription">
+			  <p>mViewer tool at the moment does not support the feature to add a Database</p>
+		    </div>
+		    <div class="sublist-head list-head">
+			  <label id="deleteDB">How do I delete a database?</label>
+		    </div>
+		    <div class="helpDescription">
+			  <p>
+                Right-click on the database name in mViewer and click <strong>Delete Database</strong> from the context menu as shown below.
+			  </p>
+			  <img class="helpDescriptionImg" alt="delete Database" src="images/delete_db.png"></img>
+			  <p>Click <strong>Yes</strong> on the confirmation alert to delete the database. The database will be deleted and the confirmation of successful database deletion will be shown </p>
+		    </div>
+		    <div class="sublist-head list-head">
+			  <label id="dbStatistics">How do I view the database Statistics</label>
+		    </div>
+		    <div class="helpDescription">
+			  <p>Just click on the database in mViewer to view the statistics. Alternatively, you can right-click on the database name and click <strong>Statistics</strong> from the context menu as shown below.
+			  </p>
+			  <img class="helpDescriptionImg" alt="delete Database" src="images/db_stats.png"></img>
+		    </div>
+			<div class="list-head">
+			  <label>Troubleshooting</label>
+			</div>
+		    <div class="sublist-head list-head">
+			  <label id="noDBs">No dbs are displayed for localhost, what should I do?</label>
+		    </div>
+		    <div class="helpDescription">
+			  <p>Try to use localhost.localdomain as the host name, in fact the best idea would be to look at your hosts file and use the first value.</p>
+		    </div>
+		    <div class="sublist-head list-head">
+			  <label id="corruptedSession">My Session is corrupted, what does this mean?</label>
+		    </div>
+		    <div class="helpDescription">
+			  <p>Try to navigate back to login page. Corrupted session just means that the token used for session tracking has been lost, no data at the db end would be compromised.</p>
+		    </div>
+
+		    <div class="sublist-head list-head">
+			  <label id="reportIssue">Something is broken, how do I report it</label>
+		    </div>
+		    <div class="helpDescription">
+			  <p>You can open up an issue at <a href="https://github.com/Imaginea/mViewer">https://github.com/Imaginea/mViewer</a>. Would be great if you attach the server logs to the issue.</p>
+		    </div>
+
+		  </div>
+	    </div>
+	  </div>
+    </div>
+  </body>
 </html>
 

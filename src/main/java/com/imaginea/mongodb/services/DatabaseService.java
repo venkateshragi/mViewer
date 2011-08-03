@@ -25,7 +25,8 @@ import com.imaginea.mongodb.common.exceptions.ValidationException;
 
 /**
  * Defines services for performing operations like create/drop on databases
- * present in mongo to whic we are connected to. Also provides service to get
+ * present in the current mongo instance, see MongoInstanceProvider for details
+ * about controlling the current instance. Also provides service to get
  * list of all databases present and Statistics of a particular database.
  * 
  * @author Rachit Mittal
@@ -36,8 +37,7 @@ import com.imaginea.mongodb.common.exceptions.ValidationException;
 public interface DatabaseService {
 
 	/**
-	 * Gets the list of databases present in mongo to which user is
-	 * connected to.
+	 * Gets the list of databases present in the current mongo instance
 	 * 
 	 * @return List of All Databases present in MongoDb
 	 * 
@@ -47,8 +47,7 @@ public interface DatabaseService {
 
 	public List<String> getDbList() throws DatabaseException; 
 	/**
-	 * Return Stats of a particular Database in mongo to which user is connected
-	 * to.
+	 * Return Stats of a particular Database in current mongo instance
 	 * 
 	 * @param dbName
 	 *            Name of Database

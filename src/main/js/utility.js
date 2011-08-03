@@ -16,7 +16,8 @@
 YUI.add('utility', function (Y) {
     Y.namespace('com.imaginea.mongoV');
     var MV = Y.com.imaginea.mongoV;
-    // Check if String.prototype.format already exists because in future versions
+    // Check if String.prototype.format already exists because in future
+	// versions
     // format function can be added
     if (typeof String.prototype.format !== 'function') {
         String.prototype.format = function () {
@@ -37,7 +38,7 @@ YUI.add('utility', function (Y) {
             return str.replace(/^[\s]+/, '').replace(/[\s]+$/, '').replace(/[\s]{2,}/, ' ');
         };
     }
-    //TODO: IS this function redundant
+    // TODO: IS this function redundant
 
     function newObject() {
         return {};
@@ -68,12 +69,12 @@ YUI.add('utility', function (Y) {
             value = doc[key];
             if (MV.isArray(value)) {
                 newArray = [];
-                //                    tempObject.type = "BasicDBList";
+                // tempObject.type = "BasicDBList";
                 newArray = getChildrenArray(value);
                 tempObject.kiddies = newArray;
             } else if (MV.isObject(value)) {
                 newArray = [];
-                //                    tempObject.type = "BasicDBObject";
+                // tempObject.type = "BasicDBObject";
                 newArray = getChildrenArray(value);
                 tempObject.kiddies = newArray;
             } else {
@@ -179,11 +180,10 @@ YUI.add('utility', function (Y) {
             width: MV.mainBody.get('scrollWidth') / 2 - 48,
             editor: new YAHOO.widget.TextboxCellEditor()
         }
-/*,
-        {
-            key: "type",
-            label: "Type",
-            width: MV.mainBody.get('scrollWidth') / 3 - 38}*/
+/*
+ * , { key: "type", label: "Type", width: MV.mainBody.get('scrollWidth') / 3 -
+ * 38}
+ */
         ],
         // Data Source
         new YAHOO.util.TreebleDataSource(new YAHOO.util.DataSource(dataSource.response.results, {
@@ -227,7 +227,7 @@ YUI.add('utility', function (Y) {
     };
     var formUpperPart = "",
         formLowerPart = "";
-    formUpperPart += "<textarea id='queryBox' name='queryBox' rows='3' cols='80' >";
+    formUpperPart += "<textarea id='queryBox' name='queryBox' rows='3' cols='60' >";
     formUpperPart += "{}";
     formUpperPart += "</textarea>";
     formUpperPart += "<label for='fields' ></label><ul id='fields' class='checklist'>";
@@ -347,7 +347,12 @@ YUI.add('utility', function (Y) {
         "COLLECTION_DELETION_EXCEPTION": "Please check if mongod is running and refresh the page.",
         "INVALID_OBJECT_ID": "You cannot update the _id key",
         "ANY_OTHER_EXCEPTION": "An unknown exception occured. Please try to login again.",
-        "ERROR_INITIATING_GRAPH": "Could not initiate the graph. Please check if mongod is running"
+        "ERROR_INITIATING_GRAPH": "Could not initiate the graph. Please check if mongod is running.",
+        "FILE_NOT_FOUND": "Logger Config File or Mongo Config File cannot be found. Please check if they are present in the resources of src/main and src/test respectively.",
+        "IO_EXCEPTION": "An IO Exception Occured. Please Refresh the page.",
+        "ERROR_PARSING_POLLING_INTERVAL": "An error occured while initiating graph. Please chcek if polling interval is passed.",
+        "LOGGING_LEVEL_UNDEFINED": "The Logging level that you are trying to change to is undefined for log4j logger. Please select from the given options only.",
+        "DELETING_FROM_CAPPED_COLLECTION": "Deleting from a Capped Collection is not allowed by database.Drop the whole Collection instead."
     };
 }, '3.3.0', {
     requires: ["node"]
