@@ -25,7 +25,7 @@ YUI({
         _clearContents(MV.mainBody);
         _clearContents(Y.one('#queryForm'));
         if (menuOpt === "home") {
-            window.location = "home.html?tokenID=" + Y.one("#tokenID").get("value") + "&username=" + Y.one("#username").get("value") + "&host=" + Y.one("#host").get("value");
+            window.location = "home.html?dbInfo=" + Y.one("#host").get("value")+"_"+Y.one("#port").get("value");
         } else if (menuOpt === "serverStats") {
             showServerStats();
             MV.header.set("innerHTML", "Server Statistics");

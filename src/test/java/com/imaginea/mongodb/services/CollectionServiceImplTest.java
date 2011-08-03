@@ -67,6 +67,10 @@ import com.mongodb.MongoException;
  * @since 16 July 2011
  * 
  */
+
+//TODO Remove code duplication
+
+
 public class CollectionServiceImplTest extends BaseRequestDispatcher {
 
     /**

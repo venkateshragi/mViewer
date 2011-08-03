@@ -34,13 +34,14 @@ import java.util.List;
 
 import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
-import org.bson.types.ObjectId; 
+import org.bson.types.ObjectId;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
 
 import com.imaginea.mongodb.common.ConfigMongoInstanceProvider;
 import com.imaginea.mongodb.common.MongoInstanceProvider;
+import com.imaginea.mongodb.common.exceptions.ApplicationException;
 import com.imaginea.mongodb.common.exceptions.CollectionException;
 import com.imaginea.mongodb.common.exceptions.DatabaseException;
 import com.imaginea.mongodb.common.exceptions.DeleteDocumentException;
@@ -67,6 +68,9 @@ import com.mongodb.MongoException;
  * @since 16 July 2011
  * 
  */
+
+
+//TODO Remove code duplication
 public class DocumentServiceImplTest extends BaseRequestDispatcher {
 
 	/**
@@ -77,41 +81,37 @@ public class DocumentServiceImplTest extends BaseRequestDispatcher {
 	 * Provides Mongo Instance.
 	 */
 	private MongoInstanceProvider mongoInstanceProvider;
-	private static  Mongo mongoInstance;
+	private static Mongo mongoInstance;
 
 	/**
 	 * Logger Object
 	 */
-	private static Logger logger = Logger
-			.getLogger(DocumentServiceImplTest.class);
+	private static Logger logger = Logger.getLogger(DocumentServiceImplTest.class);
 
 	private static final String logConfigFile = "src/main/resources/log4j.properties";
-	 
-	
+
 	/**
 	 * Constructs a mongoInstanceProvider Object.
-	 * @throws Exception 
+	 * 
+	 * @throws Exception
 	 */
 
-	
 	public DocumentServiceImplTest() throws Exception {
 		try {
-		 
+
 			mongoInstanceProvider = new ConfigMongoInstanceProvider();
 			PropertyConfigurator.configure(logConfigFile);
-		} catch (FileNotFoundException e) {
-			formErrorResponse(logger, e.getMessage(),
-					ErrorCodes.FILE_NOT_FOUND_EXCEPTION, e.getStackTrace(),
-					"ERROR");
+		} catch (FileNotFoundException m) {
+			ApplicationException e = new ApplicationException(ErrorCodes.FILE_NOT_FOUND_EXCEPTION, m.getMessage(), m.getCause());
+			formErrorResponse(logger, e);
 			throw e;
 		} catch (MongoHostUnknownException e) {
-			formErrorResponse(logger, e.getMessage(), e.getErrorCode(),
-					e.getStackTrace(), "ERROR");
+			formErrorResponse(logger, e);
 			throw e;
 
-		} catch (IOException e) {
-			formErrorResponse(logger, e.getMessage(), ErrorCodes.IO_EXCEPTION,
-					e.getStackTrace(), "ERROR");
+		} catch (IOException m) {
+			ApplicationException e = new ApplicationException(ErrorCodes.IO_EXCEPTION, m.getMessage(), m.getCause());
+			formErrorResponse(logger, e);
 			throw e;
 		}
 	}
@@ -133,12 +133,11 @@ public class DocumentServiceImplTest extends BaseRequestDispatcher {
 			logger.info("Add User to maps in UserLogin servlet");
 		}
 		// Add user to mappings in userLogin for authentication
-		String userMappingKey = "username_" + mongoInstance.getAddress() + "_"
-				+ mongoInstance.getConnectPoint();
+		String dbInfo = "username_" + mongoInstance.getAddress() + "_" + mongoInstance.getConnectPoint();
 
-		UserLogin.userToMongoInstanceMapping.put(userMappingKey, mongoInstance);
+		UserLogin.mongoConfigToInstanceMapping.put(dbInfo, mongoInstance);
 		// Class to be tested
-		testDocService = new DocumentServiceImpl(userMappingKey);
+		testDocService = new DocumentServiceImpl(dbInfo);
 	}
 
 	/**
@@ -151,8 +150,7 @@ public class DocumentServiceImplTest extends BaseRequestDispatcher {
 	 *             , CollectionException, DocumentException, ValidationException
 	 */
 	@Test
-	public void getDocList() throws DatabaseException, CollectionException,
-			DocumentException, ValidationException {
+	public void getDocList() throws DatabaseException, CollectionException, DocumentException, ValidationException {
 
 		// ArrayList of several test Objects - possible inputs
 		List<String> testDbNames = new ArrayList<String>();
@@ -170,37 +168,28 @@ public class DocumentServiceImplTest extends BaseRequestDispatcher {
 				for (DBObject documentName : testDocumentNames)
 					try {
 						if (logger.isInfoEnabled()) {
-							logger.info(" Insert document [" + documentName
-									+ "]");
+							logger.info(" Insert document [" + documentName + "]");
 						}
-						if (!mongoInstance.getDB(dbName).getCollectionNames()
-								.contains(collectionName)) {
+						if (!mongoInstance.getDB(dbName).getCollectionNames().contains(collectionName)) {
 
 							// Create Collection first
-							mongoInstance.getDB(dbName).createCollection(
-									collectionName, null);
+							mongoInstance.getDB(dbName).createCollection(collectionName, null);
 						}
-						mongoInstance.getDB(dbName)
-								.getCollection(collectionName)
-								.insert(documentName);
+						mongoInstance.getDB(dbName).getCollection(collectionName).insert(documentName);
 
-						// Test with null query and with  keys "p" 
+						// Test with null query and with keys "p"
 						DBObject keys = new BasicDBObject();
 						keys.put("p", 1);
-						ArrayList<DBObject> documentList = testDocService
-								.getQueriedDocsList(dbName, collectionName,
-										null, keys, 0, 0);
+						ArrayList<DBObject> documentList = testDocService.getQueriedDocsList(dbName, collectionName, null, keys, 0, 0);
 						if (logger.isInfoEnabled()) {
-							logger.info("List of Document from Response: ["
-									+ documentList + "]");
+							logger.info("List of Document from Response: [" + documentList + "]");
 						}
-					 
+
 						boolean flag = false;
 						for (DBObject document : documentList) {
 							for (String key : documentName.keySet()) {
 								if (document.get(key) != null) {
-									assertEquals(document.get(key),
-											documentName.get(key));
+									assertEquals(document.get(key), documentName.get(key));
 									flag = true;
 								} else {
 									flag = false;
@@ -215,32 +204,31 @@ public class DocumentServiceImplTest extends BaseRequestDispatcher {
 						mongoInstance.dropDatabase(dbName);
 
 					} catch (DatabaseException e) {
-						formErrorResponse(logger, e.getMessage(),
-								e.getErrorCode(), e.getStackTrace(), "ERROR");
+
+						formErrorResponse(logger, e);
 						assert (true);
 
 					} catch (CollectionException e) {
-						formErrorResponse(logger, e.getMessage(),
-								e.getErrorCode(), e.getStackTrace(), "ERROR");
+
+						formErrorResponse(logger, e);
 						assert (true);
 
 					} catch (DocumentException e) {
-						formErrorResponse(logger, e.getMessage(),
-								e.getErrorCode(), e.getStackTrace(), "ERROR");
+
+						formErrorResponse(logger, e);
 						assert (true);
 
 					} catch (ValidationException e) {
-						formErrorResponse(logger, e.getMessage(),
-								e.getErrorCode(), e.getStackTrace(), "ERROR");
+
+						formErrorResponse(logger, e);
 						assert (true);
 
 					} catch (MongoException m) // while dropping Db
 					{
-						DocumentException e = new DocumentException(
-								ErrorCodes.GET_DOCUMENT_LIST_EXCEPTION,
-								"Error Testing Document List", m.getCause());
-						formErrorResponse(logger, e.getMessage(),
-								e.getErrorCode(), e.getStackTrace(), "ERROR");
+						DocumentException e = new DocumentException(ErrorCodes.GET_DOCUMENT_LIST_EXCEPTION, "Error Testing Document List", m.getCause());
+
+						formErrorResponse(logger, e);
+
 						throw e;
 					}
 			}
@@ -262,8 +250,7 @@ public class DocumentServiceImplTest extends BaseRequestDispatcher {
 	 * 
 	 */
 	@Test
-	public void testInsertDocument() throws DatabaseException,
-			CollectionException, DocumentException, ValidationException {
+	public void testInsertDocument() throws DatabaseException, CollectionException, DocumentException, ValidationException {
 
 		// ArrayList of several test Objects - possible inputs
 		List<String> testDbNames = new ArrayList<String>();
@@ -284,39 +271,32 @@ public class DocumentServiceImplTest extends BaseRequestDispatcher {
 
 						// Create the collection first in which service will
 
-						if (!mongoInstance.getDB(dbName).getCollectionNames()
-								.contains(collectionName)) {
+						if (!mongoInstance.getDB(dbName).getCollectionNames().contains(collectionName)) {
 
 							DBObject options = new BasicDBObject();
-							mongoInstance.getDB(dbName).createCollection(
-									collectionName, options);
+							mongoInstance.getDB(dbName).createCollection(collectionName, options);
 						}
 
 						if (logger.isInfoEnabled()) {
-							logger.info("Insert the document [ " + documentName
-									+ "]");
+							logger.info("Insert the document [ " + documentName + "]");
 						}
-						testDocService.insertDocument(dbName, collectionName,
-								documentName);
+						testDocService.insertDocument(dbName, collectionName, documentName);
 
 						List<DBObject> documentList = new ArrayList<DBObject>();
 
-						DBCursor cursor = mongoInstance.getDB(dbName)
-								.getCollection(collectionName).find();
+						DBCursor cursor = mongoInstance.getDB(dbName).getCollection(collectionName).find();
 						while (cursor.hasNext()) {
 							documentList.add(cursor.next());
 						}
 						if (logger.isInfoEnabled()) {
-							logger.info("Get Document List: [" + documentList
-									+ "]");
+							logger.info("Get Document List: [" + documentList + "]");
 						}
 
 						boolean flag = false;
 						for (DBObject document : documentList) {
 							for (String key : documentName.keySet()) {
 								if (document.get(key) != null) {
-									assertEquals(document.get(key),
-											documentName.get(key));
+									assertEquals(document.get(key), documentName.get(key));
 									flag = true;
 								} else {
 									flag = false;
@@ -328,36 +308,33 @@ public class DocumentServiceImplTest extends BaseRequestDispatcher {
 							assert (false);
 						}
 						// Delete the document
-						mongoInstance.getDB(dbName)
-								.getCollection(collectionName)
-								.remove(documentName);
+						mongoInstance.getDB(dbName).getCollection(collectionName).remove(documentName);
 
 					} catch (DatabaseException e) {
-						formErrorResponse(logger, e.getMessage(),
-								e.getErrorCode(), e.getStackTrace(), "ERROR");
-						assert (true);
 
+						formErrorResponse(logger, e);
+						assert (true);
 					} catch (CollectionException e) {
-						formErrorResponse(logger, e.getMessage(),
-								e.getErrorCode(), e.getStackTrace(), "ERROR");
+
+						formErrorResponse(logger, e);
 						assert (true);
 
 					} catch (DocumentException e) {
-						formErrorResponse(logger, e.getMessage(),
-								e.getErrorCode(), e.getStackTrace(), "ERROR");
+
+						formErrorResponse(logger, e);
 						assert (true);
 
 					} catch (ValidationException e) {
-						formErrorResponse(logger, e.getMessage(),
-								e.getErrorCode(), e.getStackTrace(), "ERROR");
+
+						formErrorResponse(logger, e);
 						assert (true);
 
 					} catch (MongoException m) // while dropping Db
 					{
-						InsertDocumentException e = new InsertDocumentException(
-								"Error Testing Document insert", m.getCause());
-						formErrorResponse(logger, e.getMessage(),
-								e.getErrorCode(), e.getStackTrace(), "ERROR");
+						InsertDocumentException e = new InsertDocumentException("Error Testing Document insert", m.getCause());
+
+						formErrorResponse(logger, e);
+						assert (true);
 						throw e;
 					}
 			}
@@ -378,8 +355,7 @@ public class DocumentServiceImplTest extends BaseRequestDispatcher {
 	 *             , CollectionException, DocumentException, ValidationException
 	 */
 	@Test
-	public void testUpdateDocument() throws DatabaseException,
-			CollectionException, DocumentException, ValidationException {
+	public void testUpdateDocument() throws DatabaseException, CollectionException, DocumentException, ValidationException {
 		// ArrayList of several test Objects - possible inputs
 		List<String> testDbNames = new ArrayList<String>();
 		testDbNames.add("random");
@@ -400,41 +376,31 @@ public class DocumentServiceImplTest extends BaseRequestDispatcher {
 						newDocument.put("test1", "newTest");
 
 						// Create collection first
-						if (!mongoInstance.getDB(dbName).getCollectionNames()
-								.contains(collectionName)) {
+						if (!mongoInstance.getDB(dbName).getCollectionNames().contains(collectionName)) {
 
 							DBObject options = new BasicDBObject();
-							mongoInstance.getDB(dbName).createCollection(
-									collectionName, options);
+							mongoInstance.getDB(dbName).createCollection(collectionName, options);
 						}
 
 						if (logger.isInfoEnabled()) {
-							logger.info("Insert the old document [ "
-									+ documentName + "]");
+							logger.info("Insert the old document [ " + documentName + "]");
 						}
-						mongoInstance.getDB(dbName)
-								.getCollection(collectionName)
-								.insert(documentName);
+						mongoInstance.getDB(dbName).getCollection(collectionName).insert(documentName);
 
 						// get Object id of inserted old document
-						DBObject document = mongoInstance.getDB(dbName)
-								.getCollection(collectionName)
-								.findOne(documentName);
+						DBObject document = mongoInstance.getDB(dbName).getCollection(collectionName).findOne(documentName);
 						ObjectId id = (ObjectId) document.get("_id");
 
 						newDocument.put("_id", id.toString()); // same id
 
 						if (logger.isInfoEnabled()) {
-							logger.info("Update to new document [ "
-									+ newDocument + "]");
+							logger.info("Update to new document [ " + newDocument + "]");
 						}
 
-						testDocService.updateDocument(dbName, collectionName,
-								id, newDocument);
+						testDocService.updateDocument(dbName, collectionName, id, newDocument);
 
 						DBObject query = new BasicDBObject("_id", id);
-						DBCollection collection = mongoInstance.getDB(dbName)
-								.getCollection(collectionName);
+						DBCollection collection = mongoInstance.getDB(dbName).getCollection(collectionName);
 						document = collection.findOne(query);
 
 						if (document == null) {
@@ -442,43 +408,39 @@ public class DocumentServiceImplTest extends BaseRequestDispatcher {
 						}
 						String value = (String) document.get("test");
 						if (logger.isInfoEnabled()) {
-							logger.info("Get Value of test key in Document with old document _id : ["
-									+ newDocument.get("test") + "]");
+							logger.info("Get Value of test key in Document with old document _id : [" + newDocument.get("test") + "]");
 						}
-					 
-						assertEquals(newDocument.get("test"),value);
+
+						assertEquals(newDocument.get("test"), value);
 
 						// Delete the document
-						mongoInstance.getDB(dbName)
-								.getCollection(collectionName)
-								.remove(newDocument);
+						mongoInstance.getDB(dbName).getCollection(collectionName).remove(newDocument);
 
 					} catch (DatabaseException e) {
-						formErrorResponse(logger, e.getMessage(),
-								e.getErrorCode(), e.getStackTrace(), "ERROR");
+
+						formErrorResponse(logger, e);
 						assert (true);
 
 					} catch (CollectionException e) {
-						formErrorResponse(logger, e.getMessage(),
-								e.getErrorCode(), e.getStackTrace(), "ERROR");
+
+						formErrorResponse(logger, e);
 						assert (true);
 
 					} catch (DocumentException e) {
-						formErrorResponse(logger, e.getMessage(),
-								e.getErrorCode(), e.getStackTrace(), "ERROR");
+
+						formErrorResponse(logger, e);
 						assert (true);
 
 					} catch (ValidationException e) {
-						formErrorResponse(logger, e.getMessage(),
-								e.getErrorCode(), e.getStackTrace(), "ERROR");
-						assert (true);
 
+						formErrorResponse(logger, e);
+						assert (true);
 					} catch (MongoException m) // while dropping Db
 					{
-						UpdateDocumentException e = new UpdateDocumentException(
-								"Error Testing Document update", m.getCause());
-						formErrorResponse(logger, e.getMessage(),
-								e.getErrorCode(), e.getStackTrace(), "ERROR");
+						UpdateDocumentException e = new UpdateDocumentException("Error Testing Document update", m.getCause());
+
+						formErrorResponse(logger, e);
+
 						throw e;
 					}
 			}
@@ -498,8 +460,7 @@ public class DocumentServiceImplTest extends BaseRequestDispatcher {
 	 *             , CollectionException, DocumentException, ValidationException
 	 */
 	@Test
-	public void testDeleteDocument() throws DatabaseException,
-			CollectionException, DocumentException, ValidationException {
+	public void testDeleteDocument() throws DatabaseException, CollectionException, DocumentException, ValidationException {
 		if (logger.isInfoEnabled()) {
 			logger.info("Test Delete Document Service");
 		}
@@ -515,26 +476,19 @@ public class DocumentServiceImplTest extends BaseRequestDispatcher {
 				for (DBObject documentName : testDocumentNames)
 					try {
 
-						if (!mongoInstance.getDB(dbName).getCollectionNames()
-								.contains(collectionName)) {
+						if (!mongoInstance.getDB(dbName).getCollectionNames().contains(collectionName)) {
 
 							DBObject options = new BasicDBObject();
-							mongoInstance.getDB(dbName).createCollection(
-									collectionName, options);
+							mongoInstance.getDB(dbName).createCollection(collectionName, options);
 						}
 
 						if (logger.isInfoEnabled()) {
-							logger.info("Insert document [ " + documentName
-									+ "]");
+							logger.info("Insert document [ " + documentName + "]");
 						}
-						mongoInstance.getDB(dbName)
-								.getCollection(collectionName)
-								.insert(documentName);
+						mongoInstance.getDB(dbName).getCollection(collectionName).insert(documentName);
 
 						// get Object id of inserted document
-						DBObject document = mongoInstance.getDB(dbName)
-								.getCollection(collectionName)
-								.findOne(documentName);
+						DBObject document = mongoInstance.getDB(dbName).getCollection(collectionName).findOne(documentName);
 
 						if (document == null) {
 							assert (false);
@@ -544,16 +498,14 @@ public class DocumentServiceImplTest extends BaseRequestDispatcher {
 						if (logger.isInfoEnabled()) {
 							logger.info("Delete the document with  _id using service");
 						}
-						testDocService.deleteDocument(dbName, collectionName,
-								id);
+						testDocService.deleteDocument(dbName, collectionName, id);
 
 						if (logger.isInfoEnabled()) {
 							logger.info(" Get Document List");
 						}
 						List<DBObject> documentList = new ArrayList<DBObject>();
 
-						DBCursor cursor = mongoInstance.getDB(dbName)
-								.getCollection(collectionName).find();
+						DBCursor cursor = mongoInstance.getDB(dbName).getCollection(collectionName).find();
 						while (cursor.hasNext()) {
 							documentList.add(cursor.next());
 						}
@@ -575,31 +527,30 @@ public class DocumentServiceImplTest extends BaseRequestDispatcher {
 						}
 
 					} catch (DatabaseException e) {
-						formErrorResponse(logger, e.getMessage(),
-								e.getErrorCode(), e.getStackTrace(), "ERROR");
+
+						formErrorResponse(logger, e);
 						assert (true);
 
 					} catch (CollectionException e) {
-						formErrorResponse(logger, e.getMessage(),
-								e.getErrorCode(), e.getStackTrace(), "ERROR");
+
+						formErrorResponse(logger, e);
 						assert (true);
 
 					} catch (DocumentException e) {
-						formErrorResponse(logger, e.getMessage(),
-								e.getErrorCode(), e.getStackTrace(), "ERROR");
+
+						formErrorResponse(logger, e);
 						assert (true);
 
 					} catch (ValidationException e) {
-						formErrorResponse(logger, e.getMessage(),
-								e.getErrorCode(), e.getStackTrace(), "ERROR");
+
+						formErrorResponse(logger, e);
 						assert (true);
 
 					} catch (MongoException m) // while dropping Db
 					{
-						DeleteDocumentException e = new DeleteDocumentException(
-								"Error Testing Document delete", m.getCause());
-						formErrorResponse(logger, e.getMessage(),
-								e.getErrorCode(), e.getStackTrace(), "ERROR");
+						DeleteDocumentException e = new DeleteDocumentException("Error Testing Document delete", m.getCause());
+
+						formErrorResponse(logger, e);
 						throw e;
 					}
 			}
@@ -608,6 +559,7 @@ public class DocumentServiceImplTest extends BaseRequestDispatcher {
 			}
 		}
 	}
+
 	@AfterClass
 	public static void destroyMongoProcess() {
 		mongoInstance.close();

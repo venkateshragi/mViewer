@@ -253,61 +253,61 @@ YUI.add('utility', function (Y) {
     MV.infoIcon = YAHOO.widget.SimpleDialog.ICON_INFO;
     MV.URLMap = {
         insertColl: function () {
-            return "services/" + Y.one("#currentDB").get("value") + "/collection/" + Y.one("#newName").get("value") + "?tokenId=" + Y.one("#tokenID").get("value") + "&action=PUT";
+            return "services/" + Y.one("#currentDB").get("value") + "/collection/" + Y.one("#newName").get("value") + "?dbInfo=" + Y.one("#host").get("value")+"_"+Y.one("#port").get("value") + "&action=PUT";
         },
         insertDB: function () {
-            return "services/db/" + Y.one("#newName").get("value") + "?tokenId=" + Y.one("#tokenID").get("value") + "&action=DELETE";
+            return "services/db/" + Y.one("#newName").get("value") + "?dbInfo=" + Y.one("#host").get("value")+"_"+Y.one("#port").get("value") + "&action=DELETE";
         },
         dropColl: function () {
-            return "services/" + Y.one("#currentDB").get("value") + "/collection/" + Y.one("#currentColl").get("value") + "?tokenId=" + Y.one("#tokenID").get("value") + "&action=DELETE";
+            return "services/" + Y.one("#currentDB").get("value") + "/collection/" + Y.one("#currentColl").get("value") + "?dbInfo=" + Y.one("#host").get("value")+"_"+Y.one("#port").get("value") + "&action=DELETE";
         },
         getColl: function () {
-            return "services/" + Y.one("#currentDB").get("value") + "/collection?tokenId=" + Y.one("#tokenID").get("value");
+            return "services/" + Y.one("#currentDB").get("value") + "/collection?dbInfo=" + Y.one("#host").get("value")+"_"+Y.one("#port").get("value");
         },
         collStatistics: function () {
-            return "services/stats/db/" + Y.one("#currentDB").get("value") + "/collection/" + Y.one("#currentColl").get("value") + "?tokenId=" + Y.one("#tokenID").get("value");
+            return "services/stats/db/" + Y.one("#currentDB").get("value") + "/collection/" + Y.one("#currentColl").get("value") + "?dbInfo=" + Y.one("#host").get("value")+"_"+Y.one("#port").get("value");
         },
         dbStatistics: function () {
-            return "services/stats/db/" + Y.one("#currentDB").get("value") + "?tokenId=" + Y.one("#tokenID").get("value");
+            return "services/stats/db/" + Y.one("#currentDB").get("value") + "?dbInfo=" + Y.one("#host").get("value")+"_"+Y.one("#port").get("value");
         },
         dropDB: function () {
-            return "services/db/" + Y.one("#currentDB").get("value") + "?tokenId=" + Y.one("#tokenID").get("value") + "&action=DELETE";
+            return "services/db/" + Y.one("#currentDB").get("value") + "?dbInfo=" + Y.one("#host").get("value")+"_"+Y.one("#port").get("value") + "&action=DELETE";
         },
         getDBs: function () {
-            return "services/db?tokenId=" + Y.one("#tokenID").get("value");
+            return "services/db?dbInfo=" + Y.one("#host").get("value")+"_"+Y.one("#port").get("value");
         },
         documentKeys: function () {
-            return "services/" + Y.one("#currentDB").get("value") + "/" + Y.one("#currentColl").get("value") + "/document/keys?tokenId=" + Y.one("#tokenID").get("value");
+            return "services/" + Y.one("#currentDB").get("value") + "/" + Y.one("#currentColl").get("value") + "/document/keys?dbInfo=" + Y.one("#host").get("value")+"_"+Y.one("#port").get("value");
         },
         getDocs: function () {
-            return "services/" + Y.one("#currentDB").get("value") + "/" + Y.one("#currentColl").get("value") + "/document?tokenId=" + Y.one("#tokenID").get("value");
+            return "services/" + Y.one("#currentDB").get("value") + "/" + Y.one("#currentColl").get("value") + "/document?dbInfo=" + Y.one("#host").get("value")+"_"+Y.one("#port").get("value");
         },
         serverStatistics: function () {
-            return "services/stats?tokenId=" + Y.one("#tokenID").get("value");
+            return "services/stats?dbInfo=" + Y.one("#host").get("value")+"_"+Y.one("#port").get("value");
         },
         login: function () {
             return "services/login";
         },
         logout: function () {
-            return "services/logout?tokenId=" + Y.one("#tokenID").get("value");
+            return "services/logout?dbInfo=" + Y.one("#host").get("value")+"_"+Y.one("#port").get("value");
         },
         graphs: function () {
-            return "graphs.html?tokenId=" + Y.one("#tokenID").get("value");
+            return "graphs.html?dbInfo=" + Y.one("#host").get("value")+"_"+Y.one("#port").get("value");
         },
         graphInitiate: function () {
-            return "graphs/initiate?tokenId=" + Y.one("#tokenID").get("value");
+            return "graphs/initiate?dbInfo=" + Y.one("#host").get("value")+"_"+Y.one("#port").get("value");
         },
         graphQuery: function () {
-            return "graphs/query?tokenId=" + Y.one("#tokenID").get("value");
+            return "graphs/query?dbInfo=" + Y.one("#host").get("value")+"_"+Y.one("#port").get("value");
         },
         insertDoc: function () {
-            return "services/" + Y.one("#currentDB").get("value") + "/" + Y.one("#currentColl").get("value") + "/document?tokenId=" + Y.one("#tokenID").get("value") + "&action=PUT";
+            return "services/" + Y.one("#currentDB").get("value") + "/" + Y.one("#currentColl").get("value") + "/document?dbInfo=" + Y.one("#host").get("value")+"_"+Y.one("#port").get("value") + "&action=PUT";
         },
         updateDoc: function () {
-            return "services/" + Y.one("#currentDB").get("value") + "/" + Y.one("#currentColl").get("value") + "/document?tokenId=" + Y.one("#tokenID").get("value");
+            return "services/" + Y.one("#currentDB").get("value") + "/" + Y.one("#currentColl").get("value") + "/document?dbInfo=" + Y.one("#host").get("value")+"_"+Y.one("#port").get("value");
         },
         deleteDoc: function () {
-            return "services/" + Y.one("#currentDB").get("value") + "/" + Y.one("#currentColl").get("value") + "/document?tokenId=" + Y.one("#tokenID").get("value") + "&action=DELETE";
+            return "services/" + Y.one("#currentDB").get("value") + "/" + Y.one("#currentColl").get("value") + "/document?dbInfo=" + Y.one("#host").get("value")+"_"+Y.one("#port").get("value") + "&action=DELETE";
         },
         help: function () {
             return "help.html";
@@ -340,7 +340,7 @@ YUI.add('utility', function (Y) {
         "DOCUMENT_CREATION_EXCEPTION": "Please check if mongod is running and refresh the page.",
         "DOCUMENT_UPDATE_EXCEPTION": "Please check if mongod is running and refresh the page.",
         "INVALID_USER": "Your session is corrupted or timed out! Please login again from the login page.",
-        "TOKEN_ID_ABSENT": "Your session is corrupted or timed out! Please login again from the login page.",
+        "DB_INFO_ABSENT": "Mongo Config details are not provided in session! Please login again from the login page.",
         "GET_DB_STATS_EXCEPTION": "Please check if mongod is running and refresh the page.",
         "GET_COLL_STATS_EXCEPTION": "Please check if mongod is running and refresh the page.",
         "COLLECTION_CREATION_EXCEPTION": "Please check if mongod is running and refresh the page.",

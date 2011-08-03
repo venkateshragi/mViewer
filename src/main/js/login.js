@@ -63,8 +63,8 @@ YUI({
                         parsedResponse = Y.JSON.parse(responseObject.responseText);
                         var response = parsedResponse.response.result;
                         if (response !== undefined) {
-                            Y.log("Successfully logging in. TokenId: [0]".format(response.id), "info");
-                            window.location = "home.html?tokenID=" + response.id + "&username=" + response.username + "&host=" + response.host;
+                            Y.log("Successfully logging in", "info");
+                            window.location = "home.html?dbInfo="+ host + "_" +port;
                         } else {
                             var error = parsedResponse.response.error;
                             var errorDiv = Y.one("#errorMsg");

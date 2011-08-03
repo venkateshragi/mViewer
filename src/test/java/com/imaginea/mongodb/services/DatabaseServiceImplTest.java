@@ -43,6 +43,7 @@ import org.junit.Test;
 
 import com.imaginea.mongodb.common.ConfigMongoInstanceProvider;
 import com.imaginea.mongodb.common.MongoInstanceProvider;
+import com.imaginea.mongodb.common.exceptions.ApplicationException;
 import com.imaginea.mongodb.common.exceptions.DatabaseException;
 import com.imaginea.mongodb.common.exceptions.DeleteDatabaseException;
 import com.imaginea.mongodb.common.exceptions.ErrorCodes;
@@ -62,6 +63,8 @@ import com.mongodb.MongoException;
  * @since 16 July 2011
  * 
  */
+
+// TODO Remove code duplication
 public class DatabaseServiceImplTest extends BaseRequestDispatcher {
 
 	/**
@@ -80,27 +83,29 @@ public class DatabaseServiceImplTest extends BaseRequestDispatcher {
 	private static Logger logger = Logger.getLogger(DatabaseServiceImplTest.class);
 
 	private static final String logConfigFile = "src/main/resources/log4j.properties";
-	 
-	
+
 	/**
 	 * Constructs a mongoInstanceProvider Object
-	 * @throws Exception 
+	 * 
+	 * @throws Exception
 	 */
 	public DatabaseServiceImplTest() throws Exception {
 		try {
-		 
+
 			mongoInstanceProvider = new ConfigMongoInstanceProvider();
 			PropertyConfigurator.configure(logConfigFile);
-			
-		} catch (FileNotFoundException e) {
-			formErrorResponse(logger, e.getMessage(), ErrorCodes.FILE_NOT_FOUND_EXCEPTION, e.getStackTrace(), "ERROR");
+
+		} catch (FileNotFoundException m) {
+			ApplicationException e = new ApplicationException(ErrorCodes.FILE_NOT_FOUND_EXCEPTION, m.getMessage(), m.getCause());
+			formErrorResponse(logger, e);
 			throw e;
 		} catch (MongoHostUnknownException e) {
-			formErrorResponse(logger, e.getMessage(), e.getErrorCode(), e.getStackTrace(), "ERROR");
+			formErrorResponse(logger, e);
 			throw e;
 
-		} catch (IOException e) {
-			formErrorResponse(logger, e.getMessage(), ErrorCodes.IO_EXCEPTION, e.getStackTrace(), "ERROR");
+		} catch (IOException m) {
+			ApplicationException e = new ApplicationException(ErrorCodes.IO_EXCEPTION, m.getMessage(), m.getCause());
+			formErrorResponse(logger, e);
 			throw e;
 		}
 	}
@@ -122,17 +127,17 @@ public class DatabaseServiceImplTest extends BaseRequestDispatcher {
 			logger.info("Add User to maps in UserLogin servlet");
 		}
 		// Add user to mappings in userLogin for authentication
-		String userMappingKey = "username_" + mongoInstance.getAddress() + "_" + mongoInstance.getConnectPoint();
+		String dbInfo = mongoInstance.getAddress() + "_" + mongoInstance.getConnectPoint();
 
-		UserLogin.userToMongoInstanceMapping.put(userMappingKey, mongoInstance);
+		UserLogin.mongoConfigToInstanceMapping.put(dbInfo, mongoInstance);
 		// Class to be tested
-		testDbService = new DatabaseServiceImpl(userMappingKey);
+		testDbService = new DatabaseServiceImpl(dbInfo);
 	}
 
 	/**
-	 * Tests get databases list service function of Mongo Db. Hereby we first create a
-	 * Database and check whether get Service shows that Db in the list of Db
-	 * Names
+	 * Tests get databases list service function of Mongo Db. Hereby we first
+	 * create a Database and check whether get Service shows that Db in the list
+	 * of Db Names
 	 * 
 	 * @throws DatabaseException
 	 */
@@ -182,13 +187,13 @@ public class DatabaseServiceImplTest extends BaseRequestDispatcher {
 				}
 
 			} catch (DatabaseException e) {
-				formErrorResponse(logger, e.getMessage(), e.getErrorCode(), e.getStackTrace(), "ERROR");
+				formErrorResponse(logger, e);
 				assert (true);
 
 			} catch (MongoException m) // while dropping Db
 			{
 				DatabaseException e = new DatabaseException(ErrorCodes.GET_DB_LIST_EXCEPTION, "Error Testing Database List", m.getCause());
-				formErrorResponse(logger, e.getMessage(), e.getErrorCode(), e.getStackTrace(), "ERROR");
+				formErrorResponse(logger, e);
 				throw e;
 			}
 		}
@@ -239,16 +244,16 @@ public class DatabaseServiceImplTest extends BaseRequestDispatcher {
 				}
 
 			} catch (DatabaseException e) {
-				formErrorResponse(logger, e.getMessage(), e.getErrorCode(), e.getStackTrace(), "ERROR");
+				formErrorResponse(logger, e);
 				assert (true);
 
 			} catch (ValidationException e) {
-				formErrorResponse(logger, e.getMessage(), e.getErrorCode(), e.getStackTrace(), "ERROR");
+				formErrorResponse(logger, e);
 				assert (true);
 
 			} catch (MongoException m) {
 				InsertDatabaseException e = new InsertDatabaseException("Error Testing Database insert operation", m.getCause());
-				formErrorResponse(logger, e.getMessage(), e.getErrorCode(), e.getStackTrace(), "ERROR");
+				formErrorResponse(logger, e);
 				throw e;
 			}
 			if (logger.isInfoEnabled()) {
@@ -315,16 +320,16 @@ public class DatabaseServiceImplTest extends BaseRequestDispatcher {
 				}
 
 			} catch (DatabaseException e) {
-				formErrorResponse(logger, e.getMessage(), e.getErrorCode(), e.getStackTrace(), "ERROR");
+				formErrorResponse(logger, e);
 				assert (true);
 
 			} catch (ValidationException e) {
-				formErrorResponse(logger, e.getMessage(), e.getErrorCode(), e.getStackTrace(), "ERROR");
+				formErrorResponse(logger, e);
 				assert (true);
 
 			} catch (MongoException m) {
 				DeleteDatabaseException e = new DeleteDatabaseException("Error Testing Database delete operation", m.getCause());
-				formErrorResponse(logger, e.getMessage(), e.getErrorCode(), e.getStackTrace(), "ERROR");
+				formErrorResponse(logger, e);
 				throw e;
 			}
 			if (logger.isInfoEnabled()) {
@@ -344,7 +349,7 @@ public class DatabaseServiceImplTest extends BaseRequestDispatcher {
 	 *             ,JSONException
 	 */
 	@Test
-	public void getDbStats() throws JSONException, DatabaseException {
+	public void getDbStats() throws ApplicationException, DatabaseException {
 		if (logger.isInfoEnabled()) {
 			logger.info("Testing Get Db Stats Service");
 		}
@@ -379,20 +384,21 @@ public class DatabaseServiceImplTest extends BaseRequestDispatcher {
 					}
 				}
 
-			} catch (JSONException e) {
-				formErrorResponse(logger, e.getMessage(), ErrorCodes.JSON_EXCEPTION, e.getStackTrace(), "ERROR");
+			} catch (JSONException m) {
+				ApplicationException e = new ApplicationException(ErrorCodes.JSON_EXCEPTION, m.getMessage());
+				formErrorResponse(logger, e);
 				throw e;
 			} catch (DatabaseException e) {
-				formErrorResponse(logger, e.getMessage(), e.getErrorCode(), e.getStackTrace(), "ERROR");
+				formErrorResponse(logger, e);
 				assert (true);
 
 			} catch (ValidationException e) {
-				formErrorResponse(logger, e.getMessage(), e.getErrorCode(), e.getStackTrace(), "ERROR");
-				assert (true);
 
+				formErrorResponse(logger, e);
+				assert (true);
 			} catch (MongoException m) {
 				DatabaseException e = new DatabaseException(ErrorCodes.GET_DB_STATS_EXCEPTION, "Error Testing Database stats operation", m.getCause());
-				formErrorResponse(logger, e.getMessage(), e.getErrorCode(), e.getStackTrace(), "ERROR");
+				formErrorResponse(logger, e);
 				throw e;
 			}
 		}
@@ -400,7 +406,7 @@ public class DatabaseServiceImplTest extends BaseRequestDispatcher {
 			logger.info("Test Completed");
 		}
 	}
-	
+
 	@AfterClass
 	public static void destroyMongoProcess() {
 		mongoInstance.close();
