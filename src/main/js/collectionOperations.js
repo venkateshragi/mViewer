@@ -57,17 +57,14 @@ YUI({
         this.hide();
     }
 
-    function initializeHandlers(eventType, args) {
-        this.subscribe("click", handleContextMenu);
-    }
-    //TODO implement
+
     function addDocument(responseObject) {
         var parsedResponse = Y.JSON.parse(responseObject.responseText);
         response = parsedResponse.response.result;
         if (response !== undefined) {
             MV.showAlertDialog("New document added to [0]".format(Y.one("#currentColl").get("value")), MV.infoIcon);
             Y.log("New document added to [0]".format(Y.one("#currentColl").get("value"), "info"));
-            Y.one("#" + Y.one("#currentColl").get("value")).simulate("click");
+            Y.one("#" + Y.one("#currentColl").get("value").replace(/ /g, '_')).simulate("click");
         } else {
             var error = parsedResponse.response.error;
             MV.showAlertDialog("Could not add Document! [0]".format(MV.errorCodeMap[error.code]), MV.warnIcon);
@@ -77,8 +74,8 @@ YUI({
 
     function handleContextMenu(eventType, args) {
         var menuItem = args[1]; // The MenuItem that was clicked
-        Y.one("#currentColl").set("value", this.contextEventTarget.id);
-        MV.toggleClass(Y.one("#" + Y.one("#currentColl").get("value")), Y.all("#collNames li"));
+        Y.one("#currentColl").set("value", this.contextEventTarget.innerHTML);
+        MV.toggleClass(Y.one("#" + Y.one("#currentColl").get("value").replace(/ /g,'_')), Y.all("#collNames li"));
         switch (menuItem.index) {
         case 0:
             // Delete
@@ -103,18 +100,22 @@ YUI({
         }
     }
 
-    collContextMenu.subscribe("render", initializeHandlers);
-    // A function handler to use for successful get Collection Names requests:
+    collContextMenu.subscribe("render",function(eventType, args) {
+        this.subscribe("click", handleContextMenu);
+    });
 
+    // A function handler to use for successful get Collection Names requests:
     function displayCollectionNames(oId, responseObject) {
         Y.log("Response Recieved of get collection request", "info");
         try {
             var parsedResponse = Y.JSON.parse(responseObject.responseText);
-            if (parsedResponse.response.result !== undefined) {
+            var parsedResult = parsedResponse.response.result;
+
+            if ( parsedResult ) {
                 var info, index = 0,
                 collections = "";
-                for (index = 0; index < parsedResponse.response.result.length; index++) {
-                    var collectionName = parsedResponse.response.result[index];
+                for (index = 0; index < parsedResult.length; index++) {
+                    var collectionName = parsedResult[index];
                     // Issue 17 https://github.com/Imaginea/mViewer/issues/17
                     collections += "<li id='[0]' >[1]</li>".format(collectionName.replace(/ /g,'_'), collectionName);
                 }
@@ -143,7 +144,7 @@ YUI({
             MV.showAlertDialog("Could not load collections! Check if your app server is running and refresh the page.", MV.warnIcon);
         }
         loadingPanel.hide();
-    } /* FUNCTIONS SENDING XHR REQUESTS */
+    } 
 
     function requestCollNames(e) {
         Y.one("#currentDB").set("value", e.currentTarget.get("id"));

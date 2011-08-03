@@ -21,7 +21,7 @@
 			  <label>General</label>
 			</div>
 			<ul class="lists">
-			  <li><a href="#login">Login</a></li>
+			  <li><a href="#gettingStarted">Getting Started</a></li>
 			</ul>
 			<div class="list-head">
 			  <label>DB Operations</label>
@@ -30,15 +30,21 @@
 			  <li><a href="#addDB">Add a Database</a></li>
 			  <li><a href="#deleteDB">Delete a Database</a></li>
 			  <li><a href="#dbStatistics">Database Statistics</a></li>
-
 			</ul>
+			<div class="list-head">
+			  <label>Troubleshooting</label>
+			</div>
+			<ul class="lists">
+			  <li><a href="#noDBs">No DBs displayed</a></li>
+			  <li><a href="#corruptedSession">Corrupted Session</a></li>
+			  <li><a href="#reportIssue">Reporting Issues</a></li>
 		  </div>
 		  <div class="right-cont gen-float">
 			<div class="main-head list-head">
 			  <label id="General">General</label>
 			</div>
 			<div class="sublist-head list-head">
-			  <label id="start">What do I need to get started with mViewer?</label>
+			  <label id="gettingStarted">What do I need to get started with mViewer?</label>
             </div>
             <div class="helpDescription" >
 			  <p>
@@ -46,7 +52,7 @@
               </p>
             </div>
 		    <div class="sublist-head list-head">
-			  <label id="login">I've installed mongoDB. What next?</label>
+			  <label id="gettingStarted2">I've installed mongoDB. What next?</label>
 		    </div>
 		    <div class="helpDescription">
 			  <p>
@@ -93,6 +99,29 @@
 			  </p>
 			  <img class="helpDescriptionImg" alt="delete Database" src="images/db_stats.png"></img>
 		    </div>
+			<div class="list-head">
+			  <label>Troubleshooting</label>
+			</div>
+		    <div class="sublist-head list-head">
+			  <label id="noDBs">No dbs are displayed for localhost, what should I do?</label>
+		    </div>
+		    <div class="helpDescription">
+			  <p>Try to use localhost.localdomain as the host name, in fact the best idea would be to look at your hosts file and use the first value.</p>
+		    </div>
+		    <div class="sublist-head list-head">
+			  <label id="corruptedSession">My Session is corrupted, what does this mean?</label>
+		    </div>
+		    <div class="helpDescription">
+			  <p>Try to navigate back to login page. Corrupted session just means that the token used for session tracking has been lost, no data at the db end would be compromised.</p>
+		    </div>
+
+		    <div class="sublist-head list-head">
+			  <label id="reportIssue">Something is broken, how do I report it</label>
+		    </div>
+		    <div class="helpDescription">
+			  <p>You can open up an issue at <a href="https://github.com/Imaginea/mViewer">https://github.com/Imaginea/mViewer</a>. Would be great if you attach the server logs to the issue.</p>
+		    </div>
+
 		  </div>
 	    </div>
 	  </div>

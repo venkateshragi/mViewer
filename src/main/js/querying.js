@@ -22,7 +22,7 @@ YUI({
     var showTabView = function (e) {
         var treeble;
         MV.toggleClass(e.currentTarget, Y.all("#collNames li"));
-        Y.one("#currentColl").set("value", e.currentTarget.get("id"));
+        Y.one("#currentColl").set("value", e.currentTarget.getContent());
         MV.mainBody.empty(true);
         function getQueryParameters() {
             var parsedQuery, query = Y.one('#queryBox').get("value");
@@ -184,11 +184,11 @@ YUI({
             if (response !== undefined) {
                 MV.showAlertDialog("Document updated", MV.infoIcon);
                 Y.log("Document update to [0]".format(response), "info");
-                Y.one("#" + Y.one("#currentColl").get("value")).simulate("click");
+                Y.one("#" + Y.one("#currentColl").get("value").replace(/ /g, '_')).simulate("click");
             } else {
                 var error = parsedResponse.response.error;
                 MV.showAlertDialog("Could not update Document! [0]".format(MV.errorCodeMap[error.code]), MV.warnIcon, function () {
-                    Y.one("#" + Y.one("#currentColl").get("value")).simulate("click");
+                    Y.one("#" + Y.one("#currentColl").get("value").replace(/ /g, '_')).simulate("click");
                 });
                 Y.log("Could not update Document! [0]".format(MV.errorCodeMap[error.code]), "error");
             }
@@ -246,7 +246,7 @@ YUI({
                                                if (response !== undefined) {
                                                    MV.showAlertDialog("Document deleted", MV.infoIcon);
                                                    Y.log("Document with _id= [0] deleted. Response: [1]".format(id, response), "info");
-                                                   Y.one("#" + Y.one("#currentColl").get("value")).simulate("click");
+                                                   Y.one("#" + Y.one("#currentColl").get("value").replace(/ /g, '_')).simulate("click");
                                                } else {
                                                    var error = parsedResponse.response.error;
                                                    MV.showAlertDialog("Could not delete the document with _id [0]. [1]".format(id, MV.errorCodeMap[error.code]), MV.warnIcon);
