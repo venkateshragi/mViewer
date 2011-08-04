@@ -39,38 +39,41 @@ import com.mongodb.Mongo;
 @Path("/logout")
 public class UserLogout extends BaseRequestDispatcher {
 
-    private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 1L;
 
-    /**
-     * Define Logger for this class
-     */
-    private static Logger logger = Logger.getLogger(UserLogout.class);
+	/**
+	 * Define Logger for this class
+	 */
+	private static Logger logger = Logger.getLogger(UserLogout.class);
 
-    /**
-     * Listens to a logout reuest made by user to end his session from mViewer.
-     * 
-     * @param request
-     *            Logout Request made bye user with a tokenId as parameter
-     * @param dbInfo
-     *            Mongo Db Configuration provided by user to connect to.
-     * @return Logout status
-     * 
-     */
-    @GET
-    @Produces(MediaType.APPLICATION_JSON)
-    public String doGet(@QueryParam("dbInfo") final String dbInfo,
-            @Context final HttpServletRequest request) {
-        String response = new ResponseTemplate().execute(logger, dbInfo,
-                request, new ResponseCallback() {
-                    public Object execute() throws Exception {
-                        Mongo m = UserLogin.mongoConfigToInstanceMapping
-                                .get(dbInfo);
-                        m.close();
-                        UserLogin.mongoConfigToInstanceMapping.remove(dbInfo);
-                        String status = "User Logged Out";
-                        return status;
-                    }
-                });
-        return response;
-    }
+	/**
+	 * Listens to a logout reuest made by user to end his session from mViewer.
+	 * 
+	 * @param request
+	 *            Logout Request made bye user with a tokenId as parameter
+	 * @param dbInfo
+	 *            Mongo Db Configuration provided by user to connect to.
+	 * @return Logout status
+	 * 
+	 */
+	@GET
+	@Produces(MediaType.APPLICATION_JSON)
+	public String doGet(@QueryParam("dbInfo") final String dbInfo,
+			@Context final HttpServletRequest request) {
+		String response = new ResponseTemplate().execute(logger, dbInfo,
+				request, new ResponseCallback() {
+					public Object execute() throws Exception {
+						Mongo m = UserLogin.mongoConfigToInstanceMapping
+								.get(dbInfo);
+						if (UserLogin.mongoConfigToUsersMapping.get(dbInfo) == 0) {
+							m.close();
+							UserLogin.mongoConfigToInstanceMapping
+									.remove(dbInfo);
+						}
+						String status = "User Logged Out";
+						return status;
+					}
+				});
+		return response;
+	}
 }
