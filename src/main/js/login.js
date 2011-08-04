@@ -64,7 +64,7 @@ YUI({
                         var response = parsedResponse.response.result;
                         if (response !== undefined) {
                             Y.log("Successfully logging in", "info");
-                            window.location = "home.html?dbInfo="+ host + "_" +port;
+                            window.location = "home.html?dbInfo="+ host + "_" +port+"_"+username;
                         } else {
                             var error = parsedResponse.response.error;
                             var errorDiv = Y.one("#errorMsg");

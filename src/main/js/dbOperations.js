@@ -138,13 +138,15 @@ YUI({
     }
 
     function getParameters() {
-        var params = [];
+        var params = [], token;
         var fullUrl = window.location.search;
-        while (fullUrl.indexOf("&") !== -1) {
-            params.push(fullUrl.substring(fullUrl.indexOf("=") + 1, fullUrl.indexOf("&")));
-            fullUrl = fullUrl.substring(fullUrl.indexOf("&") + 1);
+        var dbInfo= fullUrl.substring(fullUrl.indexOf("=")+1);
+        while (dbInfo.indexOf("_") !== -1) {
+            token = dbInfo.substring(0, dbInfo.indexOf("_"));
+			dbInfo = dbInfo.substring(dbInfo.indexOf("_")+1);
+            params.push(token);
         }
-        params.push(fullUrl.substring(fullUrl.indexOf("=") + 1));
+        params.push(dbInfo); // last token
         return params;
     }
 
@@ -153,10 +155,9 @@ YUI({
         loadingPanel.show();
         dbDiv = Y.one('#dbNames ul.lists');
         var params = getParameters();
-        Y.log(params[0], "info");
-        Y.one("#tokenID").set("value", params[0]);
-        Y.one("#username").set("value", params[1]);
-        Y.one("#host").set("value", params[2]);
+        Y.one("#host").set("value", params[0]);
+        Y.one("#port").set("value", params[1]);
+        Y.one("#username").set("value", params[2]);
         var request = Y.io(MV.URLMap.getDBs(),
                            // configuration for loading the database names
                            {
