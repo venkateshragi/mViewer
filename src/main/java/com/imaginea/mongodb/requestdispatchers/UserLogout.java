@@ -58,22 +58,21 @@ public class UserLogout extends BaseRequestDispatcher {
 	 */
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
-	public String doGet(@QueryParam("dbInfo") final String dbInfo,
-			@Context final HttpServletRequest request) {
-		String response = new ResponseTemplate().execute(logger, dbInfo,
-				request, new ResponseCallback() {
-					public Object execute() throws Exception {
-						Mongo m = UserLogin.mongoConfigToInstanceMapping
-								.get(dbInfo);
-						if (UserLogin.mongoConfigToUsersMapping.get(dbInfo) == 0) {
-							m.close();
-							UserLogin.mongoConfigToInstanceMapping
-									.remove(dbInfo);
-						}
-						String status = "User Logged Out";
-						return status;
+	public String doGet(@QueryParam("dbInfo") final String dbInfo, @Context final HttpServletRequest request) {
+		String response = ErrorTemplate.execute(logger, new ResponseCallback() {
+			public Object execute() throws Exception {
+				// Not check in logout if session has dbInfo or not
+				Mongo m = UserLogin.mongoConfigToInstanceMapping.get(dbInfo);
+				if (m != null) {
+					if (UserLogin.mongoConfigToUsersMapping.get(dbInfo) == 0) {
+						m.close();
+						UserLogin.mongoConfigToInstanceMapping.remove(dbInfo);
 					}
-				});
+				}
+				String status = "User Logged Out";
+				return status;
+			}
+		});
 		return response;
 	}
 }

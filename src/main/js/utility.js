@@ -295,10 +295,10 @@ YUI.add('utility', function (Y) {
             return "graphs.html?dbInfo=" + Y.one("#host").get("value")+"_"+Y.one("#port").get("value");
         },
         graphInitiate: function () {
-            return "graphs/initiate?dbInfo=" + Y.one("#host").get("value")+"_"+Y.one("#port").get("value");
+            return "graphs/initiate?dbInfo=" + Y.one("#dbInfo").get("value");
         },
         graphQuery: function () {
-            return "graphs/query?dbInfo=" + Y.one("#host").get("value")+"_"+Y.one("#port").get("value");
+            return "graphs/query?dbInfo=" + Y.one("#dbInfo").get("value");
         },
         insertDoc: function () {
             return "services/" + Y.one("#currentDB").get("value") + "/" + Y.one("#currentColl").get("value") + "/document?dbInfo=" + Y.one("#host").get("value")+"_"+Y.one("#port").get("value") + "&action=PUT";

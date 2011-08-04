@@ -70,7 +70,6 @@ import com.mongodb.util.JSON;
 public class DatabaseRequestDispatcherTest extends BaseRequestDispatcher {
 
 	private MongoInstanceProvider mongoInstanceProvider;
-
 	private static Mongo mongoInstance;
 
 	/**
@@ -83,7 +82,7 @@ public class DatabaseRequestDispatcherTest extends BaseRequestDispatcher {
 	 */
 	private static Logger logger = Logger.getLogger(DatabaseRequestDispatcherTest.class);
 
-	private String testTokenId = "123212178917845678910910";
+	private String testdbInfo = ""
 	private static final String logConfigFile = "src/main/resources/log4j.properties";
  
 	

@@ -148,7 +148,7 @@ YUI({
 
     function requestInitialData() {
         var fullUrl = window.location.search;
-        Y.one("#tokenID").set("value", fullUrl.substring(fullUrl.indexOf("=") + 1));
+        Y.one("#dbInfo").set("value", fullUrl.substring(fullUrl.indexOf("=") + 1));
         var sUrl = MV.URLMap.graphInitiate();
         var request = Y.io(sUrl, cfg);
     }

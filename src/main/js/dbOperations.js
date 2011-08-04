@@ -46,7 +46,7 @@ YUI({
                     var parsedResponse = Y.JSON.parse(responseObject.responseText);
                     if (parsedResponse.response.result !== undefined) {
                         MV.showAlertDialog("[0] is dropped! ".format(Y.one("#currentDB").get("value")), MV.infoIcon, function () {
-                            window.location = "home.html?tokenID=" + Y.one("#tokenID").get("value") + "&username=" + Y.one("#username").get("value") + "&host=" + Y.one("#host").get("value");
+                            window.location = "home.html?dbInfo=" + Y.one("#host").get("value")+"_" + Y.one("#port").get("value") + "_" + Y.one("#username").get("value");
                         });
                         Y.log("[0] dropped".format(Y.one("#currentDB").get("value")), "info");
                         Y.one("#currentDB").set("value", "");
