@@ -100,7 +100,7 @@ public class CollectionServiceImplTest extends BaseRequestDispatcher {
         try {
 
             mongoInstanceProvider = new ConfigMongoInstanceProvider();
-            PropertyConfigurator.configure(logConfigFile);
+            PropertyConfigurator.configure(logConfigFile); // TODO read about this
         } catch (FileNotFoundException m) {
             ApplicationException e = new ApplicationException(
                     ErrorCodes.FILE_NOT_FOUND_EXCEPTION, m.getMessage(),
