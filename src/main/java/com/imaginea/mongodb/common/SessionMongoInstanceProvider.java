@@ -21,9 +21,9 @@ import com.mongodb.Mongo;
 /**
  * Extract the MongoInstance from the <mappingkey> which is a combination of
  * usrname , mongoIP and mongoPort. <mappingKey> maps to <tokenID>.
- *
+ * 
  * @author Rachit Mittal
- *
+ * 
  */
 public class SessionMongoInstanceProvider implements MongoInstanceProvider {
 
@@ -31,18 +31,17 @@ public class SessionMongoInstanceProvider implements MongoInstanceProvider {
 
 	/**
 	 * Sets Mongo Instance according to what obtained in UserLogin class.
-	 *
+	 * 
 	 * @param userMappingKey
 	 */
 	public SessionMongoInstanceProvider(String userMappingKey) {
-		mongoInstance = UserLogin.mongoConfigToInstanceMapping
-				.get(userMappingKey);
+		mongoInstance = UserLogin.mongoConfigToInstanceMapping.get(userMappingKey);
 	}
 
 	/**
 	 * Return MongoInstance
 	 */
-	 
+
 	public Mongo getMongoInstance() {
 		return mongoInstance;
 	}

@@ -112,9 +112,9 @@ public class BaseRequestDispatcher {
 	}
 
 	/**
-	 *  Catches error for a block of code and from JSON error Response.
+	 * Catches error for a block of code and from JSON error Response.
 	 * 
-	 *
+	 * 
 	 */
 	protected static class ErrorTemplate {
 		public static String execute(Logger logger, ResponseCallback callback) {
@@ -137,11 +137,11 @@ public class BaseRequestDispatcher {
 				// When port out of range
 				ApplicationException e = new ApplicationException(ErrorCodes.PORT_OUT_OF_RANGE, "Port out of range", m.getCause());
 				response = formErrorResponse(logger, e);
-
 			} catch (UnknownHostException m) {
 				MongoHostUnknownException e = new MongoHostUnknownException("Unknown host", m);
 				response = formErrorResponse(logger, e);
 			} catch (MongoInternalException m) {
+				// Throws when cannot connect to localhost.com
 				MongoHostUnknownException e = new MongoHostUnknownException("Unknown host", m);
 				response = formErrorResponse(logger, e);
 			} catch (MongoException m) {
@@ -155,11 +155,12 @@ public class BaseRequestDispatcher {
 				response = formErrorResponse(logger, e);
 			} catch (ValidationException e) {
 				response = formErrorResponse(logger, e);
+			} catch (ApplicationException e) {
+				response = formErrorResponse(logger, e);
 			} catch (Exception m) {
 				ApplicationException e = new ApplicationException(ErrorCodes.ANY_OTHER_EXCEPTION, m.getMessage(), m.getCause());
 				response = formErrorResponse(logger, e);
 			}
-
 			return response.toString();
 		}
 	}
@@ -167,11 +168,12 @@ public class BaseRequestDispatcher {
 	protected static class ResponseTemplate {
 		public String execute(Logger logger, String dbInfo, HttpServletRequest request, ResponseCallback callback) {
 			Object response = null;
+			// Validate first
 			response = validateDbInfo(dbInfo, logger, request);
 			if (response != null) {
 				return response.toString();
 			}
-			return ErrorTemplate.execute(logger,callback);
+			return ErrorTemplate.execute(logger, callback);
 		}
 	}
 

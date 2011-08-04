@@ -18,18 +18,18 @@ package com.imaginea.mongodb.common;
 import com.mongodb.Mongo;
 
 /**
- * Defines the contract for implementations which provide the notion of 
- * current mongo instance. For hibernate fans, this is like CurrentSessionContext.
- *
+ * Defines the contract for implementations which provide the notion of current
+ * mongo instance. For hibernate fans, this is like CurrentSessionContext.
+ * 
  * @author Rachit Mittal
- *
+ * 
  */
 public interface MongoInstanceProvider {
 
 	/**
-	 * Returns the current mongo instance, the meaning of current depends 
-     * on the actual implementation class
-	 *
+	 * Returns the current mongo instance, the meaning of current depends on the
+	 * actual implementation class
+	 * 
 	 * @return a Mongo Instance
 	 */
 	public Mongo getMongoInstance();

@@ -50,85 +50,75 @@ import com.imaginea.mongodb.services.DatabaseServiceImpl;
  */
 @Path("/db")
 public class DatabaseRequestDispatcher extends BaseRequestDispatcher {
-    private final static Logger logger = Logger
-            .getLogger(DatabaseRequestDispatcher.class);
+	private final static Logger logger = Logger.getLogger(DatabaseRequestDispatcher.class);
 
-    /**
-     * Maps GET Request to get list of databases present in mongo db to a
-     * service function that returns the list. Also forms the JSON response for
-     * this request and sent it to client. In case of any exception from the
-     * service files an error object if formed.
-     * 
-     * @param dbInfo
-     *            Mongo Db Configuration provided by user to connect to.
-     * @param request
-     *            Get the HTTP request context to extract session parameters
-     * @return String of JSON Format with list of all Databases.
-     */
-    @GET
-    @Produces(MediaType.APPLICATION_JSON)
-    public String getDbList(@QueryParam("dbInfo") final String dbInfo,
-            @Context final HttpServletRequest request) {
+	/**
+	 * Maps GET Request to get list of databases present in mongo db to a
+	 * service function that returns the list. Also forms the JSON response for
+	 * this request and sent it to client. In case of any exception from the
+	 * service files an error object if formed.
+	 * 
+	 * @param dbInfo
+	 *            Mongo Db Configuration provided by user to connect to.
+	 * @param request
+	 *            Get the HTTP request context to extract session parameters
+	 * @return String of JSON Format with list of all Databases.
+	 */
+	@GET
+	@Produces(MediaType.APPLICATION_JSON)
+	public String getDbList(@QueryParam("dbInfo") final String dbInfo, @Context final HttpServletRequest request) {
 
-        String response = new ResponseTemplate().execute(logger, dbInfo,
-                request, new ResponseCallback() {
-                    public Object execute() throws Exception {
-                        // TODO Using Service Provider
-                        DatabaseService databaseService = new DatabaseServiceImpl(
-                                dbInfo);
-                        List<String> dbNames = databaseService.getDbList();
-                        return dbNames;
-                    }
-                });
-        return response;
-    }
+		String response = new ResponseTemplate().execute(logger, dbInfo, request, new ResponseCallback() {
+			public Object execute() throws Exception {
+				// TODO Using Service Provider
+				DatabaseService databaseService = new DatabaseServiceImpl(dbInfo);
+				List<String> dbNames = databaseService.getDbList();
+				return dbNames;
+			}
+		});
+		return response;
+	}
 
-    /**
-     * Maps POST Request to perform create/drop operations on databases present
-     * in mongo db to a service function that returns the list. Also forms the
-     * JSON response for this request and sent it to client. In case of any
-     * exception from the service files an error object if formed.
-     * 
-     * @param dbName
-     *            Name of Database for which to perform create/drop operation
-     *            depending on action patameter
-     * @param action
-     *            Query Paramater with value PUT for identifying a create
-     *            database request and value DELETE for dropping a database.
-     * @param request
-     *            Get the HTTP request context to extract session parameters
-     * @param dbInfo
-     *            Mongo Db Configuration provided by user to connect to.
-     * @return : String with status of operation performed.
-     */
-    @POST
-    @Path("/{dbName}")
-    @Produces(MediaType.APPLICATION_JSON)
-    public String postDbRequest(@PathParam("dbName") final String dbName,
-            @QueryParam("action") final String action,
-            @QueryParam("dbInfo") final String dbInfo,
-            @Context final HttpServletRequest request) {
+	/**
+	 * Maps POST Request to perform create/drop operations on databases present
+	 * in mongo db to a service function that returns the list. Also forms the
+	 * JSON response for this request and sent it to client. In case of any
+	 * exception from the service files an error object if formed.
+	 * 
+	 * @param dbName
+	 *            Name of Database for which to perform create/drop operation
+	 *            depending on action patameter
+	 * @param action
+	 *            Query Paramater with value PUT for identifying a create
+	 *            database request and value DELETE for dropping a database.
+	 * @param request
+	 *            Get the HTTP request context to extract session parameters
+	 * @param dbInfo
+	 *            Mongo Db Configuration provided by user to connect to.
+	 * @return : String with status of operation performed.
+	 */
+	@POST
+	@Path("/{dbName}")
+	@Produces(MediaType.APPLICATION_JSON)
+	public String postDbRequest(@PathParam("dbName") final String dbName, @QueryParam("action") final String action, @QueryParam("dbInfo") final String dbInfo,
+			@Context final HttpServletRequest request) {
 
-        if (action == null) {
-            InvalidHTTPRequestException e = new InvalidHTTPRequestException(
-                    ErrorCodes.ACTION_PARAMETER_ABSENT,
-                    "ACTION_PARAMETER_ABSENT");
-            return formErrorResponse(logger, e);
-        }
-        String response = new ResponseTemplate().execute(logger, dbInfo,
-                request, new ResponseCallback() {
-                    public Object execute() throws Exception {
-                        DatabaseService databaseService = new DatabaseServiceImpl(
-                                dbInfo);
-                        String status = null;
-                        if ("PUT".equals(action)) {
-                            status = databaseService.createDb(dbName);
-                        } else if ("DELETE".equals(action)) {
-                            status = databaseService.dropDb(dbName);
-                        }
-                        return status;
-                    }
-                });
-        return response;
-    }
+		if (action == null) {
+			InvalidHTTPRequestException e = new InvalidHTTPRequestException(ErrorCodes.ACTION_PARAMETER_ABSENT, "ACTION_PARAMETER_ABSENT");
+			return formErrorResponse(logger, e);
+		}
+		String response = new ResponseTemplate().execute(logger, dbInfo, request, new ResponseCallback() {
+			public Object execute() throws Exception {
+				DatabaseService databaseService = new DatabaseServiceImpl(dbInfo);
+				String status = null;
+				if ("PUT".equals(action)) {
+					status = databaseService.createDb(dbName);
+				} else if ("DELETE".equals(action)) {
+					status = databaseService.dropDb(dbName);
+				}
+				return status;
+			}
+		});
+		return response;
+	}
 }

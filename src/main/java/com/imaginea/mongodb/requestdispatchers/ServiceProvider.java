@@ -16,25 +16,25 @@ import com.imaginea.mongodb.services.DocumentServiceImpl;
  */
 public class ServiceProvider {
 
-    /**
-     * Return implementation provider of serviceClass interface
-     * 
-     * @param serviceClass
-     * @return Implementation
-     * @throws Exception
-     */
-    public static Class<?> getServiceImpl(Class<?> serviceClass)
-            throws Exception {
-        Class<?> serviceImpl = null;
-        if (serviceClass.newInstance() instanceof DatabaseService) {
-            return DatabaseServiceImpl.class;
-        } else if (serviceClass.newInstance() instanceof CollectionService) {
-            return CollectionServiceImpl.class;
-        }
-        if (serviceClass.newInstance() instanceof DocumentService) {
-            return DocumentServiceImpl.class;
-        }
-        return serviceImpl;
+	// TODO Usage of this function in each service file
+	/**
+	 * Return implementation provider of serviceClass interface
+	 * 
+	 * @param serviceClass
+	 * @return Implementation
+	 * @throws Exception
+	 */
+	public static Class<?> getServiceImpl(Class<?> serviceClass) throws Exception {
+		Class<?> serviceImpl = null;
+		if (serviceClass.newInstance() instanceof DatabaseService) {
+			return DatabaseServiceImpl.class;
+		} else if (serviceClass.newInstance() instanceof CollectionService) {
+			return CollectionServiceImpl.class;
+		}
+		if (serviceClass.newInstance() instanceof DocumentService) {
+			return DocumentServiceImpl.class;
+		}
+		return serviceImpl;
 
-    }
+	}
 }
