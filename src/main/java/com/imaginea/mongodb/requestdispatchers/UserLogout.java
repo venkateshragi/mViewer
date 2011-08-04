@@ -14,13 +14,11 @@
  * limitations under the License.
  */
 package com.imaginea.mongodb.requestdispatchers;
-
-import javax.servlet.http.HttpServletRequest;
+ 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.Context;
+import javax.ws.rs.QueryParam; 
 import javax.ws.rs.core.MediaType;
 
 import org.apache.log4j.Logger;
@@ -58,15 +56,18 @@ public class UserLogout extends BaseRequestDispatcher {
 	 */
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
-	public String doGet(@QueryParam("dbInfo") final String dbInfo, @Context final HttpServletRequest request) {
+	public String doGet(@QueryParam("dbInfo") final String dbInfo) {
 		String response = ErrorTemplate.execute(logger, new ResponseCallback() {
 			public Object execute() throws Exception {
-				// Not check in logout if session has dbInfo or not
+				// Not checking in logout if session has dbInfo or not
 				Mongo m = UserLogin.mongoConfigToInstanceMapping.get(dbInfo);
 				if (m != null) {
-					if (UserLogin.mongoConfigToUsersMapping.get(dbInfo) == 0) {
+					int noOfActiveUsers = UserLogin.mongoConfigToUsersMapping.get(dbInfo);
+					if (noOfActiveUsers == 0) {
 						m.close();
 						UserLogin.mongoConfigToInstanceMapping.remove(dbInfo);
+					} else {
+						UserLogin.mongoConfigToUsersMapping.put(dbInfo, noOfActiveUsers - 1);
 					}
 				}
 				String status = "User Logged Out";

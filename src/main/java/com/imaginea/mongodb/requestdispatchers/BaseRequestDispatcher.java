@@ -61,11 +61,12 @@ public class BaseRequestDispatcher {
 			InvalidHTTPRequestException e = new InvalidHTTPRequestException(ErrorCodes.DB_INFO_ABSENT, "Mongo Config parameters not provided in the URL");
 			return formErrorResponse(logger, e);
 		}
+		 
 		// Check if db information is present in session
 		HttpSession session = request.getSession();
 		@SuppressWarnings("unchecked")
 		List<String> mongosInSession = (List<String>) session.getAttribute("dbInfo");
-
+ 
 		InvalidHTTPRequestException e = null;
 		if (mongosInSession == null) {
 			e = new InvalidHTTPRequestException(ErrorCodes.INVALID_SESSION, "No Mongo Config parameters present in Session.");

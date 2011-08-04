@@ -26,10 +26,10 @@
 package com.imaginea.mongodb.requestdispatchers;
 
 import static org.junit.Assert.*;
- 
+
 import java.util.ArrayList;
 import java.util.List;
- 
+
 import javax.servlet.http.HttpSession;
 
 import org.apache.log4j.Logger;
@@ -44,16 +44,16 @@ import com.imaginea.mongodb.common.ConfigMongoInstanceProvider;
 import com.imaginea.mongodb.common.MongoInstanceProvider;
 import com.imaginea.mongodb.common.exceptions.ApplicationException;
 import com.imaginea.mongodb.common.exceptions.DatabaseException;
-import com.imaginea.mongodb.common.exceptions.ErrorCodes; 
+import com.imaginea.mongodb.common.exceptions.ErrorCodes;
 import com.imaginea.mongodb.requestdispatchers.DatabaseRequestDispatcher;
-import com.imaginea.mongodb.requestdispatchers.UserLogin; 
+import com.imaginea.mongodb.requestdispatchers.UserLogin;
 
 import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
 import com.mongodb.Mongo;
 import com.mongodb.MongoException;
-import com.mongodb.util.JSON; 
+import com.mongodb.util.JSON;
 
 /**
  * Tests the database request dispatcher resource that handles the GET and POST
@@ -68,7 +68,7 @@ import com.mongodb.util.JSON;
  * @since 14 July 2011
  * 
  */
-public class DatabaseRequestDispatcherTest extends BaseRequestDispatcher {
+public class DatabaseRequestDispatcherTest extends TestingTemplate {
 
 	private MongoInstanceProvider mongoInstanceProvider;
 	private static Mongo mongoInstance;
@@ -87,7 +87,7 @@ public class DatabaseRequestDispatcherTest extends BaseRequestDispatcher {
 	// Not coded to interface as Mock object provides a set Session
 	// functionality.
 	private MockHttpServletRequest request = new MockHttpServletRequest();
-	private String dbInfo;
+	private String testDbInfo;
 
 	/**
 	 * Constructs a mongoInstanceProvider Object.
@@ -118,15 +118,16 @@ public class DatabaseRequestDispatcherTest extends BaseRequestDispatcher {
 		// Class to be tested
 		testDbResource = new DatabaseRequestDispatcher();
 		// Add user to mappings in userLogin for authentication
-		dbInfo = mongoInstance.getAddress() + "_" + mongoInstance.getConnectPoint();
-		UserLogin.mongoConfigToInstanceMapping.put(dbInfo, mongoInstance);
+		testDbInfo = mongoInstance.getAddress().getHost() + "_" + mongoInstance.getAddress().getPort();
+		UserLogin.mongoConfigToInstanceMapping.put(testDbInfo, mongoInstance);
 		// Add dbInfo in Session
 		List<String> dbInfos = new ArrayList<String>();
-		dbInfos.add(dbInfo);
+		dbInfos.add(testDbInfo);
 		HttpSession session = new MockHttpSession();
 		session.setAttribute("dbInfo", dbInfos);
-		MockHttpServletRequest request = new MockHttpServletRequest();
+		request = new MockHttpServletRequest();
 		request.setSession(session);
+		// TODO can do this same work in a function at one place.
 
 	}
 
@@ -161,8 +162,8 @@ public class DatabaseRequestDispatcherTest extends BaseRequestDispatcher {
 								}
 							}
 						}
+						String dbList = testDbResource.getDbList(testDbInfo, request);
 
-						String dbList = testDbResource.getDbList(dbInfo, request);
 						// response has a JSON Object with result as key and
 						// value as
 						DBObject response = (BasicDBObject) JSON.parse(dbList);
@@ -211,7 +212,7 @@ public class DatabaseRequestDispatcherTest extends BaseRequestDispatcher {
 				public Object execute() throws Exception {
 					try {
 
-						String resp = testDbResource.postDbRequest(dbName, "PUT", dbInfo, request);
+						String resp = testDbResource.postDbRequest(dbName, "PUT", testDbInfo, request);
 
 						List<String> dbNames = mongoInstance.getDatabaseNames();
 						if (dbName == null) {
@@ -274,7 +275,7 @@ public class DatabaseRequestDispatcherTest extends BaseRequestDispatcher {
 							}
 						}
 
-						String resp = testDbResource.postDbRequest(dbName, "DELETE", dbInfo, request);
+						String resp = testDbResource.postDbRequest(dbName, "DELETE", testDbInfo, request);
 
 						List<String> dbNames = mongoInstance.getDatabaseNames();
 

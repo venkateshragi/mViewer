@@ -22,29 +22,23 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.imaginea.mongodb.services.servlet;
+package com.imaginea.mongodb.services;
 
 import static org.junit.Assert.*;
-
-import java.io.FileNotFoundException;
-import java.io.IOException;
+ 
 
 import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Test;
-import org.springframework.mock.web.MockHttpServletRequest;
-import org.springframework.mock.web.MockHttpSession;
+import org.junit.Test; 
 
 import com.imaginea.mongodb.common.ConfigMongoInstanceProvider;
-import com.imaginea.mongodb.common.MongoInstanceProvider;
-import com.imaginea.mongodb.common.exceptions.ErrorCodes;
-import com.imaginea.mongodb.common.exceptions.MongoHostUnknownException;
+import com.imaginea.mongodb.common.MongoInstanceProvider; 
 import com.imaginea.mongodb.requestdispatchers.BaseRequestDispatcher;
 import com.imaginea.mongodb.requestdispatchers.UserLogin;
-import com.imaginea.mongodb.requestdispatchers.UserLogout;
+import com.imaginea.mongodb.requestdispatchers.UserLogout; 
 import com.mongodb.Mongo;
 
 /**
@@ -69,32 +63,17 @@ public class UserLogoutTest extends BaseRequestDispatcher {
 	 */
 	private static Logger logger = Logger.getLogger(UserLoginTest.class);
 
-	private String testTokenId = "123212178917845678910910";
-	private String testUserMapping = "user";
-
+	private String testdbInfo = "localhost_27017"; 
 	private static final String logConfigFile = "src/main/resources/log4j.properties";
 
 	public UserLogoutTest() throws Exception {
-		try {
-
-			mongoInstanceProvider = new ConfigMongoInstanceProvider();
-			PropertyConfigurator.configure(logConfigFile);
-
-		} catch (FileNotFoundException e) {
-			formErrorResponse(logger, e.getMessage(),
-					ErrorCodes.FILE_NOT_FOUND_EXCEPTION, e.getStackTrace(),
-					"ERROR");
-			throw e;
-
-		} catch (MongoHostUnknownException e) {
-			formErrorResponse(logger, e.getMessage(), e.getErrorCode(),
-					e.getStackTrace(), "ERROR");
-			throw e;
-
-		} catch (IOException e) {
-			formErrorResponse(logger, e.getMessage(), ErrorCodes.IO_EXCEPTION,
-					e.getStackTrace(), "ERROR");
-		}
+		ErrorTemplate.execute(logger, new ResponseCallback() {
+			public Object execute() throws Exception {
+				mongoInstanceProvider = new ConfigMongoInstanceProvider();
+				PropertyConfigurator.configure(logConfigFile); // TODO Why?
+				return null;
+			}
+		});
 
 	}
 
@@ -103,9 +82,12 @@ public class UserLogoutTest extends BaseRequestDispatcher {
 	 * mongo instance from mongo instance provider.
 	 */
 	@Before
-	public void setUpTestEnvironment() {
+	public void instantiateTestClass() {
 		testLogoutResource = new UserLogout();
 		mongoInstance = mongoInstanceProvider.getMongoInstance();
+		// Add User to maps
+		UserLogin.mongoConfigToInstanceMapping.put(testdbInfo, mongoInstance);
+		UserLogin.mongoConfigToUsersMapping.put(testdbInfo, 1);
 	}
 
 	/**
@@ -114,36 +96,11 @@ public class UserLogoutTest extends BaseRequestDispatcher {
 	 */
 	@Test
 	public void testUserLoginRequest() {
-		if (logger.isInfoEnabled()) {
-			logger.info("Testing Get Request for User Logout");
-			logger.info(" Insert a testTokenId in user mapping table");
-		}
 
-		UserLogin.tokenIDToUserMapping.put(testTokenId, testUserMapping);
-		if (logger.isInfoEnabled()) {
-			logger.info(" Insert a Mongo instance for this user in mapping table");
-		}
-
-		UserLogin.userToMongoInstanceMapping
-				.put(testUserMapping, mongoInstance);
-
-		MockHttpSession session = new MockHttpSession();
-		session.setAttribute("tokenId", testTokenId);
-		MockHttpServletRequest request = new MockHttpServletRequest();
-		request.setSession(session);
-
-		testLogoutResource.doGet(testTokenId, request);
-
-		if (logger.isInfoEnabled()) {
-			logger.info("After Logout mapping Value of Token Id: "
-					+ UserLogin.tokenIDToUserMapping.get(testTokenId));
-		}
-		assertNull(UserLogin.tokenIDToUserMapping.get(testTokenId));
-
-		if (logger.isInfoEnabled()) {
-			logger.info("Test Completed");
-		}
-
+		testLogoutResource.doGet(testdbInfo);
+		assertNotNull(UserLogin.mongoConfigToInstanceMapping.get(testdbInfo));
+		Integer value = 0;
+		assertEquals(value, UserLogin.mongoConfigToUsersMapping.get(testdbInfo)); 
 	}
 
 	@After

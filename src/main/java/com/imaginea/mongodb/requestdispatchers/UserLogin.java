@@ -85,14 +85,18 @@ public class UserLogin extends BaseRequestDispatcher {
 
 	@POST
 	@Produces(MediaType.APPLICATION_JSON)
-	public String authenticateUser(@FormParam("username") String user, @FormParam("password") final String password, @FormParam("host") final String mongoHost,
-			@FormParam("port") final String mongoPort, @Context final HttpServletRequest request) {
+	public String authenticateUser(@FormParam("username") String user, @FormParam("password") final String password, @FormParam("host") String host, @FormParam("port") final String mongoPort,
+			@Context final HttpServletRequest request) {
 
 		// Reassign username for guest user in case of empty username and
 		// password fields
 		if ("".equals(user) && "".equals(password)) {
 			user = "guest";
 		}
+		if ("127.0.0.1".equals(host)) {
+			host = "localhost"; // 1 key gor both in map
+		}
+		final String mongoHost = host;
 		final String username = user;
 		String response = ErrorTemplate.execute(logger, new ResponseCallback() {
 			public Object execute() throws Exception {
