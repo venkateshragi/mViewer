@@ -201,7 +201,7 @@
 		<echo> Deploy the war ${staging.dir}/${app.war} to your app-server. For detailed instructions please use the README</echo>
 	</target>
 
-	<target name="dev" description="prepares a dev build, is incremental" depends="compile, jar, war-staging,test">
+	<target name="dev" description="prepares a dev build, is incremental" depends="compile, jar, war-staging">
 		<echo>Building the war in dev-mode</echo>
 	</target>
 

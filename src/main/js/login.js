@@ -81,29 +81,13 @@ YUI({
                 }
             });
         };
-    var checkIfSubmitted = function (eventObject) {
-            if (eventObject.keyCode === 13) {
-                tryLogin();
-            }
-        };
-    Y.all("input").on("keyup", checkIfSubmitted);
+
+    Y.all("input").on("keyup", function (eventObject) {
+        // for enter key submit the form
+        if (eventObject.keyCode === 13) {
+            tryLogin();
+        }
+    });
+
     Y.one("#login").on('click', tryLogin);
-    /*
-     * var anim = new Y.Anim({ node: '#demo', from: { height: 0 }, to: {
-     * height: function(node) { return node.get('scrollHeight'); } },
-     * easing: Y.Easing.easeOut });
-     *
-     * var onClick = function(e) { var div = Y.one('#loginForm'); var s = "<table
-     * class='table' align='center'>"; s += "<thead><tr><th>Key</th><th>Value</th></tr></thead>";
-     * s += "<tbody class='tbody'>"; s += "<tr><td><code>Host</code></td><td ><input
-     * type='text' id='host' name='host' value='localhost'/></td></tr>";
-     * s += "<tr><td><code>Port</code></td><td ><input
-     * type='text' id='port' name='port' value='27017'/></td></tr>";
-     * s += "<tr><td><code>UserName</code></td><td ><input
-     * type='text' id='username' name='username'/></td></tr>"; s += "<tr><td><code>Password</code></td><td><input
-     * type='password' id='password' name='password'/></td></tr>"; s += "</tbody></table>";
-     * s += "<br><button class='btn' id='login'>GO</button>";
-     * div.set("innerHTML", s); e.preventDefault(); anim.run();
-     *  }; Y.one('#add').on('click', onClick);
-     */
 });
