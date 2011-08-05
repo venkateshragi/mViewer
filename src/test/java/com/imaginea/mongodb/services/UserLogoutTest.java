@@ -70,7 +70,7 @@ public class UserLogoutTest extends BaseRequestDispatcher {
 		ErrorTemplate.execute(logger, new ResponseCallback() {
 			public Object execute() throws Exception {
 				mongoInstanceProvider = new ConfigMongoInstanceProvider();
-				PropertyConfigurator.configure(logConfigFile); // TODO Why?
+				PropertyConfigurator.configure(logConfigFile);  
 				return null;
 			}
 		});

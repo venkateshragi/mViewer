@@ -85,7 +85,7 @@ public class CollectionServiceImplTest extends TestingTemplate {
 		TestingTemplate.execute(logger, new ResponseCallback() {
 			public Object execute() throws Exception {
 				mongoInstanceProvider = new ConfigMongoInstanceProvider();
-				PropertyConfigurator.configure(logConfigFile); // TODO Why?
+				PropertyConfigurator.configure(logConfigFile); 
 				return null;
 			}
 		});
@@ -277,10 +277,7 @@ public class CollectionServiceImplTest extends TestingTemplate {
 								JSONObject temp = (JSONObject) dbStats.get(i);
 								if ("count".equals(temp.get("Key"))) {
 									int noOfDocuments = Integer.parseInt((String) temp.get("Value"));
-									if (logger.isInfoEnabled()) {
-										logger.info("Number of Documents : " + noOfDocuments);
-									}
-									assertEquals(noOfDocuments, 0); // As Empty
+									 									assertEquals(noOfDocuments, 0); // As Empty
 																	// Collection
 									break;
 								}

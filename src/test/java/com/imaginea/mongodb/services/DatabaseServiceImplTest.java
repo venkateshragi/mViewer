@@ -82,7 +82,7 @@ public class DatabaseServiceImplTest extends TestingTemplate {
 		ErrorTemplate.execute(logger, new ResponseCallback() {
 			public Object execute() throws Exception {
 				mongoInstanceProvider = new ConfigMongoInstanceProvider();
-				PropertyConfigurator.configure(logConfigFile); // TODO Why?
+				PropertyConfigurator.configure(logConfigFile);  
 				return null;
 			}
 		});
@@ -283,9 +283,7 @@ public class DatabaseServiceImplTest extends TestingTemplate {
 							JSONObject temp = (JSONObject) dbStats.get(i);
 							if (temp.get("Key").equals("collections")) {
 								int noOfCollections = Integer.parseInt((String) temp.get("Value"));
-								if (logger.isInfoEnabled()) {
-									logger.info("Number of Collections : " + noOfCollections);
-								}
+							 
 								assertEquals(noOfCollections, 0); // As Empty Db
 								break;
 							}

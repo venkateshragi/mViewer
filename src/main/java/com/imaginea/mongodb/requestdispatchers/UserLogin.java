@@ -19,7 +19,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.apache.log4j.Logger;
+import org.apache.log4j.Logger; 
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
@@ -58,7 +58,7 @@ public class UserLogin extends BaseRequestDispatcher {
 	public static Map<String, Mongo> mongoConfigToInstanceMapping = new HashMap<String, Mongo>();
 	public static Map<String, Integer> mongoConfigToUsersMapping = new HashMap<String, Integer>();
 	private static Logger logger = Logger.getLogger(UserLogin.class);
-
+ 
 	/**
 	 * Authenticates User by verifying Mongo config details against admin
 	 * database and authenticating user to that Db. A facility for guest login
@@ -76,9 +76,7 @@ public class UserLogin extends BaseRequestDispatcher {
 	 *            mongo host to connect to
 	 * @param mongoPort
 	 *            mongo Port to connect to
-	 * 
-	 * @author Rachit Mittal
-	 * @since 12 Jul 2011
+	 * 	 
 	 * 
 	 * 
 	 */
@@ -94,7 +92,7 @@ public class UserLogin extends BaseRequestDispatcher {
 			user = "guest";
 		}
 		if ("127.0.0.1".equals(host)) {
-			host = "localhost"; // 1 key for both in map
+			host = "localhost"; // 1 key gor both in map
 		}
 		final String mongoHost = host;
 		final String username = user;
