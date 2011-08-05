@@ -251,63 +251,90 @@ YUI.add('utility', function (Y) {
     MV.header = Y.one("#mainBodyHeader");
     MV.warnIcon = YAHOO.widget.SimpleDialog.ICON_WARN;
     MV.infoIcon = YAHOO.widget.SimpleDialog.ICON_INFO;
+    MV.stateManager = {
+        
+    }
+    
+    MV.StateManager = (function(){
+        var self = this;
+        var stateVariables = ['currentDB', 'currentColl', 'host', 'port','dbInfo']
+        function getVal(key) {
+            return Y.one('#' + key).get("value");
+        };
+        function setVal(key, value) {
+            Y.one('#' + key).set(value);
+        };
+        var exports = {};
+        stateVariables.forEach(function(stateVariable){
+            exports[stateVariable] = function(){
+                return getVal(stateVariable);
+            };
+            var upcasedVar = stateVariable.substring(0,1).toUpperCase() + stateVariable.substring(1);
+            exports['set'+upcasedVar] = function(newValue){
+                return setVal(stateVariable, newValue);
+            };
+        });
+        exports.dbInfo = function() {
+            var currDBInfo = getVal('dbInfo');
+            if (currDBInfo == undefined || currDBInfo.length == 0) {
+                currDBInfo = getVal('host') + "_" + getVal('port');
+            }
+            return currDBInfo;
+        }
+        return exports;
+
+    })();
+
+    var sm = MV.StateManager;
+
     MV.URLMap = {
-        insertColl: function () {
-            return "services/" + Y.one("#currentDB").get("value") + "/collection/" + Y.one("#newName").get("value") + "?dbInfo=" + Y.one("#host").get("value")+"_"+Y.one("#port").get("value") + "&action=PUT";
+        getDBs: function () {
+            return "services/db?dbInfo=[0]".format(sm.dbInfo());
         },
         insertDB: function () {
-            return "services/db/" + Y.one("#newName").get("value") + "?dbInfo=" + Y.one("#host").get("value")+"_"+Y.one("#port").get("value") + "&action=DELETE";
-        },
-        dropColl: function () {
-            return "services/" + Y.one("#currentDB").get("value") + "/collection/" + Y.one("#currentColl").get("value") + "?dbInfo=" + Y.one("#host").get("value")+"_"+Y.one("#port").get("value") + "&action=DELETE";
-        },
-        getColl: function () {
-            return "services/" + Y.one("#currentDB").get("value") + "/collection?dbInfo=" + Y.one("#host").get("value")+"_"+Y.one("#port").get("value");
-        },
-        collStatistics: function () {
-            return "services/stats/db/" + Y.one("#currentDB").get("value") + "/collection/" + Y.one("#currentColl").get("value") + "?dbInfo=" + Y.one("#host").get("value")+"_"+Y.one("#port").get("value");
-        },
-        dbStatistics: function () {
-            return "services/stats/db/" + Y.one("#currentDB").get("value") + "?dbInfo=" + Y.one("#host").get("value")+"_"+Y.one("#port").get("value");
+            return "services/db/[0]?dbInfo=[1]&action=PUT".format(sm.newName(), sm.dbInfo());
         },
         dropDB: function () {
-            return "services/db/" + Y.one("#currentDB").get("value") + "?dbInfo=" + Y.one("#host").get("value")+"_"+Y.one("#port").get("value") + "&action=DELETE";
+            return "services/db/[0]?dbInfo=[1]&action=DELETE".format(sm.currentDB(),sm.dbInfo());
         },
-        getDBs: function () {
-            return "services/db?dbInfo=" + Y.one("#host").get("value")+"_"+Y.one("#port").get("value");
+        dbStatistics: function () {
+            return "services/stats/db/[0]?dbInfo=[1]".format(sm.currentDB(),sm.dbInfo());
+        },
+        getColl: function () {
+            return "services/[0]/collection?dbInfo=[1]".format(sm.currentDB(),sm.dbInfo());
+        },
+        insertColl: function () {
+            return "services/[0]/collection/[1]?dbInfo=[2]&action=PUT".format(sm.currentDB(),sm.newName(), sm.dbInfo());
+        },
+        dropColl: function () {
+            return "services/[0]/collection/[1]?dbInfo=[2]&action=DELETE".format(sm.currentDB(), sm.currentColl(), sm.dbInfo());
+        },
+        collStatistics: function () {
+            return "services/stats/db/[0]/collection/[1]?dbInfo=[2]".format(sm.currentDB(), sm.currentColl(), sm.dbInfo());
         },
         documentKeys: function () {
-            return "services/" + Y.one("#currentDB").get("value") + "/" + Y.one("#currentColl").get("value") + "/document/keys?dbInfo=" + Y.one("#host").get("value")+"_"+Y.one("#port").get("value");
+            return "services/[0]/[1]/document/keys?dbInfo=[2]".format(sm.currentDB(),sm.currentColl(), sm.dbInfo());
         },
         getDocs: function () {
-            return "services/" + Y.one("#currentDB").get("value") + "/" + Y.one("#currentColl").get("value") + "/document?dbInfo=" + Y.one("#host").get("value")+"_"+Y.one("#port").get("value");
+            return "services/[0]/[1]/document?dbInfo=[2]".format(sm.currentDB(),sm.currentColl(), sm.dbInfo());
         },
-        serverStatistics: function () {
-            return "services/stats?dbInfo=" + Y.one("#host").get("value")+"_"+Y.one("#port").get("value");
+        insertDoc: function () {
+            return "services/[0]/[1]/document?dbInfo=[2]&action=PUT".format(sm.currentDB(), sm.currentColl(), sm.dbInfo());
+        },
+        updateDoc: function () {
+            return "services/[0]/[1]/document?dbInfo=[2]".format(sm.currentDB(), sm.currentColl(), sm.dbInfo());
+        },
+        deleteDoc: function () {
+            return "services/[0]/[1]/document?dbInfo=[2]&action=DELETE".format(sm.currentDB(), sm.currentColl(), sm.dbInfo());
         },
         login: function () {
             return "services/login";
         },
         logout: function () {
-            return "services/logout?dbInfo=" + Y.one("#host").get("value")+"_"+Y.one("#port").get("value");
+            return "services/logout?dbInfo=[0]".format(sm.dbInfo());
         },
-        graphs: function () {
-            return "graphs.html?dbInfo=" + Y.one("#host").get("value")+"_"+Y.one("#port").get("value");
-        },
-        graphInitiate: function () {
-            return "graphs/initiate?dbInfo=" + Y.one("#dbInfo").get("value");
-        },
-        graphQuery: function () {
-            return "graphs/query?dbInfo=" + Y.one("#dbInfo").get("value");
-        },
-        insertDoc: function () {
-            return "services/" + Y.one("#currentDB").get("value") + "/" + Y.one("#currentColl").get("value") + "/document?dbInfo=" + Y.one("#host").get("value")+"_"+Y.one("#port").get("value") + "&action=PUT";
-        },
-        updateDoc: function () {
-            return "services/" + Y.one("#currentDB").get("value") + "/" + Y.one("#currentColl").get("value") + "/document?dbInfo=" + Y.one("#host").get("value")+"_"+Y.one("#port").get("value");
-        },
-        deleteDoc: function () {
-            return "services/" + Y.one("#currentDB").get("value") + "/" + Y.one("#currentColl").get("value") + "/document?dbInfo=" + Y.one("#host").get("value")+"_"+Y.one("#port").get("value") + "&action=DELETE";
+        serverStatistics: function () {
+            return "services/stats?dbInfo=[0]".format(sm.dbInfo());
         },
         help: function () {
             return "help.html";
@@ -318,7 +345,17 @@ YUI.add('utility', function (Y) {
         troubleShoot: function () {
             return "admin";
         },
+        graphs: function () {
+            return "graphs.html?dbInfo=[0]".format(sm.dbInfo());
+        },
+        graphInitiate: function () {
+            return "graphs/initiate?dbInfo=[0]".format(sm.dbInfo());
+        },
+        graphQuery: function () {
+            return "graphs/query?dbInfo=[0]".format(sm.dbInfo());
+        }
     };
+
     MV.errorCodeMap = {
         "HOST_UNKNOWN": "Please check if Mongod is running on the given host and port !",
         "MISSING_LOGIN_FIELDS": "Please fill in all the login fields !",
