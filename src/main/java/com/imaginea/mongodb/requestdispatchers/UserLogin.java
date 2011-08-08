@@ -92,7 +92,7 @@ public class UserLogin extends BaseRequestDispatcher {
 			user = "guest";
 		}
 		if ("127.0.0.1".equals(host)) {
-			host = "localhost"; // 1 key gor both in map
+			host = "localhost"; // 1 key for both in map
 		}
 		final String mongoHost = host;
 		final String username = user;
