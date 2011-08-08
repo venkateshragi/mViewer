@@ -67,7 +67,7 @@ public class DatabaseServiceImpl implements DatabaseService {
 	 * based on a userMappingKey which is recieved from the database request
 	 * dispatcher and is obtained from tokenId of user.
 	 * 
-	 * @param userMappingKey
+	 * @param dbInfo
 	 *            A combination of username,mongoHost and mongoPort
 	 */
 	public DatabaseServiceImpl(String dbInfo) {

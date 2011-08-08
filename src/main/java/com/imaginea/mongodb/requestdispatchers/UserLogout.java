@@ -47,8 +47,6 @@ public class UserLogout extends BaseRequestDispatcher {
 	/**
 	 * Listens to a logout reuest made by user to end his session from mViewer.
 	 * 
-	 * @param request
-	 *            Logout Request made bye user with a tokenId as parameter
 	 * @param dbInfo
 	 *            Mongo Db Configuration provided by user to connect to.
 	 * @return Logout status

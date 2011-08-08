@@ -95,7 +95,6 @@ public class ConfigMongoInstanceProvider implements MongoInstanceProvider {
 	/**
 	 * Destroys Mongo Process
 	 * 
-	 * @return
 	 */
 	public void killMongoProcess() {
 		p.destroy();

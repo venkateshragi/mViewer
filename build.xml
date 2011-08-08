@@ -202,7 +202,7 @@
 	<target name="clean" description="Cleans up all the staging resources and log files">
 		<delete dir="${staging.dir}" />
 		<delete dir="${test.reports.dir}" />
-		<delete dir="${basdir}/logs" />
+		<delete file="${basedir}/mViewer.log" />
 	</target>
 
 

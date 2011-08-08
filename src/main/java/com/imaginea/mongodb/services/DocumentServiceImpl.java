@@ -73,7 +73,7 @@ public class DocumentServiceImpl implements DocumentService {
 	 * based on a userMappingKey which is recieved from the database request
 	 * dispatcher and is obtained from tokenId of user.
 	 * 
-	 * @param userMappingKey
+	 * @param dbInfo
 	 *            A combination of username,mongoHost and mongoPort
 	 */
 	public DocumentServiceImpl(String dbInfo) {

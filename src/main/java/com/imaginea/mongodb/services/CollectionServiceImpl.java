@@ -71,7 +71,7 @@ public class CollectionServiceImpl implements CollectionService {
 	 * based on a userMappingKey which is recieved from the collection request
 	 * dispatcher and is obtained from tokenId of user.
 	 * 
-	 * @param userMappingKey
+	 * @param dbInfo
 	 *            A combination of username,mongoHost and mongoPort
 	 */
 	public CollectionServiceImpl(String dbInfo) {

@@ -68,11 +68,11 @@ public class UserLogin extends BaseRequestDispatcher {
 	 * 
 	 * @param request
 	 *            Request made by user for authentication
-	 * @param username
+	 * @param user
 	 *            Name of user as in admin database in mongo
 	 * @param password
 	 *            password of user as in admin database in mongo
-	 * @param mongoHost
+	 * @param host
 	 *            mongo host to connect to
 	 * @param mongoPort
 	 *            mongo Port to connect to
