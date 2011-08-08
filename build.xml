@@ -136,12 +136,6 @@
 			<fileset dir="${app.dir}">
 			</fileset>
 		</war>
-		<!-- Copy war to base directory -->
-		<copy todir="${basedir}">
-			<fileset dir="${staging.dir}">
-				<include name="mViewer.war" />
-			</fileset>
-		</copy>
 	</target>
 
 	<!-- docs -->
@@ -212,7 +206,11 @@
 	</target>
 
 
-	<target name="start" depends="compile, jar, war-staging" description="Starts the jetty server with the war deployed. Working on it yet.">
-
+	<target name="start" depends="compile, jar, war-staging, war" description="Starts the winstone server with the war deployed.">
+		<java jar="${src.dir}/tools/winstone-0.9.10.jar" fork="true">
+			<arg value="--httpPort=8080"/>
+			<arg value="--ajp13Port=-1" />
+			<arg value="--warfile=${staging.dir}/${app.war}" />
+		</java>
 	</target>
 </project>

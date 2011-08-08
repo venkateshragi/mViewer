@@ -20,15 +20,16 @@ YUI({
     var dbDiv, loadingPanel;
     Y.namespace('com.imaginea.mongoV');
     var MV = Y.com.imaginea.mongoV; 
+    var sm = MV.StateManager;
 
     /* HANDLER FUNCTIONS */
     function addCollection(responseObject) {
         var parsedResponse = Y.JSON.parse(responseObject.responseText);
         var response = parsedResponse.response.result;
         if (response !== undefined) {
-            MV.showAlertDialog("[0] added to [1]".format(Y.one("#newName").get("value"), Y.one("#currentDB").get("value")), MV.infoIcon);
+            MV.showAlertDialog("[0] added to [1]".format(sm.newName(), sm.currentDB()), MV.infoIcon);
             Y.log("[0] created in [1]".format(Y.one("#newName").get("value"), Y.one("#currentDB").get("value")), "info");
-            Y.one("#currentColl").set("value", "");
+            sm.clearCurrentColl();
             Y.one("#" + Y.one("#currentDB").get("value")).simulate("click");
         } else {
             var error = parsedResponse.response.error;

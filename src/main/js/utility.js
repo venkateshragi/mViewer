@@ -262,17 +262,25 @@ YUI.add('utility', function (Y) {
             return Y.one('#' + key).get("value");
         };
         function setVal(key, value) {
-            Y.one('#' + key).set(value);
+            Y.one('#' + key).set("value", value);
         };
         var exports = {};
         stateVariables.forEach(function(stateVariable){
             exports[stateVariable] = function(){
                 return getVal(stateVariable);
             };
+            exports[stateVariable+"AsNode"] = function(){
+                return Y.one('#' + getVal(stateVariable).replace(/ /g,'_'));
+            };
+
             var upcasedVar = stateVariable.substring(0,1).toUpperCase() + stateVariable.substring(1);
             exports['set'+upcasedVar] = function(newValue){
                 return setVal(stateVariable, newValue);
             };
+            exports['clear'+upcasedVar] = function(newValue){
+                return setVal(stateVariable, "");
+            };
+
         });
         exports.dbInfo = function() {
             var currDBInfo = getVal('dbInfo');

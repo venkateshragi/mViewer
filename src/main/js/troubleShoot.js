@@ -30,7 +30,7 @@ YUI({
                         var response = parsedResponse.response.result;
                         if (response !== undefined) {
                             Y.log("Successfully set the logging level", "info");
-                            Y.one("#logMessage").set("innerHTML", response + "<br> Please send us mViewer.log stored in the mViewer_logs directory of the application server in case of any problems.<br> aditya.g@imaginea.com , rachit.m@imaginea.com");
+                            Y.one("#logMessage").set("innerHTML", response + "<br> Please log the issue at httsp://github.com/Imaginea/mViewer, do attach the mViewer.log ");
                         } else {
                             var error = parsedResponse.response.error;
                             var errorDiv = Y.one("#logMessage");
