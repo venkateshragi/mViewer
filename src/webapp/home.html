@@ -66,6 +66,11 @@
 <script type="text/javascript" src="js/headerOperations.js"></script>
 <script type="text/javascript" src="js/console.js"></script>
 
+<!--scripts used for better navigation -->
+<script type="text/javascript" src="js/jQuery-min.js"></script>
+<script type="text/javascript" src="js/jQuery.hotkeys-0.7.9.js"></script>
+<script type="text/javascript" src="js/navigator.js"></script>
+
 <link href="css/style.css" rel="stylesheet" type="text/css">
 </head>
 <body bgcolor="#EEEEEE" class="yui3-skin-sam yui-skin-sam">
@@ -118,7 +123,7 @@
 			</div>
 
 			<div class="right-cont gen-float">
-				<div id="queryForm"></div>
+				<div id="queryForm" class="navigable"></div>
 				<div id="mainBodyHeader"></div>
 				<div id="mainBody">
 					<center>
@@ -134,9 +139,15 @@
 
 			</div>
 
+            <div id="contentAssist" class="floatingFooter" style="display:none">
+              Command: &nbsp;
+              <input type="text" id="assistText" class="assistText" />
+            </div>
+
 		</div>
 
 	</div>
+
 	<div id="simpleDialogContainer"></div>
 	<div id="alertDialogContainer"></div>
 	<div id="addColDialog" class="yui-pe-content">
@@ -168,6 +179,7 @@
 				<div class="clear"></div>
 			</form>
 		</div>
+
 	</div>
 	<input type="hidden" id="currentColl" name="currentColl" value="">
 	<input type="hidden" id="currentDB" name="currentDB" value="">

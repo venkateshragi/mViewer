@@ -253,17 +253,17 @@ YUI.add('utility', function (Y) {
     MV.infoIcon = YAHOO.widget.SimpleDialog.ICON_INFO;
     MV.stateManager = {
         
-    }
+    };
     
     MV.StateManager = (function(){
         var self = this;
-        var stateVariables = ['currentDB', 'currentColl', 'host', 'port','dbInfo']
+        var stateVariables = ['currentDB', 'currentColl', 'host', 'port','dbInfo'];
         function getVal(key) {
             return Y.one('#' + key).get("value");
-        };
+        }
         function setVal(key, value) {
             Y.one('#' + key).set("value", value);
-        };
+        }
         var exports = {};
         stateVariables.forEach(function(stateVariable){
             exports[stateVariable] = function(){
@@ -284,14 +284,14 @@ YUI.add('utility', function (Y) {
         });
         exports.dbInfo = function() {
             var currDBInfo = getVal('dbInfo');
-            if (currDBInfo == undefined || currDBInfo.length == 0) {
+            if (currDBInfo === undefined || currDBInfo.length === 0) {
                 currDBInfo = getVal('host') + "_" + getVal('port');
             }
             return currDBInfo;
-        }
+        };
         return exports;
 
-    })();
+    }());
 
     var sm = MV.StateManager;
 
