@@ -43,6 +43,15 @@ import com.mongodb.MongoInternalException;
  * @author Rachit Mittal
  */
 public class BaseRequestDispatcher {
+	
+	/**
+	 * To identify the HTTP Request type made to the request dispatchers. 
+	 *  
+	 */
+	protected static enum RequestMethod {
+		GET, POST, PUT, DELETE
+	};
+	
 	/**
 	 * Validates dbInfo with the dbInfo Array present in session.
 	 * 
