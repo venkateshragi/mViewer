@@ -10,35 +10,11 @@ Current Features are:
 
 How to Build
 
-Run build.xml using ant, target is dist. Since the default target is also set as dist, just running ant should suffice. dist would create a deployable war in the staging directory, which by default is at the same level as the src folder.
+Run build.xml using ant, target is start. It will create a war and run it using the winstone server, you can access the application at http://localhost:8080. 
 
-This war can be deployed on any servlet spec 3.0 compliant server like jboss as 6.
+For building a distributable unit run the target dist, since the default target is also set as dist, just running ant should suffice. dist would create a deployable war in the staging directory, which by default is at the same level as the src folder.
 
-How to run
+This war can be deployed on to tomcat 7x, other server integration can be provided on demand.
 Once the war is deployed go to the url http://<server-ip>:<http-port>/mViewer
 
-login to the mongo system, on your machine or any other visible location.
-
-
-How to create test data (from outside the tool)
-create a db (unlike other dbs mongo creates a new db as soon as we do a insert)
-# use mvTest
-
-Create a collection on the db
-#db.createCollection("bugs", {capped:true, size:100000})
-
-Insert two docs into the db
-#bug = {author:'AN', created: new Date(), title:'UI issues'}
-#db.bugs.insert(bug)
-#bug.title = 'Usability issues'
-#db.bugs.insert(bug)
-
-update one of the docs to add an embedded document, in this example we added comments to the 'UI issues' bug
-#db.bugs.update({title:'UI issues'}, {$addToSet : {comments: {text: 'Worked today', created:new Date()}}})
-
-Adding one more comment to bugs (example of adding an embedded document)
-#db.bugs.update({title:'UI issues'}, {$addToSet : {comments: {text: 'Completed', created:new Date()}}})
-
-query on base of the embedded document
-#db.bugs.find({'comments.text' : 'Worked today'})
 

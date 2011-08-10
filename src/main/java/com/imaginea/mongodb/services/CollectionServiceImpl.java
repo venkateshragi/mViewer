@@ -71,11 +71,11 @@ public class CollectionServiceImpl implements CollectionService {
 	 * based on a userMappingKey which is recieved from the collection request
 	 * dispatcher and is obtained from tokenId of user.
 	 * 
-	 * @param userMappingKey
+	 * @param dbInfo
 	 *            A combination of username,mongoHost and mongoPort
 	 */
-	public CollectionServiceImpl(String userMappingKey) {
-		mongoInstanceProvider = new SessionMongoInstanceProvider(userMappingKey);
+	public CollectionServiceImpl(String dbInfo) {
+		mongoInstanceProvider = new SessionMongoInstanceProvider(dbInfo);
 	}
 
 	/**
@@ -172,8 +172,7 @@ public class CollectionServiceImpl implements CollectionService {
 	 *                throw super type of
 	 *                DuplicateCollectionException,InsertCollectionException
 	 */
-	public String insertCollection(String dbName, String collectionName, boolean capped, int size, int maxDocs) throws DatabaseException,
-			CollectionException, ValidationException {
+	public String insertCollection(String dbName, String collectionName, boolean capped, int size, int maxDocs) throws DatabaseException, CollectionException, ValidationException {
 
 		mongoInstance = mongoInstanceProvider.getMongoInstance();
 		if (dbName == null) {
@@ -195,8 +194,7 @@ public class CollectionServiceImpl implements CollectionService {
 				throw new UndefinedDatabaseException("Db with name [" + dbName + "] doesn't exist.");
 			}
 			if (mongoInstance.getDB(dbName).getCollectionNames().contains(collectionName)) {
-				throw new DuplicateCollectionException(ErrorCodes.COLLECTION_ALREADY_EXISTS, "Collection [" + collectionName
-						+ "] Already exists in Database [" + dbName + "]");
+				throw new DuplicateCollectionException("Collection [" + collectionName + "] Already exists in Database [" + dbName + "]");
 			}
 
 			DBObject options = new BasicDBObject();
@@ -267,8 +265,7 @@ public class CollectionServiceImpl implements CollectionService {
 			}
 
 			if (!mongoInstance.getDB(dbName).getCollectionNames().contains(collectionName)) {
-				throw new UndefinedCollectionException(
-				"Collection with name [" + collectionName + "] DOES NOT EXIST in Database [" + dbName + "]");
+				throw new UndefinedCollectionException("Collection with name [" + collectionName + "] DOES NOT EXIST in Database [" + dbName + "]");
 			}
 
 			mongoInstance.getDB(dbName).getCollection(collectionName).drop();
@@ -312,8 +309,7 @@ public class CollectionServiceImpl implements CollectionService {
 	 *                JSON Exception
 	 */
 
-	public JSONArray getCollStats(String dbName, String collectionName) throws DatabaseException, CollectionException, ValidationException,
-			JSONException {
+	public JSONArray getCollStats(String dbName, String collectionName) throws DatabaseException, CollectionException, ValidationException, JSONException {
 		mongoInstance = mongoInstanceProvider.getMongoInstance();
 		if (dbName == null) {
 			throw new EmptyDatabaseNameException("Database name is null");

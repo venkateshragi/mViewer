@@ -62,9 +62,7 @@ public class TroubleShoot extends HttpServlet {
 	 * @exception ServletException
 	 *                ,IOException,IllegalArgumentException
 	 */
-	protected void doGet(HttpServletRequest request,
-			HttpServletResponse response) throws ServletException, IOException,
-			IllegalArgumentException {
+	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException, IllegalArgumentException {
 
 		response.setContentType("application/x-json");
 		PrintWriter out = response.getWriter();
@@ -93,15 +91,13 @@ public class TroubleShoot extends HttpServlet {
 				rootLogger.setLevel(newLevel);
 
 				JSONObject temp = new JSONObject();
-				temp.put("result", "Logger Level Changed from " + oldLevel + " to "
-						+ rootLogger.getLevel());
+				temp.put("result", "Logger Level Changed from " + oldLevel + " to " + rootLogger.getLevel());
 				respObj.put("response", temp);
 			}
 			out.write(respObj.toString());
 			out.close();
 		} catch (JSONException e) {
-			throw new ServletException("Error forming JSON Object in Servlet",
-					e.getCause());
+			throw new ServletException("Error forming JSON Object in Servlet", e.getCause());
 		}
 
 	}

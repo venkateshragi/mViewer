@@ -27,8 +27,6 @@ package com.imaginea.mongodb.services;
 
 import static org.junit.Assert.*;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -36,7 +34,6 @@ import java.util.Set;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -44,15 +41,11 @@ import org.junit.Test;
 
 import com.imaginea.mongodb.common.ConfigMongoInstanceProvider;
 import com.imaginea.mongodb.common.MongoInstanceProvider;
-import com.imaginea.mongodb.common.exceptions.CollectionException;
-import com.imaginea.mongodb.common.exceptions.DatabaseException;
-import com.imaginea.mongodb.common.exceptions.DeleteCollectionException;
+import com.imaginea.mongodb.common.exceptions.ApplicationException; 
 import com.imaginea.mongodb.common.exceptions.ErrorCodes;
-import com.imaginea.mongodb.common.exceptions.InsertCollectionException;
-import com.imaginea.mongodb.common.exceptions.MongoHostUnknownException;
-import com.imaginea.mongodb.common.exceptions.ValidationException;
-import com.imaginea.mongodb.requestdispatchers.BaseRequestDispatcher;
 import com.imaginea.mongodb.requestdispatchers.UserLogin;
+import com.imaginea.mongodb.requestdispatchers.TestingTemplate;
+
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
 import com.mongodb.Mongo;
@@ -66,7 +59,8 @@ import com.mongodb.MongoException;
  * @since 16 July 2011
  * 
  */
-public class CollectionServiceImplTest extends BaseRequestDispatcher {
+
+public class CollectionServiceImplTest extends TestingTemplate {
 
 	/**
 	 * Instance of class to be tested.
@@ -76,35 +70,25 @@ public class CollectionServiceImplTest extends BaseRequestDispatcher {
 	 * Provides Mongo Instance.
 	 */
 	private MongoInstanceProvider mongoInstanceProvider;
-	private static  Mongo mongoInstance;
+	private static Mongo mongoInstance;
 
 	/**
 	 * Logger Object
 	 */
 	private static Logger logger = Logger.getLogger(CollectionServiceImplTest.class);
-
 	private static final String logConfigFile = "src/main/resources/log4j.properties";
- 
+
 	/**
 	 * Constructs a mongoInstanceProvider Object.
-	 * @throws Exception 
 	 */
-	public CollectionServiceImplTest() throws Exception {
-		try {
-	 
-			mongoInstanceProvider = new ConfigMongoInstanceProvider();
-			PropertyConfigurator.configure(logConfigFile);
-		} catch (FileNotFoundException e) {
-			formErrorResponse(logger, e.getMessage(), ErrorCodes.FILE_NOT_FOUND_EXCEPTION, e.getStackTrace(), "ERROR");
-			throw e;
-		} catch (MongoHostUnknownException e) {
-			formErrorResponse(logger, e.getMessage(), e.getErrorCode(), e.getStackTrace(), "ERROR");
-			throw e;
-
-		} catch (IOException e) {
-			formErrorResponse(logger, e.getMessage(), ErrorCodes.IO_EXCEPTION, e.getStackTrace(), "ERROR");
-			throw e;
-		}
+	public CollectionServiceImplTest() {
+		TestingTemplate.execute(logger, new ResponseCallback() {
+			public Object execute() throws Exception {
+				mongoInstanceProvider = new ConfigMongoInstanceProvider();
+				PropertyConfigurator.configure(logConfigFile); 
+				return null;
+			}
+		});
 	}
 
 	/**
@@ -119,17 +103,11 @@ public class CollectionServiceImplTest extends BaseRequestDispatcher {
 
 		// Creates Mongo Instance.
 		mongoInstance = mongoInstanceProvider.getMongoInstance();
-		
-
-		if (logger.isInfoEnabled()) {
-			logger.info("Add User to maps in UserLogin servlet");
-		}
 		// Add user to mappings in userLogin for authentication
-		String userMappingKey = "username_" + mongoInstance.getAddress() + "_" + mongoInstance.getConnectPoint();
-
-		UserLogin.userToMongoInstanceMapping.put(userMappingKey, mongoInstance);
+		String dbInfo = mongoInstance.getAddress() + "_" + mongoInstance.getConnectPoint();
+		UserLogin.mongoConfigToInstanceMapping.put(dbInfo, mongoInstance);
 		// Class to be tested
-		testCollService = new CollectionServiceImpl(userMappingKey);
+		testCollService = new CollectionServiceImpl(dbInfo);
 	}
 
 	/**
@@ -137,70 +115,42 @@ public class CollectionServiceImplTest extends BaseRequestDispatcher {
 	 * we will create a test collection inside a Database and will check if that
 	 * collection exists in the collection list from the service.
 	 * 
-	 * @throws CollectionException
+	 * 
 	 */
 	@Test
-	public void getCollList() throws CollectionException {
-		if (logger.isInfoEnabled()) {
-			logger.info("Testing Get Collections Service");
-		}
-
+	public void getCollList() {
 		// ArrayList of several test Objects - possible inputs
 		List<String> testDbNames = new ArrayList<String>();
 		testDbNames.add("random");
-
 		List<String> testCollectionNames = new ArrayList<String>();
 		testCollectionNames.add("foo");
 
-		for (String dbName : testDbNames) {
-			for (String collectionName : testCollectionNames) {
-				try {
-					if (logger.isInfoEnabled()) {
-						logger.info("Test Case : Db [ " + dbName + "] collection [" + collectionName + "]");
-						logger.info("Create Collection");
+		for (final String dbName : testDbNames) {
+			for (final String collectionName : testCollectionNames) {
+				TestingTemplate.execute(logger, new ResponseCallback() {
+					public Object execute() throws Exception {
+						try {
+							// Create a collection
+							if (!mongoInstance.getDB(dbName).getCollectionNames().contains(collectionName)) {
+								DBObject options = new BasicDBObject();
+								mongoInstance.getDB(dbName).createCollection(collectionName, options);
+							}
+							// Get collection list from service
+							Set<String> collectionList = testCollService.getCollList(dbName);
+							assert (collectionList.contains(collectionName));
+							// Db not populate by test Cases
+							mongoInstance.dropDatabase(dbName);
+						} catch (MongoException m) {
+							// Throw a new Exception here if mongoexception in
+							// this code
+							ApplicationException e = new ApplicationException(ErrorCodes.GET_COLLECTION_LIST_EXCEPTION, "Error While testing Get Collections", m.getCause());
+							throw e;
+						}
+						// Return nothing . Just error written in log
+						return null;
 					}
-
-					if (!mongoInstance.getDB(dbName).getCollectionNames().contains(collectionName)) {
-						DBObject options = new BasicDBObject();
-						mongoInstance.getDB(dbName).createCollection(collectionName, options);
-					}
-
-					if (logger.isInfoEnabled()) {
-						logger.info("Get List using Service");
-					}
-					Set<String> collectionList = testCollService.getCollList(dbName);
-					if (logger.isInfoEnabled()) {
-						logger.info("Response: [" + collectionList + "]");
-					}
-					assert (collectionList.contains(collectionName));
-
-					// Db not populate by test Cases
-					mongoInstance.dropDatabase(dbName);
-
-				} catch (DatabaseException e) {
-					formErrorResponse(logger, e.getMessage(), e.getErrorCode(), e.getStackTrace(), "ERROR");
-					assert (true);
-
-				} catch (CollectionException e) {
-					formErrorResponse(logger, e.getMessage(), e.getErrorCode(), e.getStackTrace(), "ERROR");
-					assert (true);
-
-				} catch (ValidationException e) {
-					formErrorResponse(logger, e.getMessage(), e.getErrorCode(), e.getStackTrace(), "ERROR");
-					assert (true);
-
-				} catch (MongoException m) // while dropping Db
-				{
-					CollectionException e = new CollectionException(ErrorCodes.GET_COLLECTION_LIST_EXCEPTION, "Error Testing Collection List",
-							m.getCause());
-					formErrorResponse(logger, e.getMessage(), e.getErrorCode(), e.getStackTrace(), "ERROR");
-					throw e;
-				}
+				});
 			}
-			if (logger.isInfoEnabled()) {
-				logger.info("Test Completed");
-			}
-
 		}
 
 	}
@@ -210,68 +160,46 @@ public class CollectionServiceImplTest extends BaseRequestDispatcher {
 	 * will insert a collection using the service and then will check if that
 	 * collection is present in the list of collections.
 	 * 
-	 * @throws CollectionException
+	 * 
 	 * 
 	 */
 	@Test
-	public void insertColl() throws CollectionException {
-		if (logger.isInfoEnabled()) {
-			logger.info("Testing Insert Collections Service");
-		}
+	public void insertColl() {
 
 		// ArrayList of several test Objects - possible inputs
 		List<String> testDbNames = new ArrayList<String>();
 		testDbNames.add("random");
-
 		List<String> testCollectionNames = new ArrayList<String>();
 		testCollectionNames.add("foo");
 
-		for (String dbName : testDbNames) {
-			for (String collectionName : testCollectionNames) {
-				try {
-					if (logger.isInfoEnabled()) {
-						logger.info("Test Case : Db [ " + dbName + "] collection [" + collectionName + "]");
+		for (final String dbName : testDbNames) {
+			for (final String collectionName : testCollectionNames) {
+				TestingTemplate.execute(logger, new ResponseCallback() {
+					public Object execute() throws Exception {
+						try {// Delete the collection first
+							if (mongoInstance.getDB(dbName).getCollectionNames().contains(collectionName)) {
+								mongoInstance.getDB(dbName).getCollection(collectionName).drop();
+							}
+							// Insert collection using service
+							testCollService.insertCollection(dbName, collectionName, true, 100000, 100);
+							// Check if collection exists in get List of
+							// collections
+							Set<String> collectionList = mongoInstance.getDB(dbName).getCollectionNames();
+							assert (collectionList.contains(collectionName));
+							// drop this collection
+							mongoInstance.getDB(dbName).getCollection(collectionName).drop();
+						} catch (MongoException m) // while dropping Db
+						{
+							ApplicationException e = new ApplicationException(ErrorCodes.COLLECTION_CREATION_EXCEPTION, "Error Testing Collection insert", m.getCause());
+							formErrorResponse(logger, e);
+							throw e;
+						}
+						return null;
 					}
-
-					// Delete the collection
-					if (mongoInstance.getDB(dbName).getCollectionNames().contains(collectionName)) {
-						mongoInstance.getDB(dbName).getCollection(collectionName).drop();
-					}
-
-					if (logger.isInfoEnabled()) {
-						logger.info(" Create collection using service");
-					}
-					testCollService.insertCollection(dbName, collectionName, true, 100000, 100);
-
-					Set<String> collectionList = mongoInstance.getDB(dbName).getCollectionNames();
-					logger.info("Get List : [" + collectionList + "]");
-					assert (collectionList.contains(collectionName));
-					// drop this collection
-					mongoInstance.getDB(dbName).getCollection(collectionName).drop();
-
-				} catch (DatabaseException e) {
-					formErrorResponse(logger, e.getMessage(), e.getErrorCode(), e.getStackTrace(), "ERROR");
-					assert (true);
-
-				} catch (CollectionException e) {
-					formErrorResponse(logger, e.getMessage(), e.getErrorCode(), e.getStackTrace(), "ERROR");
-					assert (true);
-
-				} catch (ValidationException e) {
-					formErrorResponse(logger, e.getMessage(), e.getErrorCode(), e.getStackTrace(), "ERROR");
-					assert (true);
-
-				} catch (MongoException m) // while dropping Db
-				{
-					InsertCollectionException e = new InsertCollectionException("Error Testing Collection insert", m.getCause());
-					formErrorResponse(logger, e.getMessage(), e.getErrorCode(), e.getStackTrace(), "ERROR");
-					throw e;
-				}
-			}
-			if (logger.isInfoEnabled()) {
-				logger.info("Test Completed");
+				});
 			}
 		}
+
 	}
 
 	/**
@@ -279,67 +207,41 @@ public class CollectionServiceImplTest extends BaseRequestDispatcher {
 	 * will delete a collection using the service and then will check if that
 	 * collection is not present in the collection list.
 	 * 
-	 * @throws CollectionException
+	 * 
 	 * 
 	 */
 	@Test
-	public void deleteColl() throws CollectionException {
-		if (logger.isInfoEnabled()) {
-			logger.info("Testing Delete Collections Service");
-		}
+	public void deleteColl() {
+
 		// ArrayList of several test Objects - possible inputs
 		List<String> testDbNames = new ArrayList<String>();
 		testDbNames.add("random");
-
 		List<String> testCollectionNames = new ArrayList<String>();
 		testCollectionNames.add("foo");
+		for (final String dbName : testDbNames) {
+			for (final String collectionName : testCollectionNames) {
+				TestingTemplate.execute(logger, new ResponseCallback() {
+					public Object execute() throws Exception {
+						try {
+							// Create a collection first
+							if (!mongoInstance.getDB(dbName).getCollectionNames().contains(collectionName)) {
+								DBObject options = new BasicDBObject();
+								mongoInstance.getDB(dbName).createCollection(collectionName, options);
+							}
 
-		for (String dbName : testDbNames) {
-			for (String collectionName : testCollectionNames) {
-				try {
-
-					if (logger.isInfoEnabled()) {
-						logger.info("Test Case : Db [ " + dbName + "] collection [" + collectionName + "]");
-						logger.info("Insert Collection if not present");
+							// Delete collection using service
+							testCollService.deleteCollection(dbName, collectionName);
+							// Check if collection exists in the list
+							Set<String> collectionList = mongoInstance.getDB(dbName).getCollectionNames();
+							assert (!collectionList.contains(collectionName));
+						} catch (MongoException m) // while dropping Db
+						{
+							ApplicationException e = new ApplicationException(ErrorCodes.COLLECTION_DELETION_EXCEPTION, "Error Testing Collection delete", m.getCause());
+							throw e;
+						}
+						return null;
 					}
-					if (!mongoInstance.getDB(dbName).getCollectionNames().contains(collectionName)) {
-						DBObject options = new BasicDBObject();
-						mongoInstance.getDB(dbName).createCollection(collectionName, options);
-					}
-
-					if (logger.isInfoEnabled()) {
-						logger.info(" Delete collection using service ");
-					}
-
-					testCollService.deleteCollection(dbName, collectionName);
-
-					Set<String> collectionList = mongoInstance.getDB(dbName).getCollectionNames();
-					if (logger.isInfoEnabled()) {
-						logger.info("Get List : [" + collectionList + "]");
-					}
-					assert (!collectionList.contains(collectionName));
-
-				} catch (DatabaseException e) {
-					formErrorResponse(logger, e.getMessage(), e.getErrorCode(), e.getStackTrace(), "ERROR");
-					assert (true);
-
-				} catch (CollectionException e) {
-					formErrorResponse(logger, e.getMessage(), e.getErrorCode(), e.getStackTrace(), "ERROR");
-					assert (true);
-
-				} catch (ValidationException e) {
-					formErrorResponse(logger, e.getMessage(), e.getErrorCode(), e.getStackTrace(), "ERROR");
-					assert (true);
-
-				} catch (MongoException m) // while dropping Db
-				{
-					DeleteCollectionException e = new DeleteCollectionException("Error Testing Collection delete", m.getCause());
-					formErrorResponse(logger, e.getMessage(), e.getErrorCode(), e.getStackTrace(), "ERROR");
-					throw e;
-				}
-			}
-			if (logger.isInfoEnabled()) {
-				logger.info("Test Completed");
+				});
 			}
 		}
 	}
@@ -348,87 +250,51 @@ public class CollectionServiceImplTest extends BaseRequestDispatcher {
 	 * Tests get collection statistics service on collections in a database.
 	 * Hereby we will create an empty collection inside a Database and will
 	 * check the Number of documents in the Statistics obtained.
-	 * 
-	 * @throws JSONException
-	 *             ,CollectionException
-	 * 
-	 * 
 	 */
 	@Test
-	public void getCollStats() throws JSONException, CollectionException {
+	public void getCollStats() {
 
-		if (logger.isInfoEnabled()) {
-			logger.info("Testing Stats Collections Service");
-		}
 		// ArrayList of several test Objects - possible inputs
 		List<String> testDbNames = new ArrayList<String>();
 		testDbNames.add("random");
-
 		List<String> testCollectionNames = new ArrayList<String>();
 		testCollectionNames.add("foo");
-
-		for (String dbName : testDbNames) {
-			for (String collectionName : testCollectionNames) {
-				try {
-					if (logger.isInfoEnabled()) {
-						logger.info("Test Case : Db [ " + dbName + "] collection [" + collectionName + "]");
-					}
-
-					// Delete the collection first if exist
-					if (mongoInstance.getDB(dbName).getCollectionNames().contains(collectionName)) {
-						mongoInstance.getDB(dbName).getCollection(collectionName).drop();
-					}
-
-					if (logger.isInfoEnabled()) {
-						logger.info(" Create an empty collection");
-					}
-					DBObject options = new BasicDBObject();
-					mongoInstance.getDB(dbName).createCollection(collectionName, options);
-
-					JSONArray dbStats = testCollService.getCollStats(dbName, collectionName);
-
-					for (int i = 0; i < dbStats.length(); i++) {
-						JSONObject temp = (JSONObject) dbStats.get(i);
-						if (temp.get("Key").equals("count")) {
-							int noOfDocuments = Integer.parseInt((String) temp.get("Value"));
-							if (logger.isInfoEnabled()) {
-								logger.info("Number of Documents : " + noOfDocuments);
+		for (final String dbName : testDbNames) {
+			for (final String collectionName : testCollectionNames) {
+				TestingTemplate.execute(logger, new ResponseCallback() {
+					public Object execute() throws Exception {
+						try {
+							// Delete the collection first if exist
+							if (mongoInstance.getDB(dbName).getCollectionNames().contains(collectionName)) {
+								mongoInstance.getDB(dbName).getCollection(collectionName).drop();
 							}
-							assertEquals(noOfDocuments, 0); // As Empty
-															// Collection
-							break;
+							// Create an empty collection
+							DBObject options = new BasicDBObject();
+							mongoInstance.getDB(dbName).createCollection(collectionName, options);
+							JSONArray dbStats = testCollService.getCollStats(dbName, collectionName);
+							// Check if noOf Documents = 0
+							for (int i = 0; i < dbStats.length(); i++) {
+								JSONObject temp = (JSONObject) dbStats.get(i);
+								if ("count".equals(temp.get("Key"))) {
+									int noOfDocuments = Integer.parseInt((String) temp.get("Value"));
+									 									assertEquals(noOfDocuments, 0); // As Empty
+																	// Collection
+									break;
+								}
+							}
+						} catch (MongoException m) // while dropping Db
+						{
+							ApplicationException e = new ApplicationException(ErrorCodes.GET_COLL_STATS_EXCEPTION, "Error Testing Collection stats", m.getCause());
+							throw e;
 						}
+						return null;
 					}
-
-				} catch (JSONException e) {
-					formErrorResponse(logger, e.getMessage(), ErrorCodes.JSON_EXCEPTION, e.getStackTrace(), "ERROR");
-					throw e;
-				} catch (DatabaseException e) {
-					formErrorResponse(logger, e.getMessage(), e.getErrorCode(), e.getStackTrace(), "ERROR");
-					assert (true);
-
-				} catch (CollectionException e) {
-					formErrorResponse(logger, e.getMessage(), e.getErrorCode(), e.getStackTrace(), "ERROR");
-					assert (true);
-
-				} catch (ValidationException e) {
-					formErrorResponse(logger, e.getMessage(), e.getErrorCode(), e.getStackTrace(), "ERROR");
-					assert (true);
-
-				} catch (MongoException m) // while dropping Db
-				{
-					CollectionException e = new CollectionException(ErrorCodes.GET_COLL_STATS_EXCEPTION, "Error Testing Collection stats",
-							m.getCause());
-					formErrorResponse(logger, e.getMessage(), e.getErrorCode(), e.getStackTrace(), "ERROR");
-					throw e;
-				}
-			}
-			if (logger.isInfoEnabled()) {
-				logger.info("Test Completed");
+				});
 			}
 		}
 
 	}
+
 	@AfterClass
 	public static void destroyMongoProcess() {
 		mongoInstance.close();

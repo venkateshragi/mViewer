@@ -16,6 +16,7 @@
 package com.imaginea.mongodb.requestdispatchers;
 
 import java.net.UnknownHostException;
+import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
@@ -24,6 +25,7 @@ import org.apache.log4j.Logger;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.imaginea.mongodb.common.exceptions.ApplicationException;
 import com.imaginea.mongodb.common.exceptions.CollectionException;
 import com.imaginea.mongodb.common.exceptions.DatabaseException;
 import com.imaginea.mongodb.common.exceptions.DocumentException;
@@ -35,110 +37,158 @@ import com.mongodb.MongoException;
 import com.mongodb.MongoInternalException;
 
 /**
- * Defines validation functions for validating tokenId given to user. An error JSON object is returned when tokenId is
- * found invalid after validating it against tokenId in session.
+ * Defines validation functions for validating dbInfo from session. An error
+ * JSON object is returned when dbInfo is found invalid.
  * 
  * @author Rachit Mittal
  */
 public class BaseRequestDispatcher {
-    /**
-     * Validates tokenId with the one present in session.
-     * 
-     * @param tokenId Token Id provided to user at time of login.
-     * @param logger Logger to write error message to
-     * @param request Request made by client containing session attributes.
-     * @return null if token Id is valid else error object.
-     */
-    protected String validateTokenId(String tokenId, Logger logger, HttpServletRequest request) {
-        String response = null;
-        if (tokenId == null) {
-            InvalidHTTPRequestException e = new InvalidHTTPRequestException(ErrorCodes.TOKEN_ID_ABSENT, "Token Id not provided");
-            return formErrorResponse(logger, e.getMessage(), e.getErrorCode(), null, "FATAL");
-        }
-        // Check if tokenId is in session
-        HttpSession session = request.getSession();
-        if (session.getAttribute("tokenId") == null) {
-            InvalidHTTPRequestException e = new InvalidHTTPRequestException(ErrorCodes.INVALID_SESSION, "Session Expired(Token Id not set in session).");
-            return formErrorResponse(logger, e.getMessage(), e.getErrorCode(), null, "FATAL");
-        }
-        if (!session.getAttribute("tokenId").equals(tokenId)) {
-            InvalidHTTPRequestException e = new InvalidHTTPRequestException(ErrorCodes.INVALID_SESSION, "Invalid Session(Token Id does not match with the one in session)");
-            return formErrorResponse(logger, e.getMessage(), e.getErrorCode(), null, "FATAL");
-        }
-        return response;
-    }
+	
+	/**
+	 * To identify the HTTP Request type made to the request dispatchers. 
+	 *  
+	 */
+	protected static enum RequestMethod {
+		GET, POST, PUT, DELETE
+	};
+	
+	/**
+	 * Validates dbInfo with the dbInfo Array present in session.
+	 * 
+	 * @param dbInfo
+	 *            Mongo Db config information provided to user at time of login.
+	 * @param logger
+	 *            Logger to write error message to
+	 * @param request
+	 *            Request made by client containing session attributes.
+	 * @return null if dbInfo is valid else error object.
+	 */
+	protected static String validateDbInfo(String dbInfo, Logger logger, HttpServletRequest request) {
 
-    /**
-     * Returns the JSON error response after an invalid tokenId is found.
-     * 
-     * @param logger Logger to log the error response.
-     * @param message Error Message to be returned in the JSON Error Object.
-     * @param errorCode Error Code to be returned in the JSON Error Object.
-     * @return JSON Error String.
-     */
-    protected static String formErrorResponse(Logger logger, String message, String errorCode, StackTraceElement[] stackTrace, String level) {
-        String response = null;
-        JSONObject resp = new JSONObject();
-        JSONObject error = new JSONObject();
-        try {
-            error.put("message", message);
-            error.put("code", errorCode);
-            error.put("stackTrace", stackTrace);
-            if (level.equals("FATAL")) {
-                logger.fatal(error);
-            }
-            if (level.equals("ERROR")) {
-                logger.error(error);
-            }
-            JSONObject temp = new JSONObject();
-            temp.put("error", error);
-            resp.put("response", temp);
-            response = resp.toString();
-        } catch (JSONException e) {
-            logger.error(e);
-            response = "{\"code\":" + "\"" + ErrorCodes.JSON_EXCEPTION + "\"," + "\"message\": \"Error while forming JSON Object\"}";
-        }
-        return response;
-    }
+		String response = null;
+		if (dbInfo == null) {
+			InvalidHTTPRequestException e = new InvalidHTTPRequestException(ErrorCodes.DB_INFO_ABSENT, "Mongo Config parameters not provided in the URL");
+			return formErrorResponse(logger, e);
+		}
+		 
+		// Check if db information is present in session
+		HttpSession session = request.getSession();
+		@SuppressWarnings("unchecked")
+		List<String> mongosInSession = (List<String>) session.getAttribute("dbInfo");
+ 
+		InvalidHTTPRequestException e = null;
+		if (mongosInSession == null) {
+			e = new InvalidHTTPRequestException(ErrorCodes.INVALID_SESSION, "No Mongo Config parameters present in Session.");
+			return formErrorResponse(logger, e);
+		}
+		if (!mongosInSession.contains(dbInfo)) {
+			e = new InvalidHTTPRequestException(ErrorCodes.INVALID_SESSION, "Provided Mongo Config parameters not present in session");
+			return formErrorResponse(logger, e);
+		}
+		return response;
+	}
 
-    protected static class ResponseTemplate {
-        public String execute(Logger logger, ResponseCallback callback) {
-            String response = null;
-            try {
-                response = callback.execute();
-            } catch (JSONException e) {
-                logger.error(e);
-                response = "{\"code\":" + "\"" + ErrorCodes.JSON_EXCEPTION + "\"," + "\"message\": \"Error while forming JSON Object\"}";
-            } catch (NumberFormatException e) {
-                response = formErrorResponse(logger, "Invalid Port", ErrorCodes.ERROR_PARSING_PORT, e.getStackTrace(), "ERROR");
-            } catch (IllegalArgumentException e) {
-                // When port out of range
-                response = formErrorResponse(logger, "Port out of range", ErrorCodes.PORT_OUT_OF_RANGE, e.getStackTrace(), "ERROR");
-            } catch (UnknownHostException m) {
-                MongoHostUnknownException e = new MongoHostUnknownException("Unknown host", m);
-                response = formErrorResponse(logger, e.getMessage(), e.getErrorCode(), e.getStackTrace(), "ERROR");
-            } catch (MongoInternalException m) {
-                MongoHostUnknownException e = new MongoHostUnknownException("Unknown host", m);
-                response = formErrorResponse(logger, e.getMessage(), e.getErrorCode(), e.getStackTrace(), "ERROR");
-            } catch (MongoException m) {
-                MongoHostUnknownException e = new MongoHostUnknownException("Unknown host", m);
-                response = formErrorResponse(logger, e.getMessage(), e.getErrorCode(), e.getStackTrace(), "ERROR");
-            } catch (DatabaseException e) {
-                response = formErrorResponse(logger, e.getMessage(), e.getErrorCode(), e.getStackTrace(), "ERROR");
-            } catch (CollectionException e) {
-                response = formErrorResponse(logger, e.getMessage(), e.getErrorCode(), e.getStackTrace(), "ERROR");
-            } catch (DocumentException e) {
-                response = formErrorResponse(logger, e.getMessage(), e.getErrorCode(), e.getStackTrace(), "ERROR");
-            } catch (ValidationException e) {
-                response = formErrorResponse(logger, e.getMessage(), e.getErrorCode(), e.getStackTrace(), "ERROR");
-            } catch (Exception e) {
-                response = formErrorResponse(logger, e.getMessage(), ErrorCodes.ANY_OTHER_EXCEPTION, e.getStackTrace(), "ERROR");
-            }
-            return response;
-        }
-    }
+	/**
+	 * Returns the JSON error response after an invalid dbInfo is found.
+	 * 
+	 * @param logger
+	 *            Logger to log the error response.
+	 * @param message
+	 *            Error Message to be returned in the JSON Error Object.
+	 * @param errorCode
+	 *            Error Code to be returned in the JSON Error Object.
+	 * @return JSON Error String.
+	 */
+	protected static String formErrorResponse(Logger logger, ApplicationException e) {
 
-    protected interface ResponseCallback {
-        public String execute() throws Exception;
-    }
+		String response = null;
+		JSONObject jsonErrorResponse = new JSONObject();
+		JSONObject error = new JSONObject();
+		try {
+			error.put("message", e.getMessage());
+			error.put("code", e.getErrorCode());
+			error.put("stackTrace", e.getStackTrace());
+			logger.error(error);
+
+			JSONObject tempResponse = new JSONObject();
+			tempResponse.put("error", error);
+			jsonErrorResponse.put("response", tempResponse);
+			response = jsonErrorResponse.toString();
+		} catch (JSONException m) {
+			logger.error(m);
+			response = "{\"code\":" + "\"" + ErrorCodes.JSON_EXCEPTION + "\"," + "\"message\": \"Error while forming JSON Object\"}";
+		}
+		return response;
+	}
+
+	/**
+	 * Catches error for a block of code and from JSON error Response.
+	 * 
+	 * 
+	 */
+	protected static class ErrorTemplate {
+		public static String execute(Logger logger, ResponseCallback callback) {
+			Object response = null;
+			try {
+				Object dispatcherResponse = callback.execute();
+				JSONObject tempResult = new JSONObject();
+				JSONObject jsonResponse = new JSONObject();
+				tempResult.put("result", dispatcherResponse);
+				jsonResponse.put("response", tempResult);
+				// resp.put("totalRecords", dispatcherResponse.size());
+				response = jsonResponse.toString();
+			} catch (JSONException e) {
+				logger.error(e);
+				response = "{\"code\":" + "\"" + ErrorCodes.JSON_EXCEPTION + "\"," + "\"message\": \"Error while forming JSON Object\"}";
+			} catch (NumberFormatException m) {
+				ApplicationException e = new ApplicationException(ErrorCodes.ERROR_PARSING_PORT, "Invalid Port", m.getCause());
+				response = formErrorResponse(logger, e);
+			} catch (IllegalArgumentException m) {
+				// When port out of range
+				ApplicationException e = new ApplicationException(ErrorCodes.PORT_OUT_OF_RANGE, "Port out of range", m.getCause());
+				response = formErrorResponse(logger, e);
+			} catch (UnknownHostException m) {
+				MongoHostUnknownException e = new MongoHostUnknownException("Unknown host", m);
+				response = formErrorResponse(logger, e);
+			} catch (MongoInternalException m) {
+				// Throws when cannot connect to localhost.com
+				MongoHostUnknownException e = new MongoHostUnknownException("Unknown host", m);
+				response = formErrorResponse(logger, e);
+			} catch (MongoException m) {
+				MongoHostUnknownException e = new MongoHostUnknownException("Unknown host", m);
+				response = formErrorResponse(logger, e);
+			} catch (DatabaseException e) {
+				response = formErrorResponse(logger, e);
+			} catch (CollectionException e) {
+				response = formErrorResponse(logger, e);
+			} catch (DocumentException e) {
+				response = formErrorResponse(logger, e);
+			} catch (ValidationException e) {
+				response = formErrorResponse(logger, e);
+			} catch (ApplicationException e) {
+				response = formErrorResponse(logger, e);
+			} catch (Exception m) {
+				ApplicationException e = new ApplicationException(ErrorCodes.ANY_OTHER_EXCEPTION, m.getMessage(), m.getCause());
+				response = formErrorResponse(logger, e);
+			}
+			return response.toString();
+		}
+	}
+
+	protected static class ResponseTemplate {
+		public String execute(Logger logger, String dbInfo, HttpServletRequest request, ResponseCallback callback) {
+			Object response = null;
+			// Validate first
+			response = validateDbInfo(dbInfo, logger, request);
+			if (response != null) {
+				return response.toString();
+			}
+			return ErrorTemplate.execute(logger, callback);
+		}
+	}
+
+	protected interface ResponseCallback {
+		public Object execute() throws Exception;
+		// object can be collecitn
+	}
 }

@@ -17,7 +17,7 @@ package com.imaginea.mongodb.services;
 
 import java.util.ArrayList;
 
-import org.bson.types.ObjectId;  
+import org.bson.types.ObjectId;
 
 import com.imaginea.mongodb.common.exceptions.CollectionException;
 import com.imaginea.mongodb.common.exceptions.DatabaseException;
@@ -80,8 +80,8 @@ public interface DocumentService {
 	 * 
 	 */
 
-	public ArrayList<DBObject> getQueriedDocsList(String dbName, String collectionName, DBObject query, DBObject keys, int limit, int skip)
-			throws DatabaseException, CollectionException, DocumentException, ValidationException;
+	public ArrayList<DBObject> getQueriedDocsList(String dbName, String collectionName, DBObject query, DBObject keys, int limit, int skip) throws DatabaseException, CollectionException,
+			DocumentException, ValidationException;
 
 	/**
 	 * Insert a document inside a collection in a database in mongo to which
@@ -120,8 +120,7 @@ public interface DocumentService {
 	 * 
 	 */
 
-	public String insertDocument(String dbName, String collectionName, DBObject document) throws DatabaseException, CollectionException,
-			DocumentException, ValidationException;
+	public String insertDocument(String dbName, String collectionName, DBObject document) throws DatabaseException, CollectionException, DocumentException, ValidationException;
 
 	/**
 	 * Updates a document inside a collection in a database in mongo to which
@@ -161,8 +160,7 @@ public interface DocumentService {
 	 * 
 	 */
 
-	public String updateDocument(String dbName, String collectionName, ObjectId id, DBObject newData) throws DatabaseException, CollectionException,
-			DocumentException, ValidationException;
+	public String updateDocument(String dbName, String collectionName, ObjectId id, DBObject newData) throws DatabaseException, CollectionException, DocumentException, ValidationException;
 
 	/**
 	 * Deletes a document inside a collection in a database in mongo to which
@@ -200,7 +198,6 @@ public interface DocumentService {
 	 * 
 	 */
 
-	public String deleteDocument(String dbName, String collectionName, ObjectId id) throws DatabaseException, CollectionException, DocumentException,
-			ValidationException;
+	public String deleteDocument(String dbName, String collectionName, ObjectId id) throws DatabaseException, CollectionException, DocumentException, ValidationException;
 
 }

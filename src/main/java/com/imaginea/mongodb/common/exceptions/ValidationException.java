@@ -32,10 +32,10 @@ package com.imaginea.mongodb.common.exceptions;
  * @author Rachit Mittal
  *
  */
-public class ValidationException extends RuntimeException {
+public class ValidationException extends ApplicationException {
 
 	private static final long serialVersionUID = 1L;
-	private String errorCode;
+	 
 
 	/**
 	 * Creates a new ValidationException with errorcode and message.
@@ -46,17 +46,9 @@ public class ValidationException extends RuntimeException {
 	 *            : A description about the Error.
 	 */
 	public ValidationException(String errorCode, String message) {
-		super(message);
-		this.errorCode = errorCode;
+		super(errorCode,message); 
 	}
 
-	/**
-	 * Return the error code of an exeption.
-	 *
-	 * @return error code for the given exception
-	 */
-	public String getErrorCode() {
-		return errorCode;
-	}
+ 
 
 }

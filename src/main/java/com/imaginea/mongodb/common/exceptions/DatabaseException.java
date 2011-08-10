@@ -37,11 +37,11 @@ package com.imaginea.mongodb.common.exceptions;
  * @author Rachit Mittal
  *
  */
-public class DatabaseException extends Exception {  
+public class DatabaseException extends ApplicationException {  
 
 	private static final long serialVersionUID = 1L;
 
-	private String errorCode;
+	 
 
 	/**
 	 * Creates a new DatabaseException with errorcode and message.
@@ -53,8 +53,7 @@ public class DatabaseException extends Exception {
 	 */
 
 	public DatabaseException(String errorCode, String message) {
-		super(message);
-		this.errorCode = errorCode;
+		super(errorCode,message); 
 	}
 
 	/**
@@ -72,17 +71,6 @@ public class DatabaseException extends Exception {
 	 */
 
 	public DatabaseException(String errorCode, String message, Throwable cause) {
-		super(message, cause);
-		this.errorCode = errorCode;
-	}
-
-	/**
-	 * Return the error code of an exeption.
-	 *
-	 * @return the errorcode
-	 */
-	public String getErrorCode() {
-		return this.errorCode;
-	}
-
+		super(errorCode,message, cause); 
+	} 
 }

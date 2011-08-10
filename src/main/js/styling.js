@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 YUI.add('stylize', function (Y) {
-    Y.namespace('com.imaginea.mongoV');
-    var MV = Y.com.imaginea.mongoV;
+    YUI.namespace('com.imaginea.mongoV');
+    var MV = YUI.com.imaginea.mongoV;
     /**
      * <p>toggleClass adds a class to the menu option as soon as it is clicked</p>
      *

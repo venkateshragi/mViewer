@@ -62,19 +62,16 @@ public class ConfigMongoInstanceProvider implements MongoInstanceProvider {
 			String fileName = "src/test/resources/mongo.config";
 			InputStream is = new FileInputStream(fileName);
 			prop.load(is);
- 
+
 			if (prop != null) {
 				mongoHost = prop.getProperty("mongoHost");
 				mongoPort = Integer.parseInt(prop.getProperty("mongoPort"));
 				mongoInstance = new Mongo(mongoHost, mongoPort);
 			}
 			System.out.println(mongoInstance.getDatabaseNames());
-			
+
 		} catch (MongoInternalException e) {
-			throw new MongoHostUnknownException(
-					"HOST_UNKNOWN"
-							+ "Change your mongo data directory path or mongod path in ConfigMongoInstanceProvider",
-					e);
+			throw new MongoHostUnknownException("HOST_UNKNOWN" + "Change your mongo data directory path or mongod path in ConfigMongoInstanceProvider", e);
 		} catch (UnknownHostException e) {
 			throw new MongoHostUnknownException("HOST_UNKNOWN", e);
 		} catch (MongoException e) {
@@ -98,7 +95,6 @@ public class ConfigMongoInstanceProvider implements MongoInstanceProvider {
 	/**
 	 * Destroys Mongo Process
 	 * 
-	 * @return
 	 */
 	public void killMongoProcess() {
 		p.destroy();

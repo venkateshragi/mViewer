@@ -16,7 +16,8 @@
 YUI({
     filter: 'raw'
 }).use("alert-dialog", "utility", "dialog-box", "yes-no-dialog", "io", "node", "json-parse", "event-delegate", "node-event-simulate", "stylize", "custom-datatable", function (Y) {
-    var MV = Y.com.imaginea.mongoV;
+    var MV = YUI.com.imaginea.mongoV;
+    var sm = MV.StateManager;
     var collDiv = Y.one("#collNames ul.lists");
     // TODO make loading panel generic
     var loadingPanel;
@@ -40,7 +41,7 @@ YUI({
                                        if (response !== undefined) {
                                            MV.showAlertDialog(Y.one("#currentColl").get("value") + " dropped", MV.infoIcon);
                                            Y.log("[0] dropped. Response: [1]".format(Y.one("#currentColl").get("value"), response), "info");
-                                           Y.one("#currentColl").set("value", "");
+                                           sm.clearCurrentColl();
                                            Y.one("#" + Y.one("#currentDB").get("value")).simulate("click");
                                        } else {
                                            var error = parsedResponse.response.error;
@@ -64,7 +65,7 @@ YUI({
         if (response !== undefined) {
             MV.showAlertDialog("New document added to [0]".format(Y.one("#currentColl").get("value")), MV.infoIcon);
             Y.log("New document added to [0]".format(Y.one("#currentColl").get("value"), "info"));
-            Y.one("#" + Y.one("#currentColl").get("value").replace(/ /g, '_')).simulate("click");
+            sm.currentCollAsNode().simulate("click");
         } else {
             var error = parsedResponse.response.error;
             MV.showAlertDialog("Could not add Document! [0]".format(MV.errorCodeMap[error.code]), MV.warnIcon);
@@ -74,8 +75,8 @@ YUI({
 
     function handleContextMenu(eventType, args) {
         var menuItem = args[1]; // The MenuItem that was clicked
-        Y.one("#currentColl").set("value", this.contextEventTarget.innerHTML);
-        MV.toggleClass(Y.one("#" + Y.one("#currentColl").get("value").replace(/ /g,'_')), Y.all("#collNames li"));
+        sm.setCurrentColl(this.contextEventTarget.innerHTML);
+        MV.toggleClass(sm.currentCollAsNode(), Y.all("#collNames li"));
         switch (menuItem.index) {
         case 0:
             // Delete
@@ -124,10 +125,11 @@ YUI({
                 }
                 collDiv.set("innerHTML", collections);
                 loadingPanel.hide();
+                sm.publish(sm.events.collectionsChanged);
                 Y.log("Collection Names succesfully loaded", "info");
             } else {
                 var error = parsedResponse.response.error;
-                Y.log("Could not load collections. Message: [0]".format(error.message), "error");
+                Y.log("Could not load collections. Message: [0]".format(error.message), "error"); 
                 MV.showAlertDialog("Could not load Collections! [0]".format(MV.errorCodeMap[error.code]), MV.warnIcon);
                 loadingPanel.hide();
             }

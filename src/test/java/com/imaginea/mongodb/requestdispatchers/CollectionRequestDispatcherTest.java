@@ -27,11 +27,12 @@ package com.imaginea.mongodb.requestdispatchers;
 
 import static org.junit.Assert.*;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+
+import javax.servlet.http.HttpSession;
+
 import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
 import org.junit.AfterClass;
@@ -42,9 +43,9 @@ import org.springframework.mock.web.MockHttpSession;
 
 import com.imaginea.mongodb.common.ConfigMongoInstanceProvider;
 import com.imaginea.mongodb.common.MongoInstanceProvider;
+import com.imaginea.mongodb.common.exceptions.ApplicationException;
 import com.imaginea.mongodb.common.exceptions.CollectionException;
 import com.imaginea.mongodb.common.exceptions.ErrorCodes;
-import com.imaginea.mongodb.common.exceptions.MongoHostUnknownException;
 import com.imaginea.mongodb.requestdispatchers.UserLogin;
 
 import com.mongodb.BasicDBList;
@@ -65,10 +66,10 @@ import com.mongodb.util.JSON;
  * @since 15 July 2011
  * 
  */
-public class CollectionRequestDispatcherTest extends BaseRequestDispatcher {
+public class CollectionRequestDispatcherTest extends TestingTemplate {
 
 	private MongoInstanceProvider mongoInstanceProvider;
-	private static  Mongo mongoInstance;
+	private static Mongo mongoInstance;
 	/**
 	 * Object of class to be tested
 	 */
@@ -79,39 +80,26 @@ public class CollectionRequestDispatcherTest extends BaseRequestDispatcher {
 	 */
 	private static Logger logger = Logger.getLogger(CollectionRequestDispatcherTest.class);
 
-	/**
-	 * A test token Id
-	 */
-	private String testTokenId = "123212178917845678910910";
 	private static final String logConfigFile = "src/main/resources/log4j.properties";
- 
-	
-	
+
+	// To set a dbInfo in session
+	// Not coded to interface as Mock object provides a set Session
+	// functionality.
+	private MockHttpServletRequest request = new MockHttpServletRequest();
+	private String testDbInfo;
+
 	/**
 	 * Constructs a mongoInstanceProvider Object.
-	 * 
-	 * @throws MongoHostUnknownException
-	 * @throws IOException
-	 * @throws FileNotFoundException
 	 */
-	public CollectionRequestDispatcherTest() throws Exception {
+	public CollectionRequestDispatcherTest() {
 
-		try {
-			 
-			mongoInstanceProvider = new ConfigMongoInstanceProvider();
-			PropertyConfigurator.configure(logConfigFile);
-			
-		} catch (FileNotFoundException e) {
-			formErrorResponse(logger, e.getMessage(), ErrorCodes.FILE_NOT_FOUND_EXCEPTION, e.getStackTrace(), "ERROR");
-			throw e;
-		} catch (MongoHostUnknownException e) {
-			formErrorResponse(logger, e.getMessage(), e.getErrorCode(), e.getStackTrace(), "ERROR");
-			throw e;
-
-		} catch (IOException e) {
-			formErrorResponse(logger, e.getMessage(), ErrorCodes.IO_EXCEPTION, e.getStackTrace(), "ERROR");
-			throw e;
-		}
+		TestingTemplate.execute(logger, new ResponseCallback() {
+			public Object execute() throws Exception {
+				mongoInstanceProvider = new ConfigMongoInstanceProvider();
+				PropertyConfigurator.configure(logConfigFile);
+				return null;
+			}
+		});
 	}
 
 	/**
@@ -123,19 +111,20 @@ public class CollectionRequestDispatcherTest extends BaseRequestDispatcher {
 	 */
 	@Before
 	public void instantiateTestClass() {
-
 		// Creates Mongo Instance.
 		mongoInstance = mongoInstanceProvider.getMongoInstance();
 		// Class to be tested
 		testCollResource = new CollectionRequestDispatcher();
-		if (logger.isInfoEnabled()) {
-			logger.info("Add User to maps in UserLogin servlet");
-		}
 		// Add user to mappings in userLogin for authentication
-		String user = "username_" + mongoInstance.getAddress() + "_" + mongoInstance.getConnectPoint();
-		UserLogin.tokenIDToUserMapping.put(testTokenId, user);
-		UserLogin.userToMongoInstanceMapping.put(user, mongoInstance);
-
+		testDbInfo = mongoInstance.getAddress().getHost() + "_" + mongoInstance.getAddress().getPort();
+		UserLogin.mongoConfigToInstanceMapping.put(testDbInfo, mongoInstance);
+		// Add dbInfo in Session
+		List<String> dbInfos = new ArrayList<String>();
+		dbInfos.add(testDbInfo);
+		HttpSession session = new MockHttpSession();
+		session.setAttribute("dbInfo", dbInfos);
+		request = new MockHttpServletRequest();
+		request.setSession(session);
 	}
 
 	/**
@@ -161,74 +150,57 @@ public class CollectionRequestDispatcherTest extends BaseRequestDispatcher {
 		List<String> testCollNames = new ArrayList<String>();
 		testCollNames.add("foo");
 		testCollNames.add("");
-		if (logger.isInfoEnabled()) {
-			logger.info("Testing GET Coll Resource");
-		}
-		for (String dbName : testDbNames) {
-			for (String collName : testCollNames) {
-				if (logger.isInfoEnabled()) {
-					logger.info("Test Case  [" + dbName + "] and collection Name [" + collName + "]");
-					logger.info("Create collection inside Db [" + dbName + "]");
-				}
-				try {
-					if (dbName != null && collName != null) {
-						if (!dbName.equals("") && !collName.equals("")) {
-							if (!mongoInstance.getDB(dbName).getCollectionNames().contains(collName)) {
-								DBObject options = new BasicDBObject();
-								mongoInstance.getDB(dbName).createCollection(collName, options);
+
+		for (final String dbName : testDbNames) {
+			for (final String collName : testCollNames) {
+				TestingTemplate.execute(logger, new ResponseCallback() {
+					public Object execute() throws Exception {
+						try {
+							if (dbName != null && collName != null) {
+								if (!dbName.equals("") && !collName.equals("")) {
+									if (!mongoInstance.getDB(dbName).getCollectionNames().contains(collName)) {
+										DBObject options = new BasicDBObject();
+										mongoInstance.getDB(dbName).createCollection(collName, options);
+									}
+								}
 							}
+
+							String collList = testCollResource.getCollList(dbName, testDbInfo, request);
+
+							// response has a JSON Object with result as key and
+							// value
+							// as
+							DBObject response = (BasicDBObject) JSON.parse(collList);
+
+							if (dbName == null) {
+								DBObject error = (BasicDBObject) response.get("response");
+								String code = (String) ((BasicDBObject) error.get("error")).get("code");
+								assertEquals(ErrorCodes.DB_NAME_EMPTY, code);
+
+							} else if (dbName.equals("")) {
+								DBObject error = (BasicDBObject) response.get("response");
+								String code = (String) ((BasicDBObject) error.get("error")).get("code");
+								assertEquals(ErrorCodes.DB_NAME_EMPTY, code);
+							} else {
+								// DB exists
+								DBObject result = (BasicDBObject) response.get("response");
+								BasicDBList collNames = ((BasicDBList) result.get("result"));
+								if (collName == null) {
+									assert (!collNames.contains(collName));
+								} else if (collName.equals("")) {
+									assert (!collNames.contains(collName));
+								} else {
+									assert (collNames.contains(collName));
+									mongoInstance.dropDatabase(dbName);
+								}
+							}
+						} catch (MongoException m) {
+							ApplicationException e = new ApplicationException(ErrorCodes.GET_COLLECTION_LIST_EXCEPTION, "GET_COLLECTION_LIST_EXCEPTION", m.getCause());
+							throw e;
 						}
+						return null;
 					}
-
-					if (logger.isInfoEnabled()) {
-						logger.info("Sends a MockHTTP Request with a Mock Session parameter tokenId");
-					}
-
-					MockHttpSession session = new MockHttpSession();
-					session.setAttribute("tokenId", testTokenId);
-
-					MockHttpServletRequest request = new MockHttpServletRequest();
-					request.setSession(session);
-					String collList = testCollResource.getCollList(dbName, testTokenId, request);
-
-					// response has a JSON Object with result as key and value
-					// as
-					DBObject response = (BasicDBObject) JSON.parse(collList);
-					if (logger.isInfoEnabled()) {
-						logger.info("Response : [" + collList + "]");
-					}
-
-					if (dbName == null) {
-						DBObject error = (BasicDBObject) response.get("response");
-						String code = (String) ((BasicDBObject) error.get("error")).get("code");
-						assertEquals(ErrorCodes.DB_NAME_EMPTY, code);
-
-					} else if (dbName.equals("")) {
-						DBObject error = (BasicDBObject) response.get("response");
-						String code = (String) ((BasicDBObject) error.get("error")).get("code");
-						assertEquals(ErrorCodes.DB_NAME_EMPTY, code);
-					} else {
-						// DB exists
-						DBObject result = (BasicDBObject) response.get("response");
-						BasicDBList collNames = ((BasicDBList) result.get("result"));
-						if (collName == null) {
-							assert (!collNames.contains(collName));
-						} else if (collName.equals("")) {
-							assert (!collNames.contains(collName));
-						} else {
-							assert (collNames.contains(collName));
-							mongoInstance.dropDatabase(dbName);
-						}
-					}
-				} catch (MongoException m) {
-					CollectionException e = new CollectionException(ErrorCodes.GET_COLLECTION_LIST_EXCEPTION, "GET_COLLECTION_LIST_EXCEPTION",
-							m.getCause());
-					formErrorResponse(logger, e.getMessage(), e.getErrorCode(), e.getStackTrace(), "ERROR");
-					throw e;
-				}
-				if (logger.isInfoEnabled()) {
-					logger.info("Test Completed");
-				}
+				});
 			}
 		}
 	}
@@ -256,80 +228,61 @@ public class CollectionRequestDispatcherTest extends BaseRequestDispatcher {
 		testCollNames.add("");
 		testCollNames.add(null);
 
-		if (logger.isInfoEnabled()) {
-			logger.info("Testing Create Coll Resource");
-		}
-		for (String dbName : testDbNames) {
-			for (String collName : testCollNames) {
+		for (final String dbName : testDbNames) {
+			for (final String collName : testCollNames) {
 
-				if (logger.isInfoEnabled()) {
-					logger.info("Test Case  [" + dbName + "] and collection Name [" + collName + "]");
-					logger.info("Create Db [" + dbName + "] first");
-				}
-				try {
-					if (dbName != null) {
-						if (!dbName.equals("")) {
-							if (!mongoInstance.getDatabaseNames().contains(dbName)) {
-								mongoInstance.getDB(dbName).getCollectionNames();
+				TestingTemplate.execute(logger, new ResponseCallback() {
+					public Object execute() throws Exception {
+						try {
+
+							if (dbName != null) {
+								if (!dbName.equals("")) {
+									if (!mongoInstance.getDatabaseNames().contains(dbName)) {
+										mongoInstance.getDB(dbName).getCollectionNames();
+									}
+								}
 							}
-						}
-					}
 
-					if (logger.isInfoEnabled()) {
-						logger.info("Create collection using service");
-					}
+							// if capped = false , size irrelevant
+							String collList = testCollResource.postCollRequest(dbName, collName, "off", 0, 0, "PUT", testDbInfo, request);
+							DBObject response = (BasicDBObject) JSON.parse(collList);
 
-					MockHttpSession session = new MockHttpSession();
-					session.setAttribute("tokenId", testTokenId);
+							if (dbName == null) {
+								DBObject error = (BasicDBObject) response.get("response");
+								String code = (String) ((BasicDBObject) error.get("error")).get("code");
+								assertEquals(ErrorCodes.DB_NAME_EMPTY, code);
 
-					MockHttpServletRequest request = new MockHttpServletRequest();
-					request.setSession(session);
+							} else if (dbName.equals("")) {
+								DBObject error = (BasicDBObject) response.get("response");
+								String code = (String) ((BasicDBObject) error.get("error")).get("code");
+								assertEquals(ErrorCodes.DB_NAME_EMPTY, code);
+							} else {
+								// DB exists
 
-					// if capped = false , size irrelevant
-					String collList = testCollResource.postCollRequest(dbName, collName, "off" , 0, 0, "PUT", testTokenId, request);
-					DBObject response = (BasicDBObject) JSON.parse(collList);
+								if (collName == null) {
+									DBObject error = (BasicDBObject) response.get("response");
+									String code = (String) ((BasicDBObject) error.get("error")).get("code");
+									assertEquals(ErrorCodes.COLLECTION_NAME_EMPTY, code);
 
-					if (dbName == null) {
-						DBObject error = (BasicDBObject) response.get("response");
-						String code = (String) ((BasicDBObject) error.get("error")).get("code");
-						assertEquals(ErrorCodes.DB_NAME_EMPTY, code);
+								} else if (collName.equals("")) {
+									DBObject error = (BasicDBObject) response.get("response");
+									String code = (String) ((BasicDBObject) error.get("error")).get("code");
+									assertEquals(ErrorCodes.COLLECTION_NAME_EMPTY, code);
+								} else {
 
-					} else if (dbName.equals("")) {
-						DBObject error = (BasicDBObject) response.get("response");
-						String code = (String) ((BasicDBObject) error.get("error")).get("code");
-						assertEquals(ErrorCodes.DB_NAME_EMPTY, code);
-					} else {
-						// DB exists
-
-						if (collName == null) {
-							DBObject error = (BasicDBObject) response.get("response");
-							String code = (String) ((BasicDBObject) error.get("error")).get("code");
-							assertEquals(ErrorCodes.COLLECTION_NAME_EMPTY, code);
-
-						} else if (collName.equals("")) {
-							DBObject error = (BasicDBObject) response.get("response");
-							String code = (String) ((BasicDBObject) error.get("error")).get("code");
-							assertEquals(ErrorCodes.COLLECTION_NAME_EMPTY, code);
-						} else {
-
-							Set<String> collNames = mongoInstance.getDB(dbName).getCollectionNames();
-							if (logger.isInfoEnabled()) {
-								logger.info("GET Collection List [" + collNames + "]");
+									Set<String> collNames = mongoInstance.getDB(dbName).getCollectionNames();
+									assert (collNames.contains(collName));
+									mongoInstance.dropDatabase(dbName);
+								}
 							}
-							assert (collNames.contains(collName));
-							mongoInstance.dropDatabase(dbName);
+						} catch (MongoException m) {
+							ApplicationException e = new ApplicationException(ErrorCodes.COLLECTION_CREATION_EXCEPTION, "COLLECTION_CREATION_EXCEPTION", m.getCause());
+							throw e;
 						}
+						return null;
 					}
-				} catch (MongoException m) {
-					CollectionException e = new CollectionException(ErrorCodes.COLLECTION_CREATION_EXCEPTION, "COLLECTION_CREATION_EXCEPTION",
-							m.getCause());
+				});
 
-					formErrorResponse(logger, e.getMessage(), e.getErrorCode(), e.getStackTrace(), "ERROR");
-					throw e;
-				}
-				if (logger.isInfoEnabled()) {
-					logger.info("Test Completed");
-				}
 			}
 		}
 	}
@@ -357,77 +310,61 @@ public class CollectionRequestDispatcherTest extends BaseRequestDispatcher {
 		testCollNames.add("");
 		testCollNames.add(null);
 
-		if (logger.isInfoEnabled()) {
-			logger.info("Testing Create Coll Resource");
-		}
-		for (String dbName : testDbNames) {
-			for (String collName : testCollNames) {
-				if (logger.isInfoEnabled()) {
-					logger.info("Test Case  [" + dbName + "] and collection Name [" + collName + "]");
-					logger.info("Create collection inside Db [" + dbName + "]");
-				}
-				try {
-					if (dbName != null && collName != null) {
-						if (!dbName.equals("") && !collName.equals("")) {
-							if (!mongoInstance.getDB(dbName).getCollectionNames().contains(collName)) {
-								DBObject options = new BasicDBObject();
-								mongoInstance.getDB(dbName).createCollection(collName, options);
+		for (final String dbName : testDbNames) {
+			for (final String collName : testCollNames) {
+				TestingTemplate.execute(logger, new ResponseCallback() {
+					public Object execute() throws Exception {
+						try {
+
+							if (dbName != null && collName != null) {
+								if (!dbName.equals("") && !collName.equals("")) {
+									if (!mongoInstance.getDB(dbName).getCollectionNames().contains(collName)) {
+										DBObject options = new BasicDBObject();
+										mongoInstance.getDB(dbName).createCollection(collName, options);
+									}
+								}
 							}
+
+							// if capped = false , size irrelevant
+							String collList = testCollResource.postCollRequest(dbName, collName, "off", 0, 0, "DELETE", testDbInfo, request);
+							DBObject response = (BasicDBObject) JSON.parse(collList);
+
+							if (dbName == null) {
+								DBObject error = (BasicDBObject) response.get("response");
+								String code = (String) ((BasicDBObject) error.get("error")).get("code");
+								assertEquals(ErrorCodes.DB_NAME_EMPTY, code);
+
+							} else if (dbName.equals("")) {
+								DBObject error = (BasicDBObject) response.get("response");
+								String code = (String) ((BasicDBObject) error.get("error")).get("code");
+								assertEquals(ErrorCodes.DB_NAME_EMPTY, code);
+							} else {
+								// DB exists
+
+								if (collName == null) {
+									DBObject error = (BasicDBObject) response.get("response");
+									String code = (String) ((BasicDBObject) error.get("error")).get("code");
+									assertEquals(ErrorCodes.COLLECTION_NAME_EMPTY, code);
+
+								} else if (collName.equals("")) {
+									DBObject error = (BasicDBObject) response.get("response");
+									String code = (String) ((BasicDBObject) error.get("error")).get("code");
+									assertEquals(ErrorCodes.COLLECTION_NAME_EMPTY, code);
+								} else {
+
+									Set<String> collNames = mongoInstance.getDB(dbName).getCollectionNames();
+							 
+
+									assert (!collNames.contains(collName));
+								}
+							}
+						} catch (MongoException m) {
+							ApplicationException e = new ApplicationException(ErrorCodes.COLLECTION_DELETION_EXCEPTION, "COLLECTION_DELETION_EXCEPTION", m.getCause());
+							throw e;
 						}
+						return null;
 					}
-
-					if (logger.isInfoEnabled()) {
-						logger.info("Delete collection using service");
-					}
-
-					MockHttpSession session = new MockHttpSession();
-					session.setAttribute("tokenId", testTokenId);
-
-					MockHttpServletRequest request = new MockHttpServletRequest();
-					request.setSession(session);
-
-					// if capped = false , size irrelevant
-					String collList = testCollResource.postCollRequest(dbName, collName, "off", 0, 0, "DELETE", testTokenId, request);
-					DBObject response = (BasicDBObject) JSON.parse(collList);
-
-					if (dbName == null) {
-						DBObject error = (BasicDBObject) response.get("response");
-						String code = (String) ((BasicDBObject) error.get("error")).get("code");
-						assertEquals(ErrorCodes.DB_NAME_EMPTY, code);
-
-					} else if (dbName.equals("")) {
-						DBObject error = (BasicDBObject) response.get("response");
-						String code = (String) ((BasicDBObject) error.get("error")).get("code");
-						assertEquals(ErrorCodes.DB_NAME_EMPTY, code);
-					} else {
-						// DB exists
-
-						if (collName == null) {
-							DBObject error = (BasicDBObject) response.get("response");
-							String code = (String) ((BasicDBObject) error.get("error")).get("code");
-							assertEquals(ErrorCodes.COLLECTION_NAME_EMPTY, code);
-
-						} else if (collName.equals("")) {
-							DBObject error = (BasicDBObject) response.get("response");
-							String code = (String) ((BasicDBObject) error.get("error")).get("code");
-							assertEquals(ErrorCodes.COLLECTION_NAME_EMPTY, code);
-						} else {
-
-							Set<String> collNames = mongoInstance.getDB(dbName).getCollectionNames();
-							logger.info("GET Collection List [" + collNames + "]");
-
-							assert (!collNames.contains(collName));
-						}
-					}
-				} catch (MongoException m) {
-					CollectionException e = new CollectionException(ErrorCodes.COLLECTION_DELETION_EXCEPTION, "COLLECTION_DELETION_EXCEPTION",
-							m.getCause());
-					formErrorResponse(logger, e.getMessage(), e.getErrorCode(), e.getStackTrace(), "ERROR");
-					throw e;
-				}
-				if (logger.isInfoEnabled()) {
-					logger.info("Test Completed");
-				}
+				});
 			}
 		}
 	}

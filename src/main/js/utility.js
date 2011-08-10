@@ -13,9 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+var gRegistry = [];
 YUI.add('utility', function (Y) {
-    Y.namespace('com.imaginea.mongoV');
-    var MV = Y.com.imaginea.mongoV;
+    YUI.namespace('com.imaginea.mongoV');
+    var MV = YUI.com.imaginea.mongoV;
     // Check if String.prototype.format already exists because in future
 	// versions
     // format function can be added
@@ -251,63 +252,118 @@ YUI.add('utility', function (Y) {
     MV.header = Y.one("#mainBodyHeader");
     MV.warnIcon = YAHOO.widget.SimpleDialog.ICON_WARN;
     MV.infoIcon = YAHOO.widget.SimpleDialog.ICON_INFO;
+
+    MV.StateManager = (function(){
+        var self = this;
+        var stateVariables = ['currentDB', 'currentColl', 'host', 'port','dbInfo'];
+        function getVal(key) {
+            return Y.one('#' + key).get("value");
+        }
+        function setVal(key, value) {
+            Y.one('#' + key).set("value", value);
+        }
+        function deliverEvent(eventName) {
+            var i = 0;
+            var callbackArray = gRegistry[eventName];
+            for (; i < callbackArray.length; i++) {
+                callbackArray[i].apply(this);
+            }
+        }
+        var exports = {};
+        stateVariables.forEach(function(stateVariable){
+            exports[stateVariable] = function(){
+                return getVal(stateVariable);
+            };
+            exports[stateVariable+"AsNode"] = function(){
+                return Y.one('#' + getVal(stateVariable).replace(/ /g,'_'));
+            };
+
+            var upcasedVar = stateVariable.substring(0,1).toUpperCase() + stateVariable.substring(1);
+            exports['set'+upcasedVar] = function(newValue){
+                return setVal(stateVariable, newValue);
+            };
+            exports['clear'+upcasedVar] = function(newValue){
+                return setVal(stateVariable, "");
+            };
+
+        });
+        exports.dbInfo = function() {
+            var currDBInfo = getVal('dbInfo');
+            if (currDBInfo === undefined || currDBInfo.length === 0) {
+                currDBInfo = getVal('host') + "_" + getVal('port');
+            }
+            return currDBInfo;
+        };
+        exports.publish = function(eventName) {
+            if (gRegistry[eventName]) {
+                deliverEvent(eventName);
+            }
+        };
+        exports.subscribe = function(eventName, callback) {
+            if (gRegistry[eventName] === undefined) {
+                gRegistry[eventName] = [];
+            }
+            gRegistry[eventName].push(callback);
+        };
+        exports.events = {
+            collectionsChanged : 1,
+            dbsChanged : 2,
+            queryFired : 3
+        };
+        return exports;
+
+    }());
+
+    var sm = MV.StateManager;
+
     MV.URLMap = {
-        insertColl: function () {
-            return "services/" + Y.one("#currentDB").get("value") + "/collection/" + Y.one("#newName").get("value") + "?tokenId=" + Y.one("#tokenID").get("value") + "&action=PUT";
+        getDBs: function () {
+            return "services/db?dbInfo=[0]".format(sm.dbInfo());
         },
         insertDB: function () {
-            return "services/db/" + Y.one("#newName").get("value") + "?tokenId=" + Y.one("#tokenID").get("value") + "&action=DELETE";
-        },
-        dropColl: function () {
-            return "services/" + Y.one("#currentDB").get("value") + "/collection/" + Y.one("#currentColl").get("value") + "?tokenId=" + Y.one("#tokenID").get("value") + "&action=DELETE";
-        },
-        getColl: function () {
-            return "services/" + Y.one("#currentDB").get("value") + "/collection?tokenId=" + Y.one("#tokenID").get("value");
-        },
-        collStatistics: function () {
-            return "services/stats/db/" + Y.one("#currentDB").get("value") + "/collection/" + Y.one("#currentColl").get("value") + "?tokenId=" + Y.one("#tokenID").get("value");
-        },
-        dbStatistics: function () {
-            return "services/stats/db/" + Y.one("#currentDB").get("value") + "?tokenId=" + Y.one("#tokenID").get("value");
+            return "services/db/[0]?dbInfo=[1]&action=PUT".format(sm.newName(), sm.dbInfo());
         },
         dropDB: function () {
-            return "services/db/" + Y.one("#currentDB").get("value") + "?tokenId=" + Y.one("#tokenID").get("value") + "&action=DELETE";
+            return "services/db/[0]?dbInfo=[1]&action=DELETE".format(sm.currentDB(),sm.dbInfo());
         },
-        getDBs: function () {
-            return "services/db?tokenId=" + Y.one("#tokenID").get("value");
+        dbStatistics: function () {
+            return "services/stats/db/[0]?dbInfo=[1]".format(sm.currentDB(),sm.dbInfo());
+        },
+        getColl: function () {
+            return "services/[0]/collection?dbInfo=[1]".format(sm.currentDB(),sm.dbInfo());
+        },
+        insertColl: function () {
+            return "services/[0]/collection/[1]?dbInfo=[2]&action=PUT".format(sm.currentDB(),sm.newName(), sm.dbInfo());
+        },
+        dropColl: function () {
+            return "services/[0]/collection/[1]?dbInfo=[2]&action=DELETE".format(sm.currentDB(), sm.currentColl(), sm.dbInfo());
+        },
+        collStatistics: function () {
+            return "services/stats/db/[0]/collection/[1]?dbInfo=[2]".format(sm.currentDB(), sm.currentColl(), sm.dbInfo());
         },
         documentKeys: function () {
-            return "services/" + Y.one("#currentDB").get("value") + "/" + Y.one("#currentColl").get("value") + "/document/keys?tokenId=" + Y.one("#tokenID").get("value");
+            return "services/[0]/[1]/document/keys?dbInfo=[2]".format(sm.currentDB(),sm.currentColl(), sm.dbInfo());
         },
         getDocs: function () {
-            return "services/" + Y.one("#currentDB").get("value") + "/" + Y.one("#currentColl").get("value") + "/document?tokenId=" + Y.one("#tokenID").get("value");
+            return "services/[0]/[1]/document?dbInfo=[2]".format(sm.currentDB(),sm.currentColl(), sm.dbInfo());
         },
-        serverStatistics: function () {
-            return "services/stats?tokenId=" + Y.one("#tokenID").get("value");
+        insertDoc: function () {
+            return "services/[0]/[1]/document?dbInfo=[2]&action=PUT".format(sm.currentDB(), sm.currentColl(), sm.dbInfo());
+        },
+        updateDoc: function () {
+            return "services/[0]/[1]/document?dbInfo=[2]".format(sm.currentDB(), sm.currentColl(), sm.dbInfo());
+        },
+        deleteDoc: function () {
+            return "services/[0]/[1]/document?dbInfo=[2]&action=DELETE".format(sm.currentDB(), sm.currentColl(), sm.dbInfo());
         },
         login: function () {
             return "services/login";
         },
         logout: function () {
-            return "services/logout?tokenId=" + Y.one("#tokenID").get("value");
+            return "services/logout?dbInfo=[0]".format(sm.dbInfo());
         },
-        graphs: function () {
-            return "graphs.html?tokenId=" + Y.one("#tokenID").get("value");
-        },
-        graphInitiate: function () {
-            return "graphs/initiate?tokenId=" + Y.one("#tokenID").get("value");
-        },
-        graphQuery: function () {
-            return "graphs/query?tokenId=" + Y.one("#tokenID").get("value");
-        },
-        insertDoc: function () {
-            return "services/" + Y.one("#currentDB").get("value") + "/" + Y.one("#currentColl").get("value") + "/document?tokenId=" + Y.one("#tokenID").get("value") + "&action=PUT";
-        },
-        updateDoc: function () {
-            return "services/" + Y.one("#currentDB").get("value") + "/" + Y.one("#currentColl").get("value") + "/document?tokenId=" + Y.one("#tokenID").get("value");
-        },
-        deleteDoc: function () {
-            return "services/" + Y.one("#currentDB").get("value") + "/" + Y.one("#currentColl").get("value") + "/document?tokenId=" + Y.one("#tokenID").get("value") + "&action=DELETE";
+        serverStatistics: function () {
+            return "services/stats?dbInfo=[0]".format(sm.dbInfo());
         },
         help: function () {
             return "help.html";
@@ -318,7 +374,17 @@ YUI.add('utility', function (Y) {
         troubleShoot: function () {
             return "admin";
         },
+        graphs: function () {
+            return "graphs.html?dbInfo=[0]".format(sm.dbInfo());
+        },
+        graphInitiate: function () {
+            return "graphs/initiate?dbInfo=[0]".format(sm.dbInfo());
+        },
+        graphQuery: function () {
+            return "graphs/query?dbInfo=[0]".format(sm.dbInfo());
+        }
     };
+
     MV.errorCodeMap = {
         "HOST_UNKNOWN": "Please check if Mongod is running on the given host and port !",
         "MISSING_LOGIN_FIELDS": "Please fill in all the login fields !",
@@ -340,7 +406,7 @@ YUI.add('utility', function (Y) {
         "DOCUMENT_CREATION_EXCEPTION": "Please check if mongod is running and refresh the page.",
         "DOCUMENT_UPDATE_EXCEPTION": "Please check if mongod is running and refresh the page.",
         "INVALID_USER": "Your session is corrupted or timed out! Please login again from the login page.",
-        "TOKEN_ID_ABSENT": "Your session is corrupted or timed out! Please login again from the login page.",
+        "DB_INFO_ABSENT": "Mongo Config details are not provided in session! Please login again from the login page.",
         "GET_DB_STATS_EXCEPTION": "Please check if mongod is running and refresh the page.",
         "GET_COLL_STATS_EXCEPTION": "Please check if mongod is running and refresh the page.",
         "COLLECTION_CREATION_EXCEPTION": "Please check if mongod is running and refresh the page.",

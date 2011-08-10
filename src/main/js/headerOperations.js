@@ -16,8 +16,8 @@
 YUI({
     filter: 'raw'
 }).use("alert-dialog", "utility", "node", "event-delegate", "stylize", "custom-datatable", function (Y) {
-    Y.namespace('com.imaginea.mongoV');
-    var MV = Y.com.imaginea.mongoV;
+    YUI.namespace('com.imaginea.mongoV');
+    var MV = YUI.com.imaginea.mongoV;
 
     function handleHeaderOption(eventObject) {
         var menuOpt = eventObject.currentTarget.get("id");
@@ -25,7 +25,7 @@ YUI({
         _clearContents(MV.mainBody);
         _clearContents(Y.one('#queryForm'));
         if (menuOpt === "home") {
-            window.location = "home.html?tokenID=" + Y.one("#tokenID").get("value") + "&username=" + Y.one("#username").get("value") + "&host=" + Y.one("#host").get("value");
+            window.location = "home.html?dbInfo=" + Y.one("#host").get("value")+"_" + Y.one("#port").get("value") + "_" + Y.one("#username").get("value");
         } else if (menuOpt === "serverStats") {
             showServerStats();
             MV.header.set("innerHTML", "Server Statistics");

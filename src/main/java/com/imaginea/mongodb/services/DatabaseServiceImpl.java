@@ -19,7 +19,7 @@ package com.imaginea.mongodb.services;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
- 
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -40,11 +40,12 @@ import com.mongodb.MongoException;
 
 /**
  * Defines services definitions for performing operations like create/drop on
- * databases present in mongo to which we are connected to. Also provides service
- * to get list of all databases present and Statistics of a particular database.
+ * databases present in mongo to which we are connected to. Also provides
+ * service to get list of all databases present and Statistics of a particular
+ * database.
  * 
  * @author Rachit Mittal
- * @since  2 July 2011
+ * @since 2 July 2011
  * 
  * 
  */
@@ -66,12 +67,12 @@ public class DatabaseServiceImpl implements DatabaseService {
 	 * based on a userMappingKey which is recieved from the database request
 	 * dispatcher and is obtained from tokenId of user.
 	 * 
-	 * @param userMappingKey
+	 * @param dbInfo
 	 *            A combination of username,mongoHost and mongoPort
 	 */
-	public DatabaseServiceImpl(String userMappingKey) {
-		mongoInstanceProvider = new SessionMongoInstanceProvider(userMappingKey);
-	 
+	public DatabaseServiceImpl(String dbInfo) {
+		mongoInstanceProvider = new SessionMongoInstanceProvider(dbInfo);
+
 	}
 
 	/**
@@ -83,7 +84,7 @@ public class DatabaseServiceImpl implements DatabaseService {
 	 * @throws DatabaseException
 	 *             If any error while getting database list.
 	 */
- 
+
 	public List<String> getDbList() throws DatabaseException {
 
 		mongoInstance = mongoInstanceProvider.getMongoInstance();
@@ -214,7 +215,7 @@ public class DatabaseServiceImpl implements DatabaseService {
 	 * @exception ValidationException
 	 *                throw super type of EmptyDatabaseNameException
 	 */
-	 
+
 	public JSONArray getDbStats(String dbName) throws DatabaseException, ValidationException, JSONException {
 
 		mongoInstance = mongoInstanceProvider.getMongoInstance();

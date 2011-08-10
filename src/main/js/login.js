@@ -17,7 +17,7 @@
 YUI({
     filter: 'raw'
 }).use("io", "json", "node", "utility", function (Y) {
-    var MV = Y.com.imaginea.mongoV;
+    var MV = YUI.com.imaginea.mongoV;
     var tryLogin = function (e) {
             var username = Y.one("#username").get("value").trim();
             var password = Y.one("#password").get("value").trim();
@@ -63,8 +63,8 @@ YUI({
                         parsedResponse = Y.JSON.parse(responseObject.responseText);
                         var response = parsedResponse.response.result;
                         if (response !== undefined) {
-                            Y.log("Successfully logging in. TokenId: [0]".format(response.id), "info");
-                            window.location = "home.html?tokenID=" + response.id + "&username=" + response.username + "&host=" + response.host;
+                            Y.log("Successfully logging in", "info");
+                            window.location = "home.html?dbInfo="+ host + "_" +port+"_"+username;
                         } else {
                             var error = parsedResponse.response.error;
                             var errorDiv = Y.one("#errorMsg");
@@ -81,29 +81,14 @@ YUI({
                 }
             });
         };
-    var checkIfSubmitted = function (eventObject) {
-            if (eventObject.keyCode === 13) {
-                tryLogin();
-            }
-        };
-    Y.all("input").on("keyup", checkIfSubmitted);
+
+    Y.all("input").on("keyup", function (eventObject) {
+        // for enter key submit the form
+        if (eventObject.keyCode === 13) {
+            tryLogin();
+        }
+    });
+
     Y.one("#login").on('click', tryLogin);
-    /*
-     * var anim = new Y.Anim({ node: '#demo', from: { height: 0 }, to: {
-     * height: function(node) { return node.get('scrollHeight'); } },
-     * easing: Y.Easing.easeOut });
-     *
-     * var onClick = function(e) { var div = Y.one('#loginForm'); var s = "<table
-     * class='table' align='center'>"; s += "<thead><tr><th>Key</th><th>Value</th></tr></thead>";
-     * s += "<tbody class='tbody'>"; s += "<tr><td><code>Host</code></td><td ><input
-     * type='text' id='host' name='host' value='localhost'/></td></tr>";
-     * s += "<tr><td><code>Port</code></td><td ><input
-     * type='text' id='port' name='port' value='27017'/></td></tr>";
-     * s += "<tr><td><code>UserName</code></td><td ><input
-     * type='text' id='username' name='username'/></td></tr>"; s += "<tr><td><code>Password</code></td><td><input
-     * type='password' id='password' name='password'/></td></tr>"; s += "</tbody></table>";
-     * s += "<br><button class='btn' id='login'>GO</button>";
-     * div.set("innerHTML", s); e.preventDefault(); anim.run();
-     *  }; Y.one('#add').on('click', onClick);
-     */
+    Y.one("#login").focus();
 });

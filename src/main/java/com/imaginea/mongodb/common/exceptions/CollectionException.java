@@ -23,65 +23,51 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 package com.imaginea.mongodb.common.exceptions;
- 
 
 /**
  * Defines all the Exceptions generated while performing any operation on
  * Collections in MongoDb. This class extends MongoException which is the
  * General Exception for Databases,Collections and Documents in MongoDb.
- *
- *
+ * 
+ * 
  * Also a field <errorCode> of type <String> is introduced which gives more info
  * about the error.
- *
+ * 
  * @author Rachit Mittal
- *
+ * 
  */
-public class CollectionException extends Exception {
+public class CollectionException extends ApplicationException {
 
-	private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-	private String errorCode;
+    /**
+     * 
+     * Defines a Collection Exception and also sets errorCode.
+     * 
+     * @param errorCode
+     *            the errorcode for the message
+     * @param message
+     *            the error message
+     */
+    public CollectionException(String errorCode, String message) {
+        super(errorCode, message);
+    }
 
-	/**
-	 *
-	 * Defines a Collection Exception and also sets errorCode.
-	 *
-	 * @param errorCode
-	 *            the errorcode for the message
-	 * @param message
-	 *            the error message
-	 */
-	public CollectionException(String errorCode, String message) {
-		super(message);
-		this.errorCode = errorCode;
-	}
+    /**
+     * Defines a Collection Exception along with cause of caught Exception to be
+     * appended and also sets errorCode.
+     * 
+     * @param errorCode
+     *            : ErrorCode of the Exception thrown
+     * @param message
+     *            : A description about the Exception. *
+     * @param cause
+     *            : Cause of the caught Exception to be appended in the new
+     *            CollectionException formed here.
+     */
 
-	/**
-	 * Defines a Collection Exception along with cause of caught Exception to be
-	 * appended and also sets errorCode.
-	 *
-	 * @param errorCode
-	 *            : ErrorCode of the Exception thrown
-	 * @param message
-	 *            : A description about the Exception. *
-	 * @param cause
-	 *            : Cause of the caught Exception to be appended in the new
-	 *            CollectionException formed here.
-	 */
-
-	public CollectionException(String errorCode, String message, Throwable cause) {
-		super(message, cause);
-		this.errorCode = errorCode;
-	}
-
-	/**
-	 * Get the error code of the Exception
-	 *
-	 * @return the error code of the Exception
-	 */
-	public String getErrorCode() {
-		return errorCode;
-	}
+    public CollectionException(String errorCode, String message, Throwable cause) {
+        super(errorCode, message, cause);
+    }
 
 }

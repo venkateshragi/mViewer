@@ -28,10 +28,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 
-import org.apache.log4j.Logger; 
-import org.json.JSONObject;
-
-import com.imaginea.mongodb.common.DateProvider; 
+import org.apache.log4j.Logger;
 import com.imaginea.mongodb.common.exceptions.ErrorCodes;
 import com.imaginea.mongodb.common.exceptions.InvalidHTTPRequestException; 
 import com.imaginea.mongodb.services.CollectionService;
@@ -55,14 +52,7 @@ import com.imaginea.mongodb.services.CollectionServiceImpl;
  */
 @Path("/{dbName}/collection")
 public class CollectionRequestDispatcher extends BaseRequestDispatcher {
-	private final static Logger logger = Logger
-			.getLogger(CollectionRequestDispatcher.class);
-
-	/**
-	 * Default Constructor
-	 */
-	public CollectionRequestDispatcher() {
-	}
+	private final static Logger logger = Logger.getLogger(CollectionRequestDispatcher.class);
 
 	/**
 	 * Maps GET Request to get list of collections inside databases present in
@@ -72,57 +62,25 @@ public class CollectionRequestDispatcher extends BaseRequestDispatcher {
 	 * 
 	 * @param dbName
 	 *            Name of database
-	 * @param tokenId
-	 *            a token Id given to every user at Login.
+	 * @param dbInfo
+	 *            Mongo Db Configuration provided by user to connect to.
 	 * @param request
 	 *            Get the HTTP request context to extract session parameters
 	 * @return String of JSON Format with list of all collections.
 	 */
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
-	public String getCollList(@PathParam("dbName") final String dbName,
-			@QueryParam("tokenId") final String tokenId,
-			@Context final HttpServletRequest request) {
-		if (logger.isInfoEnabled()) {
-			logger.info("Recieved GET Request for Collection  ["
-					+ DateProvider.getDateTime() + "]");
-		}
+	public String getCollList(@PathParam("dbName") final String dbName, @QueryParam("dbInfo") final String dbInfo, @Context final HttpServletRequest request) {
 
-		String response = new ResponseTemplate().execute(logger,
-				new ResponseCallback() {
-					public String execute() throws Exception {
-						String response = validateTokenId(tokenId, logger,
-								request);
-						if (response != null) {
-							return response;
-						}
-						// Get User for a given Token Id
-						String userMappingkey = UserLogin.tokenIDToUserMapping
-								.get(tokenId);
-						if (userMappingkey == null) {
-							return formErrorResponse(logger,
-									"User not mapped to token Id",
-									ErrorCodes.INVALID_USER, null, "FATAL");
-						}
-						JSONObject temp = new JSONObject();
-						JSONObject resp = new JSONObject();
-						// Create Instance of Service File.
-						CollectionService collectionService = new CollectionServiceImpl(
-								userMappingkey);
-						// Get the result;
-						Set<String> collectionNames = collectionService
-								.getCollList(dbName);
-						temp.put("result", collectionNames);
-						resp.put("response", temp);
-						resp.put("totalRecords", collectionNames.size());
-						response = resp.toString();
-						return response;
-					}
-				});
-		if (logger.isInfoEnabled()) {
-			logger.info("Request Completed [" + DateProvider.getDateTime()
-					+ "]");
-		}
+		String response = new ResponseTemplate().execute(logger, dbInfo, request, new ResponseCallback() {
+			public Object execute() throws Exception {
+
+				CollectionService collectionService = new CollectionServiceImpl(dbInfo);
+				Set<String> collectionNames = collectionService.getCollList(dbName);
+
+				return collectionNames;
+			}
+		});
 		return response;
 	}
 
@@ -148,78 +106,58 @@ public class CollectionRequestDispatcher extends BaseRequestDispatcher {
 	 *            database request and value DELETE for dropping a database.
 	 * @param request
 	 *            Get the HTTP request context to extract session parameters
-	 * @param tokenId
-	 *            a token Id given to every user at Login.
+	 * @param dbInfo
+	 *            Mongo Db Configuration provided by user to connect to.
 	 * @return String with status of operation performed.
 	 */
 	@POST
 	@Path("/{collectionName}")
 	@Produces(MediaType.APPLICATION_JSON)
-	public String postCollRequest(@PathParam("dbName") final String dbName,
-			@PathParam("collectionName") final String collectionName,
-			@FormParam("isCapped") final String capped,
-			@QueryParam("collSize") final int size,
-			@QueryParam("collMaxSize") final int maxDocs,
-			@QueryParam("action") final String action,
-			@QueryParam("tokenId") final String tokenId,
+	public String postCollRequest(@PathParam("dbName") final String dbName, @PathParam("collectionName") final String collectionName, @FormParam("isCapped") String capped,
+			@QueryParam("collSize") final int size, @QueryParam("collMaxSize") final int maxDocs, @QueryParam("action") final String action, @QueryParam("dbInfo") final String dbInfo,
 			@Context final HttpServletRequest request) {
-		if (logger.isInfoEnabled()) {
-			logger.info("Recieved POST Request for Collection  ["
-					+ DateProvider.getDateTime() + "]");
-		}
+
 		if (action == null) {
-			InvalidHTTPRequestException e = new InvalidHTTPRequestException(
-					ErrorCodes.ACTION_PARAMETER_ABSENT,
-					"ACTION_PARAMETER_ABSENT");
-			return formErrorResponse(logger, e.getMessage(), e.getErrorCode(),
-					null, "ERROR");
+			InvalidHTTPRequestException e = new InvalidHTTPRequestException(ErrorCodes.ACTION_PARAMETER_ABSENT, "ACTION_PARAMETER_ABSENT");
+			return formErrorResponse(logger, e);
 		}
-		String response = new ResponseTemplate().execute(logger,
-				new ResponseCallback() {
-					public String execute() throws Exception {
-						String response = validateTokenId(tokenId, logger,
-								request);
-						if (response != null) {
-							return response;
-						}
-						// Get User for a given Token Id
-						String userMappingkey = UserLogin.tokenIDToUserMapping
-								.get(tokenId);
-						if (userMappingkey == null) {
-							return formErrorResponse(logger,
-									"User not mapped to token Id",
-									ErrorCodes.INVALID_USER, null, "FATAL");
-						}
-						JSONObject temp = new JSONObject();
-						JSONObject resp = new JSONObject();
-						// Create Instance of Service File.
-						CollectionService collectionService = new CollectionServiceImpl(
-								userMappingkey);
-						boolean capp = false;
-						if (capped == null) {
-							capp = false;
-						} else if (capped.equals("on")) {
-							capp = true;
-						}
-						if (action.equals("PUT")) {
-							temp.put("result", collectionService
-									.insertCollection(dbName, collectionName,
-											capp, size, maxDocs));
-						} else if (action.equals("DELETE")) {
-							temp.put("result", collectionService
-									.deleteCollection(dbName, collectionName));
-						}
-						resp.put("response", temp);
-						response = resp.toString();
-						return response;
+		// Reassign isCapped according to value from UI
+		boolean capp = false;
+		if (capped == null) {
+			capp = false;
+		} else if (capped.equals("on")) {
+			capp = true;
+		}
+		final boolean iscapped = capp;
+		String response = new ResponseTemplate().execute(logger, dbInfo, request, new ResponseCallback() {
+			public Object execute() throws Exception {
+				CollectionService collectionService = new CollectionServiceImpl(dbInfo);
+				String status = null;
+				RequestMethod method = null;
+				for (RequestMethod m : RequestMethod.values()) {
+					if ((m.toString()).equals(action)) {
+						method = m;
+						break;
 					}
-				});
+				}
+				switch (method) {
+				case PUT: {
+					status = collectionService.insertCollection(dbName, collectionName, iscapped, size, maxDocs);
 
-		if (logger.isInfoEnabled()) {
-			logger.info("Request Completed [" + DateProvider.getDateTime()
-					+ "]");
-		}
-
+					break;
+				}
+				case DELETE: {
+					status = collectionService.deleteCollection(dbName, collectionName);
+					break;
+				}
+				default: {
+					status = "Action parameter value is wrong";
+					break;
+				}
+				}
+				return status;
+			}
+		});
 		return response;
 	}
 }

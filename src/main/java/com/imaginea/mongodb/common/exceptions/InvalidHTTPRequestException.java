@@ -28,55 +28,43 @@ package com.imaginea.mongodb.common.exceptions;
  * Defines an Exception thrown when the HTTP Request made is invalid. An invalid
  * request is when it does not contain a tokenID which is must for every
  * authenticated user.
- *
+ * 
  * @author Rachit Mittal
- *
+ * 
  */
-public class InvalidHTTPRequestException extends Exception {
-	private static final long serialVersionUID = 1L;
-	private String errorCode;
+public class InvalidHTTPRequestException extends ApplicationException {
+    private static final long serialVersionUID = 1L;
 
-	/**
-	 * Creates a new InvalidHTTPRequestException with errorcode and message.
-	 *
-	 * @param errorCode
-	 *            : ErrorCode of the Exception thrown
-	 * @param message
-	 *            : A description about the Error.
-	 *
-	 */
-	public InvalidHTTPRequestException(String errorCode, String message) {
-		super(message);
-		this.errorCode = errorCode;
-	}
+    /**
+     * Creates a new InvalidHTTPRequestException with errorcode and message.
+     * 
+     * @param errorCode
+     *            : ErrorCode of the Exception thrown
+     * @param message
+     *            : A description about the Error.
+     * 
+     */
+    public InvalidHTTPRequestException(String errorCode, String message) {
+        super(errorCode, message);
+    }
 
-	/**
-	 * Creates a new InvalidHTTPRequestException along with cause of caught
-	 * Exception to be appended.
-	 *
-	 * @param errorCode
-	 *            : ErrorCode of the Exception thrown
-	 * @param message
-	 *            : A description about the Error.
-	 *
-	 * @param cause
-	 *            : Cause of the previous Exception. This is appended in the new
-	 *            InvalidHTTPRequestException formed here.
-	 */
-	public InvalidHTTPRequestException(String errorCode, String message,
-			Throwable cause) {
-		super(message, cause);
-		this.errorCode = errorCode;
+    /**
+     * Creates a new InvalidHTTPRequestException along with cause of caught
+     * Exception to be appended.
+     * 
+     * @param errorCode
+     *            : ErrorCode of the Exception thrown
+     * @param message
+     *            : A description about the Error.
+     * 
+     * @param cause
+     *            : Cause of the previous Exception. This is appended in the new
+     *            InvalidHTTPRequestException formed here.
+     */
+    public InvalidHTTPRequestException(String errorCode, String message,
+            Throwable cause) {
+        super(errorCode, message, cause);
 
-	}
-
-	/**
-	 * Get errorCode.
-	 *
-	 * @return errorCode.
-	 */
-	public String getErrorCode() {
-		return errorCode;
-	}
+    }
 
 }

@@ -102,7 +102,7 @@ ul.nav-cont li a {
 	cursor: pointer;
 }
 
-ul.lists li:hover,ul.lists li.sel:hover,ul.nav-cont li a.sel,ul.nav-cont li a:hover,.user-menu .logout:hover
+ul.lists li:hover,ul.lists li.sel:hover,ul.nav-cont li a.sel,ul.nav-cont li a:hover,.user-menu .logout:hover, ul.lists li.simulatedHover, ul.lists li.sel.simulatedHover
 	{
 	text-decoration: none;
 	background: rgb(191, 191, 191); /* Old browsers */
@@ -467,4 +467,29 @@ fieldset legend {
     font-weight: bold;
     padding-bottom: 1em;
     padding-right: 3em;
+}
+
+.floatingFooter {
+position: fixed;
+bottom: 0px;
+}
+
+*html .floatingFooter {
+position: absolute;
+bottom: 0px;
+}
+
+
+.shadow-original {
+    -moz-box-shadow: 3px 3px 4px #000;
+    -webkit-box-shadow: 3px 3px 4px #000;
+    box-shadow: 3px 3px 4px #000;
+    /* For IE 8 */
+    -ms-filter: "progid:DXImageTransform.Microsoft.Shadow(Strength=4, Direction=135, Color='#000000')";
+    /* For IE 5.5 - 7 */
+    filter: progid:DXImageTransform.Microsoft.Shadow(Strength=4, Direction=135, Color='#000000');
+}
+
+.shadow {
+    border: 3px grey ridge;
 }

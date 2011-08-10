@@ -20,14 +20,14 @@ import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONException;
 
-import com.imaginea.mongodb.common.exceptions.DatabaseException;  
+import com.imaginea.mongodb.common.exceptions.DatabaseException;
 import com.imaginea.mongodb.common.exceptions.ValidationException;
 
 /**
  * Defines services for performing operations like create/drop on databases
  * present in the current mongo instance, see MongoInstanceProvider for details
- * about controlling the current instance. Also provides service to get
- * list of all databases present and Statistics of a particular database.
+ * about controlling the current instance. Also provides service to get list of
+ * all databases present and Statistics of a particular database.
  * 
  * @author Rachit Mittal
  * @since 2 July 2011
@@ -45,7 +45,8 @@ public interface DatabaseService {
 	 *             If any error while getting database list.
 	 */
 
-	public List<String> getDbList() throws DatabaseException; 
+	public List<String> getDbList() throws DatabaseException;
+
 	/**
 	 * Return Stats of a particular Database in current mongo instance
 	 * 

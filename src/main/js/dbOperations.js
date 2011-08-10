@@ -18,17 +18,18 @@ YUI({
 }).use("alert-dialog", "utility", "dialog-box", "yes-no-dialog", "io-base", "node", "json-parse", "event-delegate", "node-event-simulate", "stylize", "custom-datatable", function (Y) {
     // TODO: make loading panel module
     var dbDiv, loadingPanel;
-    Y.namespace('com.imaginea.mongoV');
-    var MV = Y.com.imaginea.mongoV; 
+    YUI.namespace('com.imaginea.mongoV');
+    var MV = YUI.com.imaginea.mongoV; 
+    var sm = YUI.com.imaginea.mongoV.StateManager;
 
     /* HANDLER FUNCTIONS */
     function addCollection(responseObject) {
         var parsedResponse = Y.JSON.parse(responseObject.responseText);
         var response = parsedResponse.response.result;
         if (response !== undefined) {
-            MV.showAlertDialog("[0] added to [1]".format(Y.one("#newName").get("value"), Y.one("#currentDB").get("value")), MV.infoIcon);
+            MV.showAlertDialog("[0] added to [1]".format(sm.newName(), sm.currentDB()), MV.infoIcon);
             Y.log("[0] created in [1]".format(Y.one("#newName").get("value"), Y.one("#currentDB").get("value")), "info");
-            Y.one("#currentColl").set("value", "");
+            sm.clearCurrentColl();
             Y.one("#" + Y.one("#currentDB").get("value")).simulate("click");
         } else {
             var error = parsedResponse.response.error;
@@ -46,7 +47,7 @@ YUI({
                     var parsedResponse = Y.JSON.parse(responseObject.responseText);
                     if (parsedResponse.response.result !== undefined) {
                         MV.showAlertDialog("[0] is dropped! ".format(Y.one("#currentDB").get("value")), MV.infoIcon, function () {
-                            window.location = "home.html?tokenID=" + Y.one("#tokenID").get("value") + "&username=" + Y.one("#username").get("value") + "&host=" + Y.one("#host").get("value");
+                            window.location = "home.html?dbInfo=" + Y.one("#host").get("value")+"_" + Y.one("#port").get("value") + "_" + Y.one("#username").get("value");
                         });
                         Y.log("[0] dropped".format(Y.one("#currentDB").get("value")), "info");
                         Y.one("#currentDB").set("value", "");
@@ -118,6 +119,7 @@ YUI({
                 Y.one('#hostname').set("innerHTML", Y.one("#host").get("value"));
                 loadingPanel.hide();
                 Y.log("Database Names succesfully loaded", "info");
+                sm.publish(sm.events.dbsChanged);
             } else {
                 var error = parsedResponse.response.error;
                 Y.log("Could not load databases. Message from server: [0]. Error Code from server:[1] ".format(error.message, error.code), "error");
@@ -138,13 +140,15 @@ YUI({
     }
 
     function getParameters() {
-        var params = [];
+        var params = [], token;
         var fullUrl = window.location.search;
-        while (fullUrl.indexOf("&") !== -1) {
-            params.push(fullUrl.substring(fullUrl.indexOf("=") + 1, fullUrl.indexOf("&")));
-            fullUrl = fullUrl.substring(fullUrl.indexOf("&") + 1);
+        var dbInfo= fullUrl.substring(fullUrl.indexOf("=")+1);
+        while (dbInfo.indexOf("_") !== -1) {
+            token = dbInfo.substring(0, dbInfo.indexOf("_"));
+			dbInfo = dbInfo.substring(dbInfo.indexOf("_")+1);
+            params.push(token);
         }
-        params.push(fullUrl.substring(fullUrl.indexOf("=") + 1));
+        params.push(dbInfo); // last token
         return params;
     }
 
@@ -153,10 +157,9 @@ YUI({
         loadingPanel.show();
         dbDiv = Y.one('#dbNames ul.lists');
         var params = getParameters();
-        Y.log(params[0], "info");
-        Y.one("#tokenID").set("value", params[0]);
-        Y.one("#username").set("value", params[1]);
-        Y.one("#host").set("value", params[2]);
+        Y.one("#host").set("value", params[0]);
+        Y.one("#port").set("value", params[1]);
+        Y.one("#username").set("value", params[2]);
         var request = Y.io(MV.URLMap.getDBs(),
                            // configuration for loading the database names
                            {

@@ -136,12 +136,6 @@
 			<fileset dir="${app.dir}">
 			</fileset>
 		</war>
-		<!-- Copy war to base directory -->
-		<copy todir="${basedir}">
-			<fileset dir="${staging.dir}">
-				<include name="mViewer.war" />
-			</fileset>
-		</copy>
 	</target>
 
 	<!-- docs -->
@@ -192,7 +186,10 @@
 	<target name="jslint">
 		<jsl:jslint haltOnFailure="true" options="es5,evil,fragment,forin,continue">
 			<formatter type="plain" />
-			<fileset dir="${js.src.dir}" includes="*.js" />
+			<fileset dir="${js.src.dir}" includes="*.js">
+              <exclude name="**/*-min.js" />
+              <exclude name="**/jQuery*.js" />
+            </fileset>
 		</jsl:jslint>
 	</target>
 
@@ -208,11 +205,15 @@
 	<target name="clean" description="Cleans up all the staging resources and log files">
 		<delete dir="${staging.dir}" />
 		<delete dir="${test.reports.dir}" />
-		<delete dir="${basdir}/logs" />
+		<delete file="${basedir}/mViewer.log" />
 	</target>
 
 
-	<target name="start" depends="compile, jar, war-staging" description="Starts the jetty server with the war deployed. Working on it yet.">
-
+	<target name="start" depends="compile, jar, war-staging, war" description="Starts the winstone server with the war deployed.">
+		<java jar="${src.dir}/tools/winstone-0.9.10.jar" fork="true">
+			<arg value="--httpPort=8080"/>
+			<arg value="--ajp13Port=-1" />
+			<arg value="--warfile=${staging.dir}/${app.war}" />
+		</java>
 	</target>
 </project>

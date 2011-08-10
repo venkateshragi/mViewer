@@ -22,52 +22,62 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
 package com.imaginea.mongodb.common.exceptions;
 
 /**
- * Defines Exception generated when a User tries to insert a Duplicate
- * collection which is not permitted. This class extends CollectionException
- * which is the General Exception for all operations on Collections.
- *
+ * Defines all the Exceptions generated while performing any operation in
+ * MongoDb. This class extends Exception and is used to insert ErrorCode in the
+ * Exception hierarchy for this application.
+ * 
  * @author Rachit Mittal
- *
+ * @since 1 Aug 2011
+ * 
  */
-public class DuplicateCollectionException extends CollectionException {
+public class ApplicationException extends Exception {
 
 	private static final long serialVersionUID = 1L;
 
+	private String errorCode;
+
 	/**
-	 * Creates a new DuplicateCollectionException with errorcode and message and
-	 * a cause of the Used to catch a exception and throw a new one with cause
-	 * of previous in it.
+	 * Creates a new ApplicationException with errorcode and message.
 	 * 
-	 * 
+	 * @param errorCode
+	 *            : ErrorCode of the Exception thrown
 	 * @param message
 	 *            : A description about the Error.
-	 * 
 	 */
-	public DuplicateCollectionException(String message) {
-		super(ErrorCodes.COLLECTION_ALREADY_EXISTS, message);
 
+	public ApplicationException(String errorCode, String message) {
+		super(message);
+		this.errorCode = errorCode;
 	}
 
 	/**
-	 * Creates a new DuplicateCollectionException along with cause of caught
-	 * Exception to be appended.
+	 * Creates a new ApplicationException with errorcode and message and
+	 * appending the cause of a caught exception.
 	 * 
-	 * 
+	 * @param errorCode
+	 *            : ErrorCode of the Exception thrown
 	 * @param message
 	 *            : A description about the Error.
-	 * 
 	 * @param cause
 	 *            : Cause of the previous Exception. This is appended in the new
-	 *            DuplicateCollectionException formed here.
+	 *            DatabaseException formed here.
 	 */
-	public DuplicateCollectionException(String message,
-			Throwable cause) {
-		super(ErrorCodes.COLLECTION_ALREADY_EXISTS, message, cause);
 
+	public ApplicationException(String errorCode, String message, Throwable cause) {
+		super(message, cause);
+		this.errorCode = errorCode;
+	}
+
+	/**
+	 * Return the error code of an exeption.
+	 * 
+	 * @return the errorcode
+	 */
+	public String getErrorCode() {
+		return this.errorCode;
 	}
 
 }

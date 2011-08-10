@@ -27,15 +27,12 @@ package com.imaginea.mongodb.services;
 
 import static org.junit.Assert.*;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -43,13 +40,9 @@ import org.junit.Test;
 
 import com.imaginea.mongodb.common.ConfigMongoInstanceProvider;
 import com.imaginea.mongodb.common.MongoInstanceProvider;
-import com.imaginea.mongodb.common.exceptions.DatabaseException;
-import com.imaginea.mongodb.common.exceptions.DeleteDatabaseException;
+import com.imaginea.mongodb.common.exceptions.ApplicationException; 
 import com.imaginea.mongodb.common.exceptions.ErrorCodes;
-import com.imaginea.mongodb.common.exceptions.InsertDatabaseException;
-import com.imaginea.mongodb.common.exceptions.MongoHostUnknownException;
-import com.imaginea.mongodb.common.exceptions.ValidationException;
-import com.imaginea.mongodb.requestdispatchers.BaseRequestDispatcher;
+import com.imaginea.mongodb.requestdispatchers.TestingTemplate;
 import com.imaginea.mongodb.requestdispatchers.UserLogin;
 import com.mongodb.Mongo;
 import com.mongodb.MongoException;
@@ -62,7 +55,8 @@ import com.mongodb.MongoException;
  * @since 16 July 2011
  * 
  */
-public class DatabaseServiceImplTest extends BaseRequestDispatcher {
+
+public class DatabaseServiceImplTest extends TestingTemplate {
 
 	/**
 	 * Instance of class to be tested.
@@ -80,29 +74,18 @@ public class DatabaseServiceImplTest extends BaseRequestDispatcher {
 	private static Logger logger = Logger.getLogger(DatabaseServiceImplTest.class);
 
 	private static final String logConfigFile = "src/main/resources/log4j.properties";
-	 
-	
+
 	/**
 	 * Constructs a mongoInstanceProvider Object
-	 * @throws Exception 
 	 */
-	public DatabaseServiceImplTest() throws Exception {
-		try {
-		 
-			mongoInstanceProvider = new ConfigMongoInstanceProvider();
-			PropertyConfigurator.configure(logConfigFile);
-			
-		} catch (FileNotFoundException e) {
-			formErrorResponse(logger, e.getMessage(), ErrorCodes.FILE_NOT_FOUND_EXCEPTION, e.getStackTrace(), "ERROR");
-			throw e;
-		} catch (MongoHostUnknownException e) {
-			formErrorResponse(logger, e.getMessage(), e.getErrorCode(), e.getStackTrace(), "ERROR");
-			throw e;
-
-		} catch (IOException e) {
-			formErrorResponse(logger, e.getMessage(), ErrorCodes.IO_EXCEPTION, e.getStackTrace(), "ERROR");
-			throw e;
-		}
+	public DatabaseServiceImplTest() {
+		ErrorTemplate.execute(logger, new ResponseCallback() {
+			public Object execute() throws Exception {
+				mongoInstanceProvider = new ConfigMongoInstanceProvider();
+				PropertyConfigurator.configure(logConfigFile);  
+				return null;
+			}
+		});
 	}
 
 	/**
@@ -114,30 +97,23 @@ public class DatabaseServiceImplTest extends BaseRequestDispatcher {
 	 */
 	@Before
 	public void instantiateTestClass() {
-
 		// Creates Mongo Instance.
 		mongoInstance = mongoInstanceProvider.getMongoInstance();
-
-		if (logger.isInfoEnabled()) {
-			logger.info("Add User to maps in UserLogin servlet");
-		}
 		// Add user to mappings in userLogin for authentication
-		String userMappingKey = "username_" + mongoInstance.getAddress() + "_" + mongoInstance.getConnectPoint();
-
-		UserLogin.userToMongoInstanceMapping.put(userMappingKey, mongoInstance);
+		String dbInfo = mongoInstance.getAddress() + "_" + mongoInstance.getConnectPoint();
+		UserLogin.mongoConfigToInstanceMapping.put(dbInfo, mongoInstance);
 		// Class to be tested
-		testDbService = new DatabaseServiceImpl(userMappingKey);
+		testDbService = new DatabaseServiceImpl(dbInfo);
 	}
 
 	/**
-	 * Tests get databases list service function of Mongo Db. Hereby we first create a
-	 * Database and check whether get Service shows that Db in the list of Db
-	 * Names
+	 * Tests get databases list service function of Mongo Db. Hereby we first
+	 * create a Database and check whether get Service shows that Db in the list
+	 * of Db Names
 	 * 
-	 * @throws DatabaseException
 	 */
 	@Test
-	public void getDbList() throws DatabaseException {
+	public void getDbList() {
 
 		// ArrayList of several test Objects - possible inputs
 		List<String> testDbNames = new ArrayList<String>();
@@ -146,54 +122,39 @@ public class DatabaseServiceImplTest extends BaseRequestDispatcher {
 		testDbNames.add("admin");
 		testDbNames.add(null);
 		testDbNames.add("");
-
-		if (logger.isInfoEnabled()) {
-			logger.info("Testing GetDb service");
-		}
-		for (String dbName : testDbNames) {
-			if (logger.isInfoEnabled()) {
-				logger.info("Test Case : Db [ " + dbName + "]");
-				logger.info("Create a Db first");
-			}
-			if (dbName != null) {
-				if (!dbName.equals("")) {
-					if (!mongoInstance.getDatabaseNames().contains(dbName)) {
-						mongoInstance.getDB(dbName).getCollectionNames();
+		for (final String dbName : testDbNames) {
+			ErrorTemplate.execute(logger, new ResponseCallback() {
+				public Object execute() throws Exception {
+					try {
+						// Create a Database
+						if (dbName != null) {
+							if (!"".equals(dbName)) {
+								if (!mongoInstance.getDatabaseNames().contains(dbName)) {
+									mongoInstance.getDB(dbName).getCollectionNames();
+								}
+							}
+						}
+						// Get list using service
+						List<String> dbNames = testDbService.getDbList();
+						if (dbName == null) {
+							assert (!dbNames.contains(dbName));
+						} else if ("".equals(dbName)) {
+							assert (!dbNames.contains(dbName));
+						} else if (dbName.equals("admin")) {
+							assert (dbNames.contains(dbName));
+						} else {
+							assert (dbNames.contains(dbName));
+							// Db not populate by test Cases
+							mongoInstance.dropDatabase(dbName);
+						}
+					} catch (MongoException m) // while dropping Db
+					{
+						ApplicationException e = new ApplicationException(ErrorCodes.GET_DB_LIST_EXCEPTION, "Error Testing Database List", m.getCause());
+						throw e;
 					}
+					return null;
 				}
-			}
-
-			List<String> dbNames;
-			try {
-				dbNames = testDbService.getDbList();
-				if (logger.isInfoEnabled()) {
-					logger.info(" Response from Service : [" + dbNames + "]");
-				}
-				if (dbName == null) {
-					assert (!dbNames.contains(dbName));
-				} else if (dbName.equals("")) {
-					assert (!dbNames.contains(dbName));
-				} else if (dbName.equals("admin")) {
-					assert (dbNames.contains(dbName));
-				} else {
-					assert (dbNames.contains(dbName));
-					// Db not populate by test Cases
-					mongoInstance.dropDatabase(dbName);
-				}
-
-			} catch (DatabaseException e) {
-				formErrorResponse(logger, e.getMessage(), e.getErrorCode(), e.getStackTrace(), "ERROR");
-				assert (true);
-
-			} catch (MongoException m) // while dropping Db
-			{
-				DatabaseException e = new DatabaseException(ErrorCodes.GET_DB_LIST_EXCEPTION, "Error Testing Database List", m.getCause());
-				formErrorResponse(logger, e.getMessage(), e.getErrorCode(), e.getStackTrace(), "ERROR");
-				throw e;
-			}
-		}
-		if (logger.isInfoEnabled()) {
-			logger.info("Test Completed");
+			});
 		}
 	}
 
@@ -202,58 +163,41 @@ public class DatabaseServiceImplTest extends BaseRequestDispatcher {
 	 * a new database using the Service and check if the database created is
 	 * present in the list of databases in Mongo.
 	 * 
-	 * @throws DatabaseException
 	 */
 	@Test
-	public void createDb() throws DatabaseException {
-		if (logger.isInfoEnabled()) {
-			logger.info("Testing CreateDb service");
-		}
+	public void createDb() {
+
 		// ArrayList of several test Objects - possible inputs
 		List<String> testDbNames = new ArrayList<String>();
 		// Add some test Cases.
 		testDbNames.add("random");
 		testDbNames.add("");
 		testDbNames.add(null);
-		for (String dbName : testDbNames) {
-
-			try {
-
-				if (logger.isInfoEnabled()) {
-					logger.info("Create Db using the Service");
+		for (final String dbName : testDbNames) {
+			ErrorTemplate.execute(logger, new ResponseCallback() {
+				public Object execute() throws Exception {
+					try {
+						// Create a Database using service
+						testDbService.createDb(dbName);
+						// Get Db List
+						List<String> dbNames = mongoInstance.getDatabaseNames();
+						if (dbName == null) {
+							assert (!dbNames.contains(dbName));
+						} else if ("".equals(dbName)) {
+							assert (!dbNames.contains(dbName));
+						} else {
+							assert (dbNames.contains(dbName));
+							// Db not populate by test Cases
+							mongoInstance.dropDatabase(dbName);
+						}
+					} catch (MongoException m) {
+						ApplicationException e = new ApplicationException(ErrorCodes.DB_CREATION_EXCEPTION, "Error Testing Database insert operation", m.getCause());
+						formErrorResponse(logger, e);
+						throw e;
+					}
+					return null;
 				}
-				testDbService.createDb(dbName);
-
-				if (logger.isInfoEnabled()) {
-					logger.info("Get List of Databases from Mongo");
-				}
-				List<String> dbNames = mongoInstance.getDatabaseNames();
-				if (dbName == null) {
-					assert (!dbNames.contains(dbName));
-				} else if (dbName.equals("")) {
-					assert (!dbNames.contains(dbName));
-				} else {
-					assert (dbNames.contains(dbName));
-					// Db not populate by test Cases
-					mongoInstance.dropDatabase(dbName);
-				}
-
-			} catch (DatabaseException e) {
-				formErrorResponse(logger, e.getMessage(), e.getErrorCode(), e.getStackTrace(), "ERROR");
-				assert (true);
-
-			} catch (ValidationException e) {
-				formErrorResponse(logger, e.getMessage(), e.getErrorCode(), e.getStackTrace(), "ERROR");
-				assert (true);
-
-			} catch (MongoException m) {
-				InsertDatabaseException e = new InsertDatabaseException("Error Testing Database insert operation", m.getCause());
-				formErrorResponse(logger, e.getMessage(), e.getErrorCode(), e.getStackTrace(), "ERROR");
-				throw e;
-			}
-			if (logger.isInfoEnabled()) {
-				logger.info("Test Completed");
-			}
+			});
 		}
 	}
 
@@ -262,15 +206,11 @@ public class DatabaseServiceImplTest extends BaseRequestDispatcher {
 	 * database using the Service and check if the database created is present
 	 * in the list of databases in Mongo.
 	 * 
-	 * @throws DatabaseException
 	 */
 
 	@Test
-	public void dropDb() throws DatabaseException {
+	public void dropDb() {
 
-		if (logger.isInfoEnabled()) {
-			logger.info("Testing drop database service");
-		}
 		// ArrayList of several test Objects - possible inputs
 		List<String> testDbNames = new ArrayList<String>();
 		// Add some test Cases.
@@ -278,60 +218,38 @@ public class DatabaseServiceImplTest extends BaseRequestDispatcher {
 		testDbNames.add("");
 		testDbNames.add(null);
 
-		for (String dbName : testDbNames) {
-
-			try {
-
-				if (logger.isInfoEnabled()) {
-					logger.info(" Create testDb if not present");
-				}
-				if (dbName != null) {
-					if (!dbName.equals("")) {
-						if (!mongoInstance.getDatabaseNames().contains(dbName)) {
-							mongoInstance.getDB(dbName).getCollectionNames();
+		for (final String dbName : testDbNames) {
+			ErrorTemplate.execute(logger, new ResponseCallback() {
+				public Object execute() throws Exception {
+					// Create a Db
+					try {
+						if (dbName != null) {
+							if (!"".equals(dbName)) {
+								if (!mongoInstance.getDatabaseNames().contains(dbName)) {
+									mongoInstance.getDB(dbName).getCollectionNames();
+								}
+							}
 						}
+						// Drop using service
+						testDbService.dropDb(dbName);
+						List<String> dbNames = mongoInstance.getDatabaseNames();
+						if (dbName == null) {
+							assert (!dbNames.contains(dbName));
+						} else if ("".equals(dbName)) {
+							assert (!dbNames.contains(dbName));
+						} else {
+							assert (dbNames.contains(dbName));
+							// Db not populate by test Cases
+							mongoInstance.dropDatabase(dbName);
+						}
+					} catch (MongoException m) {
+						ApplicationException e = new ApplicationException(ErrorCodes.DB_DELETION_EXCEPTION, "Error Testing Database delete operation", m.getCause());
+						throw e;
 					}
+					return null;
 				}
-
-				if (logger.isInfoEnabled()) {
-					logger.info("Delete Db using the Service");
-				}
-
-				testDbService.dropDb(dbName);
-
-				if (logger.isInfoEnabled()) {
-					logger.info("Get List of Databases from Mongo");
-				}
-				List<String> dbNames = mongoInstance.getDatabaseNames();
-
-				if (dbName == null) {
-					assert (!dbNames.contains(dbName));
-				} else if (dbName.equals("")) {
-					assert (!dbNames.contains(dbName));
-				} else {
-					assert (dbNames.contains(dbName));
-					// Db not populate by test Cases
-					mongoInstance.dropDatabase(dbName);
-				}
-
-			} catch (DatabaseException e) {
-				formErrorResponse(logger, e.getMessage(), e.getErrorCode(), e.getStackTrace(), "ERROR");
-				assert (true);
-
-			} catch (ValidationException e) {
-				formErrorResponse(logger, e.getMessage(), e.getErrorCode(), e.getStackTrace(), "ERROR");
-				assert (true);
-
-			} catch (MongoException m) {
-				DeleteDatabaseException e = new DeleteDatabaseException("Error Testing Database delete operation", m.getCause());
-				formErrorResponse(logger, e.getMessage(), e.getErrorCode(), e.getStackTrace(), "ERROR");
-				throw e;
-			}
-			if (logger.isInfoEnabled()) {
-				logger.info("Test Completed");
-			}
+			});
 		}
-
 	}
 
 	/**
@@ -340,67 +258,46 @@ public class DatabaseServiceImplTest extends BaseRequestDispatcher {
 	 * Hereby we create an empty Db and verify that the collections field in
 	 * database statistics is empty.
 	 * 
-	 * @throws DatabaseException
-	 *             ,JSONException
 	 */
 	@Test
-	public void getDbStats() throws JSONException, DatabaseException {
-		if (logger.isInfoEnabled()) {
-			logger.info("Testing Get Db Stats Service");
-		}
+	public void getDbStats() {
+
 		// ArrayList of several test Objects - possible inputs
 		List<String> testDbNames = new ArrayList<String>();
 		// Add some test Cases.
 		testDbNames.add("random");
 
-		for (String dbName : testDbNames) {
-			try {
-
-				if (logger.isInfoEnabled()) {
-					logger.info("Create an empty database");
-				}
-				if (mongoInstance.getDatabaseNames().contains(dbName)) {
-					// Delete if exist
-					mongoInstance.dropDatabase(dbName);
-				}
-				mongoInstance.getDB(dbName).getCollectionNames(); // Create
-
-				JSONArray dbStats = testDbService.getDbStats(dbName);
-
-				for (int i = 0; i < dbStats.length(); i++) {
-					JSONObject temp = (JSONObject) dbStats.get(i);
-					if (temp.get("Key").equals("collections")) {
-						int noOfCollections = Integer.parseInt((String) temp.get("Value"));
-						if (logger.isInfoEnabled()) {
-							logger.info("Number of Collections : " + noOfCollections);
+		for (final String dbName : testDbNames) {
+			ErrorTemplate.execute(logger, new ResponseCallback() {
+				public Object execute() throws Exception {
+					try {
+						if (mongoInstance.getDatabaseNames().contains(dbName)) {
+							// Delete if Db exist
+							mongoInstance.dropDatabase(dbName);
 						}
-						assertEquals(noOfCollections, 0); // As Empty Db
-						break;
+						// Create an empty db
+						mongoInstance.getDB(dbName).getCollectionNames();
+						JSONArray dbStats = testDbService.getDbStats(dbName);
+
+						for (int i = 0; i < dbStats.length(); i++) {
+							JSONObject temp = (JSONObject) dbStats.get(i);
+							if (temp.get("Key").equals("collections")) {
+								int noOfCollections = Integer.parseInt((String) temp.get("Value"));
+							 
+								assertEquals(noOfCollections, 0); // As Empty Db
+								break;
+							}
+						}
+					} catch (MongoException m) {
+						ApplicationException e = new ApplicationException(ErrorCodes.GET_DB_STATS_EXCEPTION, "Error Testing Database stats operation", m.getCause());
+						throw e;
 					}
+					return null;
 				}
-
-			} catch (JSONException e) {
-				formErrorResponse(logger, e.getMessage(), ErrorCodes.JSON_EXCEPTION, e.getStackTrace(), "ERROR");
-				throw e;
-			} catch (DatabaseException e) {
-				formErrorResponse(logger, e.getMessage(), e.getErrorCode(), e.getStackTrace(), "ERROR");
-				assert (true);
-
-			} catch (ValidationException e) {
-				formErrorResponse(logger, e.getMessage(), e.getErrorCode(), e.getStackTrace(), "ERROR");
-				assert (true);
-
-			} catch (MongoException m) {
-				DatabaseException e = new DatabaseException(ErrorCodes.GET_DB_STATS_EXCEPTION, "Error Testing Database stats operation", m.getCause());
-				formErrorResponse(logger, e.getMessage(), e.getErrorCode(), e.getStackTrace(), "ERROR");
-				throw e;
-			}
-		}
-		if (logger.isInfoEnabled()) {
-			logger.info("Test Completed");
+			});
 		}
 	}
-	
+
 	@AfterClass
 	public static void destroyMongoProcess() {
 		mongoInstance.close();

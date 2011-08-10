@@ -24,58 +24,46 @@
  */
 package com.imaginea.mongodb.common.exceptions;
 
-
 /**
  * Defines Exception generated when Mongo Host is not found. This class extends
  * UnknownHostException generated when host is not found with an <errorCode>
  * introduced.
- *
+ * 
  * @author Rachit Mittal
- *
+ * 
  */
 
-public class MongoHostUnknownException extends Exception {
+public class MongoHostUnknownException extends ApplicationException {
 
-	private static final long serialVersionUID = 1L;
-	private String errorCode;
+    private static final long serialVersionUID = 1L;
 
-	/**
-	 * Creates a new MongoNotFoundException with errorcode and message.
-	 * 
-	 * 
-	 * @param message
-	 *            : A description about the Error.
-	 */
-	public MongoHostUnknownException(String message) {
-		super(message);
-		this.errorCode = ErrorCodes.HOST_UNKNOWN;
-	}
+    /**
+     * Creates a new MongoNotFoundException with errorcode and message.
+     * 
+     * 
+     * @param message
+     *            : A description about the Error.
+     */
+    public MongoHostUnknownException(String message) {
+        super(ErrorCodes.HOST_UNKNOWN, message);
+    }
 
-	/**
-	 * Creates a new MongoHostUnknownException along with cause of caught
-	 * Exception to be appended.
-	 * 
-	 * 
-	 * @param message
-	 *            : A description about the Error.
-	 * 
-	 * @param cause
-	 *            : Cause of the previous Exception. This is appended in the new
-	 *            MongoHostUnknownException formed here.
-	 */
-	public MongoHostUnknownException(String message,
-			Throwable cause) {
-		super(message, cause);
-		this.errorCode = ErrorCodes.HOST_UNKNOWN;
-	}
+    /**
+     * Creates a new MongoHostUnknownException along with cause of caught
+     * Exception to be appended.
+     * 
+     * 
+     * @param message
+     *            : A description about the Error.
+     * 
+     * @param cause
+     *            : Cause of the previous Exception. This is appended in the new
+     *            MongoHostUnknownException formed here.
+     */
+    public MongoHostUnknownException(String message, Throwable cause) {
+        super(ErrorCodes.HOST_UNKNOWN, message, cause);
+    }
 
-	/**
-	 * get the errorcode of exception.
-	 *
-	 * @return the errorCode
-	 */
-	public String getErrorCode() {
-		return errorCode;
-	}
+    
 
 }

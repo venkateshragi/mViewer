@@ -73,11 +73,11 @@ public class DocumentServiceImpl implements DocumentService {
 	 * based on a userMappingKey which is recieved from the database request
 	 * dispatcher and is obtained from tokenId of user.
 	 * 
-	 * @param userMappingKey
+	 * @param dbInfo
 	 *            A combination of username,mongoHost and mongoPort
 	 */
-	public DocumentServiceImpl(String userMappingKey) {
-		mongoInstanceProvider = new SessionMongoInstanceProvider(userMappingKey);
+	public DocumentServiceImpl(String dbInfo) {
+		mongoInstanceProvider = new SessionMongoInstanceProvider(dbInfo);
 	}
 
 	/**
@@ -123,9 +123,7 @@ public class DocumentServiceImpl implements DocumentService {
 	 * 
 	 */
 
-	public ArrayList<DBObject> getQueriedDocsList(String dbName,
-			String collectionName, DBObject query, DBObject keys, int limit,
-			int skip) throws DatabaseException, CollectionException,
+	public ArrayList<DBObject> getQueriedDocsList(String dbName, String collectionName, DBObject query, DBObject keys, int limit, int skip) throws DatabaseException, CollectionException,
 			DocumentException, ValidationException {
 
 		mongoInstance = mongoInstanceProvider.getMongoInstance();
@@ -148,23 +146,18 @@ public class DocumentServiceImpl implements DocumentService {
 		ArrayList<DBObject> dataList = new ArrayList<DBObject>();
 		try {
 			if (!mongoInstance.getDatabaseNames().contains(dbName)) {
-				throw new UndefinedDatabaseException("DB with name [" + dbName
-						+ "]DOES_NOT_EXIST");
+				throw new UndefinedDatabaseException("DB with name [" + dbName + "]DOES_NOT_EXIST");
 			}
 
-			if (!mongoInstance.getDB(dbName).getCollectionNames()
-					.contains(collectionName)) {
-				throw new UndefinedCollectionException("Collection with name ["
-						+ collectionName + "] DOES NOT EXIST in Database ["
-						+ dbName + "]");
+			if (!mongoInstance.getDB(dbName).getCollectionNames().contains(collectionName)) {
+				throw new UndefinedCollectionException("Collection with name [" + collectionName + "] DOES NOT EXIST in Database [" + dbName + "]");
 			}
 			if (keys.keySet().isEmpty()) {
 				keys.put("_id", 1); // For empty keys return all _id of all docs
 			}
 
 			// Return Queried Documents
-			DBCursor cursor = mongoInstance.getDB(dbName)
-					.getCollection(collectionName).find(query, keys);
+			DBCursor cursor = mongoInstance.getDB(dbName).getCollection(collectionName).find(query, keys);
 			cursor.limit(limit);
 			cursor.skip(skip);
 
@@ -174,8 +167,7 @@ public class DocumentServiceImpl implements DocumentService {
 				}
 			}
 		} catch (MongoException e) {
-			throw new DocumentException(ErrorCodes.GET_DOCUMENT_LIST_EXCEPTION,
-					"GET_DOCUMENT_LIST_EXCEPTION", e.getCause());
+			throw new DocumentException(ErrorCodes.GET_DOCUMENT_LIST_EXCEPTION, "GET_DOCUMENT_LIST_EXCEPTION", e.getCause());
 		}
 		return dataList;
 
@@ -218,9 +210,7 @@ public class DocumentServiceImpl implements DocumentService {
 	 * 
 	 */
 
-	public String insertDocument(String dbName, String collectionName,
-			DBObject document) throws DatabaseException, CollectionException,
-			DocumentException, ValidationException {
+	public String insertDocument(String dbName, String collectionName, DBObject document) throws DatabaseException, CollectionException, DocumentException, ValidationException {
 		mongoInstance = mongoInstanceProvider.getMongoInstance();
 		if (dbName == null) {
 			throw new EmptyDatabaseNameException("Database name is null");
@@ -240,15 +230,11 @@ public class DocumentServiceImpl implements DocumentService {
 		String result = null;
 		try {
 			if (!mongoInstance.getDatabaseNames().contains(dbName)) {
-				throw new UndefinedDatabaseException("DB [" + dbName
-						+ "] DOES NOT EXIST");
+				throw new UndefinedDatabaseException("DB [" + dbName + "] DOES NOT EXIST");
 			}
 
-			if (!mongoInstance.getDB(dbName).getCollectionNames()
-					.contains(collectionName)) {
-				throw new UndefinedCollectionException("COLLECTION [ "
-						+ collectionName + "] _DOES_NOT_EXIST in Db [ "
-						+ dbName + "]");
+			if (!mongoInstance.getDB(dbName).getCollectionNames().contains(collectionName)) {
+				throw new UndefinedCollectionException("COLLECTION [ " + collectionName + "] _DOES_NOT_EXIST in Db [ " + dbName + "]");
 			}
 
 			// _id also provided by user
@@ -260,16 +246,13 @@ public class DocumentServiceImpl implements DocumentService {
 			}
 			// MongoDb permits Duplicate document Insert
 
-			mongoInstance.getDB(dbName).getCollection(collectionName)
-					.insert(document);
+			mongoInstance.getDB(dbName).getCollection(collectionName).insert(document);
 			result = "Inserted Document with Data : [" + document + "]";
 		} catch (IllegalArgumentException e) {
 			// When error converting object Id
-			throw new DocumentException(ErrorCodes.INVALID_OBJECT_ID,
-					"INVALID_OBJECT_ID");
+			throw new DocumentException(ErrorCodes.INVALID_OBJECT_ID, "INVALID_OBJECT_ID");
 		} catch (MongoException e) {
-			throw new InsertDocumentException("DOCUMENT_CREATION_EXCEPTION",
-					e.getCause());
+			throw new InsertDocumentException("DOCUMENT_CREATION_EXCEPTION", e.getCause());
 		}
 		return result;
 	}
@@ -313,9 +296,7 @@ public class DocumentServiceImpl implements DocumentService {
 	 * 
 	 */
 
-	public String updateDocument(String dbName, String collectionName,
-			ObjectId id, DBObject newData) throws DatabaseException,
-			CollectionException, DocumentException, ValidationException {
+	public String updateDocument(String dbName, String collectionName, ObjectId id, DBObject newData) throws DatabaseException, CollectionException, DocumentException, ValidationException {
 
 		mongoInstance = mongoInstanceProvider.getMongoInstance();
 		if (dbName == null) {
@@ -336,15 +317,11 @@ public class DocumentServiceImpl implements DocumentService {
 		DBObject documentData = null;
 		try {
 			if (!mongoInstance.getDatabaseNames().contains(dbName)) {
-				throw new UndefinedDatabaseException("DB [" + dbName
-						+ "] DOES NOT EXIST");
+				throw new UndefinedDatabaseException("DB [" + dbName + "] DOES NOT EXIST");
 			}
 
-			if (!mongoInstance.getDB(dbName).getCollectionNames()
-					.contains(collectionName)) {
-				throw new UndefinedCollectionException("COLLECTION [ "
-						+ collectionName + "] _DOES_NOT_EXIST in Db [ "
-						+ dbName + "]");
+			if (!mongoInstance.getDB(dbName).getCollectionNames().contains(collectionName)) {
+				throw new UndefinedCollectionException("COLLECTION [ " + collectionName + "] _DOES_NOT_EXIST in Db [ " + dbName + "]");
 			}
 			if (id == null) {
 				throw new EmptyDocumentDataException("Document is empty");
@@ -352,18 +329,15 @@ public class DocumentServiceImpl implements DocumentService {
 
 			String temp = (String) newData.get("_id");
 			if (temp == null) {
-				throw new DocumentException(ErrorCodes.INVALID_OBJECT_ID,
-						"INVALID_OBJECT_ID");
+				throw new DocumentException(ErrorCodes.INVALID_OBJECT_ID, "INVALID_OBJECT_ID");
 			}
 			if (temp.equals("")) {
-				throw new DocumentException(ErrorCodes.INVALID_OBJECT_ID,
-						"INVALID_OBJECT_ID");
+				throw new DocumentException(ErrorCodes.INVALID_OBJECT_ID, "INVALID_OBJECT_ID");
 			}
 
 			ObjectId newId = new ObjectId(temp);
 			if (!newId.equals(id)) {
-				throw new DocumentException(ErrorCodes.INVALID_OBJECT_ID,
-						"Cannot Change Object Id of a document");
+				throw new DocumentException(ErrorCodes.INVALID_OBJECT_ID, "Cannot Change Object Id of a document");
 			} else {
 				// Id's equal but putting the id of old document still
 				// as newData as id of string type but we need ObjectId type
@@ -371,8 +345,7 @@ public class DocumentServiceImpl implements DocumentService {
 			}
 			DBObject query = new BasicDBObject("_id", id);
 
-			DBCollection collection = mongoInstance.getDB(dbName)
-					.getCollection(collectionName);
+			DBCollection collection = mongoInstance.getDB(dbName).getCollection(collectionName);
 			DBObject doc = collection.findOne(query);
 			if (doc == null) {
 				throw new UndefinedDocumentException("DOCUMENT_DOES_NOT_EXIST");
@@ -383,8 +356,7 @@ public class DocumentServiceImpl implements DocumentService {
 
 		} catch (IllegalArgumentException e) {
 			// When error converting object Id
-			throw new DocumentException(ErrorCodes.INVALID_OBJECT_ID,
-					"INVALID_OBJECT_ID");
+			throw new DocumentException(ErrorCodes.INVALID_OBJECT_ID, "INVALID_OBJECT_ID");
 
 		} catch (MongoException e) {
 			throw new UpdateDocumentException("DOCUMENT_UPDATE_EXCEPTION");
@@ -430,9 +402,7 @@ public class DocumentServiceImpl implements DocumentService {
 	 * 
 	 */
 
-	public String deleteDocument(String dbName, String collectionName,
-			ObjectId id) throws DatabaseException, CollectionException,
-			DocumentException, ValidationException {
+	public String deleteDocument(String dbName, String collectionName, ObjectId id) throws DatabaseException, CollectionException, DocumentException, ValidationException {
 		mongoInstance = mongoInstanceProvider.getMongoInstance();
 		if (dbName == null) {
 			throw new EmptyDatabaseNameException("Database name is null");
@@ -453,22 +423,15 @@ public class DocumentServiceImpl implements DocumentService {
 		DBObject documentData = null;
 		try {
 			if (!mongoInstance.getDatabaseNames().contains(dbName)) {
-				throw new UndefinedDatabaseException("DB [" + dbName
-						+ "] DOES NOT EXIST");
+				throw new UndefinedDatabaseException("DB [" + dbName + "] DOES NOT EXIST");
 			}
 
-			if (!mongoInstance.getDB(dbName).getCollectionNames()
-					.contains(collectionName)) {
-				throw new UndefinedCollectionException("COLLECTION [ "
-						+ collectionName + "] _DOES_NOT_EXIST in Db [ "
-						+ dbName + "]");
+			if (!mongoInstance.getDB(dbName).getCollectionNames().contains(collectionName)) {
+				throw new UndefinedCollectionException("COLLECTION [ " + collectionName + "] _DOES_NOT_EXIST in Db [ " + dbName + "]");
 			}
-			DBCollection coll = mongoInstance.getDB(dbName).getCollection(
-					collectionName);
+			DBCollection coll = mongoInstance.getDB(dbName).getCollection(collectionName);
 			if (coll.isCapped()) {
-				throw new DocumentException(
-						ErrorCodes.DELETING_FROM_CAPPED_COLLECTION,
-						"Cannot Delete From a Capped Collection");
+				throw new DocumentException(ErrorCodes.DELETING_FROM_CAPPED_COLLECTION, "Cannot Delete From a Capped Collection");
 			}
 			if (id == null) {
 				throw new EmptyDocumentDataException("Document is empty");
@@ -476,16 +439,14 @@ public class DocumentServiceImpl implements DocumentService {
 
 			DBObject query = new BasicDBObject();
 			query.put("_id", id);
-			DBCollection collection = this.mongoInstance.getDB(dbName)
-					.getCollection(collectionName);
+			DBCollection collection = this.mongoInstance.getDB(dbName).getCollection(collectionName);
 			documentData = collection.findOne(query);
 
 			if (documentData == null) {
 				throw new UndefinedDocumentException("DOCUMENT_DOES_NOT_EXIST");
 			}
 
-			mongoInstance.getDB(dbName).getCollection(collectionName)
-					.remove(documentData);
+			mongoInstance.getDB(dbName).getCollection(collectionName).remove(documentData);
 
 		} catch (MongoException e) {
 			throw new DeleteDocumentException("DOCUMENT_DELETION_EXCEPTION");

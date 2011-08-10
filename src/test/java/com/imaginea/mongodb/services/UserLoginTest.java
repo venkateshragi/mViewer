@@ -23,12 +23,10 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package com.imaginea.mongodb.services.servlet;
+package com.imaginea.mongodb.services;
 
 import static org.junit.Assert.*;
-
-import java.io.FileNotFoundException;
-import java.io.IOException;
+ 
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -39,17 +37,15 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.mock.web.MockHttpServletRequest;
-import com.imaginea.mongodb.common.ConfigMongoInstanceProvider;
-import com.imaginea.mongodb.common.DateProvider;
+import com.imaginea.mongodb.common.ConfigMongoInstanceProvider; 
 import com.imaginea.mongodb.common.MongoInstanceProvider;
+import com.imaginea.mongodb.common.exceptions.ApplicationException;
 import com.imaginea.mongodb.common.exceptions.ErrorCodes;
 import com.imaginea.mongodb.common.exceptions.MongoHostUnknownException;
 import com.imaginea.mongodb.requestdispatchers.BaseRequestDispatcher;
-import com.imaginea.mongodb.requestdispatchers.UserLogin;
-import com.mongodb.BasicDBObject;
+import com.imaginea.mongodb.requestdispatchers.UserLogin; 
 import com.mongodb.Mongo;
 import com.mongodb.MongoException;
-import com.mongodb.util.JSON;
 
 /**
  * Tests the UserLogin Resource functionality. Here we will try to register a
@@ -78,7 +74,7 @@ public class UserLoginTest extends BaseRequestDispatcher {
 	 * test username and password
 	 */
 	private String testUsername = "name";
-	private String testPassword = "pass"; 
+	private String testPassword = "pass";
 	private static final String logConfigFile = "src/main/resources/log4j.properties";
 
 	/**
@@ -87,36 +83,23 @@ public class UserLoginTest extends BaseRequestDispatcher {
 	 * file mongo.config
 	 */
 
-	public UserLoginTest() throws Exception {
-		try {
-
-			mongoInstanceProvider = new ConfigMongoInstanceProvider();
-			PropertyConfigurator.configure(logConfigFile);
-
-		} catch (FileNotFoundException e) {
-			formErrorResponse(logger, e.getMessage(),
-					ErrorCodes.FILE_NOT_FOUND_EXCEPTION, e.getStackTrace(),
-					"ERROR");
-			throw e;
-
-		} catch (MongoHostUnknownException e) {
-			formErrorResponse(logger, e.getMessage(), e.getErrorCode(),
-					e.getStackTrace(), "ERROR");
-			throw e;
-
-		} catch (IOException e) {
-			formErrorResponse(logger, e.getMessage(), ErrorCodes.IO_EXCEPTION,
-					e.getStackTrace(), "ERROR");
-		}
-
+	public UserLoginTest() {
+		ErrorTemplate.execute(logger, new ResponseCallback() {
+			public Object execute() throws Exception {
+				mongoInstanceProvider = new ConfigMongoInstanceProvider();
+				PropertyConfigurator.configure(logConfigFile);  
+				return null;
+			}
+		});
 	}
 
 	/**
 	 * Instantiates the class UserLogin which is to be tested and also gets a
 	 * mongo instance from mongo instance provider.
 	 */
+
 	@Before
-	public void setUpTestEnvironment() {
+	public void instantiateTestClass() {
 		testLoginResource = new UserLogin();
 		mongoInstance = mongoInstanceProvider.getMongoInstance();
 	}
@@ -125,53 +108,35 @@ public class UserLoginTest extends BaseRequestDispatcher {
 	 * Test Post login Request made by User to UserLogin resource for
 	 * authentication. Hereby we will check if a token ID is generated and also
 	 * will check if a mongoInstacne is set by the servlet.
+	 * 
+	 * 
 	 */
 
 	@Test
-	public void testUserLoginRequest() {
-		if (logger.isInfoEnabled()) {
-			logger.info("Testing Post Request for User Login ["
-					+ DateProvider.getDateTime() + "]");
-			logger.info("Insert User in admin table");
-		}
-		try {
-			mongoInstance.getDB("admin").addUser(testUsername,
-					testPassword.toCharArray());
-			String host = mongoInstance.getAddress().getHost();
-			Integer port = (Integer) (mongoInstance.getAddress().getPort());
-			HttpServletRequest request = new MockHttpServletRequest();
-			String resp = testLoginResource.authenticateUser(testUsername,
-					testPassword, host, port.toString(), request);
+	public void testUserLoginRequest() throws MongoHostUnknownException {
+		ErrorTemplate.execute(logger, new ResponseCallback() {
+			public Object execute() throws Exception {
+				try {
+					// Insert user in admin db
+					mongoInstance.getDB("admin").addUser(testUsername, testPassword.toCharArray());
+					String host = mongoInstance.getAddress().getHost();
+					Integer port = (Integer) (mongoInstance.getAddress().getPort());
+					HttpServletRequest request = new MockHttpServletRequest();
+					// Call Service for login
+					testLoginResource.authenticateUser(testUsername, testPassword, host, port.toString(), request);
+					// Check if we got a mongoInstance corresponding to our host
+					// and port.
+					String dbInfo = host + "_" + port;
+					Mongo m = UserLogin.mongoConfigToInstanceMapping.get(dbInfo);
+					assertNotNull(m);
 
-			if (logger.isInfoEnabled()) {
-				logger.info("Response: " + resp);
+				} catch (MongoException m) {
+					ApplicationException e = new ApplicationException(ErrorCodes.HOST_UNKNOWN, m.getMessage(), m);
+					throw e;
+				}
+				return null;
 			}
-
-			BasicDBObject dbObject = (BasicDBObject) JSON.parse(resp);
-			BasicDBObject result = (BasicDBObject) dbObject.get("response");
-			BasicDBObject token = (BasicDBObject) result.get("result");
-
-			// Token = null => Test Failure
-			assertNotNull(token);
-
-			// Now check if mongo set for this or not.
-			if (token != null) {
-				String user = UserLogin.tokenIDToUserMapping.get(token
-						.get("id"));
-				Mongo m = UserLogin.userToMongoInstanceMapping.get(user);
-				assertNotNull(m);
-			}
-
-			if (logger.isInfoEnabled()) {
-				logger.info("Test Completed  [" + DateProvider.getDateTime()
-						+ "]");
-			}
-
-		} catch (MongoException e) {
-			formErrorResponse(logger, e.getMessage(), ErrorCodes.HOST_UNKNOWN,
-					e.getStackTrace(), "ERROR");
-			throw e;
-		}
+		});
 	}
 
 	@After

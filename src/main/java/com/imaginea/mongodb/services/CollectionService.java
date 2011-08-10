@@ -21,7 +21,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 
 import com.imaginea.mongodb.common.exceptions.CollectionException;
-import com.imaginea.mongodb.common.exceptions.DatabaseException; 
+import com.imaginea.mongodb.common.exceptions.DatabaseException;
 import com.imaginea.mongodb.common.exceptions.ValidationException;
 
 /**
@@ -95,8 +95,7 @@ public interface CollectionService {
 	 *                throw super type of
 	 *                DuplicateCollectionException,InsertCollectionException
 	 */
-	public String insertCollection(String dbName, String collectionName, boolean capped, int size, int maxDocs) throws DatabaseException,
-			CollectionException, ValidationException;
+	public String insertCollection(String dbName, String collectionName, boolean capped, int size, int maxDocs) throws DatabaseException, CollectionException, ValidationException;
 
 	/**
 	 * Deletes a collection inside a database in mongo to which user is
@@ -158,6 +157,5 @@ public interface CollectionService {
 	 *                JSON Exception
 	 */
 
-	public JSONArray getCollStats(String dbName, String collectionName) throws DatabaseException, CollectionException, ValidationException,
-			JSONException;
+	public JSONArray getCollStats(String dbName, String collectionName) throws DatabaseException, CollectionException, ValidationException, JSONException;
 }

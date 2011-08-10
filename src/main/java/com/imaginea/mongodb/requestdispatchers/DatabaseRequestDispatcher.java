@@ -28,9 +28,6 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 
 import org.apache.log4j.Logger;
-import org.json.JSONObject;
-
-import com.imaginea.mongodb.common.DateProvider;
 import com.imaginea.mongodb.common.exceptions.ErrorCodes;
 import com.imaginea.mongodb.common.exceptions.InvalidHTTPRequestException;
 import com.imaginea.mongodb.services.DatabaseService;
@@ -53,14 +50,7 @@ import com.imaginea.mongodb.services.DatabaseServiceImpl;
  */
 @Path("/db")
 public class DatabaseRequestDispatcher extends BaseRequestDispatcher {
-	private final static Logger logger = Logger
-			.getLogger(DatabaseRequestDispatcher.class);
-
-	/**
-	 * Default constructor
-	 */
-	public DatabaseRequestDispatcher() {
-	}
+	private final static Logger logger = Logger.getLogger(DatabaseRequestDispatcher.class);
 
 	/**
 	 * Maps GET Request to get list of databases present in mongo db to a
@@ -68,55 +58,24 @@ public class DatabaseRequestDispatcher extends BaseRequestDispatcher {
 	 * this request and sent it to client. In case of any exception from the
 	 * service files an error object if formed.
 	 * 
-	 * @param tokenId
-	 *            a token Id given to every user at Login.
+	 * @param dbInfo
+	 *            Mongo Db Configuration provided by user to connect to.
 	 * @param request
 	 *            Get the HTTP request context to extract session parameters
 	 * @return String of JSON Format with list of all Databases.
 	 */
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
-	public String getDbList(@QueryParam("tokenId") final String tokenId,
-			@Context final HttpServletRequest request) {
+	public String getDbList(@QueryParam("dbInfo") final String dbInfo, @Context final HttpServletRequest request) {
 
-		if (logger.isInfoEnabled()) {
-			logger.info("Recieved a Get DB List Request ["
-					+ DateProvider.getDateTime() + "]");
-		}
-		String response = new ResponseTemplate().execute(logger,
-				new ResponseCallback() {
-					public String execute() throws Exception {
-						String response = validateTokenId(tokenId, logger,
-								request);
-						if (response != null) {
-							return response;
-						}
-						// Get User for a given Token Id
-						String userMappingkey = UserLogin.tokenIDToUserMapping
-								.get(tokenId);
-						if (userMappingkey == null) {
-							return formErrorResponse(logger,
-									"User not mapped to token Id",
-									ErrorCodes.INVALID_USER, null, "FATAL");
-						}
-						JSONObject temp = new JSONObject();
-						JSONObject resp = new JSONObject();
-						// Create Instance of Service File.
-						DatabaseService databaseService = new DatabaseServiceImpl(
-								userMappingkey);
-						// Get the result;
-						List<String> dbNames = databaseService.getDbList();
-						temp.put("result", dbNames);
-						resp.put("response", temp);
-						resp.put("totalRecords", dbNames.size());
-						response = resp.toString();
-						return response;
-					}
-				});
-		if (logger.isInfoEnabled()) {
-			logger.info("Request Completed [" + DateProvider.getDateTime()
-					+ "]");
-		}
+		String response = new ResponseTemplate().execute(logger, dbInfo, request, new ResponseCallback() {
+			public Object execute() throws Exception {
+				// TODO Using Service Provider
+				DatabaseService databaseService = new DatabaseServiceImpl(dbInfo);
+				List<String> dbNames = databaseService.getDbList();
+				return dbNames;
+			}
+		});
 		return response;
 	}
 
@@ -134,64 +93,48 @@ public class DatabaseRequestDispatcher extends BaseRequestDispatcher {
 	 *            database request and value DELETE for dropping a database.
 	 * @param request
 	 *            Get the HTTP request context to extract session parameters
-	 * @param tokenId
-	 *            a token Id given to every user at Login.
+	 * @param dbInfo
+	 *            Mongo Db Configuration provided by user to connect to.
 	 * @return : String with status of operation performed.
 	 */
 	@POST
 	@Path("/{dbName}")
 	@Produces(MediaType.APPLICATION_JSON)
-	public String postDbRequest(@PathParam("dbName") final String dbName,
-			@QueryParam("action") final String action,
-			@QueryParam("tokenId") final String tokenId,
+	public String postDbRequest(@PathParam("dbName") final String dbName, @QueryParam("action") final String action, @QueryParam("dbInfo") final String dbInfo,
 			@Context final HttpServletRequest request) {
-		if (logger.isInfoEnabled()) {
-			logger.info("Recieved POST Request for Db with action [ " + action
-					+ "] [" + DateProvider.getDateTime() + "]");
-		}
-		if (action == null) {
-			InvalidHTTPRequestException e = new InvalidHTTPRequestException(
-					ErrorCodes.ACTION_PARAMETER_ABSENT,
-					"ACTION_PARAMETER_ABSENT");
-			return formErrorResponse(logger, e.getMessage(), e.getErrorCode(),
-					null, "ERROR");
-		}
 
-		String response = new ResponseTemplate().execute(logger,
-				new ResponseCallback() {
-					public String execute() throws Exception {
-						String response = validateTokenId(tokenId, logger,
-								request);
-						if (response != null) {
-							return response;
-						}
-						// Get User for a given Token Id
-						String userMappingkey = UserLogin.tokenIDToUserMapping
-								.get(tokenId);
-						if (userMappingkey == null) {
-							return formErrorResponse(logger,
-									"User not mapped to token Id",
-									ErrorCodes.INVALID_USER, null, "FATAL");
-						}
-						// Create Instance of Service File.
-						DatabaseService databaseService = new DatabaseServiceImpl(
-								userMappingkey);
-						JSONObject temp = new JSONObject();
-						JSONObject resp = new JSONObject();
-						if (action.equals("PUT")) {
-							temp.put("result", databaseService.createDb(dbName));
-						} else if (action.equals("DELETE")) {
-							temp.put("result", databaseService.dropDb(dbName));
-						}
-						resp.put("response", temp);
-						response = resp.toString();
-						return response;
-					}
-				});
-		if (logger.isInfoEnabled()) {
-			logger.info("Request Completed [" + DateProvider.getDateTime()
-					+ "]");
+		if (action == null) {
+			InvalidHTTPRequestException e = new InvalidHTTPRequestException(ErrorCodes.ACTION_PARAMETER_ABSENT, "ACTION_PARAMETER_ABSENT");
+			return formErrorResponse(logger, e);
 		}
+		String response = new ResponseTemplate().execute(logger, dbInfo, request, new ResponseCallback() {
+			public Object execute() throws Exception {
+				DatabaseService databaseService = new DatabaseServiceImpl(dbInfo);
+				String status = null;
+				RequestMethod method = null;
+				for (RequestMethod m : RequestMethod.values()) {
+					if ((m.toString()).equals(action)) {
+						method = m;
+						break;
+					}
+				}
+				switch (method) {
+				case PUT: {
+					status = databaseService.createDb(dbName);
+					break;
+				}
+				case DELETE: {
+					status = databaseService.dropDb(dbName);
+					break;
+				}
+				default: {
+					status = "Action parameter value is wrong";
+					break;
+				}
+				}
+				return status;
+			}
+		});
 		return response;
 	}
 }

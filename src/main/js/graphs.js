@@ -16,8 +16,8 @@
 YUI({
     filter: 'raw'
 }).use("io-base", "node", "json-parse", "utility", function (Y) {
-    Y.namespace('com.imaginea.mongoV');
-    var MV = Y.com.imaginea.mongoV;
+    YUI.namespace('com.imaginea.mongoV');
+    var MV = YUI.com.imaginea.mongoV;
     var pollingTime = 5000;
     var combinedChart;
     var chartOptions = "<table width='30%'>";
@@ -148,7 +148,7 @@ YUI({
 
     function requestInitialData() {
         var fullUrl = window.location.search;
-        Y.one("#tokenID").set("value", fullUrl.substring(fullUrl.indexOf("=") + 1));
+        Y.one("#dbInfo").set("value", fullUrl.substring(fullUrl.indexOf("=") + 1));
         var sUrl = MV.URLMap.graphInitiate();
         var request = Y.io(sUrl, cfg);
     }
