@@ -65,6 +65,8 @@ import com.mongodb.util.JSON;
 public class DocumentRequestDispatcher extends BaseRequestDispatcher {
 	private final static Logger logger = Logger.getLogger(DocumentRequestDispatcher.class);
 
+
+
 	/**
 	 * Maps GET Request to get list of documents inside a collection inside a
 	 * database present in mongo db to a service function that returns the list.
@@ -216,7 +218,15 @@ public class DocumentRequestDispatcher extends BaseRequestDispatcher {
 
 				DocumentService documentService = new DocumentServiceImpl(dbInfo);
 				String result = null;
-				if ("PUT".equals(action)) {
+				RequestMethod method = null;
+				for (RequestMethod m : RequestMethod.values()) {
+					if ((m.toString()).equals(action)) {
+						method = m;
+						break;
+					}
+				}
+				switch (method) {
+				case PUT: {
 					if ("".equals(documentData)) {
 						UndefinedDocumentException e = new UndefinedDocumentException("Document Data Missing in Request Body");
 						result = formErrorResponse(logger, e);
@@ -224,7 +234,9 @@ public class DocumentRequestDispatcher extends BaseRequestDispatcher {
 						DBObject document = (DBObject) JSON.parse(documentData);
 						result = documentService.insertDocument(dbName, collectionName, document);
 					}
-				} else if ("DELETE".equals(action)) {
+					break;
+				}
+				case DELETE: {
 					if ("".equals(_id)) {
 						UndefinedDocumentException e = new UndefinedDocumentException("Document Data Missing in Request Body");
 						result = formErrorResponse(logger, e);
@@ -232,7 +244,9 @@ public class DocumentRequestDispatcher extends BaseRequestDispatcher {
 						ObjectId id = new ObjectId(_id);
 						result = documentService.deleteDocument(dbName, collectionName, id);
 					}
-				} else if ("POST".equals(action)) {
+					break;
+				}
+				case POST: {
 					if ("".equals(_id) || "".equals(keys)) {
 						UndefinedDocumentException e = new UndefinedDocumentException("Document Data Missing in Request Body");
 						formErrorResponse(logger, e);
@@ -243,6 +257,13 @@ public class DocumentRequestDispatcher extends BaseRequestDispatcher {
 						DBObject newDoc = (DBObject) JSON.parse(keys);
 						result = documentService.updateDocument(dbName, collectionName, id, newDoc);
 					}
+					break;
+				}
+
+				default: {
+					result = "Action parameter value is wrong";
+					break;
+				}
 				}
 				return result;
 			}

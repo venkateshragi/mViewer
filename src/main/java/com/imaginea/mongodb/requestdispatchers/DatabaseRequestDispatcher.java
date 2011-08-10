@@ -111,10 +111,26 @@ public class DatabaseRequestDispatcher extends BaseRequestDispatcher {
 			public Object execute() throws Exception {
 				DatabaseService databaseService = new DatabaseServiceImpl(dbInfo);
 				String status = null;
-				if ("PUT".equals(action)) {
+				RequestMethod method = null;
+				for (RequestMethod m : RequestMethod.values()) {
+					if ((m.toString()).equals(action)) {
+						method = m;
+						break;
+					}
+				}
+				switch (method) {
+				case PUT: {
 					status = databaseService.createDb(dbName);
-				} else if ("DELETE".equals(action)) {
+					break;
+				}
+				case DELETE: {
 					status = databaseService.dropDb(dbName);
+					break;
+				}
+				default: {
+					status = "Action parameter value is wrong";
+					break;
+				}
 				}
 				return status;
 			}

@@ -30,7 +30,7 @@ import javax.ws.rs.core.MediaType;
 
 import org.apache.log4j.Logger;
 import com.imaginea.mongodb.common.exceptions.ErrorCodes;
-import com.imaginea.mongodb.common.exceptions.InvalidHTTPRequestException;
+import com.imaginea.mongodb.common.exceptions.InvalidHTTPRequestException; 
 import com.imaginea.mongodb.services.CollectionService;
 import com.imaginea.mongodb.services.CollectionServiceImpl;
 
@@ -133,10 +133,27 @@ public class CollectionRequestDispatcher extends BaseRequestDispatcher {
 			public Object execute() throws Exception {
 				CollectionService collectionService = new CollectionServiceImpl(dbInfo);
 				String status = null;
-				if ("PUT".equals(action)) {
+				RequestMethod method = null;
+				for (RequestMethod m : RequestMethod.values()) {
+					if ((m.toString()).equals(action)) {
+						method = m;
+						break;
+					}
+				}
+				switch (method) {
+				case PUT: {
 					status = collectionService.insertCollection(dbName, collectionName, iscapped, size, maxDocs);
-				} else if ("DELETE".equals(action)) {
+
+					break;
+				}
+				case DELETE: {
 					status = collectionService.deleteCollection(dbName, collectionName);
+					break;
+				}
+				default: {
+					status = "Action parameter value is wrong";
+					break;
+				}
 				}
 				return status;
 			}
