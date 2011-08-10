@@ -15,8 +15,8 @@
  */
 
 YUI.add('yes-no-dialog', function(Y) {
-    Y.namespace('com.imaginea.mongoV');
-    var MV = Y.com.imaginea.mongoV;
+    YUI.namespace('com.imaginea.mongoV');
+    var MV = YUI.com.imaginea.mongoV;
     MV.showYesNoDialog = function(msg, handleYes, handleNo) {
         var simpleDialog = new YAHOO.widget.SimpleDialog("simpledialog", {
             width: "300px",

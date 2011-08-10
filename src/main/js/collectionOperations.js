@@ -16,7 +16,7 @@
 YUI({
     filter: 'raw'
 }).use("alert-dialog", "utility", "dialog-box", "yes-no-dialog", "io", "node", "json-parse", "event-delegate", "node-event-simulate", "stylize", "custom-datatable", function (Y) {
-    var MV = Y.com.imaginea.mongoV;
+    var MV = YUI.com.imaginea.mongoV;
     var sm = MV.StateManager;
     var collDiv = Y.one("#collNames ul.lists");
     // TODO make loading panel generic
@@ -125,10 +125,11 @@ YUI({
                 }
                 collDiv.set("innerHTML", collections);
                 loadingPanel.hide();
+                sm.publish(sm.events.collectionsChanged);
                 Y.log("Collection Names succesfully loaded", "info");
             } else {
                 var error = parsedResponse.response.error;
-                Y.log("Could not load collections. Message: [0]".format(error.message), "error");
+                Y.log("Could not load collections. Message: [0]".format(error.message), "error"); 
                 MV.showAlertDialog("Could not load Collections! [0]".format(MV.errorCodeMap[error.code]), MV.warnIcon);
                 loadingPanel.hide();
             }

@@ -17,7 +17,7 @@
 YUI({
     filter: 'raw'
 }).use("io", "json", "node", "utility", function (Y) {
-    var MV = Y.com.imaginea.mongoV;
+    var MV = YUI.com.imaginea.mongoV;
     var tryLogin = function (e) {
             var username = Y.one("#username").get("value").trim();
             var password = Y.one("#password").get("value").trim();
@@ -90,4 +90,5 @@ YUI({
     });
 
     Y.one("#login").on('click', tryLogin);
+    Y.one("#login").focus();
 });

@@ -16,8 +16,8 @@
 YUI({
     filter: 'raw'
 }).use("io-base", "node", "json-parse", "utility", function (Y) {
-    Y.namespace('com.imaginea.mongoV');
-    var MV = Y.com.imaginea.mongoV;
+    YUI.namespace('com.imaginea.mongoV');
+    var MV = YUI.com.imaginea.mongoV;
     var pollingTime = 5000;
     var combinedChart;
     var chartOptions = "<table width='30%'>";

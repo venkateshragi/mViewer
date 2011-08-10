@@ -15,8 +15,8 @@
  */
 // TODO send a custom handler if not provided run the default one
 YUI.add('alert-dialog', function (Y) {
-    Y.namespace('com.imaginea.mongoV');
-    Y.com.imaginea.mongoV.showAlertDialog = function (msg, ico, handler) {
+    YUI.namespace('com.imaginea.mongoV');
+    YUI.com.imaginea.mongoV.showAlertDialog = function (msg, ico, handler) {
         var simpleDialog = new YAHOO.widget.SimpleDialog("simpledialog", {
             width: "300px",
             fixedcenter: true,

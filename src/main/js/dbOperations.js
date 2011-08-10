@@ -18,9 +18,9 @@ YUI({
 }).use("alert-dialog", "utility", "dialog-box", "yes-no-dialog", "io-base", "node", "json-parse", "event-delegate", "node-event-simulate", "stylize", "custom-datatable", function (Y) {
     // TODO: make loading panel module
     var dbDiv, loadingPanel;
-    Y.namespace('com.imaginea.mongoV');
-    var MV = Y.com.imaginea.mongoV; 
-    var sm = MV.StateManager;
+    YUI.namespace('com.imaginea.mongoV');
+    var MV = YUI.com.imaginea.mongoV; 
+    var sm = YUI.com.imaginea.mongoV.StateManager;
 
     /* HANDLER FUNCTIONS */
     function addCollection(responseObject) {
@@ -119,6 +119,7 @@ YUI({
                 Y.one('#hostname').set("innerHTML", Y.one("#host").get("value"));
                 loadingPanel.hide();
                 Y.log("Database Names succesfully loaded", "info");
+                sm.publish(sm.events.dbsChanged);
             } else {
                 var error = parsedResponse.response.error;
                 Y.log("Could not load databases. Message from server: [0]. Error Code from server:[1] ".format(error.message, error.code), "error");

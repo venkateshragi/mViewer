@@ -17,7 +17,7 @@
 YUI({
     filter: 'raw'
 }).use("io", "json", "node", "utility", function (Y) {
-    var MV = Y.com.imaginea.mongoV;
+    var MV = YUI.com.imaginea.mongoV;
     var trySetLevel = function (e) {
             var index = document.getElementById("logLevel").selectedIndex;
             var logValue = document.getElementById("logLevel").options[index].text;

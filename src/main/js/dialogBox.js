@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 YUI.add('dialog-box', function (Y) {
-    Y.namespace('com.imaginea.mongoV');
-    var MV = Y.com.imaginea.mongoV;
+    YUI.namespace('com.imaginea.mongoV');
+    var MV = YUI.com.imaginea.mongoV;
 
     MV.getDialog = function Dialog(form, successHandler, failureHandler) {
         YAHOO.util.Dom.removeClass(form, "yui-pe-content");

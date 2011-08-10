@@ -16,8 +16,8 @@
 YUI({
     filter: 'raw'
 }).use("alert-dialog", "utility", "node", "event-delegate", "stylize", "custom-datatable", function (Y) {
-    Y.namespace('com.imaginea.mongoV');
-    var MV = Y.com.imaginea.mongoV;
+    YUI.namespace('com.imaginea.mongoV');
+    var MV = YUI.com.imaginea.mongoV;
 
     function handleHeaderOption(eventObject) {
         var menuOpt = eventObject.currentTarget.get("id");

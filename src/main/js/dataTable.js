@@ -15,7 +15,7 @@
  */
 
 YUI.add('custom-datatable', function(Y) {
-    Y.namespace('com.imaginea.mongoV');
+    YUI.namespace('com.imaginea.mongoV');
     /**
      * <p>custom-datatable creates a datatable with the following columns
      * <p>Currently it is used to make the datatable to show the collection and the
@@ -29,7 +29,7 @@ YUI.add('custom-datatable', function(Y) {
      * @param name
      *          <dd>(required)The name of the collection/database whose data is required.</dd>
      */
-    var MV = Y.com.imaginea.mongoV;
+    var MV = YUI.com.imaginea.mongoV;
     MV.createDatatable = function(path, name) {
         MV.mainBody.set("innerHTML", "");
         /**

@@ -13,9 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+var gRegistry = [];
 YUI.add('utility', function (Y) {
-    Y.namespace('com.imaginea.mongoV');
-    var MV = Y.com.imaginea.mongoV;
+    YUI.namespace('com.imaginea.mongoV');
+    var MV = YUI.com.imaginea.mongoV;
     // Check if String.prototype.format already exists because in future
 	// versions
     // format function can be added
@@ -251,10 +252,7 @@ YUI.add('utility', function (Y) {
     MV.header = Y.one("#mainBodyHeader");
     MV.warnIcon = YAHOO.widget.SimpleDialog.ICON_WARN;
     MV.infoIcon = YAHOO.widget.SimpleDialog.ICON_INFO;
-    MV.stateManager = {
-        
-    };
-    
+
     MV.StateManager = (function(){
         var self = this;
         var stateVariables = ['currentDB', 'currentColl', 'host', 'port','dbInfo'];
@@ -263,6 +261,13 @@ YUI.add('utility', function (Y) {
         }
         function setVal(key, value) {
             Y.one('#' + key).set("value", value);
+        }
+        function deliverEvent(eventName) {
+            var i = 0;
+            var callbackArray = gRegistry[eventName];
+            for (; i < callbackArray.length; i++) {
+                callbackArray[i].apply(this);
+            }
         }
         var exports = {};
         stateVariables.forEach(function(stateVariable){
@@ -288,6 +293,22 @@ YUI.add('utility', function (Y) {
                 currDBInfo = getVal('host') + "_" + getVal('port');
             }
             return currDBInfo;
+        };
+        exports.publish = function(eventName) {
+            if (gRegistry[eventName]) {
+                deliverEvent(eventName);
+            }
+        };
+        exports.subscribe = function(eventName, callback) {
+            if (gRegistry[eventName] === undefined) {
+                gRegistry[eventName] = [];
+            }
+            gRegistry[eventName].push(callback);
+        };
+        exports.events = {
+            collectionsChanged : 1,
+            dbsChanged : 2,
+            queryFired : 3
         };
         return exports;
 

@@ -186,7 +186,10 @@
 	<target name="jslint">
 		<jsl:jslint haltOnFailure="true" options="es5,evil,fragment,forin,continue">
 			<formatter type="plain" />
-			<fileset dir="${js.src.dir}" includes="*.js" />
+			<fileset dir="${js.src.dir}" includes="*.js">
+              <exclude name="**/*-min.js" />
+              <exclude name="**/jQuery*.js" />
+            </fileset>
 		</jsl:jslint>
 	</target>
 
