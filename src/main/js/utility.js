@@ -318,6 +318,9 @@ YUI.add('utility', function (Y) {
             }
             gRegistry[eventName].push(callback);
         };
+        exports.now = function() {
+            return new Date().getTime().toString();
+        };
         exports.events = {
             collectionsChanged : 1,
             dbsChanged : 2,
@@ -331,43 +334,43 @@ YUI.add('utility', function (Y) {
 
     MV.URLMap = {
         getDBs: function () {
-            return "services/db?dbInfo=[0]".format(sm.dbInfo());
+            return "services/db?dbInfo=[0]&ts=[1]".format(sm.dbInfo());
         },
         insertDB: function () {
-            return "services/db/[0]?dbInfo=[1]&action=PUT".format(sm.newName(), sm.dbInfo());
+            return "services/db/[0]?dbInfo=[1]&action=PUT&ts=[2]".format(sm.newName(), sm.dbInfo(), sm.now());
         },
         dropDB: function () {
-            return "services/db/[0]?dbInfo=[1]&action=DELETE".format(sm.currentDB(),sm.dbInfo());
+            return "services/db/[0]?dbInfo=[1]&action=DELETE&ts=[2]".format(sm.currentDB(),sm.dbInfo(), sm.now());
         },
         dbStatistics: function () {
-            return "services/stats/db/[0]?dbInfo=[1]".format(sm.currentDB(),sm.dbInfo());
+            return "services/stats/db/[0]?dbInfo=[1]&ts=[2]".format(sm.currentDB(),sm.dbInfo(), sm.now());
         },
         getColl: function () {
-            return "services/[0]/collection?dbInfo=[1]".format(sm.currentDB(),sm.dbInfo());
+            return "services/[0]/collection?dbInfo=[1]&ts=[2]".format(sm.currentDB(),sm.dbInfo(), sm.now());
         },
         insertColl: function () {
-            return "services/[0]/collection/[1]?dbInfo=[2]&action=PUT".format(sm.currentDB(),sm.newName(), sm.dbInfo());
+            return "services/[0]/collection/[1]?dbInfo=[2]&action=PUT&ts=[3]".format(sm.currentDB(),sm.newName(), sm.dbInfo(), sm.now());
         },
         dropColl: function () {
-            return "services/[0]/collection/[1]?dbInfo=[2]&action=DELETE".format(sm.currentDB(), sm.currentColl(), sm.dbInfo());
+            return "services/[0]/collection/[1]?dbInfo=[2]&action=DELETE&ts=[3]".format(sm.currentDB(), sm.currentColl(), sm.dbInfo(), sm.now());
         },
         collStatistics: function () {
-            return "services/stats/db/[0]/collection/[1]?dbInfo=[2]".format(sm.currentDB(), sm.currentColl(), sm.dbInfo());
+            return "services/stats/db/[0]/collection/[1]?dbInfo=[2]&ts=[3]".format(sm.currentDB(), sm.currentColl(), sm.dbInfo(), sm.now());
         },
         documentKeys: function () {
-            return "services/[0]/[1]/document/keys?dbInfo=[2]".format(sm.currentDB(),sm.currentColl(), sm.dbInfo());
+            return "services/[0]/[1]/document/keys?dbInfo=[2]&ts=[3]".format(sm.currentDB(),sm.currentColl(), sm.dbInfo(), sm.now());
         },
         getDocs: function () {
-            return "services/[0]/[1]/document?dbInfo=[2]".format(sm.currentDB(),sm.currentColl(), sm.dbInfo());
+            return "services/[0]/[1]/document?dbInfo=[2]&ts=[3]".format(sm.currentDB(),sm.currentColl(), sm.dbInfo(), sm.now());
         },
         insertDoc: function () {
-            return "services/[0]/[1]/document?dbInfo=[2]&action=PUT".format(sm.currentDB(), sm.currentColl(), sm.dbInfo());
+            return "services/[0]/[1]/document?dbInfo=[2]&action=PUT&ts=[3]".format(sm.currentDB(), sm.currentColl(), sm.dbInfo(), sm.now());
         },
         updateDoc: function () {
-            return "services/[0]/[1]/document?dbInfo=[2]".format(sm.currentDB(), sm.currentColl(), sm.dbInfo());
+            return "services/[0]/[1]/document?dbInfo=[2]&ts=[3]".format(sm.currentDB(), sm.currentColl(), sm.dbInfo(), sm.now());
         },
         deleteDoc: function () {
-            return "services/[0]/[1]/document?dbInfo=[2]&action=DELETE".format(sm.currentDB(), sm.currentColl(), sm.dbInfo());
+            return "services/[0]/[1]/document?dbInfo=[2]&action=DELETE&ts=[3]".format(sm.currentDB(), sm.currentColl(), sm.dbInfo(),sm.now());
         },
         login: function () {
             return "services/login";
@@ -376,7 +379,7 @@ YUI.add('utility', function (Y) {
             return "services/logout?dbInfo=[0]".format(sm.dbInfo());
         },
         serverStatistics: function () {
-            return "services/stats?dbInfo=[0]".format(sm.dbInfo());
+            return "services/stats?dbInfo=[0]&ts=[1]".format(sm.dbInfo(), sm.now());
         },
         help: function () {
             return "help.html";
@@ -388,13 +391,13 @@ YUI.add('utility', function (Y) {
             return "admin";
         },
         graphs: function () {
-            return "graphs.html?dbInfo=[0]".format(sm.dbInfo());
+            return "graphs.html?dbInfo=[0]&ts=[1]".format(sm.dbInfo(), sm.now());
         },
         graphInitiate: function () {
-            return "graphs/initiate?dbInfo=[0]".format(sm.dbInfo());
+            return "graphs/initiate?dbInfo=[0]&ts=[1]".format(sm.dbInfo(), sm.now());
         },
         graphQuery: function () {
-            return "graphs/query?dbInfo=[0]".format(sm.dbInfo());
+            return "graphs/query?dbInfo=[0]&ts=[1]".format(sm.dbInfo(), sm.now());
         }
     };
 
