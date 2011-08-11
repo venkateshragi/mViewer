@@ -90,6 +90,7 @@
             selectElement: function(self) {
                 if (selectedElement) {
                     Y.log(selectedElement,"debug");
+                    selectedElement.simulate('focus');
                     selectedElement.simulate('click');
                 }
                 self.hideCommandBar();

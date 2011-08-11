@@ -33,10 +33,14 @@ YUI.add('utility', function (Y) {
     if (typeof String.prototype.trim !== 'function') {
         String.prototype.trim = function () {
             var str = this;
-            if (!str || typeof str !== 'string') {
-                return null;
+            // AN typeof recipe for disaster in IE8
+            // if (!str || typeof str !== 'string') {
+            if (!str) {
+                return "";
+            } else {
+                str = str.toString();
+                return str.replace(/^[\s]+/, '').replace(/[\s]+$/, '').replace(/[\s]{2,}/, ' ');
             }
-            return str.replace(/^[\s]+/, '').replace(/[\s]+$/, '').replace(/[\s]{2,}/, ' ');
         };
     }
     // TODO: IS this function redundant
@@ -256,6 +260,9 @@ YUI.add('utility', function (Y) {
     MV.StateManager = (function(){
         var self = this;
         var stateVariables = ['currentDB', 'currentColl', 'host', 'port','dbInfo'];
+        var i = 0;
+        var exports = {};
+
         function getVal(key) {
             return Y.one('#' + key).get("value");
         }
@@ -269,8 +276,8 @@ YUI.add('utility', function (Y) {
                 callbackArray[i].apply(this);
             }
         }
-        var exports = {};
-        stateVariables.forEach(function(stateVariable){
+        
+        function methodMaker(stateVariable) {
             exports[stateVariable] = function(){
                 return getVal(stateVariable);
             };
@@ -285,8 +292,14 @@ YUI.add('utility', function (Y) {
             exports['clear'+upcasedVar] = function(newValue){
                 return setVal(stateVariable, "");
             };
+        }
 
-        });
+        // AN stupid IE8 does not understand forEach
+        for (i =0 ; i < stateVariables.length; i++) {
+            var currVariable = stateVariables[i];
+            methodMaker(currVariable);
+        }
+
         exports.dbInfo = function() {
             var currDBInfo = getVal('dbInfo');
             if (currDBInfo === undefined || currDBInfo.length === 0) {

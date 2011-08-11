@@ -87,7 +87,7 @@ ul.nav-cont {
 }
 
 ul.nav-cont li {
-	display: inline-block;
+	display: inline;
 }
 
 ul.nav-cont li a {
@@ -132,7 +132,7 @@ ul.user-menu {
 }
 
 ul.user-menu li {
-	display: inline-block;
+	display: inline;
 }
 
 ul.user-menu li label {
@@ -491,5 +491,18 @@ bottom: 0px;
 }
 
 .shadow {
-    border: 3px grey ridge;
+    border: 1px solid #CCCCCC;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+    -webkit-box-shadow: rgba(0,0,0,.2) 0px 0px 5px;
+    -moz-box-shadow: rgba(0,0,0,.2) 0px 0px 5px;
+    -o-box-shadow: rgba(0,0,0,.2) 0px 0px 5px;
+}
+
+* input:focus {
+    border: 3px ridge grey;
+    outline: 1px solid grey;
+}
+
+div.navigable ul.lists li {
+    cursor: "pointer";
 }
