@@ -63,7 +63,7 @@ YUI({
             failure: function (request, responseObject) {
                 MV.showAlertDialog("Failed: ServerStats could not be loaded! Please check if the app server is still running.", MV.warnIcon);
                 Y.log("Server Statistics could not be loaded. Response Status: [0]".format(responseObject.statusText), "error");
-            },
+            }
         });
     }
 

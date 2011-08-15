@@ -33,10 +33,14 @@ YUI.add('utility', function (Y) {
     if (typeof String.prototype.trim !== 'function') {
         String.prototype.trim = function () {
             var str = this;
-            if (!str || typeof str !== 'string') {
-                return null;
+            // AN typeof recipe for disaster in IE8
+            // if (!str || typeof str !== 'string') {
+            if (!str) {
+                return "";
+            } else {
+                str = str.toString();
+                return str.replace(/^[\s]+/, '').replace(/[\s]+$/, '').replace(/[\s]{2,}/, ' ');
             }
-            return str.replace(/^[\s]+/, '').replace(/[\s]+$/, '').replace(/[\s]{2,}/, ' ');
         };
     }
     // TODO: IS this function redundant
@@ -256,6 +260,9 @@ YUI.add('utility', function (Y) {
     MV.StateManager = (function(){
         var self = this;
         var stateVariables = ['currentDB', 'currentColl', 'host', 'port','dbInfo'];
+        var i = 0;
+        var exports = {};
+
         function getVal(key) {
             return Y.one('#' + key).get("value");
         }
@@ -269,8 +276,8 @@ YUI.add('utility', function (Y) {
                 callbackArray[i].apply(this);
             }
         }
-        var exports = {};
-        stateVariables.forEach(function(stateVariable){
+        
+        function methodMaker(stateVariable) {
             exports[stateVariable] = function(){
                 return getVal(stateVariable);
             };
@@ -285,8 +292,14 @@ YUI.add('utility', function (Y) {
             exports['clear'+upcasedVar] = function(newValue){
                 return setVal(stateVariable, "");
             };
+        }
 
-        });
+        // AN stupid IE8 does not understand forEach
+        for (i =0 ; i < stateVariables.length; i++) {
+            var currVariable = stateVariables[i];
+            methodMaker(currVariable);
+        }
+
         exports.dbInfo = function() {
             var currDBInfo = getVal('dbInfo');
             if (currDBInfo === undefined || currDBInfo.length === 0) {
@@ -305,6 +318,9 @@ YUI.add('utility', function (Y) {
             }
             gRegistry[eventName].push(callback);
         };
+        exports.now = function() {
+            return new Date().getTime().toString();
+        };
         exports.events = {
             collectionsChanged : 1,
             dbsChanged : 2,
@@ -318,43 +334,43 @@ YUI.add('utility', function (Y) {
 
     MV.URLMap = {
         getDBs: function () {
-            return "services/db?dbInfo=[0]".format(sm.dbInfo());
+            return "services/db?dbInfo=[0]&ts=[1]".format(sm.dbInfo());
         },
         insertDB: function () {
-            return "services/db/[0]?dbInfo=[1]&action=PUT".format(sm.newName(), sm.dbInfo());
+            return "services/db/[0]?dbInfo=[1]&action=PUT&ts=[2]".format(sm.newName(), sm.dbInfo(), sm.now());
         },
         dropDB: function () {
-            return "services/db/[0]?dbInfo=[1]&action=DELETE".format(sm.currentDB(),sm.dbInfo());
+            return "services/db/[0]?dbInfo=[1]&action=DELETE&ts=[2]".format(sm.currentDB(),sm.dbInfo(), sm.now());
         },
         dbStatistics: function () {
-            return "services/stats/db/[0]?dbInfo=[1]".format(sm.currentDB(),sm.dbInfo());
+            return "services/stats/db/[0]?dbInfo=[1]&ts=[2]".format(sm.currentDB(),sm.dbInfo(), sm.now());
         },
         getColl: function () {
-            return "services/[0]/collection?dbInfo=[1]".format(sm.currentDB(),sm.dbInfo());
+            return "services/[0]/collection?dbInfo=[1]&ts=[2]".format(sm.currentDB(),sm.dbInfo(), sm.now());
         },
         insertColl: function () {
-            return "services/[0]/collection/[1]?dbInfo=[2]&action=PUT".format(sm.currentDB(),sm.newName(), sm.dbInfo());
+            return "services/[0]/collection/[1]?dbInfo=[2]&action=PUT&ts=[3]".format(sm.currentDB(),sm.newName(), sm.dbInfo(), sm.now());
         },
         dropColl: function () {
-            return "services/[0]/collection/[1]?dbInfo=[2]&action=DELETE".format(sm.currentDB(), sm.currentColl(), sm.dbInfo());
+            return "services/[0]/collection/[1]?dbInfo=[2]&action=DELETE&ts=[3]".format(sm.currentDB(), sm.currentColl(), sm.dbInfo(), sm.now());
         },
         collStatistics: function () {
-            return "services/stats/db/[0]/collection/[1]?dbInfo=[2]".format(sm.currentDB(), sm.currentColl(), sm.dbInfo());
+            return "services/stats/db/[0]/collection/[1]?dbInfo=[2]&ts=[3]".format(sm.currentDB(), sm.currentColl(), sm.dbInfo(), sm.now());
         },
         documentKeys: function () {
-            return "services/[0]/[1]/document/keys?dbInfo=[2]".format(sm.currentDB(),sm.currentColl(), sm.dbInfo());
+            return "services/[0]/[1]/document/keys?dbInfo=[2]&ts=[3]".format(sm.currentDB(),sm.currentColl(), sm.dbInfo(), sm.now());
         },
         getDocs: function () {
-            return "services/[0]/[1]/document?dbInfo=[2]".format(sm.currentDB(),sm.currentColl(), sm.dbInfo());
+            return "services/[0]/[1]/document?dbInfo=[2]&ts=[3]".format(sm.currentDB(),sm.currentColl(), sm.dbInfo(), sm.now());
         },
         insertDoc: function () {
-            return "services/[0]/[1]/document?dbInfo=[2]&action=PUT".format(sm.currentDB(), sm.currentColl(), sm.dbInfo());
+            return "services/[0]/[1]/document?dbInfo=[2]&action=PUT&ts=[3]".format(sm.currentDB(), sm.currentColl(), sm.dbInfo(), sm.now());
         },
         updateDoc: function () {
-            return "services/[0]/[1]/document?dbInfo=[2]".format(sm.currentDB(), sm.currentColl(), sm.dbInfo());
+            return "services/[0]/[1]/document?dbInfo=[2]&ts=[3]".format(sm.currentDB(), sm.currentColl(), sm.dbInfo(), sm.now());
         },
         deleteDoc: function () {
-            return "services/[0]/[1]/document?dbInfo=[2]&action=DELETE".format(sm.currentDB(), sm.currentColl(), sm.dbInfo());
+            return "services/[0]/[1]/document?dbInfo=[2]&action=DELETE&ts=[3]".format(sm.currentDB(), sm.currentColl(), sm.dbInfo(),sm.now());
         },
         login: function () {
             return "services/login";
@@ -363,7 +379,7 @@ YUI.add('utility', function (Y) {
             return "services/logout?dbInfo=[0]".format(sm.dbInfo());
         },
         serverStatistics: function () {
-            return "services/stats?dbInfo=[0]".format(sm.dbInfo());
+            return "services/stats?dbInfo=[0]&ts=[1]".format(sm.dbInfo(), sm.now());
         },
         help: function () {
             return "help.html";
@@ -375,13 +391,13 @@ YUI.add('utility', function (Y) {
             return "admin";
         },
         graphs: function () {
-            return "graphs.html?dbInfo=[0]".format(sm.dbInfo());
+            return "graphs.html?dbInfo=[0]&ts=[1]".format(sm.dbInfo(), sm.now());
         },
         graphInitiate: function () {
-            return "graphs/initiate?dbInfo=[0]".format(sm.dbInfo());
+            return "graphs/initiate?dbInfo=[0]&ts=[1]".format(sm.dbInfo(), sm.now());
         },
         graphQuery: function () {
-            return "graphs/query?dbInfo=[0]".format(sm.dbInfo());
+            return "graphs/query?dbInfo=[0]&ts=[1]".format(sm.dbInfo(), sm.now());
         }
     };
 
