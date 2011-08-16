@@ -104,7 +104,7 @@
                         selectedElement.focus();
                     } else if ('DIV' === selectedNodeName) {
                         // for divs position them to the first input element
-                        var firstChild = selectedElement.one('textarea, input')
+                        var firstChild = selectedElement.one('textarea, input');
                         if (firstChild) {
                             firstChild.focus();
                         } else {
