@@ -28,6 +28,7 @@
                 Y.log("About to init the navigator", "debug");
                 var selectorString = this.selectorString;
                 var self = this;
+                this.regions = [];
                 Y.all(selectorString).each(function(item) {
                     self.add(item);
                 });
