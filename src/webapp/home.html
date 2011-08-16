@@ -101,43 +101,51 @@
 			</div>
 			<div class="gen-float">
 				<div class="left-cont gen-float">
-					<div class="list-head">
+                    <div id="dbBuffer" class="buffer navigable dbBuffer">
+					  <div class="list-head">
 						<label class="db">Databases</label>
-					</div>
-					<div id="dbNames" class="navigable">
+					  </div>
+					  <div id="dbNames">
 						<ul class="lists">
 						</ul>
-					</div>
-					<div class="list-head">
+					  </div>
+                    </div>
+
+                    <div id="collectionBuffer" class="buffer navigable collectionBuffer">
+					  <div class="list-head">
 						<label class="collections">collections</label>
-					</div>
-					<div id="collNames" class="navigable">
+					  </div>
+					  <div id="collNames">
 						<ul class="lists">
 						</ul>
-					</div>
+					  </div>
+                    </div>
 					<div id="dbContextMenu"></div>
 					<div id="collContextMenu"></div>
 				</div>
 			</div>
 
 			<div class="right-cont gen-float">
-				<div id="queryForm" class="navigable"></div>
+                <div id="queryBuffer" class="buffer navigable queryBuffer" >
+				  <div id="queryForm"></div>
+                </div>
 				<div id="mainBodyHeader"></div>
-				<div id="mainBody">
+                <div id="resultBuffer" class="buffer resultBuffer">
+				  <div id="mainBody">
 					<center>
-						<img src="images/index_logo.png" alt="mViewer Logo"
-							title="mViewer Logo">
-						<p>a mongoDB management Tool</p>
-						<h3>Pramati Technologies</h3>
-						<br>
-						<br>
-						<p><h2>Please click on the database name to start working</h2></p>
+					  <img src="images/index_logo.png" alt="mViewer Logo"
+						   title="mViewer Logo">
+					  <p>a mongoDB management Tool</p>
+					  <h3>Pramati Technologies</h3>
+					  <br>
+					  <br>
+					  <p><h2>Please click on the database name to start working</h2></p>
 					</center>
-				</div>
-
+				  </div>
+                </div>
 			</div>
 
-            <div id="contentAssist" class="floatingFooter" style="display:none">
+            <div id="commandBuffer" class="floatingFooter" style="display:none">
               Command: &nbsp;
               <input type="text" id="assistText" class="assistText" />
             </div>

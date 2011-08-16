@@ -243,7 +243,7 @@ YUI.add('utility', function (Y) {
     MV.getForm = function (data) {
         var checkList = "";
         for (index = 0; index < data.length; index++) {
-            checkList += "<li><label for='" + data[index] + "'><input id='" + data[index] + "' name='" + data[index] + "' type='checkbox' checked=true />" + data[index] + "</label></li>";
+            checkList += "<li><label for='[0]'><input id='[1]' name='[2]' type='checkbox' checked=true />[3]</label></li>".format(data[index], data[index], data[index], data[index]);
         }
         return formUpperPart + checkList + formLowerPart;
     };
@@ -312,11 +312,22 @@ YUI.add('utility', function (Y) {
                 deliverEvent(eventName);
             }
         };
-        exports.subscribe = function(eventName, callback) {
-            if (gRegistry[eventName] === undefined) {
-                gRegistry[eventName] = [];
+        exports.subscribe = function(callback, eventArgs) {
+            var i = 0, eventNames;
+            // if it is not a number assume it is an array
+            if (isNaN(eventArgs)) {
+                eventNames = eventArgs;
+            } else {
+                eventNames = [eventArgs];
             }
-            gRegistry[eventName].push(callback);
+
+            for (; i < eventNames.length; i++) {
+                eventName = eventNames[i];
+                if (gRegistry[eventName] === undefined) {
+                    gRegistry[eventName] = [];
+                }
+                gRegistry[eventName].push(callback);
+            }
         };
         exports.now = function() {
             return new Date().getTime().toString();

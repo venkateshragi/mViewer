@@ -11,13 +11,12 @@
             this.selectorString = selectorString;
             var self = this;
             var navigatorCallback = function() {self.init();};
-            sm.subscribe(sm.events.collectionsChanged, navigatorCallback);
-            sm.subscribe(sm.events.dbsChanged, navigatorCallback);
+            sm.subscribe(navigatorCallback, [sm.events.collectionsChanged,sm.events.dbsChanged, sm.events.queryFired]);
             this._bindKeysYUI();
             this.init();
         }
         function addChildren(node, regionManager) {
-            node.all('input, ul li').each(
+            node.all('* input, * ul li, * textarea, * button').each(
                 function(item) {
                     regionManager.add(item);
                 }
@@ -48,13 +47,18 @@
                 Y.one(caSelector + ' input').set('value','');
                 Y.one(caSelector).show();
                 Y.one(caSelector + ' input').focus();
-                Y.log("CA displayed and navigator knows [0] magic keys".format(this.regions.length), "debug");
+                Y.all('div.buffer').each(function(item) {
+                    item.addClass('hint');
+                });
             },
             hideCommandBar:function(type, args) {
                 Y.one('.floatingFooter').hide();
                 Y.all('.shadow').each(function(item) {
                     item.removeClass('shadow');
                     item.removeClass('simulatedHover');
+                });
+                Y.all('div.buffer').each(function(item) {
+                    item.removeClass('hint');
                 });
             },
             _bindKeysYUI: function() {
@@ -77,28 +81,47 @@
                 var regionName = Y.one('.assistText').get('value');
                 if (regionName && regionName.length > 0) {
                     self.clearStyles();
+                    selectedElement = null;
                     var index = 0;
                     for (;index < self.regions.length; index++) {
                         if (self.regions[index].get('id').toUpperCase().indexOf(regionName.toUpperCase()) === 0) {
                             self.regions[index].addClass('shadow');
                             self.regions[index].addClass('simulatedHover');
-                            selectedElement = self.regions[index];
+                            //just go for the first selected element as result
+                            if (!selectedElement) {
+                                selectedElement = self.regions[index];
+                            }
                         }
                     }
                 }
             },
             selectElement: function(self) {
+                self.hideCommandBar();
                 if (selectedElement) {
                     Y.log(selectedElement,"debug");
-                    selectedElement.simulate('focus');
-                    selectedElement.simulate('click');
+                    var selectedNodeName = selectedElement.get('nodeName');
+                    if ('INPUT' === selectedNodeName || 'TEXTAREA' === selectedNodeName) {
+                        selectedElement.focus();
+                    } else if ('DIV' === selectedNodeName) {
+                        // for divs position them to the first input element
+                        var firstChild = selectedElement.one('textarea, input')
+                        if (firstChild) {
+                            firstChild.focus();
+                        } else {
+                            selectedElement.simulate('click');
+                        }
+                    } else {
+                        selectedElement.simulate('click');
+                    }
                 }
-                self.hideCommandBar();
             },
             clearStyles: function() {
                 Y.all('.shadow').each(function(item) {
                     item.removeClass('shadow');
                     item.removeClass('simulatedHover');
+                });
+                Y.all('div.buffer').each(function(item) {
+                    item.removeClass('hint');
                 });
                 selectedElement = null;
             },

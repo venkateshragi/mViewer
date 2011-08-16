@@ -18,6 +18,7 @@ YUI({
 }).use("yes-no-dialog", "alert-dialog", "io-base", "json-parse", "node-event-simulate", "node", "event-delegate", "stylize", "json-stringify", "utility", function (Y) {
     YUI.namespace('com.imaginea.mongoV');
     var MV = YUI.com.imaginea.mongoV;
+    var sm = MV.StateManager;
     MV.treebleData = {};
     var showTabView = function (e) {
         var treeble;
@@ -130,6 +131,7 @@ YUI({
             treeble.subscribe("rowMouseoverEvent", treeble.onEventHighlightRow);
             treeble.subscribe("rowMouseoutEvent", treeble.onEventUnhighlightRow);
         }
+
         function showDocuments(request, responseObject) {
             Y.log("Preparing to write on JSON tab", "info");
             writeOnJSONTab(responseObject.results);
@@ -138,7 +140,9 @@ YUI({
             treeble = MV.getTreeble(treebleData);
             loadAndSubscribe(treeble);
             Y.log("Tree table view loaded", "info");
+            sm.publish(sm.events.queryFired);
         }
+
         var tabView = new YAHOO.widget.TabView();
         tabView.addTab(new YAHOO.widget.Tab({
             label: 'JSON',
