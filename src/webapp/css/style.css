@@ -178,7 +178,7 @@ ul.user-menu li label.logout {
 .left-cont {
 	width: 190px;
 	padding-left: 10px;
-	padding-top: 10px;
+	/* padding-top: 10px; */
 }
 
 .list-head {
@@ -186,7 +186,7 @@ ul.user-menu li label.logout {
 	border: 1px solid #e3eaee;
 	border-right: 0 !important;
 	padding: 10px;
-	margin: 20px 0 10px 0;
+	margin: 10px 0 10px 0;
 	height: 16px;
 	text-transform: uppercase;
 	color: #0e2137;
@@ -234,6 +234,7 @@ ul.lists li {
 	background: #fff;
 	border-left: 1px solid #E3EAEE;
 	min-height: 500px;
+    padding-top: 10px;
 }
 
 .form-cont {
@@ -530,4 +531,16 @@ div.collectionBuffer {
     height: "*";
     min-height: "50px"
 
+}
+
+fieldset.bufferFieldSet {
+	border-color: #e5e5e5;
+	border-style: solid;
+	border-width: 1px;
+}
+
+div.generalInfo {
+    width:100%; 
+    text-align:center;
+    border: 1px solid grey
 }

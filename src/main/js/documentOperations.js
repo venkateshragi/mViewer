@@ -15,15 +15,16 @@
  */
 YUI({
     filter: 'raw'
-}).use("yes-no-dialog", "alert-dialog", "io-base", "json-parse", "node-event-simulate", "node", "event-delegate", "stylize", "json-stringify", "utility", function (Y) {
+}).use("yes-no-dialog", "alert-dialog", "io-base", "json-parse", "node-event-simulate", "node", "event-delegate", "stylize", "json-stringify", "utility", "event-key", function (Y) {
     YUI.namespace('com.imaginea.mongoV');
     var MV = YUI.com.imaginea.mongoV;
     var sm = MV.StateManager;
     MV.treebleData = {};
+
     var showTabView = function (e) {
         var treeble;
         MV.toggleClass(e.currentTarget, Y.all("#collNames li"));
-        Y.one("#currentColl").set("value", e.currentTarget.getContent());
+        sm.setCurrentColl(e.currentTarget.getContent());
         MV.mainBody.empty(true);
         function getQueryParameters() {
             var parsedQuery, query = Y.one('#queryBox').get("value");
@@ -89,6 +90,14 @@ YUI({
                     var queryForm = Y.one('#queryForm');
                     queryForm.addClass('form-cont');
                     queryForm.set("innerHTML", MV.getForm(keys));
+                    // insert a ctrl + enter listener for query evaluation
+                    Y.one("#queryBox").on("keyup", function (eventObject) {
+                        if (eventObject.ctrlKey && eventObject.keyCode === 13) {
+                            Y.one('#execQueryButton').simulate('click');
+                        }
+                    });
+
+     
                     Y.log("QueryBox loaded", "info");
                     Y.on("click", executeQuery, "#execQueryButton");
                     defineDatasource();
@@ -317,7 +326,7 @@ YUI({
             for (i = 0; i < response.length; i++) {
                 fitToContent(500, document.getElementById("ta" + i));
             }
-            Y.log("The documents written on the JSON tab", "info");
+            Y.log("The documents written on the JSON tab", "debug");
         }
         MV.header.set("innerHTML", "Contents of " + Y.one("#currentColl").get("value"));
         tabView.appendTo(MV.mainBody.get('id'));

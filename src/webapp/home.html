@@ -55,11 +55,11 @@
 <script type="text/javascript" src="js/alertDialog.js"></script>
 <script type="text/javascript" src="js/dataTable.js"></script>
 <script type="text/javascript" src="js/styling.js"></script>
-<script type="text/javascript" src="js/querying.js"></script>
 <script type="text/javascript" src="js/dialogBox.js"></script>
 <script type="text/javascript" src="js/simpleDialog.js"></script>
 <script type="text/javascript" src="js/dbOperations.js"></script>
 <script type="text/javascript" src="js/collectionOperations.js"></script>
+<script type="text/javascript" src="js/documentOperations.js"></script>
 <script type="text/javascript" src="js/loadingPanel.js"></script>
 <script type="text/javascript" src="js/treeblePatch.js"></script>
 <script type="text/javascript" src="js/treeble.js"></script>
@@ -99,30 +99,29 @@
 				<label>Host: <span id="hostname"></span> </label> 
 				<button id="toggle_console" class="btn">Show UI Log</button>
 			</div>
-			<div class="gen-float">
-				<div class="left-cont gen-float">
-                    <div id="dbBuffer" class="buffer navigable dbBuffer">
-					  <div class="list-head">
-						<label class="db">Databases</label>
-					  </div>
-					  <div id="dbNames">
-						<ul class="lists">
-						</ul>
-					  </div>
-                    </div>
-
-                    <div id="collectionBuffer" class="buffer navigable collectionBuffer">
-					  <div class="list-head">
-						<label class="collections">collections</label>
-					  </div>
-					  <div id="collNames">
-						<ul class="lists">
-						</ul>
-					  </div>
-                    </div>
-					<div id="dbContextMenu"></div>
-					<div id="collContextMenu"></div>
+            <div class="generalInfo" style="display:none"> &nbsp;</div>
+			<div class="left-cont gen-float">
+              <div id="dbBuffer" class="buffer navigable dbBuffer">
+				<div class="list-head">
+				  <label class="db">Databases</label>
 				</div>
+				<div id="dbNames">
+				  <ul class="lists">
+				  </ul>
+				</div>
+              </div>
+
+              <div id="collectionBuffer" class="buffer navigable collectionBuffer">
+				<div class="list-head">
+				  <label class="collections">collections</label>
+				</div>
+				<div id="collNames">
+				  <ul class="lists">
+				  </ul>
+				</div>
+              </div>
+			  <div id="dbContextMenu"></div>
+			  <div id="collContextMenu"></div>
 			</div>
 
 			<div class="right-cont gen-float">
