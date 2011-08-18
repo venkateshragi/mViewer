@@ -230,23 +230,28 @@ YUI.add('utility', function (Y) {
         };
         return treeTable;
     };
-    var formUpperPart = "",
-        formLowerPart = "";
-    formUpperPart += "<textarea id='queryBox' name='queryBox' rows='3' cols='60' class='queryBox'>";
-    formUpperPart += "{}";
-    formUpperPart += "</textarea>";
-    formUpperPart += "<label for='fields' ></label><ul id='fields' class='checklist'>";
-    formLowerPart += "</ul><br>";
-    formLowerPart += "<label for='limit'> Limit: </label><input id='limit' type='text' name='limit' value='0' size='5' />";
-    formLowerPart += "<label for='skip'> Skip: </label><input id='skip' type='text' name='skip' value='0' size='5' />";
-    formLowerPart += "<button id='execQueryButton' class='btn'>Execute Query</button>";
+    var upperPartTemplate = [
+        "<textarea id='queryBox' name='queryBox' rows='3' cols='60' class='queryBox'>",
+        "{}",
+        "</textarea>",
+        "<label for='fields' ></label><ul id='fields' class='checklist'>"].join('\n');
+
+    var lowerPartTemplate = [
+        "</ul><br/><br/>",
+        "<label for='limit'> Limit: </label><input id='limit' type='text' name='limit' value='0' size='5' />",
+        "<label for='skip'> Skip: </label><input id='skip' type='text' name='skip' value='0' size='5' />",
+        "<button id='execQueryButton' class='btn'>Execute Query</button>"].join('\n');
+
+    var checkListTemplate = "<li><label for='[0]'><input id='[1]' name='[2]' type='checkbox' checked=true />[3]</label></li>";
+
     MV.getForm = function (data) {
         var checkList = "";
         for (index = 0; index < data.length; index++) {
-            checkList += "<li><label for='[0]'><input id='[1]' name='[2]' type='checkbox' checked=true />[3]</label></li>".format(data[index], data[index], data[index], data[index]);
+            checkList += checkListTemplate.format(data[index], data[index], data[index], data[index]);
         }
-        return formUpperPart + checkList + formLowerPart;
+        return upperPartTemplate + checkList + lowerPartTemplate;
     };
+
     MV.hideQueryForm = function () {
         var queryForm = Y.one('#queryForm');
         queryForm.removeClass('form-cont');
