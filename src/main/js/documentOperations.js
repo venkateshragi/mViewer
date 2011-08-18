@@ -15,7 +15,7 @@
  */
 YUI({
     filter: 'raw'
-}).use("yes-no-dialog", "alert-dialog", "io-base", "json-parse", "node-event-simulate", "node", "event-delegate", "stylize", "json-stringify", "utility", "event-key", function (Y) {
+}).use("yes-no-dialog", "alert-dialog", "io-base", "json-parse", "node-event-simulate", "node", "event-delegate", "stylize", "json-stringify", "utility", "event-key", "event-focus", function (Y) {
     YUI.namespace('com.imaginea.mongoV');
     var MV = YUI.com.imaginea.mongoV;
     var sm = MV.StateManager;
@@ -307,17 +307,29 @@ YUI({
             }
         }
         function writeOnJSONTab(response) {
-            var documents = "<table>",
-            i;
+            var jsonView = "<div class='buffer jsonBuffer navigable navigateTable' id='jsonBuffer'>";
+            var i;
+            var trTemplate = ["<tr>",
+                              "  <td id='doc[0]'>",
+                              "      <pre> <textarea id='ta[1]' class='disabled non-navigable' disabled='disabled' cols='75'>[2]</textarea></pre>",
+                              "  </td>",
+                              "  <td>",
+                              "   <button id='edit[3]'class='btn editbtn non-navigable'>edit</button>",
+                              "   <br/>",
+                              "   <button id='delete[4]'class='btn deletebtn non-navigable'>delete</button>",
+                              "  </td>",
+                              "</tr>"].join('\n');
+            jsonView += "<table class='jsonTable'><tbody>";
+            
             for (i = 0; i < response.length; i++) {
-                documents = documents + "<tr><td id='doc" + i + "'><pre><textarea id='ta" + i + "' class='disabled' disabled='disabled' cols='80' >" + Y.JSON.stringify(response[i], null, 4) + "</textarea></pre></td>" + "<td><button id='edit" + i + "' class='btn editbtn'>edit</button><br/><button id='delete" + i + "' class='btn deletebtn'>delete</button></td></tr>";
+                jsonView += trTemplate.format(i, i, Y.JSON.stringify(response[i], null, 4),i, i);
             }
             if (i === 0) {
-                documents = documents + "No documents to be displayed";
+                jsonView = jsonView + "No documents to be displayed";
             }
-            documents = documents + "</table>";
+            jsonView = jsonView + "</tbody></table></div>";
             tabView.getTab(0).setAttributes({
-                content: documents
+                content: jsonView
             }, false);
             for (i = 0; i < response.length; i++) {
                 Y.on("click", editDoc, "#edit" + i);
@@ -326,6 +338,36 @@ YUI({
             for (i = 0; i < response.length; i++) {
                 fitToContent(500, document.getElementById("ta" + i));
             }
+            var trSelectionClass = 'selected';
+            // add click listener to select and deselect rows.
+            Y.all('.jsonTable tr').on("click", function (eventObject) {
+                var currentTR = eventObject.currentTarget;
+                var alreadySelected = currentTR.hasClass(trSelectionClass);
+
+                Y.all('.jsonTable tr').each(function(item) {
+                    item.removeClass(trSelectionClass);
+                });
+
+                if (!alreadySelected) {
+                    currentTR.addClass(trSelectionClass);
+                    var editBtn = currentTR.one('button.editbtn');
+                    if (editBtn) {
+                        editBtn.focus();
+                    }
+                }
+            });
+            Y.on('blur', function(eventObject) {
+                var resetAll = true;
+                // FIXME ugly hack for avoiding blur when scroll happens
+                if (sm.isNavigationSideEffect()) {
+                    resetAll = false;
+                }
+                if (resetAll) {
+                    Y.all('tr.selected').each(function(item) {
+                        item.removeClass(trSelectionClass);
+                    });
+                }
+            }, 'div.jsonBuffer');
             Y.log("The documents written on the JSON tab", "debug");
         }
         MV.header.set("innerHTML", "Contents of " + Y.one("#currentColl").get("value"));

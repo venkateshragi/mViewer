@@ -18,7 +18,9 @@
         function addChildren(node, regionManager) {
             node.all('* input, * ul li, * textarea, * button').each(
                 function(item) {
-                    regionManager.add(item);
+                    if (!item.hasClass('.non-navigable')) {
+                        regionManager.add(item);
+                    }
                 }
             );
         }
@@ -71,12 +73,52 @@
                 escapeListener.enable();
                 Y.all(".floatingFooter input").on("keyup", function (eventObject) {
                     self.highlight(self);
-                    // for enter key submit the form
-                    if (eventObject.keyCode === 13) {
+                    // for enter key select the element
+                    if (eventObject.keyCode === '\r'.charCodeAt(0)) {
                         self.selectElement(self);
                     }
                 });
+               this._addArrowKeyNavigation();
+            },
+            _addArrowKeyNavigation: function() {
+                var arrowKeys = {left:37, up: 38, right: 39, down: 40};
+                var findParent = function(yNode, selector) {
+                    var parentNode = yNode;
+                    do {
+                        parentNode = parentNode.get('parentNode');
+                    }while(parentNode && parentNode.test(selector) === false);
+                    return parentNode;
+                };
+                var findParentTR = function() {
+                    var relevantParent = null;
+                    if (document.activeElement) {
+                        var yNode = Y.one(document.activeElement);
+                        if (yNode.hasClass('non-navigable')) {
+                            relevantParent = findParent(yNode, 'tr');
+                        }
+                    }
+                    return relevantParent;
+                };
 
+                Y.on("keydown", function(eventObject) {
+                    var parentTR = null;
+                    var effectTR = null;
+                    switch(eventObject.keyCode) {
+                    case arrowKeys.down:
+                        parentTR = findParentTR();
+                        effectTR = (parentTR)? parentTR.next():null;
+                        break;
+                    case arrowKeys.up:
+                        parentTR = findParentTR();
+                        effectTR = (parentTR)? parentTR.previous():null;
+                        break;
+                    }
+                    if (effectTR) {
+                        sm.recordLastArrowNavigation();
+                        effectTR.simulate('click');
+                    }
+
+                }, document);
             },
             highlight: function(self) {
                 var regionName = Y.one('.assistText').get('value');
@@ -104,12 +146,19 @@
                     if ('INPUT' === selectedNodeName || 'TEXTAREA' === selectedNodeName) {
                         selectedElement.focus();
                     } else if ('DIV' === selectedNodeName) {
-                        // for divs position them to the first input element
-                        var firstChild = selectedElement.one('textarea, input');
-                        if (firstChild) {
-                            firstChild.focus();
+                        var firstChild = null;
+                        if (selectedElement.hasClass('navigateTable')) {
+                            firstChild = selectedElement.one('* tr');
+                            if (firstChild) {
+                                firstChild.simulate('click');
+                            }
                         } else {
-                            selectedElement.simulate('click');
+                            firstChild = selectedElement.one('textarea, input');
+                            if (firstChild) {
+                                firstChild.focus();
+                            } else {
+                                selectedElement.simulate('click');
+                            }
                         }
                     } else {
                         selectedElement.simulate('click');

@@ -329,6 +329,12 @@ YUI.add('utility', function (Y) {
                 gRegistry[eventName].push(callback);
             }
         };
+        exports.recordLastArrowNavigation = function() {
+            self.lastArrowNavTS = new Date().getTime();
+        };
+        exports.isNavigationSideEffect = function() {
+            return ((self.lastArrowNavTS)? ((new Date().getTime() - self.lastArrowNavTS) < 100):false);
+        };
         exports.now = function() {
             return new Date().getTime().toString();
         };
