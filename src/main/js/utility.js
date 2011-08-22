@@ -264,7 +264,7 @@ YUI.add('utility', function (Y) {
 
     MV.StateManager = (function(){
         var self = this;
-        var stateVariables = ['currentDB', 'currentColl', 'host', 'port','dbInfo'];
+        var stateVariables = ['currentDB', 'currentColl', 'host', 'port','dbInfo','newName'];
         var i = 0;
         var exports = {};
 
