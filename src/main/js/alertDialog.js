@@ -16,28 +16,29 @@
 // TODO send a custom handler if not provided run the default one
 YUI.add('alert-dialog', function (Y) {
     YUI.namespace('com.imaginea.mongoV');
+    var simpleDialog = new YAHOO.widget.SimpleDialog("simpledialog", {
+        width: "300px",
+        fixedcenter: true,
+        visible: false,
+        draggable: true,
+        close: false,
+        constraintoviewport: true,
+        zIndex: 10,
+    });
+    simpleDialog.setHeader("Info");
+    simpleDialog.render("alertDialogContainer");
     YUI.com.imaginea.mongoV.showAlertDialog = function (msg, ico, handler) {
-        var simpleDialog = new YAHOO.widget.SimpleDialog("simpledialog", {
-            width: "300px",
-            fixedcenter: true,
-            visible: false,
-            draggable: true,
-            close: false,
-            text: msg,
-            icon: ico || YAHOO.widget.SimpleDialog.ICON_INFO,
-            constraintoviewport: true,
-            zIndex: 10,
-            buttons: [{
-                text: "OK",
-                handler: handler ||
-                function () {
-                    this.hide();
-                },
-                isDefault: true
-            }]
-        });
-        simpleDialog.setHeader("Info");
-        simpleDialog.render("alertDialogContainer");
+        var buttons = [{
+            text: "OK",
+            handler: handler ||
+            function () {
+                this.hide();
+            },
+            isDefault: true
+        }];
+        simpleDialog.cfg.setProperty("buttons", buttons);
+        simpleDialog.setBody(msg);
+        simpleDialog.cfg.setProperty("icon", ico || YAHOO.widget.SimpleDialog.ICON_INFO);
         simpleDialog.show();
     };
 }, '3.3.0', {
