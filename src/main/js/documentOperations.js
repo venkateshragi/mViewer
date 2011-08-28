@@ -15,7 +15,7 @@
  */
 YUI({
     filter: 'raw'
-}).use("yes-no-dialog", "alert-dialog", "io-base", "json-parse", "node-event-simulate", "node", "event-delegate", "stylize", "json-stringify", "utility", "event-key", "event-focus", function (Y) {
+}).use("yes-no-dialog", "alert-dialog", "io-base", "json-parse", "node-event-simulate", "node", "event-delegate", "stylize", "json-stringify", "utility", "event-key", "event-focus", "node-focusmanager", function (Y) {
     YUI.namespace('com.imaginea.mongoV');
     var MV = YUI.com.imaginea.mongoV;
     var sm = MV.StateManager;
@@ -301,7 +301,9 @@ YUI({
                 var targetNode = eventObject.currentTarget;
                 var index = getButtonIndex(targetNode);
                 toggleSaveEdit(targetNode, index, actionMap.edit);
-                var doc = Y.one('#doc' + index).one("pre").one("textarea").get("value");
+                var docNode = Y.one('#doc' + index).one("pre").one("textarea");
+                docNode.focus();
+                var doc = docNode.get("value");
                 parsedDoc = Y.JSON.parse(doc);
                 idMap.index = parsedDoc._id;
             }
