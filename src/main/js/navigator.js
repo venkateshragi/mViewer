@@ -11,15 +11,16 @@
             this.selectorString = selectorString;
             var self = this;
             var navigatorCallback = function() {self.init();};
-            sm.subscribe(sm.events.collectionsChanged, navigatorCallback);
-            sm.subscribe(sm.events.dbsChanged, navigatorCallback);
+            sm.subscribe(navigatorCallback, [sm.events.collectionsChanged,sm.events.dbsChanged, sm.events.queryFired]);
             this._bindKeysYUI();
             this.init();
         }
         function addChildren(node, regionManager) {
-            node.all('input, ul li').each(
+            node.all('* input, * ul li, * textarea, * button').each(
                 function(item) {
-                    regionManager.add(item);
+                    if (!item.hasClass('non-navigable')) {
+                        regionManager.add(item);
+                    }
                 }
             );
         }
@@ -29,6 +30,7 @@
                 Y.log("About to init the navigator", "debug");
                 var selectorString = this.selectorString;
                 var self = this;
+                this.regions = [];
                 Y.all(selectorString).each(function(item) {
                     self.add(item);
                 });
@@ -48,13 +50,18 @@
                 Y.one(caSelector + ' input').set('value','');
                 Y.one(caSelector).show();
                 Y.one(caSelector + ' input').focus();
-                Y.log("CA displayed and navigator knows [0] magic keys".format(this.regions.length), "debug");
+                Y.all('div.buffer').each(function(item) {
+                    item.addClass('hint');
+                });
             },
             hideCommandBar:function(type, args) {
                 Y.one('.floatingFooter').hide();
                 Y.all('.shadow').each(function(item) {
                     item.removeClass('shadow');
                     item.removeClass('simulatedHover');
+                });
+                Y.all('div.buffer').each(function(item) {
+                    item.removeClass('hint');
                 });
             },
             _bindKeysYUI: function() {
@@ -66,39 +73,105 @@
                 escapeListener.enable();
                 Y.all(".floatingFooter input").on("keyup", function (eventObject) {
                     self.highlight(self);
-                    // for enter key submit the form
-                    if (eventObject.keyCode === 13) {
+                    // for enter key select the element
+                    if (eventObject.keyCode === '\r'.charCodeAt(0)) {
                         self.selectElement(self);
                     }
                 });
+               this._addArrowKeyNavigation();
+            },
+            _addArrowKeyNavigation: function() {
+                var arrowKeys = {left:37, up: 38, right: 39, down: 40};
+                var findParent = function(yNode, selector) {
+                    var parentNode = yNode;
+                    do {
+                        parentNode = parentNode.get('parentNode');
+                    }while(parentNode && parentNode.test(selector) === false);
+                    return parentNode;
+                };
+                var findParentTR = function() {
+                    var relevantParent = null;
+                    if (document.activeElement) {
+                        var yNode = Y.one(document.activeElement);
+                        if (yNode.hasClass('non-navigable')) {
+                            relevantParent = findParent(yNode, 'tr');
+                        }
+                    }
+                    return relevantParent;
+                };
 
+                Y.on("keydown", function(eventObject) {
+                    var parentTR = null;
+                    var effectTR = null;
+                    switch(eventObject.keyCode) {
+                    case arrowKeys.down:
+                        parentTR = findParentTR();
+                        effectTR = (parentTR)? parentTR.next():null;
+                        break;
+                    case arrowKeys.up:
+                        parentTR = findParentTR();
+                        effectTR = (parentTR)? parentTR.previous():null;
+                        break;
+                    }
+                    if (effectTR) {
+                        sm.recordLastArrowNavigation();
+                        effectTR.simulate('click');
+                    }
+
+                }, document);
             },
             highlight: function(self) {
                 var regionName = Y.one('.assistText').get('value');
                 if (regionName && regionName.length > 0) {
                     self.clearStyles();
+                    selectedElement = null;
                     var index = 0;
                     for (;index < self.regions.length; index++) {
                         if (self.regions[index].get('id').toUpperCase().indexOf(regionName.toUpperCase()) === 0) {
                             self.regions[index].addClass('shadow');
                             self.regions[index].addClass('simulatedHover');
-                            selectedElement = self.regions[index];
+                            //just go for the first selected element as result
+                            if (!selectedElement) {
+                                selectedElement = self.regions[index];
+                            }
                         }
                     }
                 }
             },
             selectElement: function(self) {
+                self.hideCommandBar();
                 if (selectedElement) {
                     Y.log(selectedElement,"debug");
-                    selectedElement.simulate('focus');
-                    selectedElement.simulate('click');
+                    var selectedNodeName = selectedElement.get('nodeName');
+                    if ('INPUT' === selectedNodeName || 'TEXTAREA' === selectedNodeName) {
+                        selectedElement.focus();
+                    } else if ('DIV' === selectedNodeName) {
+                        var firstChild = null;
+                        if (selectedElement.hasClass('navigateTable')) {
+                            firstChild = selectedElement.one('* tr');
+                            if (firstChild) {
+                                firstChild.simulate('click');
+                            }
+                        } else {
+                            firstChild = selectedElement.one('textarea, input');
+                            if (firstChild) {
+                                firstChild.focus();
+                            } else {
+                                selectedElement.simulate('click');
+                            }
+                        }
+                    } else {
+                        selectedElement.simulate('click');
+                    }
                 }
-                self.hideCommandBar();
             },
             clearStyles: function() {
                 Y.all('.shadow').each(function(item) {
                     item.removeClass('shadow');
                     item.removeClass('simulatedHover');
+                });
+                Y.all('div.buffer').each(function(item) {
+                    item.removeClass('hint');
                 });
                 selectedElement = null;
             },

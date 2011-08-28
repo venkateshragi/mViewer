@@ -178,7 +178,7 @@ ul.user-menu li label.logout {
 .left-cont {
 	width: 190px;
 	padding-left: 10px;
-	padding-top: 10px;
+	/* padding-top: 10px; */
 }
 
 .list-head {
@@ -186,7 +186,7 @@ ul.user-menu li label.logout {
 	border: 1px solid #e3eaee;
 	border-right: 0 !important;
 	padding: 10px;
-	margin: 20px 0 10px 0;
+	margin: 10px 0 10px 0;
 	height: 16px;
 	text-transform: uppercase;
 	color: #0e2137;
@@ -234,11 +234,12 @@ ul.lists li {
 	background: #fff;
 	border-left: 1px solid #E3EAEE;
 	min-height: 500px;
+    padding-top: 10px;
 }
 
 .form-cont {
 	background: #ececec;
-	width: 677px;
+	/* width: 677px; */
 	padding: 10px 10px;
 }
 
@@ -360,14 +361,14 @@ textarea .disabled {
 	font-weight: bold;
 }
 
-fieldset {
+fieldset.login {
 	width: 25em;
 	border-color: #e5e5e5;
 	border-style: solid;
 	border-width: 3px;
 }
 
-fieldset legend {
+fieldset.login legend {
 	font-weight: bolder;
 }
 
@@ -490,19 +491,48 @@ bottom: 0px;
     filter: progid:DXImageTransform.Microsoft.Shadow(Strength=4, Direction=135, Color='#000000');
 }
 
-.shadow {
-    border: 1px solid #CCCCCC;
-    box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
-    -webkit-box-shadow: rgba(0,0,0,.2) 0px 0px 5px;
-    -moz-box-shadow: rgba(0,0,0,.2) 0px 0px 5px;
-    -o-box-shadow: rgba(0,0,0,.2) 0px 0px 5px;
-}
+.shadow, * input:focus, button:focus, textarea:focus, tr.selected {
+    /* border: 1px solid #CCCCCC; */
+    /* box-shadow: 0 0 5px rgba(0, 0, 0, 0.2); */
+    /* -webkit-box-shadow: rgba(0,0,0,.2) 0px 0px 5px; */
+    /* -moz-box-shadow: rgba(0,0,0,.2) 0px 0px 5px; */
+    /* -o-box-shadow: rgba(0,0,0,.2) 0px 0px 5px; */
 
-* input:focus {
-    border: 3px ridge grey;
-    outline: 1px solid grey;
+    box-shadow: 0 0 2px 2px highlight !important; 
+    -webkit-box-shadow: 0 0 2px 2px rgb(255, 255, 255)
+    -moz-box-shadow: 0 0 2px 2px highlight !important;
+
 }
 
 div.navigable ul.lists li {
     cursor: "pointer";
 }
+
+div.buffer {
+    overflow:auto;
+    margin: 2px
+}
+
+div.dbBuffer {
+    height: "30%";
+    min-height: "50px"
+}
+
+div.collectionBuffer {
+    height: "*";
+    min-height: "50px"
+
+}
+
+fieldset.bufferFieldSet {
+	border-color: #e5e5e5;
+	border-style: solid;
+	border-width: 1px;
+}
+
+div.generalInfo {
+    width:100%; 
+    text-align:center;
+    border: 1px solid grey
+}
+

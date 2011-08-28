@@ -15,14 +15,16 @@
  */
 YUI({
     filter: 'raw'
-}).use("yes-no-dialog", "alert-dialog", "io-base", "json-parse", "node-event-simulate", "node", "event-delegate", "stylize", "json-stringify", "utility", function (Y) {
+}).use("yes-no-dialog", "alert-dialog", "io-base", "json-parse", "node-event-simulate", "node", "event-delegate", "stylize", "json-stringify", "utility", "event-key", "event-focus", function (Y) {
     YUI.namespace('com.imaginea.mongoV');
     var MV = YUI.com.imaginea.mongoV;
+    var sm = MV.StateManager;
     MV.treebleData = {};
+
     var showTabView = function (e) {
         var treeble;
         MV.toggleClass(e.currentTarget, Y.all("#collNames li"));
-        Y.one("#currentColl").set("value", e.currentTarget.getContent());
+        sm.setCurrentColl(e.currentTarget.getContent());
         MV.mainBody.empty(true);
         function getQueryParameters() {
             var parsedQuery, query = Y.one('#queryBox').get("value");
@@ -88,6 +90,14 @@ YUI({
                     var queryForm = Y.one('#queryForm');
                     queryForm.addClass('form-cont');
                     queryForm.set("innerHTML", MV.getForm(keys));
+                    // insert a ctrl + enter listener for query evaluation
+                    Y.one("#queryBox").on("keyup", function (eventObject) {
+                        if (eventObject.ctrlKey && eventObject.keyCode === 13) {
+                            Y.one('#execQueryButton').simulate('click');
+                        }
+                    });
+
+     
                     Y.log("QueryBox loaded", "info");
                     Y.on("click", executeQuery, "#execQueryButton");
                     defineDatasource();
@@ -130,6 +140,7 @@ YUI({
             treeble.subscribe("rowMouseoverEvent", treeble.onEventHighlightRow);
             treeble.subscribe("rowMouseoutEvent", treeble.onEventUnhighlightRow);
         }
+
         function showDocuments(request, responseObject) {
             Y.log("Preparing to write on JSON tab", "info");
             writeOnJSONTab(responseObject.results);
@@ -138,7 +149,9 @@ YUI({
             treeble = MV.getTreeble(treebleData);
             loadAndSubscribe(treeble);
             Y.log("Tree table view loaded", "info");
+            sm.publish(sm.events.queryFired);
         }
+
         var tabView = new YAHOO.widget.TabView();
         tabView.addTab(new YAHOO.widget.Tab({
             label: 'JSON',
@@ -294,17 +307,29 @@ YUI({
             }
         }
         function writeOnJSONTab(response) {
-            var documents = "<table>",
-            i;
+            var jsonView = "<div class='buffer jsonBuffer navigable navigateTable' id='jsonBuffer'>";
+            var i;
+            var trTemplate = ["<tr>",
+                              "  <td id='doc[0]'>",
+                              "      <pre> <textarea id='ta[1]' class='disabled non-navigable' disabled='disabled' cols='75'>[2]</textarea></pre>",
+                              "  </td>",
+                              "  <td>",
+                              "   <button id='edit[3]'class='btn editbtn non-navigable'>edit</button>",
+                              "   <br/>",
+                              "   <button id='delete[4]'class='btn deletebtn non-navigable'>delete</button>",
+                              "  </td>",
+                              "</tr>"].join('\n');
+            jsonView += "<table class='jsonTable'><tbody>";
+            
             for (i = 0; i < response.length; i++) {
-                documents = documents + "<tr><td id='doc" + i + "'><pre><textarea id='ta" + i + "' class='disabled' disabled='disabled' cols='80' >" + Y.JSON.stringify(response[i], null, 4) + "</textarea></pre></td>" + "<td><button id='edit" + i + "' class='btn editbtn'>edit</button><br/><button id='delete" + i + "' class='btn deletebtn'>delete</button></td></tr>";
+                jsonView += trTemplate.format(i, i, Y.JSON.stringify(response[i], null, 4),i, i);
             }
             if (i === 0) {
-                documents = documents + "No documents to be displayed";
+                jsonView = jsonView + "No documents to be displayed";
             }
-            documents = documents + "</table>";
+            jsonView = jsonView + "</tbody></table></div>";
             tabView.getTab(0).setAttributes({
-                content: documents
+                content: jsonView
             }, false);
             for (i = 0; i < response.length; i++) {
                 Y.on("click", editDoc, "#edit" + i);
@@ -313,7 +338,37 @@ YUI({
             for (i = 0; i < response.length; i++) {
                 fitToContent(500, document.getElementById("ta" + i));
             }
-            Y.log("The documents written on the JSON tab", "info");
+            var trSelectionClass = 'selected';
+            // add click listener to select and deselect rows.
+            Y.all('.jsonTable tr').on("click", function (eventObject) {
+                var currentTR = eventObject.currentTarget;
+                var alreadySelected = currentTR.hasClass(trSelectionClass);
+
+                Y.all('.jsonTable tr').each(function(item) {
+                    item.removeClass(trSelectionClass);
+                });
+
+                if (!alreadySelected) {
+                    currentTR.addClass(trSelectionClass);
+                    var editBtn = currentTR.one('button.editbtn');
+                    if (editBtn) {
+                        editBtn.focus();
+                    }
+                }
+            });
+            Y.on('blur', function(eventObject) {
+                var resetAll = true;
+                // FIXME ugly hack for avoiding blur when scroll happens
+                if (sm.isNavigationSideEffect()) {
+                    resetAll = false;
+                }
+                if (resetAll) {
+                    Y.all('tr.selected').each(function(item) {
+                        item.removeClass(trSelectionClass);
+                    });
+                }
+            }, 'div.jsonBuffer');
+            Y.log("The documents written on the JSON tab", "debug");
         }
         MV.header.set("innerHTML", "Contents of " + Y.one("#currentColl").get("value"));
         tabView.appendTo(MV.mainBody.get('id'));

@@ -230,23 +230,28 @@ YUI.add('utility', function (Y) {
         };
         return treeTable;
     };
-    var formUpperPart = "",
-        formLowerPart = "";
-    formUpperPart += "<textarea id='queryBox' name='queryBox' rows='3' cols='60' >";
-    formUpperPart += "{}";
-    formUpperPart += "</textarea>";
-    formUpperPart += "<label for='fields' ></label><ul id='fields' class='checklist'>";
-    formLowerPart += "</ul><br>";
-    formLowerPart += "<label for='limit'> Limit: </label><input id='limit' type='text' name='limit' value='0' size='5' />";
-    formLowerPart += "<label for='skip'> Skip: </label><input id='skip' type='text' name='skip' value='0' size='5' />";
-    formLowerPart += "<button id='execQueryButton' class='btn'>Execute Query</button>";
+    var upperPartTemplate = [
+        "<textarea id='queryBox' name='queryBox' rows='3' cols='60' class='queryBox'>",
+        "{}",
+        "</textarea>",
+        "<label for='fields' ></label><ul id='fields' class='checklist'>"].join('\n');
+
+    var lowerPartTemplate = [
+        "</ul><br/><br/>",
+        "<label for='limit'> Limit: </label><input id='limit' type='text' name='limit' value='0' size='5' />",
+        "<label for='skip'> Skip: </label><input id='skip' type='text' name='skip' value='0' size='5' />",
+        "<button id='execQueryButton' class='btn'>Execute Query</button>"].join('\n');
+
+    var checkListTemplate = "<li><label for='[0]'><input id='[1]' name='[2]' type='checkbox' checked=true />[3]</label></li>";
+
     MV.getForm = function (data) {
         var checkList = "";
         for (index = 0; index < data.length; index++) {
-            checkList += "<li><label for='" + data[index] + "'><input id='" + data[index] + "' name='" + data[index] + "' type='checkbox' checked=true />" + data[index] + "</label></li>";
+            checkList += checkListTemplate.format(data[index], data[index], data[index], data[index]);
         }
-        return formUpperPart + checkList + formLowerPart;
+        return upperPartTemplate + checkList + lowerPartTemplate;
     };
+
     MV.hideQueryForm = function () {
         var queryForm = Y.one('#queryForm');
         queryForm.removeClass('form-cont');
@@ -259,7 +264,7 @@ YUI.add('utility', function (Y) {
 
     MV.StateManager = (function(){
         var self = this;
-        var stateVariables = ['currentDB', 'currentColl', 'host', 'port','dbInfo'];
+        var stateVariables = ['currentDB', 'currentColl', 'host', 'port','dbInfo','newName'];
         var i = 0;
         var exports = {};
 
@@ -312,11 +317,28 @@ YUI.add('utility', function (Y) {
                 deliverEvent(eventName);
             }
         };
-        exports.subscribe = function(eventName, callback) {
-            if (gRegistry[eventName] === undefined) {
-                gRegistry[eventName] = [];
+        exports.subscribe = function(callback, eventArgs) {
+            var i = 0, eventNames;
+            // if it is not a number assume it is an array
+            if (isNaN(eventArgs)) {
+                eventNames = eventArgs;
+            } else {
+                eventNames = [eventArgs];
             }
-            gRegistry[eventName].push(callback);
+
+            for (; i < eventNames.length; i++) {
+                eventName = eventNames[i];
+                if (gRegistry[eventName] === undefined) {
+                    gRegistry[eventName] = [];
+                }
+                gRegistry[eventName].push(callback);
+            }
+        };
+        exports.recordLastArrowNavigation = function() {
+            self.lastArrowNavTS = new Date().getTime();
+        };
+        exports.isNavigationSideEffect = function() {
+            return ((self.lastArrowNavTS)? ((new Date().getTime() - self.lastArrowNavTS) < 100):false);
         };
         exports.now = function() {
             return new Date().getTime().toString();
