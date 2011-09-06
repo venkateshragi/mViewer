@@ -95,6 +95,10 @@
                         var yNode = Y.one(document.activeElement);
                         if (yNode.hasClass('non-navigable')) {
                             relevantParent = findParent(yNode, 'tr');
+                            // in case the tr contains a save button, skip
+                            if (relevantParent.one("* .savebtn") != null) {
+                                relevantParent = null;
+                            }
                         }
                     }
                     return relevantParent;

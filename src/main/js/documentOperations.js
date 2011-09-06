@@ -124,14 +124,16 @@ YUI({
             }
         });
         function fitToContent(maxHeight, text) {
-            var adjustedHeight = text.clientHeight;
-            if (!maxHeight || maxHeight > adjustedHeight) {
-                adjustedHeight = Math.max(text.scrollHeight, adjustedHeight);
-                if (maxHeight) {
-                    adjustedHeight = Math.min(maxHeight, adjustedHeight);
-                }
-                if (adjustedHeight > text.clientHeight) {
-                    text.style.height = adjustedHeight + "px";
+            if (text) {
+                var adjustedHeight = text.clientHeight;
+                if (!maxHeight || maxHeight > adjustedHeight) {
+                    adjustedHeight = Math.max(text.scrollHeight, adjustedHeight);
+                    if (maxHeight) {
+                        adjustedHeight = Math.min(maxHeight, adjustedHeight);
+                    }
+                    if (adjustedHeight > text.clientHeight) {
+                        text.style.height = adjustedHeight + "px";
+                    }
                 }
             }
         }
@@ -190,6 +192,8 @@ YUI({
             targetNode.removeClass(action + 'btn');
             targetNode.addClass(antiAction + 'btn');
             targetNode.set("id", antiAction + index);
+            targetNode.focus();
+            
         }
         function parseUpdateDocResponse(ioId, responseObject) {
             var parsedResponse = Y.JSON.parse(responseObject.responseText);
@@ -367,6 +371,19 @@ YUI({
                 if (resetAll) {
                     Y.all('tr.selected').each(function(item) {
                         item.removeClass(trSelectionClass);
+                    });
+                }
+            }, 'div.jsonBuffer');
+
+            Y.on('keyup', function(eventObject) {
+                var firstItem;
+                // escape edit mode
+                if (eventObject.keyCode === 27) {
+                    Y.all("button.savebtn").each(function(item) {
+                        toggleSaveEdit(item, getButtonIndex(item), actionMap.save);
+                        if (!(firstItem)) {
+                            firstItem = item;
+                        }
                     });
                 }
             }, 'div.jsonBuffer');
