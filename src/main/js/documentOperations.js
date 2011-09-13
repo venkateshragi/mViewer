@@ -176,18 +176,28 @@ YUI({
         }
         function toggleSaveEdit(targetNode, index, action) {
             var textArea = Y.one('#doc' + index).one("pre").one("textarea");
+            var deleteBtn = Y.one('#delete' + index);
             var antiAction;
+            var deleteBtnLabel;
             if (action === actionMap.save) {
                 antiAction = actionMap.edit;
                 textArea.addClass('disabled');
                 textArea.setAttribute("disabled", "disabled");
                 Y.on("click", editDoc, "#edit" + index);
+                deleteBtnLabel = 'delete';
+                deleteBtn.addClass('deletebtn');
+                deleteBtn.removeClass('cancelbtn');
             } else {
                 antiAction = actionMap.save;
                 textArea.removeAttribute("disabled");
                 textArea.removeClass('disabled');
                 Y.on("click", saveDoc, "#save" + index);
+                deleteBtnLabel = 'cancel';
+                deleteBtn.removeClass('deletebtn');
+                deleteBtn.addClass('cancelbtn');
             }
+            deleteBtn.set('innerHTML', deleteBtnLabel);
+
             targetNode.set("innerHTML", antiAction);
             targetNode.removeClass(action + 'btn');
             targetNode.addClass(antiAction + 'btn');
@@ -245,6 +255,7 @@ YUI({
             this.hide();
         }
         function deleteDoc(eventObject) {
+            var btnIndex;
             var sendDeleteDocRequest = function () {
                 var targetNode = eventObject.currentTarget;
                 var index = getButtonIndex(targetNode);
@@ -278,9 +289,15 @@ YUI({
                                    });
                 this.hide();
             };
-            MV.showYesNoDialog("Do you really want to drop the document ?", sendDeleteDocRequest, function () {
-                this.hide();
-            });
+            if (eventObject.currentTarget.hasClass('deletebtn')) {
+                MV.showYesNoDialog("Do you really want to drop the document ?", sendDeleteDocRequest, function () {
+                    this.hide();
+                });
+            } else {
+                //get the sibling save/edit btn and toggle using that
+                btnIndex = getButtonIndex(eventObject.currentTarget);
+                toggleSaveEdit(Y.one('#delete'+btnIndex).get('parentNode').one('button'), btnIndex, actionMap.save);
+            }
         }
         function saveDoc(eventObject) {
             var parsedDoc;
