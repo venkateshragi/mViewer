@@ -24,8 +24,9 @@
 	<property name="java.test.dir" value="${src.dir}/test/java" />
 	<property name="test.reports.dir" value="${staging.dir}/testreports" />
 	<property name="test.classes.dir" value="${staging.dir}/testclasses" />
-
-
+	
+	<property file="${basedir}/mViewer.properties" />
+	
 	<taskdef uri="antlib:net.sf.antcontrib" resource="net/sf/antcontrib/antlib.xml" classpath=" ${src.dir}/tools/ant-contrib.jar" />
 
 	<taskdef uri="antlib:com.googlecode.jslint4java" resource="com/googlecode/jslint4java/antlib.xml" classpath="${src.dir}/tools/jslint4java.jar" />
@@ -210,8 +211,11 @@
 
 
 	<target name="start" depends="compile, jar, war-staging, war" description="Starts the winstone server with the war deployed.">
+		<echo>----------------------------------------------------------</echo>
+		<echo>On server start goto localhost:${WINSTONE_PORT}/index.html</echo>
+		<echo>----------------------------------------------------------</echo>
 		<java jar="${src.dir}/tools/winstone-0.9.10.jar" fork="true">
-			<arg value="--httpPort=8080"/>
+			<arg value="--httpPort=${WINSTONE_PORT}"/>
 			<arg value="--ajp13Port=-1" />
 			<arg value="--warfile=${staging.dir}/${app.war}" />
 		</java>
