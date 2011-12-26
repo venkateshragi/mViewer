@@ -2,6 +2,7 @@
 
 
 	<property name="app.name" value="mViewer" />
+        <property name="app.version" value="0.6" />
 	<property name="app.war" value="${app.name}.war" />
 	<property name="app.jar" value="${app.name}.jar" />
 	<property name="src.dir" value="${basedir}/src" />
@@ -10,11 +11,15 @@
 	<property name="src.resources.dir" value="${src.dir}/resources" />
 	<property name="main.resources.dir" value="${src.dir}/main/resources" />
 	<property name="lib.dir" value="${src.resources.dir}" />
+        <property name="scripts.dir" value="${basedir}/scripts" />
 
 	<property name="staging.dir" value="${basedir}/staging" />
 	<property name="docs.dir" value="${staging.dir}/docs" />
 	<property name="java.docs.dir" value="${docs.dir}/java" />
 	<property name="js.docs.dir" value="${docs.dir}/js" />
+
+	<property name="release.dir" value="${basedir}/release" />
+	<property name="release.app.dir" value="${release.dir}/mViewer" />
 
 	<property name="classes.dir" value="${staging.dir}/classes" />
 	<property name="app.dir" value="${staging.dir}/${app.name}" />
@@ -198,6 +203,24 @@
 	<target name="dist" description="Prepares a dist, is not incremental" depends="clean, compile, jar,jdoc,war,dev">
 		<echo> Deploy the war ${staging.dir}/${app.war} to your app-server. For detailed instructions please use the README</echo>
 	</target>
+
+	<target name="release" description="Prepares a dist, is not incremental" depends="clean, compile, jar,jdoc,war,dev">
+		<echo> Deploy the war ${staging.dir}/${app.war} to your app-server. For detailed instructions please use the README</echo>
+		<mkdir dir="${release.dir}" />
+		<mkdir dir="${release.app.dir}" />
+
+		<copy file="${staging.dir}/${app.war}" toDir="${release.app.dir}"/>
+		<copy file="${src.dir}/tools/winstone-0.9.10.jar" toDir="${release.app.dir}" />
+		<copy file="${basedir}/mViewer.properties" toDir="${release.app.dir}" />
+		<copy toDir="${release.app.dir}">
+			<fileset dir="${scripts.dir}" />
+		</copy>
+
+		<zip destfile="${release.dir}/mViewer-v${app.version}.zip"
+ 		     basedir="${release.app.dir}" 
+		/>
+	</target>
+
 
 	<target name="dev" description="prepares a dev build, is incremental" depends="compile, jar, war-staging">
 		<echo>Building the war in dev-mode</echo>
