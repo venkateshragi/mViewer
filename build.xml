@@ -204,7 +204,7 @@
 		<echo> Deploy the war ${staging.dir}/${app.war} to your app-server. For detailed instructions please use the README</echo>
 	</target>
 
-	<target name="release" description="Prepares a dist, is not incremental" depends="clean, compile, jar,jdoc,war,dev">
+	<target name="release" description="Prepares a deployable release." depends="clean, compile, jar,jdoc,war,dev">
 		<echo> Deploy the war ${staging.dir}/${app.war} to your app-server. For detailed instructions please use the README</echo>
 		<mkdir dir="${release.dir}" />
 		<mkdir dir="${release.app.dir}" />
@@ -216,9 +216,15 @@
 			<fileset dir="${scripts.dir}" />
 		</copy>
 
+		<chmod file="${release.app.dir}/start_mviewer.sh" perm="ugo+rx"/>
+
 		<zip destfile="${release.dir}/mViewer-v${app.version}.zip"
  		     basedir="${release.app.dir}" 
 		/>
+		<tar destfile="${release.dir}/mViewer-v${app.version}.tar"
+     		     basedir="${release.app.dir}"
+     		/>
+		<delete dir="${release.app.dir}" />
 	</target>
 
 
