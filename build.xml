@@ -224,7 +224,11 @@
 		<tar destfile="${release.dir}/mViewer-v${app.version}.tar"
      		     basedir="${release.app.dir}"
      		/>
+		<gzip destfile="${release.dir}/mViewer-v${app.version}.tar.gz" 
+		      src="${release.dir}/mViewer-v${app.version}.tar"/>
+		<delete file="${release.dir}/mViewer-v${app.version}.tar"/>
 		<delete dir="${release.app.dir}" />
+
 	</target>
 
 
