@@ -175,35 +175,23 @@ YUI({
             return (parseInt(match[0], 10));
         }
         function toggleSaveEdit(targetNode, index, action) {
-            var textArea = Y.one('#doc' + index).one("pre").one("textarea");
-            var deleteBtn = Y.one('#delete' + index);
-            var antiAction;
-            var deleteBtnLabel;
+        	var textArea = Y.one('#doc' + index).one("pre").one("textarea");
             if (action === actionMap.save) {
-                antiAction = actionMap.edit;
-                textArea.addClass('disabled');
+            	textArea.addClass('disabled');
                 textArea.setAttribute("disabled", "disabled");
-                Y.on("click", editDoc, "#edit" + index);
-                deleteBtnLabel = 'delete';
-                deleteBtn.addClass('deletebtn');
-                deleteBtn.removeClass('cancelbtn');
+            	Y.one("#save"+index).addClass("invisible");
+            	Y.one("#cancel"+index).addClass("invisible");
+            	Y.one("#edit"+index).removeClass("invisible");
+            	Y.one("#delete"+index).removeClass("invisible");
             } else {
-                antiAction = actionMap.save;
-                textArea.removeAttribute("disabled");
+            	textArea.removeAttribute("disabled");
                 textArea.removeClass('disabled');
-                Y.on("click", saveDoc, "#save" + index);
-                deleteBtnLabel = 'cancel';
-                deleteBtn.removeClass('deletebtn');
-                deleteBtn.addClass('cancelbtn');
+            	Y.one("#edit"+index).addClass("invisible");
+            	Y.one("#delete"+index).addClass("invisible");
+            	Y.one("#save"+index).removeClass("invisible");
+            	Y.one("#cancel"+index).removeClass("invisible");
             }
-            deleteBtn.set('innerHTML', deleteBtnLabel);
-
-            targetNode.set("innerHTML", antiAction);
-            targetNode.removeClass(action + 'btn');
-            targetNode.addClass(antiAction + 'btn');
-            targetNode.set("id", antiAction + index);
             targetNode.focus();
-            
         }
         function parseUpdateDocResponse(ioId, responseObject) {
             var parsedResponse = Y.JSON.parse(responseObject.responseText);
@@ -303,15 +291,22 @@ YUI({
             var parsedDoc;
             var targetNode = eventObject.currentTarget;
             var index = getButtonIndex(targetNode);
-            toggleSaveEdit(targetNode, index, actionMap.save);
             var doc = Y.one('#doc' + index).one("pre").one("textarea").get("value");
             doc = doc.replace(/'/g, '"');
             try {
                 parsedDoc = Y.JSON.parse(doc);
+                sendUpdateDocRequest(Y.JSON.stringify(parsedDoc), idMap[index].id);
+                toggleSaveEdit(targetNode, index, actionMap.save);
             } catch (e) {
                 MV.showAlertDialog("The document entered is not in the correct JSON format");
             }
-            sendUpdateDocRequest(Y.JSON.stringify(parsedDoc), idMap.index);
+        }
+        function cancelSave(eventObject){
+        	 var targetNode = eventObject.currentTarget;
+             var index = getButtonIndex(targetNode);
+             var textArea = Y.one('#doc' + index).one("pre").one("textarea");
+             textArea.set("value",idMap[index].originalDoc);
+             toggleSaveEdit(targetNode, index, actionMap.save);
         }
         function editDoc(eventObject) {
             if (!allKeysSelected()) {
@@ -321,12 +316,14 @@ YUI({
             } else {
                 var targetNode = eventObject.currentTarget;
                 var index = getButtonIndex(targetNode);
-                toggleSaveEdit(targetNode, index, actionMap.edit);
                 var docNode = Y.one('#doc' + index).one("pre").one("textarea");
-                docNode.focus();
                 var doc = docNode.get("value");
                 parsedDoc = Y.JSON.parse(doc);
-                idMap.index = parsedDoc._id;
+                idMap[index] = {};
+                idMap[index].id = parsedDoc._id;
+                idMap[index].originalDoc = doc;
+                toggleSaveEdit(targetNode, index, actionMap.edit);
+                docNode.focus();
             }
         }
         function writeOnJSONTab(response) {
@@ -337,15 +334,17 @@ YUI({
                               "      <pre> <textarea id='ta[1]' class='disabled non-navigable' disabled='disabled' cols='75'>[2]</textarea></pre>",
                               "  </td>",
                               "  <td>",
-                              "   <button id='edit[3]'class='btn editbtn non-navigable'>edit</button>",
-                              "   <br/>",
+                              "  <button id='edit[3]'class='btn editbtn non-navigable'>edit</button>",
                               "   <button id='delete[4]'class='btn deletebtn non-navigable'>delete</button>",
+                              "   <button id='save[5]'class='btn savebtn non-navigable invisible'>save</button>",
+                              "   <button id='cancel[6]'class='btn cancelbtn non-navigable invisible'>cancel</button>",
+                              "   <br/>",
                               "  </td>",
                               "</tr>"].join('\n');
             jsonView += "<table class='jsonTable'><tbody>";
             
             for (i = 0; i < response.length; i++) {
-                jsonView += trTemplate.format(i, i, Y.JSON.stringify(response[i], null, 4),i, i);
+                jsonView += trTemplate.format(i, i, Y.JSON.stringify(response[i], null, 4),i, i, i, i);
             }
             if (i === 0) {
                 jsonView = jsonView + "No documents to be displayed";
@@ -357,6 +356,8 @@ YUI({
             for (i = 0; i < response.length; i++) {
                 Y.on("click", editDoc, "#edit" + i);
                 Y.on("click", deleteDoc, "#delete" + i);
+                Y.on("click", saveDoc, "#save" + i);
+                Y.on("click", cancelSave, "#cancel" + i);
             }
             for (i = 0; i < response.length; i++) {
                 fitToContent(500, document.getElementById("ta" + i));

@@ -535,4 +535,6 @@ div.generalInfo {
     text-align:center;
     border: 1px solid grey
 }
-
+.invisible{
+	display :none;
+}
