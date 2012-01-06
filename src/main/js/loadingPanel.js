@@ -21,10 +21,12 @@ function LoadingPanel(message) {
         width: "240px",
         fixedcenter: true,
         close: false,
+        zindex:4, 
+        modal:true, 
         draggable: false,
         visible: false,
         constraintoviewport: true,
-        iframe: true
+        iframe: true,
     });
 
     this.panel.setHeader(message);
