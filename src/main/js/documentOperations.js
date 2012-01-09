@@ -292,6 +292,7 @@ YUI({
             } else {
                 var error = parsedResponse.response.error;
                 MV.showAlertDialog("Could not update Document! [0]".format(MV.errorCodeMap[error.code]), MV.warnIcon, function () {
+                	this.hide();
                     Y.one("#" + Y.one("#currentColl").get("value").replace(/ /g, '_')).simulate("click");
                 });
                 Y.log("Could not update Document! [0]".format(MV.errorCodeMap[error.code]), "error");
