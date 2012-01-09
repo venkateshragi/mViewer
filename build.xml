@@ -2,7 +2,7 @@
 
 
 	<property name="app.name" value="mViewer" />
-        <property name="app.version" value="0.8" />
+    <property name="app.version" value="0.8" />
 	<property name="app.war" value="${app.name}.war" />
 	<property name="app.jar" value="${app.name}.jar" />
 	<property name="src.dir" value="${basedir}/src" />
@@ -11,7 +11,7 @@
 	<property name="src.resources.dir" value="${src.dir}/resources" />
 	<property name="main.resources.dir" value="${src.dir}/main/resources" />
 	<property name="lib.dir" value="${src.resources.dir}" />
-        <property name="scripts.dir" value="${basedir}/scripts" />
+    <property name="scripts.dir" value="${basedir}/scripts" />
 
 	<property name="staging.dir" value="${basedir}/staging" />
 	<property name="docs.dir" value="${staging.dir}/docs" />

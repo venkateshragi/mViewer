@@ -19,13 +19,15 @@ YUI({
 }).use("io", "json", "node", "utility", function (Y) {
     var MV = YUI.com.imaginea.mongoV;
     var tryLogin = function (e) {
-            var username = Y.one("#username").get("value").trim();
-            var password = Y.one("#password").get("value").trim();
-            var port = Y.one("#port").get("value").trim();
-            var host = Y.one("#host").get("value").trim();
+            var username = Y.one("#username").get("value").trim(),
+            	password = Y.one("#password").get("value").trim(),
+            	port = Y.one("#port").get("value").trim(),
+            	host = Y.one("#host").get("value").trim();
+            
             var resetBGColor = function () {
                     Y.all("input").setStyle("background", "#FFFFFF");
                 };
+                
             var errorHandlerMap = {
                 "HOST_UNKNOWN": function () {
                     resetBGColor();
@@ -60,14 +62,15 @@ YUI({
                 method: "POST",
                 on: {
                     success: function (ioId, responseObject) {
-                        parsedResponse = Y.JSON.parse(responseObject.responseText);
-                        var response = parsedResponse.response.result;
+                        var parsedResponse = Y.JSON.parse(responseObject.responseText),
+                        	response = parsedResponse.response.result,
+                        	error,errorDiv;
                         if (response !== undefined) {
                             Y.log("Successfully logging in", "info");
                             window.location = "home.html?dbInfo="+ host + "_" +port+"_"+username;
                         } else {
-                            var error = parsedResponse.response.error;
-                            var errorDiv = Y.one("#errorMsg");
+                            error = parsedResponse.response.error;
+                            errorDiv = Y.one("#errorMsg");
                             errorDiv.setStyle("display", "inline");
                             errorHandlerMap[error.code]();
                             errorDiv.set("innerHTML", MV.errorCodeMap[error.code] || "Error!");

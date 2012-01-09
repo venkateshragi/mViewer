@@ -14,6 +14,11 @@
  * limitations under the License.
  */
 YUI.add('dialog-box', function (Y) {
+	/**
+	 *Show a dialog box
+	 * @module dialog-box
+	 */
+
     YUI.namespace('com.imaginea.mongoV');
     var MV = YUI.com.imaginea.mongoV;
 
