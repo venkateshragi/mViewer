@@ -22,7 +22,7 @@ YUI.add('alert-dialog', function (Y) {
     var MV = YUI.com.imaginea.mongoV;
     if(!MV.simpleDialog){
     	 // Simple Dialog object
-    	MV.simpleDialog = new YAHOO.widget.SimpleDialog("simpledialog", {
+    	MV.simpleDialog = new YAHOO.widget.SimpleDialog("alertDialog", {
             width: "300px",
             fixedcenter: true,
             visible: false,

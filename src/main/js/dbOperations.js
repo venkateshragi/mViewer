@@ -22,29 +22,43 @@ YUI({
     var MV = YUI.com.imaginea.mongoV; 
     var sm = YUI.com.imaginea.mongoV.StateManager;
 
-    /* HANDLER FUNCTIONS */
+    /**
+     * The function handles the successful sending of add Collection request.
+     * It parses the response and checks if the collection is successfully added. If not, 
+     * then prompt the user
+     * @param responseObject The response Object
+     */
     function addCollection(responseObject) {
-        var parsedResponse = Y.JSON.parse(responseObject.responseText);
-        var response = parsedResponse.response.result;
+        var parsedResponse = Y.JSON.parse(responseObject.responseText),
+        	response = parsedResponse.response.result,
+        	error;
         if (response !== undefined) {
             MV.showAlertDialog("[0] added to [1]".format(sm.newName(), sm.currentDB()), MV.infoIcon);
             Y.log("[0] created in [1]".format(Y.one("#newName").get("value"), Y.one("#currentDB").get("value")), "info");
             sm.clearCurrentColl();
             Y.one("#" + Y.one("#currentDB").get("value")).simulate("click");
         } else {
-            var error = parsedResponse.response.error;
+            error = parsedResponse.response.error;
             MV.showAlertDialog("Could not add Collection! [0]".format(MV.errorCodeMap[error.code]), MV.warnIcon);
             Y.log("Could not add Collection! [0]".format(MV.errorCodeMap[error.code]), "error");
         }
     }
 
+    /**
+     * Sends the dropDb requests and handles it. It is actually the callback for the Yes button click
+     * on the YesNo dialog box
+     * @param responseObject The response Object
+     */
     function sendDropDBRequest() {
+    	//"this" refers to the Yes/No dialog box
+    	this.hide();
         Y.log("Preparing to send request to drop DB", "info");
         var request = Y.io(MV.URLMap.dropDB(), {
             method: "POST",
             on: {
                 success: function (ioId, responseObject) {
-                    var parsedResponse = Y.JSON.parse(responseObject.responseText);
+                    var parsedResponse = Y.JSON.parse(responseObject.responseText),
+                    	error;
                     if (parsedResponse.response.result !== undefined) {
                         MV.showAlertDialog("[0] is dropped! ".format(Y.one("#currentDB").get("value")), MV.infoIcon, function () {
                             window.location = "home.html?dbInfo=" + Y.one("#host").get("value")+"_" + Y.one("#port").get("value") + "_" + Y.one("#username").get("value");
@@ -52,7 +66,7 @@ YUI({
                         Y.log("[0] dropped".format(Y.one("#currentDB").get("value")), "info");
                         Y.one("#currentDB").set("value", "");
                     } else {
-                        var error = parsedResponse.response.error;
+                        error = parsedResponse.response.error;
                         MV.showAlertDialog("Could not drop: [0]. [1]".format(Y.one("#currentDB").get("value"), MV.errorCodeMap[error.code]), MV.warnIcon);
                         Y.log("Could not drop: [0], Response Recieved: [1], ErrorCode: [2]".format(Y.one("#currentDB").get("value"), error.message, error.code), "error");
                     }
@@ -63,12 +77,19 @@ YUI({
                 }
             }
         });
-        this.hide();
     }
+    
+    /**
+     * The function handles event on the context menu for the database
+     * @param eventType The event type
+     * @param args the arguments containing information about which menu item was clicked
+     */
 
-    // TODO move to onclick configuration property style for context menu
     function handleContextMenu(eventType, args) {
-        var menuItem = args[1]; // The MenuItem that was clicked
+        var menuItem = args[1], // The MenuItem that was clicked
+        	dialog,
+        	form,
+        	showErrorMessage;
         Y.one("#currentDB").set("value", this.contextEventTarget.id);
         MV.toggleClass(Y.one("#" + Y.one("#currentDB").get("value")), Y.all("#dbNames li"));
         switch (menuItem.index) {
@@ -78,8 +99,8 @@ YUI({
             break;
         case 1:
             // add collection
-            var form = "addColDialog";
-            var showErrorMessage = function(responseObject) {
+            form = "addColDialog";
+            showErrorMessage = function(responseObject) {
                 MV.showAlertDialog("Collection creation failed! Please check if app server is runnning.", MV.warnIcon);
                 Y.log("Collection creation failed. Response Status: [0]".format(responseObject.statusText), "error");
             };
@@ -97,11 +118,43 @@ YUI({
         trigger: "dbNames",
         itemData: ["Delete Database", "Add Collection", "Statistics"]
     });
-
     dbContextMenu.render("dbContextMenu");
     dbContextMenu.clickEvent.subscribe(handleContextMenu);
-
-    // A function handler to use for successful requests to get DB names:
+   
+    /**
+     * Gets the parameters from the URL
+     */
+    function getParameters() {
+        var params = [], token;
+        var fullUrl = window.location.search;
+        var dbInfo= fullUrl.substring(fullUrl.indexOf("=")+1);
+        while (dbInfo.indexOf("_") !== -1) {
+            token = dbInfo.substring(0, dbInfo.indexOf("_"));
+			dbInfo = dbInfo.substring(dbInfo.indexOf("_")+1);
+            params.push(token);
+        }
+        params.push(dbInfo); // last token
+        return params;
+    }
+    
+    /**
+     * Gets the user information from the URL and sets it
+     */
+    function setUserInfo(){
+    	var params = getParameters();
+    	Y.one("#host").set("value", params[0]);
+        Y.one("#port").set("value", params[1]);
+        Y.one("#username").set("value", params[2]);
+    	Y.one('#user').set("innerHTML", Y.one("#username").get("value"));
+        Y.one('#hostname').set("innerHTML", Y.one("#host").get("value"));
+    }
+    /**
+     *  A function handler to use for successful requests to get DB names.
+     *  It parses the response and checks if DB list is successfully received. If not,
+     *  then prompt the user that an error occurred.
+     *  @param ioId eventId
+     *  @param responseObject The response Object
+     */
     function showDBs(ioId, responseObject) {
         Y.log("Response Recieved of get DB request", "info");
         try {
@@ -115,8 +168,6 @@ YUI({
                     dbDiv.set("innerHTML", "No Databases");
                 }
                 dbDiv.set("innerHTML", dbNames);
-                Y.one('#user').set("innerHTML", Y.one("#username").get("value"));
-                Y.one('#hostname').set("innerHTML", Y.one("#host").get("value"));
                 loadingPanel.hide();
                 Y.log("Database Names succesfully loaded", "info");
                 sm.publish(sm.events.dbsChanged);
@@ -131,35 +182,27 @@ YUI({
         }
     }
 
-    // A function handler to use for failed requests to get DB names:
+    /**
+     * A function handler to use for failed requests to get DB names.
+     * @param ioId
+     * @param responseObject The response Object
+     */ 
     function displayError(ioId, responseObject) {
         Y.log("Could not load the databases", "error");
         Y.log("Status code message: [0]".format(responseObject.statusText), "error");
         loadingPanel.hide();
         MV.showAlertDialog("Could not load collections! Please check if the app server is running. Status Text: [0]".format(responseObject.statustext), MV.warnIcon);
     }
-
-    function getParameters() {
-        var params = [], token;
-        var fullUrl = window.location.search;
-        var dbInfo= fullUrl.substring(fullUrl.indexOf("=")+1);
-        while (dbInfo.indexOf("_") !== -1) {
-            token = dbInfo.substring(0, dbInfo.indexOf("_"));
-			dbInfo = dbInfo.substring(dbInfo.indexOf("_")+1);
-            params.push(token);
-        }
-        params.push(dbInfo); // last token
-        return params;
-    }
-
+    
+    /**
+     * The function handles the onLoad event for the home page.
+     * It sends request to get the DB names
+     */
     function requestDBNames() {
         loadingPanel = new LoadingPanel("Loading Databases...");
         loadingPanel.show();
+        setUserInfo();
         dbDiv = Y.one('#dbNames ul.lists');
-        var params = getParameters();
-        Y.one("#host").set("value", params[0]);
-        Y.one("#port").set("value", params[1]);
-        Y.one("#username").set("value", params[2]);
         var request = Y.io(MV.URLMap.getDBs(),
                            // configuration for loading the database names
                            {
@@ -172,7 +215,6 @@ YUI({
         Y.log("Sending request to load DB names", "info");
     } 
 
-    /* EVENT LISTENERS */
     // Make a request to load Database names when the page loads
     Y.on("load", requestDBNames);
 });
