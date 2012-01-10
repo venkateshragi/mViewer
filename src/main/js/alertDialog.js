@@ -13,20 +13,34 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-// TODO send a custom handler if not provided run the default one
+/**
+ * @module alert-dialog
+ * The module provides function <tt>showAlertDialog</tt> to show the simple dialog box.
+ */
 YUI.add('alert-dialog', function (Y) {
     YUI.namespace('com.imaginea.mongoV');
-    var simpleDialog = new YAHOO.widget.SimpleDialog("simpledialog", {
-        width: "300px",
-        fixedcenter: true,
-        visible: false,
-        draggable: true,
-        close: false,
-        constraintoviewport: true,
-        zIndex: 10,
-    });
-    simpleDialog.setHeader("Info");
-    simpleDialog.render("alertDialogContainer");
+    var MV = YUI.com.imaginea.mongoV;
+    if(!MV.simpleDialog){
+    	 // Simple Dialog object
+    	MV.simpleDialog = new YAHOO.widget.SimpleDialog("simpledialog", {
+            width: "300px",
+            fixedcenter: true,
+            visible: false,
+            draggable: true,
+            close: false,
+            constraintoviewport: true,
+            zIndex: 10,
+        });
+        MV.simpleDialog.setHeader("Info");
+        MV.simpleDialog.render("alertDialogContainer");
+    }
+    /**
+     * The function pops up a simple dialog box 
+     * @param msg {String} This is the message that the alert dialog box will show
+     * @param ico {Object} The icon to be show with the message. The icon can either be a Warn icon
+     * or a Info icon
+     * @param handler {Function} The call back function when <tt>OK</tt> is clicked on the dialog box   
+     */
     YUI.com.imaginea.mongoV.showAlertDialog = function (msg, ico, handler) {
         var buttons = [{
             text: "OK",
@@ -36,10 +50,10 @@ YUI.add('alert-dialog', function (Y) {
             },
             isDefault: true
         }];
-        simpleDialog.cfg.setProperty("buttons", buttons);
-        simpleDialog.setBody(msg);
-        simpleDialog.cfg.setProperty("icon", ico || YAHOO.widget.SimpleDialog.ICON_INFO);
-        simpleDialog.show();
+        MV.simpleDialog.cfg.setProperty("buttons", buttons);
+        MV.simpleDialog.setBody(msg);
+        MV.simpleDialog.cfg.setProperty("icon", ico || YAHOO.widget.SimpleDialog.ICON_INFO);
+        MV.simpleDialog.show();
     };
 }, '3.3.0', {
     requires: []
