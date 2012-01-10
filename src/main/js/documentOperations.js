@@ -1,11 +1,11 @@
 /*
  * Copyright (c) 2011 Imaginea Technologies Private Ltd.
  * Hyderabad, India
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     http://www.apache.org/licenses/LICENSE-2.0
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -15,46 +15,46 @@
  */
 YUI({
     filter: 'raw'
-}).use("yes-no-dialog", "alert-dialog", "io-base", "json-parse", "node-event-simulate", "node", "event-delegate", "stylize", "json-stringify", "utility", "event-key", "event-focus", "node-focusmanager", function (Y) {
+}).use("yes-no-dialog", "alert-dialog", "io-base", "json-parse", "node-event-simulate", "node", "event-delegate", "stylize", "json-stringify", "utility", "event-key", "event-focus", "node-focusmanager", function(Y) {
     YUI.namespace('com.imaginea.mongoV');
     var MV = YUI.com.imaginea.mongoV,
-    	sm = MV.StateManager;
+        sm = MV.StateManager;
     MV.treebleData = {};
-    
+
     /**
      * The function is an event handler to show the documents whenever a column name is clicked  
      * @param {object} e It is an event object
-     * 
+     *
      */
-    var showTabView = function (e) {
+    var showTabView = function(e) {
         MV.toggleClass(e.currentTarget, Y.all("#collNames li"));
         sm.setCurrentColl(e.currentTarget.getContent());
         MV.mainBody.empty(true);
-        
+
         /**
-         * This function gets the query parameters from the query box. It takes the 
-         * query string, the limit value, skip value and the fields selected and return a 
-         * query parameter string which will be added to the request URL 
+         * This function gets the query parameters from the query box. It takes the
+         * query string, the limit value, skip value and the fields selected and return a
+         * query parameter string which will be added to the request URL
          * @returns {String} Query prameter string
-         * 
+         *
          */
+
         function getQueryParameters() {
-            var parsedQuery,
-            	query = Y.one('#queryBox').get("value"),
-            	limit = Y.one('#limit').get("value"),
-            	skip = Y.one('#skip').get("value"),
-            	fields = Y.all('#fields input'),
-            	index = 0,
-            	checkedFields = [],
-            	item;
+            var parsedQuery, query = Y.one('#queryBox').get("value"),
+                limit = Y.one('#limit').get("value"),
+                skip = Y.one('#skip').get("value"),
+                fields = Y.all('#fields input'),
+                index = 0,
+                checkedFields = [],
+                item;
 
             if (query === "") {
                 query = "{}";
             }
-            
-            //replace the single quotes (') in the query string by double quotes (") 
+
+            //replace the single quotes (') in the query string by double quotes (")
             query = query.replace(/'/g, '"');
-            
+
             try {
                 parsedQuery = Y.JSON.parse(query);
                 for (index = 0; index < fields.size(); index++) {
@@ -69,13 +69,14 @@ YUI({
                 MV.showAlertDialog("Failed:Could not parse query. [0]".format(error), MV.warnIcon);
             }
         }
-        
+
         /**
          * The function creates and XHR data source which will get all the documents.
          * A data source is created so that we don't have to send separate requests to load
-         * the JSON view and the Treeble view 
-         * 
+         * the JSON view and the Treeble view
+         *
          */
+
         function defineDatasource() {
             MV.data = new YAHOO.util.XHRDataSource(MV.URLMap.getDocs(), {
                 responseType: YAHOO.util.XHRDataSource.TYPE_JSON,
@@ -89,48 +90,47 @@ YUI({
                 }
             });
         }
-        
+
         /**
          * The function sends a request to the data source create by function <tt>defineDatasource</tt>
          * to get all the documents.
-         * @param {String} param The query parameter string that has to be sent to get the documents 
+         * @param {String} param The query parameter string that has to be sent to get the documents
          */
-        
+
         function requestDocuments(param) {
             MV.data.sendRequest(param, {
                 success: showDocuments,
-                failure: function (request, responseObject) {
+                failure: function(request, responseObject) {
                     MV.showAlertDialog("Failed: Documents could not be loaded", MV.warnIcon);
                     Y.log("Documents could not be loaded. Response: [0]".format(responseObject.responseText), "error");
                 },
                 scope: tabView
             });
         }
-        
+
         /**
-         *The function is an event handler for the execute query button. It gets the query parameters 
-         *and sends a request to get the documents 
-         * @param {Object} e The event object 
+         *The function is an event handler for the execute query button. It gets the query parameters
+         *and sends a request to get the documents
+         * @param {Object} e The event object
          */
+
         function executeQuery(e) {
             var queryParams = getQueryParameters();
             if (queryParams !== undefined) {
                 requestDocuments(queryParams);
             }
         }
-        
+
         /**
          *The function is success handler for the request of getting all the keys in a collections.
-         *It parses the response, gets the keys and makes the query box. It also sends the request to load the 
+         *It parses the response, gets the keys and makes the query box. It also sends the request to load the
          *documents after the query box has been populated,
-         * @param {Number} e Id 
+         * @param {Number} e Id
          * @param {Object} The response Object
          */
+
         function showQueryBox(ioId, responseObject) {
-        	var parsedResponse,
-        		keys,
-        		queryForm,
-        		error;
+            var parsedResponse, keys, queryForm, error;
             Y.log("Preparing to show QueryBox", "info");
             try {
                 Y.log("Parsing the JSON response to get the keys", "info");
@@ -141,7 +141,7 @@ YUI({
                     queryForm.addClass('form-cont');
                     queryForm.set("innerHTML", MV.getForm(keys));
                     // insert a ctrl + enter listener for query evaluation
-                    Y.one("#queryBox").on("keyup", function (eventObject) {
+                    Y.one("#queryBox").on("keyup", function(eventObject) {
                         if (eventObject.ctrlKey && eventObject.keyCode === 13) {
                             Y.one('#execQueryButton').simulate('click');
                         }
@@ -162,7 +162,7 @@ YUI({
                 MV.showAlertDialog("Cannot parse Response to get keys!", MV.warnIcon);
             }
         }
-        
+
         /**
          * It sends request to get all  the keys of the  current collection
          */
@@ -170,18 +170,19 @@ YUI({
             method: "GET",
             on: {
                 success: showQueryBox,
-                failure: function (ioId, responseObject) {
+                failure: function(ioId, responseObject) {
                     MV.showAlertDialog("Unexpected Error: Could not load the query Box", MV.warnIcon);
                     Y.log("Could not send the request to get the keys in the collection. Response Status: [0]".format(responseObject.statusText), "error");
                 }
             }
         });
-        
+
         /**
          * Sets the size of the text area according to the content in the text area.
          * @param maxHeight The maximum height if the text area
          * @param text The text of the text area
          */
+
         function fitToContent(maxHeight, text) {
             if (text) {
                 var adjustedHeight = text.clientHeight;
@@ -196,26 +197,28 @@ YUI({
                 }
             }
         }
-        
+
         /**
          * The function loads the treeble view and subscibes it to the mouse over event.
          * When the mouse over over the rows the complete row is highlighted
          * @param treeble the treeble structure to be loaded
          */
+
         function loadAndSubscribe(treeble) {
             treeble.load();
             treeble.subscribe("rowMouseoverEvent", treeble.onEventHighlightRow);
             treeble.subscribe("rowMouseoutEvent", treeble.onEventUnhighlightRow);
         }
-        
+
         /**
          * The function is the success handler for the request document call.
-         * It calls function to write on the JSON tab and to create the treeble structure 
+         * It calls function to write on the JSON tab and to create the treeble structure
          * from the response data
-         * @param {Object} request The request Object 
+         * @param {Object} request The request Object
          * @param {Object} responseObject The response object containing the response of the get documents request
-         * 
+         *
          */
+
         function showDocuments(request, responseObject) {
             Y.log("Preparing to write on JSON tab", "info");
             writeOnJSONTab(responseObject.results);
@@ -226,8 +229,8 @@ YUI({
             Y.log("Tree table view loaded", "info");
             sm.publish(sm.events.queryFired);
         }
-        
-        
+
+
         var tabView = new YAHOO.widget.TabView();
         tabView.addTab(new YAHOO.widget.Tab({
             label: 'JSON',
@@ -242,14 +245,15 @@ YUI({
             save: "save",
             edit: "edit"
         };
-        
+
         var idMap = {};
+
         function getButtonIndex(targetNode) {
             var btnID = targetNode.get("id");
             var match = btnID.match(/\d+/);
             return (parseInt(match[0], 10));
         }
-        
+
         /**
          * The function toggles the save/cancel and edit/delete buttons. It just adds/removes class invisible.
          * Also it makes the textArea disabled/enabled based on the condition
@@ -257,22 +261,23 @@ YUI({
          * @param index the index number of the node that is clicked
          * @param action The action (save/edit) that has been performed
          */
+
         function toggleSaveEdit(targetNode, index, action) {
-        	var textArea = Y.one('#doc' + index).one("pre").one("textarea");
+            var textArea = Y.one('#doc' + index).one("pre").one("textarea");
             if (action === actionMap.save) {
-            	textArea.addClass('disabled');
+                textArea.addClass('disabled');
                 textArea.setAttribute("disabled", "disabled");
-            	Y.one("#save"+index).addClass("invisible");
-            	Y.one("#cancel"+index).addClass("invisible");
-            	Y.one("#edit"+index).removeClass("invisible");
-            	Y.one("#delete"+index).removeClass("invisible");
+                Y.one("#save" + index).addClass("invisible");
+                Y.one("#cancel" + index).addClass("invisible");
+                Y.one("#edit" + index).removeClass("invisible");
+                Y.one("#delete" + index).removeClass("invisible");
             } else {
-            	textArea.removeAttribute("disabled");
+                textArea.removeAttribute("disabled");
                 textArea.removeClass('disabled');
-            	Y.one("#edit"+index).addClass("invisible");
-            	Y.one("#delete"+index).addClass("invisible");
-            	Y.one("#save"+index).removeClass("invisible");
-            	Y.one("#cancel"+index).removeClass("invisible");
+                Y.one("#edit" + index).addClass("invisible");
+                Y.one("#delete" + index).addClass("invisible");
+                Y.one("#save" + index).removeClass("invisible");
+                Y.one("#cancel" + index).removeClass("invisible");
             }
             targetNode.focus();
         }
@@ -282,6 +287,7 @@ YUI({
          * @param ioId the event ID
          * @param responseObject the response object
          */
+
         function parseUpdateDocResponse(ioId, responseObject) {
             var parsedResponse = Y.JSON.parse(responseObject.responseText);
             response = parsedResponse.response.result;
@@ -291,36 +297,38 @@ YUI({
                 Y.one("#" + Y.one("#currentColl").get("value").replace(/ /g, '_')).simulate("click");
             } else {
                 var error = parsedResponse.response.error;
-                MV.showAlertDialog("Could not update Document! [0]".format(MV.errorCodeMap[error.code]), MV.warnIcon, function () {
-                	this.hide();
+                MV.showAlertDialog("Could not update Document! [0]".format(MV.errorCodeMap[error.code]), MV.warnIcon, function() {
+                    this.hide();
                     Y.one("#" + Y.one("#currentColl").get("value").replace(/ /g, '_')).simulate("click");
                 });
                 Y.log("Could not update Document! [0]".format(MV.errorCodeMap[error.code]), "error");
             }
         }
-        
+
         /**
          * The function sends the update Document request.
-         * @param doc The updated document 
+         * @param doc The updated document
          * @param id The id of the updated document
          */
+
         function sendUpdateDocRequest(doc, id) {
             var updateDocumentRequest = Y.io(MV.URLMap.updateDoc(), {
                 method: "POST",
                 data: "_id=" + id + "&keys=" + doc,
                 on: {
                     success: parseUpdateDocResponse,
-                    failure: function (ioId, responseObject) {
+                    failure: function(ioId, responseObject) {
                         MV.showAlertDialog("Unexpected Error: Could not update the document. Check if app server is running", MV.warnIcon);
                         Y.log("Could not send the request to update the document. Response Status: [0]".format(responseObject.statusText), "error");
                     }
                 }
             });
         }
-        
+
         /**
          * The function checks of all keys are selected in the fields list of the query box
          */
+
         function allKeysSelected() {
             var fields = Y.all('#fields input');
             var index;
@@ -335,6 +343,7 @@ YUI({
         /**
          * The function marks all the keys in the query box as checkd
          */
+
         function selectAllKeys() {
             var fields = Y.all('#fields input');
             var index;
@@ -348,57 +357,59 @@ YUI({
         /**
          * The function is an event handler to handle the delete button click.
          * It sends request to delete the document
-         * @param eventObject The event Object 
+         * @param eventObject The event Object
          */
+
         function deleteDoc(eventObject) {
             var btnIndex;
-            var sendDeleteDocRequest = function () {
+            var sendDeleteDocRequest = function() {
                 var targetNode = eventObject.currentTarget;
                 var index = getButtonIndex(targetNode);
                 var doc = Y.one('#doc' + index).one("pre").one("textarea").get("value");
                 parsedDoc = Y.JSON.parse(doc);
                 var id = parsedDoc._id;
                 var request = Y.io(MV.URLMap.deleteDoc(),
-                                   // configuration for dropping the document
-                                   {
-                                       method: "POST",
-                                       data: "_id=" + id,
-                                       on: {
-                                           success: function (ioId, responseObj) {
-                                               var parsedResponse = Y.JSON.parse(responseObj.responseText);
-                                               response = parsedResponse.response.result;
-                                               if (response !== undefined) {
-                                                   MV.showAlertDialog("Document deleted", MV.infoIcon);
-                                                   Y.log("Document with _id= [0] deleted. Response: [1]".format(id, response), "info");
-                                                   Y.one("#" + Y.one("#currentColl").get("value").replace(/ /g, '_')).simulate("click");
-                                               } else {
-                                                   var error = parsedResponse.response.error;
-                                                   MV.showAlertDialog("Could not delete the document with _id [0]. [1]".format(id, MV.errorCodeMap[error.code]), MV.warnIcon);
-                                                   Y.log("Could not delete the document with _id =  [0], Error message: [1], Error Code: [2]".format(id, error.message, error.code), "error");
-                                               }
-                                           },
-                                           failure: function (ioId, responseObj) {
-                                               Y.log("Could not delete the document .Status text: ".format(Y.one("#currentColl").get("value"), responseObj.statusText), "error");
-                                               MV.showAlertDialog("Could not drop the document! Please check if your app server is running and try again. Status Text: [1]".format(responseObj.statusText), MV.warnIcon);
-                                           }
-                                       }
-                                   });
+                // configuration for dropping the document
+                {
+                    method: "POST",
+                    data: "_id=" + id,
+                    on: {
+                        success: function(ioId, responseObj) {
+                            var parsedResponse = Y.JSON.parse(responseObj.responseText);
+                            response = parsedResponse.response.result;
+                            if (response !== undefined) {
+                                MV.showAlertDialog("Document deleted", MV.infoIcon);
+                                Y.log("Document with _id= [0] deleted. Response: [1]".format(id, response), "info");
+                                Y.one("#" + Y.one("#currentColl").get("value").replace(/ /g, '_')).simulate("click");
+                            } else {
+                                var error = parsedResponse.response.error;
+                                MV.showAlertDialog("Could not delete the document with _id [0]. [1]".format(id, MV.errorCodeMap[error.code]), MV.warnIcon);
+                                Y.log("Could not delete the document with _id =  [0], Error message: [1], Error Code: [2]".format(id, error.message, error.code), "error");
+                            }
+                        },
+                        failure: function(ioId, responseObj) {
+                            Y.log("Could not delete the document .Status text: ".format(Y.one("#currentColl").get("value"), responseObj.statusText), "error");
+                            MV.showAlertDialog("Could not drop the document! Please check if your app server is running and try again. Status Text: [1]".format(responseObj.statusText), MV.warnIcon);
+                        }
+                    }
+                });
                 this.hide();
             };
             if (eventObject.currentTarget.hasClass('deletebtn')) {
-                MV.showYesNoDialog("Do you really want to drop the document ?", sendDeleteDocRequest, function () {
+                MV.showYesNoDialog("Do you really want to drop the document ?", sendDeleteDocRequest, function() {
                     this.hide();
                 });
             } else {
                 //get the sibling save/edit btn and toggle using that
                 btnIndex = getButtonIndex(eventObject.currentTarget);
-                toggleSaveEdit(Y.one('#delete'+btnIndex).get('parentNode').one('button'), btnIndex, actionMap.save);
+                toggleSaveEdit(Y.one('#delete' + btnIndex).get('parentNode').one('button'), btnIndex, actionMap.save);
             }
         }
         /**
          * The function is an event handler for the save button click.
          * @param eventObject The event Object
          */
+
         function saveDoc(eventObject) {
             var parsedDoc;
             var targetNode = eventObject.currentTarget;
@@ -411,31 +422,33 @@ YUI({
                 sendUpdateDocRequest(Y.JSON.stringify(parsedDoc), idMap[index].id);
                 toggleSaveEdit(targetNode, index, actionMap.save);
             } catch (e) {
-                MV.showAlertDialog("The document entered is not in the correct JSON format",MV.warnIcon,function(){
-                	textArea.focus();
-                	this.hide();
+                MV.showAlertDialog("The document entered is not in the correct JSON format", MV.warnIcon, function() {
+                    textArea.focus();
+                    this.hide();
                 });
-                
+
             }
         }
         /**
          * The function is an event handler for the cancel button click
          * @param eventObject The event Object
          */
-        function cancelSave(eventObject){
-        	 var targetNode = eventObject.currentTarget;
-             var index = getButtonIndex(targetNode);
-             var textArea = Y.one('#doc' + index).one("pre").one("textarea");
-             textArea.set("value",idMap[index].originalDoc);
-             toggleSaveEdit(targetNode, index, actionMap.save);
+
+        function cancelSave(eventObject) {
+            var targetNode = eventObject.currentTarget;
+            var index = getButtonIndex(targetNode);
+            var textArea = Y.one('#doc' + index).one("pre").one("textarea");
+            textArea.set("value", idMap[index].originalDoc);
+            toggleSaveEdit(targetNode, index, actionMap.save);
         }
         /**
          * The function is an event handler for the edit button click
          * @param eventObject The event Object
          */
+
         function editDoc(eventObject) {
             if (!allKeysSelected()) {
-                MV.showYesNoDialog("To edit a document you need check all keys in query box. Click YES to do so, NO to cancel", selectAllKeys, function () {
+                MV.showYesNoDialog("To edit a document you need check all keys in query box. Click YES to do so, NO to cancel", selectAllKeys, function() {
                     this.hide();
                 });
             } else {
@@ -455,25 +468,26 @@ YUI({
          * The function creates the json view and adds the edit,delete,save and cancel buttons for each document
          * @param response The response Object containing all the documents
          */
+
         function writeOnJSONTab(response) {
             var jsonView = "<div class='buffer jsonBuffer navigable navigateTable' id='jsonBuffer'>";
             var i;
             var trTemplate = ["<tr>",
-                              "  <td id='doc[0]'>",
-                              "      <pre> <textarea id='ta[1]' class='disabled non-navigable' disabled='disabled' cols='75'>[2]</textarea></pre>",
-                              "  </td>",
-                              "  <td>",
-                              "  <button id='edit[3]'class='btn editbtn non-navigable'>edit</button>",
-                              "   <button id='delete[4]'class='btn deletebtn non-navigable'>delete</button>",
-                              "   <button id='save[5]'class='btn savebtn non-navigable invisible'>save</button>",
-                              "   <button id='cancel[6]'class='btn cancelbtn non-navigable invisible'>cancel</button>",
-                              "   <br/>",
-                              "  </td>",
-                              "</tr>"].join('\n');
+                                              "  <td id='doc[0]'>",
+                                              "      <pre> <textarea id='ta[1]' class='disabled non-navigable' disabled='disabled' cols='75'>[2]</textarea></pre>",
+                                              "  </td>",
+                                              "  <td>",
+                                              "  <button id='edit[3]'class='btn editbtn non-navigable'>edit</button>",
+                                              "   <button id='delete[4]'class='btn deletebtn non-navigable'>delete</button>",
+                                              "   <button id='save[5]'class='btn savebtn non-navigable invisible'>save</button>",
+                                              "   <button id='cancel[6]'class='btn cancelbtn non-navigable invisible'>cancel</button>",
+                                              "   <br/>",
+                                              "  </td>",
+                                              "</tr>"].join('\n');
             jsonView += "<table class='jsonTable'><tbody>";
-            
+
             for (i = 0; i < response.length; i++) {
-                jsonView += trTemplate.format(i, i, Y.JSON.stringify(response[i], null, 4),i, i, i, i);
+                jsonView += trTemplate.format(i, i, Y.JSON.stringify(response[i], null, 4), i, i, i, i);
             }
             if (i === 0) {
                 jsonView = jsonView + "No documents to be displayed";
@@ -493,7 +507,7 @@ YUI({
             }
             var trSelectionClass = 'selected';
             // add click listener to select and deselect rows.
-            Y.all('.jsonTable tr').on("click", function (eventObject) {
+            Y.all('.jsonTable tr').on("click", function(eventObject) {
                 var currentTR = eventObject.currentTarget;
                 var alreadySelected = currentTR.hasClass(trSelectionClass);
 
