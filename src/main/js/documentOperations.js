@@ -15,7 +15,7 @@
  */
 YUI({
     filter: 'raw'
-}).use("yes-no-dialog", "alert-dialog", "io-base", "json-parse", "node-event-simulate", "node", "event-delegate", "stylize", "json-stringify", "utility", "event-key", "event-focus", "node-focusmanager", function(Y) {
+}).use("loading-panel","yes-no-dialog", "alert-dialog", "io-base", "json-parse", "node-event-simulate", "node", "event-delegate", "stylize", "json-stringify", "utility", "event-key", "event-focus", "node-focusmanager", function(Y) {
     YUI.namespace('com.imaginea.mongoV');
     var MV = YUI.com.imaginea.mongoV,
         sm = MV.StateManager;
@@ -98,6 +98,7 @@ YUI({
          */
 
         function requestDocuments(param) {
+        	MV.showLoadingPanel("Loading Documents...")
             MV.data.sendRequest(param, {
                 success: showDocuments,
                 failure: function(request, responseObject) {
@@ -228,6 +229,7 @@ YUI({
             loadAndSubscribe(treeble);
             Y.log("Tree table view loaded", "info");
             sm.publish(sm.events.queryFired);
+            MV.hideLoadingPanel();
         }
 
 

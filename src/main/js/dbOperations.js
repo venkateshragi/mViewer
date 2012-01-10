@@ -15,9 +15,9 @@
  */
 YUI({
     filter: 'raw'
-}).use("alert-dialog", "utility", "dialog-box", "yes-no-dialog", "io-base", "node", "json-parse", "event-delegate", "node-event-simulate", "stylize", "custom-datatable", function (Y) {
+}).use("loading-panel","alert-dialog", "utility", "dialog-box", "yes-no-dialog", "io-base", "node", "json-parse", "event-delegate", "node-event-simulate", "stylize", "custom-datatable", function (Y) {
     // TODO: make loading panel module
-    var dbDiv, loadingPanel;
+    var dbDiv;
     YUI.namespace('com.imaginea.mongoV');
     var MV = YUI.com.imaginea.mongoV; 
     var sm = YUI.com.imaginea.mongoV.StateManager;
@@ -168,14 +168,14 @@ YUI({
                     dbDiv.set("innerHTML", "No Databases");
                 }
                 dbDiv.set("innerHTML", dbNames);
-                loadingPanel.hide();
+                MV.hideLoadingPanel();
                 Y.log("Database Names succesfully loaded", "info");
                 sm.publish(sm.events.dbsChanged);
             } else {
                 var error = parsedResponse.response.error;
                 Y.log("Could not load databases. Message from server: [0]. Error Code from server:[1] ".format(error.message, error.code), "error");
                 MV.showAlertDialog(MV.errorCodeMap[error.code], MV.warnIcon);
-                loadingPanel.hide();
+                MV.hideLoadingPanel();
             }
         } catch (e) {
             MV.showAlertDialog(e, MV.warnIcon);
@@ -190,7 +190,7 @@ YUI({
     function displayError(ioId, responseObject) {
         Y.log("Could not load the databases", "error");
         Y.log("Status code message: [0]".format(responseObject.statusText), "error");
-        loadingPanel.hide();
+        MV.hideLoadingPanel();
         MV.showAlertDialog("Could not load collections! Please check if the app server is running. Status Text: [0]".format(responseObject.statustext), MV.warnIcon);
     }
     
@@ -199,8 +199,7 @@ YUI({
      * It sends request to get the DB names
      */
     function requestDBNames() {
-        loadingPanel = new LoadingPanel("Loading Databases...");
-        loadingPanel.show();
+    	MV.showLoadingPanel("Loading Databases...");
         setUserInfo();
         dbDiv = Y.one('#dbNames ul.lists');
         var request = Y.io(MV.URLMap.getDBs(),

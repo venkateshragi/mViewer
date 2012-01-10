@@ -19,11 +19,10 @@
  */
 YUI({
     filter: 'raw'
-}).use("alert-dialog", "utility", "dialog-box", "yes-no-dialog", "io", "node", "json-parse", "event-delegate", "node-event-simulate", "stylize", "custom-datatable", function(Y) {
+}).use("loading-panel","alert-dialog", "utility", "dialog-box", "yes-no-dialog", "io", "node", "json-parse", "event-delegate", "node-event-simulate", "stylize", "custom-datatable", function(Y) {
     var MV = YUI.com.imaginea.mongoV,
         sm = MV.StateManager,
-        collDiv = Y.one("#collNames ul.lists"),
-        loadingPanel;
+        collDiv = Y.one("#collNames ul.lists");
 
     // The Collection context menu object
     var collContextMenu = new YAHOO.widget.ContextMenu("collContextMenuID", {
@@ -154,14 +153,14 @@ YUI({
                     collections = "No Collections";
                 }
                 collDiv.set("innerHTML", collections);
-                loadingPanel.hide();
+                MV.hideLoadingPanel();
                 sm.publish(sm.events.collectionsChanged);
                 Y.log("Collection Names succesfully loaded", "info");
             } else {
                 error = parsedResponse.response.error;
                 Y.log("Could not load collections. Message: [0]".format(error.message), "error");
                 MV.showAlertDialog("Could not load Collections! [0]".format(MV.errorCodeMap[error.code]), MV.warnIcon);
-                loadingPanel.hide();
+                MV.hideLoadingPanel();
             }
         } catch (e) {
             MV.showAlertDialog(e, MV.warnIcon);
@@ -180,7 +179,7 @@ YUI({
             Y.log("Could not load collections. Status message: [0]".format(responseObj.statusText), "error");
             MV.showAlertDialog("Could not load collections! Check if your app server is running and refresh the page.", MV.warnIcon);
         }
-        loadingPanel.hide();
+        MV.hideLoadingPanel();
     }
 
     /**
@@ -195,8 +194,7 @@ YUI({
         MV.createDatatable(MV.URLMap.dbStatistics(), Y.one("#currentDB").get("value"));
         MV.toggleClass(e.currentTarget, Y.all("#dbNames li"));
         MV.hideQueryForm();
-        loadingPanel = new LoadingPanel("Loading Collections...");
-        loadingPanel.show();
+        MV.showLoadingPanel("Loading Collections...");
         Y.log("Initiating request to load collections.", "info");
         var request = Y.io(MV.URLMap.getColl(), {
             // configuration for loading the collections
