@@ -67,14 +67,29 @@ YUI.add('custom-datatable', function(Y) {
             datasource: ds,
             initialRequest: ""
         });
-
-        ds.after("response", function() {
-
-            MV.header.addClass('tab-cont');
-            MV.header.set("innerHTML", "Statistics: " + name);
-            dt.render("#" + MV.mainBody.get('id'));
+        
+        ds.sendRequest({    
+            callback: {
+                success: function (e) {
+                	 MV.header.addClass('tab-cont');
+                     MV.header.set("innerHTML", "Statistics: " + name);
+                     dt.render("#" + MV.mainBody.get('id'));
+                     Y.log("Statistics successfully loaded","info");
+                },
+                failure:function(e){
+                	var parsedResponse = Y.JSON.parse(e.data.response),
+                		error = parsedResponse.response.error; 
+                	Y.log("Could not get the statistics, Error message: [0], Error Code: [1]".format(error.message, error.code), "error");
+                	MV.showAlertDialog("Could not get the statistics. [0]".format(MV.errorCodeMap[error.code]), MV.warnIcon);
+                }
+            }
         });
+//        ds.after("response", function() {
+//            MV.header.addClass('tab-cont');
+//            MV.header.set("innerHTML", "Statistics: " + name);
+//            dt.render("#" + MV.mainBody.get('id'));
+//        });
     };
 }, '3.3.0', {
-    requires: ["io-base", "node", "json-parse", "datatable-scroll", "datasource-io", "datasource-jsonschema", "datatable-datasource", "event-delegate"]
+    requires: ["utility", "alert-dialog","io-base", "node", "json-parse", "datatable-scroll", "datasource-io", "datasource-jsonschema", "datatable-datasource", "event-delegate"]
 });

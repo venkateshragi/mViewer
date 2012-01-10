@@ -102,6 +102,7 @@ YUI({
             MV.data.sendRequest(param, {
                 success: showDocuments,
                 failure: function(request, responseObject) {
+                	 MV.hideLoadingPanel();
                     MV.showAlertDialog("Failed: Documents could not be loaded", MV.warnIcon);
                     Y.log("Documents could not be loaded. Response: [0]".format(responseObject.responseText), "error");
                 },
@@ -172,8 +173,10 @@ YUI({
             on: {
                 success: showQueryBox,
                 failure: function(ioId, responseObject) {
+                	MV.hideLoadingPanel();
                     MV.showAlertDialog("Unexpected Error: Could not load the query Box", MV.warnIcon);
                     Y.log("Could not send the request to get the keys in the collection. Response Status: [0]".format(responseObject.statusText), "error");
+                    
                 }
             }
         });
