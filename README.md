@@ -32,9 +32,16 @@ or
 #### Method 1
 Run build.xml using ant, target is start. It will create a war and run it using the winstone server, you can access the application at http://localhost:<port-no>. You can change the port no. in mViewer.properties file. Default port is 8080
 
+>
+> $ant start
+>
+
 #### Method 2 (Windows Users)
 Run mViewer.bat It will create a war and run it using the winstone server, you can access the application at http://localhost:<port-no>. You can change the port no. in mViewer.properties file. Default port is 8080.
 
+>
+> \>mViewer.bat
+>
 
 #### Method 3 (For Other Servlet-Containers)
 
@@ -43,7 +50,19 @@ This war can be deployed on to tomcat 7x, other server integration can be provid
 
 Once the war is deployed go to the url http://<server-ip>:<http-port>/mViewer
 
+>
+> $ant dist
+>
 
-Eagerly waiting for feature requests and bug reports
-Team Imaginea
+### How to build for release
+
+Building a release, bundles the war with winstone servlet container and scripts from scripts folder. The release zip and tgz mviewer-<version>.<type>
+
+>
+> $ant release
+>
+
+
+##### Eagerly waiting for feature requests and bug reports
+##### Team Imaginea
 
