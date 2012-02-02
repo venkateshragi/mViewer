@@ -98,7 +98,7 @@
 	<target name="war-staging">
 		<echo>${app.dir}</echo>
 		<copy toDir="${app.dir}">
-			<fileset dir="${src.dir}/webapp">
+			<fileset dir="${src.dir}/main/webapp">
 				<exclude name="web.xml" />
 			</fileset>
 			<fileset dir="${src.dir}/test/js">
@@ -122,7 +122,7 @@
 			</fileset>
 		</copy>
 		<copy toDir="${app.dir}/WEB-INF">
-			<fileset dir="${src.dir}/webapp">
+			<fileset dir="${src.dir}/main/webapp">
 				<include name="web.xml" />
 			</fileset>
 		</copy>
