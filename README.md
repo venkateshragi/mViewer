@@ -25,25 +25,55 @@ or
 
 <port> is optional, if not given it'll take the default port from properties file.
 
+### How to Build (If you love maven)
 
-### How to Build
+>
+> $mvn clean install -DskipTests
+>
+
+   Q. Why do we skip tests ?. 
+   A. Because we need to configure src/test/resources/mongo.config to point to running mongod service. To let the test run.
+   
+#### Start standalone
+Run pom.xml using maven. It will create a war and run it using the jetty server on a default port (Check the logs that print on your screen to spot it), you can access the service at http://localhost:<portno>/mViewer/
+
+>
+> $mvn -Pserver -DskipTests
+>
 
 
-#### Method 1
+#### Start and deploy to Other Servlet-Containers.
+
+For building a distributable unit run the target dist, since the default target is also set as dist, just running ant should suffice. dist would create a deployable war in the staging directory, which by default is at the same level as the src folder.
+This war can be deployed on to tomcat 7x, other server integration can be provided on demand.
+
+Once the war is deployed go to the url http://<server-ip>:<http-port>/mViewer
+
+>
+> $mvn clean package -DskipTests
+>
+
+### How to build for release
+
+Building a release, bundles the war with winstone servlet container and scripts from scripts folder. The release zip and tgz mviewer-<version>.<type>
+
+>
+> $mvn clean package -DskipTests
+>
+
+
+### How to Build (Legacy Method)
+
+
+#### Start standalone
 Run build.xml using ant, target is start. It will create a war and run it using the winstone server, you can access the application at http://localhost:<port-no>. You can change the port no. in mViewer.properties file. Default port is 8080
 
 >
 > $ant start
 >
 
-#### Method 2 (Windows Users)
-Run mViewer.bat It will create a war and run it using the winstone server, you can access the application at http://localhost:<port-no>. You can change the port no. in mViewer.properties file. Default port is 8080.
 
->
-> \>mViewer.bat
->
-
-#### Method 3 (For Other Servlet-Containers)
+#### Start and deploy to Other Servlet-Containers.
 
 For building a distributable unit run the target dist, since the default target is also set as dist, just running ant should suffice. dist would create a deployable war in the staging directory, which by default is at the same level as the src folder.
 This war can be deployed on to tomcat 7x, other server integration can be provided on demand.
