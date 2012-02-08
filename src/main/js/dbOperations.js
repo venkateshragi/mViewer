@@ -51,6 +51,7 @@ YUI({
                         });
                         Y.log("[0] dropped".format(Y.one("#currentDB").get("value")), "info");
                         Y.one("#currentDB").set("value", "");
+                        requestDBNames();
                     } else {
                         var error = parsedResponse.response.error;
                         MV.showAlertDialog("Could not drop: [0]. [1]".format(Y.one("#currentDB").get("value"), MV.errorCodeMap[error.code]), MV.warnIcon);
@@ -170,9 +171,22 @@ YUI({
                                }
                            });
         Y.log("Sending request to load DB names", "info");
-    } 
+    }
+    
+    //shows a dialog that takes input (i.e. Db name) from user.	
+    function createDB()	{
+        var form = "addDBDialog";
+        var showErrorMessage = function(responseObject) {
+            MV.showAlertDialog("DB creation failed! Please check if app server is runnning.", MV.warnIcon);
+            Y.log("DB creation failed. Response Status: [0]".format(responseObject.statusText), "error");
+        };
+        MV.getDialog(form, requestDBNames, showErrorMessage); 
+    }
 
     /* EVENT LISTENERS */
     // Make a request to load Database names when the page loads
     Y.on("load", requestDBNames);
+    
+    //Adding click handler for new DB button that calls createDB()
+    Y.on("click", createDB, "#createDB");
 });
