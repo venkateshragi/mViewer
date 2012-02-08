@@ -214,8 +214,10 @@ YUI({
                            });
         Y.log("Sending request to load DB names", "info");
     }
-    
-    //shows a dialog that takes input (i.e. Db name) from user.	
+        
+    /**
+     * The function shows a dialog that takes input (i.e. Db name) from user
+     */
     function createDB()	{
         var form = "addDBDialog";
         var showErrorMessage = function(responseObject) {
