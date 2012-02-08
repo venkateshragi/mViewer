@@ -103,11 +103,12 @@
 			<div class="left-cont gen-float">
               <div id="dbBuffer" class="buffer navigable dbBuffer">
 				<div class="list-head">
-				  <label class="db">Databases</label>
+				  <label class="db">Databases <button id="createDB" class="add btn">New</button></label>
 				</div>
 				<div id="dbNames">
 				  <ul class="lists">
-				  </ul>
+				  </ul>				
+				  <p></p>
 				</div>
               </div>
 
@@ -183,7 +184,15 @@
 				<div class="clear"></div>
 			</form>
 		</div>
-
+	</div>
+	<div id="addDBDialog" class="yui-pe-content">
+		<div class="hd">Please enter DB name</div>
+		<div class="bd">
+			<form method="POST">
+				<label class="dialogLabel" for="collSize">DB Name:</label><input value="" type="text" name="name" />
+				<div class="clear"></div>
+			</form>
+		</div>
 	</div>
 	<input type="hidden" id="currentColl" name="currentColl" value="">
 	<input type="hidden" id="currentDB" name="currentDB" value="">
