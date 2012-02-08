@@ -210,6 +210,11 @@ ul.user-menu li label.logout {
 	padding-left: 22px;
 }
 
+#createDB{
+	margin-left:5px;
+	font-size:11px;	
+}
+
 .collections {
 	background: url("../images/collections.png") no-repeat;
 	padding-left: 22px;
