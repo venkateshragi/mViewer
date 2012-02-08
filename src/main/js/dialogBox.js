@@ -1,11 +1,11 @@
 /*
  * Copyright (c) 2011 Imaginea Technologies Private Ltd.
  * Hyderabad, India
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     http://www.apache.org/licenses/LICENSE-2.0
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -13,17 +13,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-YUI.add('dialog-box', function (Y) {
+
+/**
+ *Show a dialog box
+ * @module dialog-box
+ */
+
+YUI.add('dialog-box', function(Y) {
+
     YUI.namespace('com.imaginea.mongoV');
     var MV = YUI.com.imaginea.mongoV;
 
     MV.getDialog = function Dialog(form, successHandler, failureHandler) {
         YAHOO.util.Dom.removeClass(form, "yui-pe-content");
+
         function cancelCurrent() {
             this.cancel();
         }
+
         function addCollection() {
-            Y.log("Submit handler for add collection called","info");
+            Y.log("Submit handler for add collection called", "info");
             var newCollInfo = this.getData();
             if (newCollInfo.name === "") {
                 MV.showAlertDialog("Please enter the name.");
@@ -33,6 +42,7 @@ YUI.add('dialog-box', function (Y) {
                 this.submit();
             }
         }
+
         function addDB() {
             var newDBInfo = this.getData();
             if (newDBInfo.name === "") {
@@ -43,6 +53,7 @@ YUI.add('dialog-box', function (Y) {
                 this.submit();
             }
         }
+
         function addDocument() {
             var newDoc = this.getData().document;
             try {
@@ -71,14 +82,13 @@ YUI.add('dialog-box', function (Y) {
             buttons: [{
                 text: "Submit",
                 handler: sumbitHandlerMap[form + "SubmitHandler"] ||
-                    function () {
-                        this.submit();
-                    },
-                isDefault: true
-            }, {
+                function() {
+                    this.submit();
+                },
+                isDefault: true},
+            {
                 text: "Cancel",
-                handler: cancelCurrent
-            }]
+                handler: cancelCurrent}]
         });
         dialogBox.callback = {
             success: successHandler,

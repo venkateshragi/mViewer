@@ -285,12 +285,13 @@ public class DocumentServiceImplTest extends TestingTemplate {
 								DBObject query = new BasicDBObject("_id", id);
 								DBCollection collection = mongoInstance.getDB(dbName).getCollection(collectionName);
 								document = collection.findOne(query);
-
-								if (document == null) {
-									assert (false);
-								}
+								
+								assertNotNull("Updated doc should not be null", document);
+								
 								String value = (String) document.get("test");
-								assertEquals(newDocument.get("test"), value);
+								
+								assertEquals("Verify update",newDocument.get("test"), value);
+								
 								// Delete the document
 								mongoInstance.getDB(dbName).getCollection(collectionName).remove(newDocument);
 
@@ -317,9 +318,9 @@ public class DocumentServiceImplTest extends TestingTemplate {
 	public void testDeleteDocument() {
 
 		List<String> testDbNames = new ArrayList<String>();
-		testDbNames.add("random");
+		testDbNames.add("random123");
 		List<String> testCollectionNames = new ArrayList<String>();
-		testCollectionNames.add("foo");
+		testCollectionNames.add("foo1");
 		List<DBObject> testDocumentNames = new ArrayList<DBObject>();
 		testDocumentNames.add(new BasicDBObject("test", "test"));
 
@@ -340,35 +341,41 @@ public class DocumentServiceImplTest extends TestingTemplate {
 
 								// get Object id of inserted document
 								DBObject document = mongoInstance.getDB(dbName).getCollection(collectionName).findOne(documentName);
+								assertNotNull("chk if doc just created is not null", document);
 
-								if (document == null) {
-									assert (false);
-								}
 								ObjectId id = (ObjectId) document.get("_id");
-
+								assertNotNull("document for that _id not null", id);
+								
+								//Testing if doc exists before delete
+								DBCollection coll =  mongoInstance.getDB(dbName).getCollection(collectionName);
+								long countBeforeDelete=coll.getCount();
 								testDocService.deleteDocument(dbName, collectionName, id);
-
-								List<DBObject> documentList = new ArrayList<DBObject>();
-
-								DBCursor cursor = mongoInstance.getDB(dbName).getCollection(collectionName).find();
-								while (cursor.hasNext()) {
-									documentList.add(cursor.next());
-								}
-
-								boolean flag = false;
-								for (DBObject doc : documentList) {
-									for (String key : documentName.keySet()) {
-										if (doc.get(key) == null) {
-											flag = true;
-										} else {
-											flag = false; // key present
-											break;
-										}
-									}
-								}
-								if (!flag) {
-									assert (false);
-								}
+								DBObject docAfterDelete=coll.findOne(id);
+								assertNull("docAfterDelete should be null if delete was successfull",docAfterDelete);
+								long countAfterDelete=coll.getCount();
+								
+								assertEquals("Count reduced after delete or not",(countBeforeDelete-countAfterDelete),1 );
+								
+//								Older way of checking.
+//								List<DBObject> documentList = new ArrayList<DBObject>();
+//
+//								DBCursor cursor = mongoInstance.getDB(dbName).getCollection(collectionName).find();
+//								while (cursor.hasNext()) {
+//									documentList.add(cursor.next());
+//								}
+//
+//								boolean flag = false;
+//								for (DBObject doc : documentList) {
+//									for (String key : documentName.keySet()) {
+//										if (doc.get(key) == null) {
+//											flag = true;
+//										} else {
+//											flag = false; // key present
+//											break;
+//										}
+//									}
+//								}
+								
 							} catch (MongoException m) // while dropping Db
 							{
 								ApplicationException e = new ApplicationException(ErrorCodes.DOCUMENT_DELETION_EXCEPTION, "Error Testing Document delete", m.getCause());
@@ -378,6 +385,7 @@ public class DocumentServiceImplTest extends TestingTemplate {
 						}
 					});
 			}
+//			mongoInstance.dropDatabase(dbName); //Uncomment incase we need to clean up
 		}
 	}
 

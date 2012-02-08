@@ -1,11 +1,11 @@
 /*
  * Copyright (c) 2011 Imaginea Technologies Private Ltd.
  * Hyderabad, India
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     http://www.apache.org/licenses/LICENSE-2.0
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -14,21 +14,27 @@
  * limitations under the License.
  */
 
+/**
+ * <p>custom-datatable creates a datatable with the following columns
+ * <ul>
+ * <li> key</li>
+ * <li> value</li>
+ * <li> type</li>
+ * </ul>
+ * <p>Currently it is used to make the datatable to show the collection and the
+ * database statistics. </p>
+ *
+ * @module custom-datatable
+ * @namespace com.imaginea.mongov
+ * @requires "io-base", "node", "json-parse", "datatable-scroll", "datasource-io", "datasource-jsonschema", "datatable-datasource", "event-delegate"
+ * @param path
+ *          <dd>(required) This is the url to which the request will be sent to get the data</dd>
+ * @param name
+ *          <dd>(required)The name of the collection/database whose data is required.</dd>
+ */
+
 YUI.add('custom-datatable', function(Y) {
     YUI.namespace('com.imaginea.mongoV');
-    /**
-     * <p>custom-datatable creates a datatable with the following columns
-     * <p>Currently it is used to make the datatable to show the collection and the
-     * database statistics. </p>
-     *
-     * @module custom-datatable
-     * @namespace com.imaginea.mongov
-     * @requires "io-base", "node", "json-parse", "datatable-scroll", "datasource-io", "datasource-jsonschema", "datatable-datasource", "event-delegate"
-     * @param path
-     *          <dd>(required) This is the url to which the request will be sent to get the data</dd>
-     * @param name
-     *          <dd>(required)The name of the collection/database whose data is required.</dd>
-     */
     var MV = YUI.com.imaginea.mongoV;
     MV.createDatatable = function(path, name) {
         MV.mainBody.set("innerHTML", "");
@@ -61,14 +67,29 @@ YUI.add('custom-datatable', function(Y) {
             datasource: ds,
             initialRequest: ""
         });
-
-        ds.after("response", function() {
-
-            MV.header.addClass('tab-cont');
-            MV.header.set("innerHTML", "Statistics: " + name);
-            dt.render("#" + MV.mainBody.get('id'));
+        
+        ds.sendRequest({    
+            callback: {
+                success: function (e) {
+                	 MV.header.addClass('tab-cont');
+                     MV.header.set("innerHTML", "Statistics: " + name);
+                     dt.render("#" + MV.mainBody.get('id'));
+                     Y.log("Statistics successfully loaded","info");
+                },
+                failure:function(e){
+                	var parsedResponse = Y.JSON.parse(e.data.response),
+                		error = parsedResponse.response.error; 
+                	Y.log("Could not get the statistics, Error message: [0], Error Code: [1]".format(error.message, error.code), "error");
+                	MV.showAlertDialog("Could not get the statistics. [0]".format(MV.errorCodeMap[error.code]), MV.warnIcon);
+                }
+            }
         });
+//        ds.after("response", function() {
+//            MV.header.addClass('tab-cont');
+//            MV.header.set("innerHTML", "Statistics: " + name);
+//            dt.render("#" + MV.mainBody.get('id'));
+//        });
     };
 }, '3.3.0', {
-    requires: ["io-base", "node", "json-parse", "datatable-scroll", "datasource-io", "datasource-jsonschema", "datatable-datasource", "event-delegate"]
+    requires: ["utility", "alert-dialog","io-base", "node", "json-parse", "datatable-scroll", "datasource-io", "datasource-jsonschema", "datatable-datasource", "event-delegate"]
 });

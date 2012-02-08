@@ -14,26 +14,31 @@
  * limitations under the License.
  */
 
-
-function LoadingPanel(message) {
-	// TODO: make loading panel module
-    this.panel = new YAHOO.widget.Panel("wait", {
-        width: "240px",
-        fixedcenter: true,
-        close: false,
-        draggable: false,
-        visible: false,
-        constraintoviewport: true,
-        iframe: true
-    });
-
-    this.panel.setHeader(message);
-    this.panel.setBody("<img src='images/loading.gif'>");
-    this.panel.render(document.getElementById("mainBody"));
-}
-LoadingPanel.prototype.show = function () {
-    this.panel.show();
-};
-LoadingPanel.prototype.hide = function () {
-    this.panel.hide();
-};
+YUI.add('loading-panel', function (Y) {
+	 YUI.namespace('com.imaginea.mongoV');
+	 var MV = YUI.com.imaginea.mongoV;
+	 if(!MV.loadingPanel){
+		 MV.loadingPanel = new YAHOO.widget.Panel("wait", {
+		        width: "240px",
+		        fixedcenter: true,
+		        close: false,
+		        zindex:4, 
+		        modal:true, 
+		        draggable: false,
+		        visible: false,
+		        constraintoviewport: true,
+		        iframe: true,
+		    });
+	 }
+	 MV.showLoadingPanel = function(msg){
+		 MV.loadingPanel.render(document.getElementById("mainBody")); 
+		 MV.loadingPanel.setHeader(msg);
+		 MV.loadingPanel.setBody("<img src='images/loading.gif'>");
+		 MV.loadingPanel.show();
+	 }
+	 MV.hideLoadingPanel = function(){
+		 MV.loadingPanel.hide();
+	 }
+}, '3.3.0', {
+    requires: []
+});

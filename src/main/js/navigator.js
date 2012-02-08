@@ -10,19 +10,22 @@
             this.regions = [];
             this.selectorString = selectorString;
             var self = this;
-            var navigatorCallback = function() {self.init();};
-            sm.subscribe(navigatorCallback, [sm.events.collectionsChanged,sm.events.dbsChanged, sm.events.queryFired]);
+            var navigatorCallback = function() {
+                self.init();
+            };
+            sm.subscribe(navigatorCallback, [sm.events.collectionsChanged, sm.events.dbsChanged, sm.events.queryFired]);
             this._bindKeysYUI();
             this.init();
         }
+
         function addChildren(node, regionManager) {
             node.all('* input, * ul li, * textarea, * button').each(
-                function(item) {
-                    if (!item.hasClass('non-navigable')) {
-                        regionManager.add(item);
-                    }
+
+            function(item) {
+                if (!item.hasClass('non-navigable')) {
+                    regionManager.add(item);
                 }
-            );
+            });
         }
 
         Navigator.prototype = {
@@ -42,19 +45,19 @@
                     addChildren(section, this);
                 }
             },
-            getRegions : function() {
+            getRegions: function() {
                 return this.regions;
             },
             showCommandBar: function(type, args) {
                 var caSelector = '.floatingFooter';
-                Y.one(caSelector + ' input').set('value','');
+                Y.one(caSelector + ' input').set('value', '');
                 Y.one(caSelector).show();
                 Y.one(caSelector + ' input').focus();
                 Y.all('div.buffer').each(function(item) {
                     item.addClass('hint');
                 });
             },
-            hideCommandBar:function(type, args) {
+            hideCommandBar: function(type, args) {
                 Y.one('.floatingFooter').hide();
                 Y.all('.shadow').each(function(item) {
                     item.removeClass('shadow');
@@ -67,26 +70,40 @@
             _bindKeysYUI: function() {
                 // TODO instead of keylistener use event listener
                 var self = this;
-                var spaceListener = new YAHOO.util.KeyListener(document, { ctrl:true, keys:' '.charCodeAt(0) }, {fn:self.showCommandBar});
+                var spaceListener = new YAHOO.util.KeyListener(document, {
+                    ctrl: true,
+                    keys: ' '.charCodeAt(0)
+                }, {
+                    fn: self.showCommandBar
+                });
                 spaceListener.enable();
-                var escapeListener = new YAHOO.util.KeyListener(document, { keys:27}, {fn:self.hideCommandBar}, 'keyup');
+                var escapeListener = new YAHOO.util.KeyListener(document, {
+                    keys: 27
+                }, {
+                    fn: self.hideCommandBar
+                }, 'keyup');
                 escapeListener.enable();
-                Y.all(".floatingFooter input").on("keyup", function (eventObject) {
+                Y.all(".floatingFooter input").on("keyup", function(eventObject) {
                     self.highlight(self);
                     // for enter key select the element
                     if (eventObject.keyCode === '\r'.charCodeAt(0)) {
                         self.selectElement(self);
                     }
                 });
-               this._addArrowKeyNavigation();
+                this._addArrowKeyNavigation();
             },
             _addArrowKeyNavigation: function() {
-                var arrowKeys = {left:37, up: 38, right: 39, down: 40};
+                var arrowKeys = {
+                    left: 37,
+                    up: 38,
+                    right: 39,
+                    down: 40
+                };
                 var findParent = function(yNode, selector) {
                     var parentNode = yNode;
                     do {
                         parentNode = parentNode.get('parentNode');
-                    }while(parentNode && parentNode.test(selector) === false);
+                    } while (parentNode && parentNode.test(selector) === false);
                     return parentNode;
                 };
                 var findParentTR = function() {
@@ -96,7 +113,7 @@
                         if (yNode.hasClass('non-navigable')) {
                             relevantParent = findParent(yNode, 'tr');
                             // in case the tr contains a save button, skip
-                            if (relevantParent.one("* .savebtn") != null) {
+                            if (relevantParent.one("* .savebtn") !== null) {
                                 relevantParent = null;
                             }
                         }
@@ -107,14 +124,14 @@
                 Y.on("keydown", function(eventObject) {
                     var parentTR = null;
                     var effectTR = null;
-                    switch(eventObject.keyCode) {
+                    switch (eventObject.keyCode) {
                     case arrowKeys.down:
                         parentTR = findParentTR();
-                        effectTR = (parentTR)? parentTR.next():null;
+                        effectTR = (parentTR) ? parentTR.next() : null;
                         break;
                     case arrowKeys.up:
                         parentTR = findParentTR();
-                        effectTR = (parentTR)? parentTR.previous():null;
+                        effectTR = (parentTR) ? parentTR.previous() : null;
                         break;
                     }
                     if (effectTR) {
@@ -130,7 +147,7 @@
                     self.clearStyles();
                     selectedElement = null;
                     var index = 0;
-                    for (;index < self.regions.length; index++) {
+                    for (; index < self.regions.length; index++) {
                         if (self.regions[index].get('id').toUpperCase().indexOf(regionName.toUpperCase()) === 0) {
                             self.regions[index].addClass('shadow');
                             self.regions[index].addClass('simulatedHover');
@@ -145,7 +162,7 @@
             selectElement: function(self) {
                 self.hideCommandBar();
                 if (selectedElement) {
-                    Y.log(selectedElement,"debug");
+                    Y.log(selectedElement, "debug");
                     var selectedNodeName = selectedElement.get('nodeName');
                     if ('INPUT' === selectedNodeName || 'TEXTAREA' === selectedNodeName) {
                         selectedElement.focus();
@@ -184,10 +201,10 @@
             }
         };
 
-        var navigator =  new Navigator('.navigable');
+        var navigator = new Navigator('.navigable');
     };
 
     // lets start the fun stuff with YUI
-    YUI().use('event-key','node', 'utility', 'node-event-simulate', actualCode);
+    YUI().use('event-key', 'node', 'utility', 'node-event-simulate', actualCode);
 
 }());
