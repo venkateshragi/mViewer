@@ -16,6 +16,7 @@
 package com.imaginea.mongodb.requestdispatchers;
 
 import com.imaginea.mongodb.common.exceptions.*;
+import com.imaginea.mongodb.common.utils.ApplicationUtils;
 import com.mongodb.MongoException;
 import com.mongodb.MongoInternalException;
 import org.apache.log4j.Logger;
@@ -158,7 +159,7 @@ public class BaseRequestDispatcher {
                 try {
                     tempResult.put("result", dispatcherResponse);
                     jsonResponse.put("response", tempResult);
-                    response = jsonResponse.toString();
+                    response = ApplicationUtils.serializeToJSON(jsonResponse);
                 } catch (JSONException e) {
                     logger.error(e);
                     response = "{\"code\":" + "\"" + ErrorCodes.JSON_EXCEPTION + "\"," + "\"message\": \"Error while forming JSON Object\"}";

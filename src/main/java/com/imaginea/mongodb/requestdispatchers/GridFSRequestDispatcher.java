@@ -16,7 +16,7 @@
 package com.imaginea.mongodb.requestdispatchers;
 
 import com.imaginea.mongodb.common.exceptions.UndefinedDocumentException;
-import com.imaginea.mongodb.common.utils.FileUtil;
+import com.imaginea.mongodb.common.utils.ApplicationUtils;
 import com.imaginea.mongodb.services.GridFSService;
 import com.imaginea.mongodb.services.GridFSServiceImpl;
 import com.mongodb.DBObject;
@@ -107,7 +107,7 @@ public class GridFSRequestDispatcher extends BaseRequestDispatcher {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        String contentType = FileUtil.getContentType(fileObject);
+        String contentType = ApplicationUtils.getContentType(fileObject);
         Response.ResponseBuilder response = Response.ok(fileObject, contentType);
         if (download == true) {
             response.header("Content-Disposition", "attachment; filename=" + fileObject.getName());
