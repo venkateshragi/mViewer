@@ -15,16 +15,15 @@
  */
 
 /**
- *Show a dialog box
+ * Show a dialog box
  * @module dialog-box
  */
 
-YUI.add('dialog-box', function(Y) {
-
+YUI.add('submit-dialog', function(Y) {
     YUI.namespace('com.imaginea.mongoV');
     var MV = YUI.com.imaginea.mongoV;
 
-    MV.getDialog = function Dialog(form, successHandler, failureHandler) {
+    MV.showSubmitDialog = function Dialog(form, successHandler, failureHandler) {
         YAHOO.util.Dom.removeClass(form, "yui-pe-content");
 
         function cancelCurrent() {

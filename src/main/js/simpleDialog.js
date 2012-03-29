@@ -38,7 +38,6 @@ YUI.add('yes-no-dialog', function(Y) {
         simpleDialog.setHeader("Are you sure?");
         simpleDialog.render("simpleDialogContainer");
         simpleDialog.show();
-      //  return simpleDialog;
     };
 }, '3.3.0', {
     requires: []

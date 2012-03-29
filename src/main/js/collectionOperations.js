@@ -19,15 +19,16 @@
  */
 YUI({
     filter: 'raw'
-}).use("loading-panel","alert-dialog", "utility", "dialog-box", "yes-no-dialog", "io", "node", "json-parse", "event-delegate", "node-event-simulate", "stylize", "custom-datatable", function(Y) {
+}).use("loading-panel","alert-dialog", "utility", "submit-dialog", "yes-no-dialog", "io", "node", "json-parse", "event-delegate", "node-event-simulate", "stylize", "custom-datatable", function(Y) {
     var MV = YUI.com.imaginea.mongoV,
         sm = MV.StateManager,
-        collDiv = Y.one("#collNames ul.lists");
+        collDiv = Y.one("#collNames ul.lists"),
+		gridFSDiv = Y.one("#bucketNames ul.lists");
 
     // The Collection context menu object
     var collContextMenu = new YAHOO.widget.ContextMenu("collContextMenuID", {
         trigger: "collNames",
-        itemData: ["Delete", "Add Document", "Statistics"],
+        itemData: ["Add Document", "Drop Collection", "Statistics"],
         lazyload: true
     });
 
@@ -72,7 +73,6 @@ YUI({
      * THe function handles the successful sending of the add Document request
      * @param responseObject the response object
      */
-
     function addDocument(responseObject) {
         var parsedResponse = Y.JSON.parse(responseObject.responseText),
             response = parsedResponse.response.result,
@@ -93,7 +93,6 @@ YUI({
      * @param eventType The event type
      * @param args the arguments containing information about which menu item was clicked
      */
-
     function handleContextMenu(eventType, args) {
         var menuItem = args[1],	// The MenuItem that was clicked
         	form,
@@ -101,27 +100,27 @@ YUI({
         sm.setCurrentColl(this.contextEventTarget.innerHTML);
         MV.toggleClass(sm.currentCollAsNode(), Y.all("#collNames li"));
         switch (menuItem.index) {
-        case 0:
-            // Delete
-            MV.showYesNoDialog("Do you really want to drop the Collection - " + Y.one("#currentColl").get("value") + "?", dropCollection, function() {
-                this.hide();
-            });
-            break;
-        case 1:
-            // Add Document
-            form = "addDocDialog";
-            showErrorMessage = function(responseObject) {
-                MV.showAlertDialog("Document creation failed! Please check if your app server is running and then refresh the page.", MV.warnIcon);
-                Y.log("Document creation failed. Response Status: [0]".format(responseObject.statusText), "error");
-            };
-            MV.getDialog(form, addDocument, showErrorMessage);
-            break;
-        case 2:
-            // click to view details
-            MV.hideQueryForm();
-            MV.createDatatable(MV.URLMap.collStatistics(), Y.one("#currentColl").get("value"));
-            break;
-        }
+		case 0:
+			// Add Document
+			form = "addDocDialog";
+			showErrorMessage = function(responseObject) {
+				MV.showAlertDialog("Document creation failed! Please check if your app server is running and then refresh the page.", MV.warnIcon);
+				Y.log("Document creation failed. Response Status: [0]".format(responseObject.statusText), "error");
+			};
+			MV.showSubmitDialog(form, addDocument, showErrorMessage);
+			break;
+		case 1:
+			// Delete
+			MV.showYesNoDialog("Do you really want to drop the Collection - " + Y.one("#currentColl").get("value") + "?", dropCollection, function() {
+				this.hide();
+			});
+			break;
+		case 2:
+			// click to view details
+			MV.hideQueryForm();
+			MV.createDatatable(MV.URLMap.collStatistics(), Y.one("#currentColl").get("value"));
+			break;
+	}
     }
 
     collContextMenu.subscribe("render", function(eventType, args) {
@@ -138,21 +137,29 @@ YUI({
 
     function displayCollectionNames(oId, responseObject) {
         Y.log("Response Recieved of get collection request", "info");
-        var parsedResponse, parsedResult, info, index, error, collections = "";
+        var parsedResponse, parsedResult, info, index, error, collections = "", gridFSBuckets = "";
         try {
             parsedResponse = Y.JSON.parse(responseObject.responseText);
             parsedResult = parsedResponse.response.result;
 
             if (parsedResult) {
-                for (index = 0; index < parsedResult.length; index++) {
-                    var collectionName = parsedResult[index];
-                    // Issue 17 https://github.com/Imaginea/mViewer/issues/17
-                    collections += "<li id='[0]' >[1]</li>".format(collectionName.replace(/ /g, '_'), collectionName);
-                }
+	            for (index = 0; index < parsedResult.length; index++) {
+		            var collectionName = parsedResult[index];
+		            var pos = collectionName.search(".files");
+		            if (pos > 0) {
+			            gridFSBuckets += "<li id='[0]' >[1]</li>".format(collectionName.substring(0, pos).replace(/ /g, '_'), collectionName.substring(0, pos));
+		            }
+		            // Issue 17 https://github.com/Imaginea/mViewer/issues/17
+		            if (pos < 0 && collectionName.search(".chunks") < 0) {
+			            collections += "<li id='[0]' >[1]</li>".format(collectionName.replace(/ /g, '_'), collectionName);
+		            }
+	            }
                 if (index === 0) {
                     collections = "No Collections";
+	                gridFSBuckets = "No Files";
                 }
                 collDiv.set("innerHTML", collections);
+	            gridFSDiv.set("innerHTML", gridFSBuckets);
                 MV.hideLoadingPanel();
                 sm.publish(sm.events.collectionsChanged);
                 Y.log("Collection Names succesfully loaded", "info");

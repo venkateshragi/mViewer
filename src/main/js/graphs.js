@@ -22,7 +22,7 @@ YUI({
     var combinedChart;
     var chartOptions = "<table width='30%'>";
     chartOptions += "<tr>";
-    chartOptions += "<td><button id='animation' class='btn'>Stop Animation</button></td>";
+    chartOptions += "<td><button id='animation' class='bttn'>Stop Animation</button></td>";
     chartOptions += "</tr>";
     chartOptions += "</table>";
 

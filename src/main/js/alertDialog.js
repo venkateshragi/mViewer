@@ -29,7 +29,7 @@ YUI.add('alert-dialog', function (Y) {
             draggable: true,
             close: false,
             constraintoviewport: true,
-            zIndex: 10,
+            zIndex: 10
         });
         MV.simpleDialog.setHeader("Info");
         MV.simpleDialog.render("alertDialogContainer");

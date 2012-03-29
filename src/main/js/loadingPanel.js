@@ -27,7 +27,7 @@ YUI.add('loading-panel', function (Y) {
 		        draggable: false,
 		        visible: false,
 		        constraintoviewport: true,
-		        iframe: true,
+		        iframe: true
 		    });
 	 }
 	 MV.showLoadingPanel = function(msg){

@@ -241,13 +241,26 @@
 		<delete dir="${test.reports.dir}" />
 		<delete file="${basedir}/mViewer.log" />
 	</target>
-
-
+	
 	<target name="start" depends="compile, jar, war-staging, war" description="Starts the winstone server with the war deployed.">
 		<echo>----------------------------------------------------------</echo>
 		<echo>On server start goto localhost:${WINSTONE_PORT}/index.html</echo>
 		<echo>----------------------------------------------------------</echo>
 		<java jar="${src.dir}/tools/winstone-0.9.10.jar" fork="true">
+			<arg value="--httpPort=${WINSTONE_PORT}"/>
+			<arg value="--ajp13Port=-1" />
+			<arg value="--warfile=${staging.dir}/${app.war}" />
+		</java>
+	</target>
+
+
+	<target name="debug" depends="compile, jar, war-staging, war" description="Starts the winstone server with the war deployed.">
+		<echo>----------------------------------------------------------</echo>
+		<echo>On server start goto localhost:${WINSTONE_PORT}/index.html</echo>
+		<echo>----------------------------------------------------------</echo>
+		<java jar="${src.dir}/tools/winstone-0.9.10.jar" fork="true">
+			<jvmarg value="-Xdebug" />
+			<jvmarg value="-Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=5005" />
 			<arg value="--httpPort=${WINSTONE_PORT}"/>
 			<arg value="--ajp13Port=-1" />
 			<arg value="--warfile=${staging.dir}/${app.war}" />

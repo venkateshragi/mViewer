@@ -30,6 +30,25 @@ YUI({
         MV.toggleClass(e.currentTarget, Y.all("#collNames li"));
         sm.setCurrentColl(e.currentTarget.getContent());
         MV.mainBody.empty(true);
+	    MV.deleteDocEvent.unsubscribeAll();
+	    MV.deleteDocEvent.subscribe(deleteDoc);
+
+	    var tabView = new YAHOO.widget.TabView();
+	    tabView.addTab(new YAHOO.widget.Tab({
+		    label: 'Tree Table',
+		    active: true,
+		    content: ' <div id="table"></div><div id="table-pagination"></div> '
+	    }));
+	    tabView.addTab(new YAHOO.widget.Tab({
+		    label: 'JSON',
+		    cacheData: true
+	    }));
+	    var actionMap = {
+		    save: "save",
+		    edit: "edit"
+	    };
+
+	    var idMap = {};
 
         /**
          * This function gets the query parameters from the query box. It takes the
@@ -224,34 +243,18 @@ YUI({
          */
 
         function showDocuments(request, responseObject) {
-            Y.log("Preparing to write on JSON tab", "info");
-            writeOnJSONTab(responseObject.results);
-            Y.log("Preparing the treeTable data", "info");
-            var treebleData = MV.getTreebleDataforDocs(responseObject);
-            var treeble = MV.getTreeble(treebleData);
+			Y.log("Preparing the treeTable data", "info");
+            var treebleData = MV.getTreebleDataForDocs(responseObject);
+            var treeble = MV.getTreeble(treebleData, "document");
+			// Remove download column for document operations	        
+	        treeble.removeColumn(treeble.getColumn("download_column"));
             loadAndSubscribe(treeble);
             Y.log("Tree table view loaded", "info");
+            Y.log("Preparing to write on JSON tab", "info");
+            writeOnJSONTab(responseObject.results);
             sm.publish(sm.events.queryFired);
             MV.hideLoadingPanel();
         }
-
-
-        var tabView = new YAHOO.widget.TabView();
-        tabView.addTab(new YAHOO.widget.Tab({
-            label: 'JSON',
-            cacheData: true,
-            active: true
-        }));
-        tabView.addTab(new YAHOO.widget.Tab({
-            label: 'Tree Table',
-            content: ' <div id="table"></div><div id="table-pagination"></div> '
-        }));
-        var actionMap = {
-            save: "save",
-            edit: "edit"
-        };
-
-        var idMap = {};
 
         function getButtonIndex(targetNode) {
             var btnID = targetNode.get("id");
@@ -365,10 +368,10 @@ YUI({
          * @param eventObject The event Object
          */
 
-        function deleteDoc(eventObject) {
+        function deleteDoc(type, args) {
             var btnIndex;
             var sendDeleteDocRequest = function() {
-                var targetNode = eventObject.currentTarget;
+                var targetNode = args[0].eventObj.currentTarget;
                 var index = getButtonIndex(targetNode);
                 var doc = Y.one('#doc' + index).one("pre").one("textarea").get("value");
                 parsedDoc = Y.JSON.parse(doc);
@@ -384,7 +387,7 @@ YUI({
                             response = parsedResponse.response.result;
                             if (response !== undefined) {
                                 MV.showAlertDialog("Document deleted", MV.infoIcon);
-                                Y.log("Document with _id= [0] deleted. Response: [1]".format(id, response), "info");
+                                Y.log("Document with _id= [0] deleted. Response: [1]".format(id, response), "info");	                            
                                 Y.one("#" + Y.one("#currentColl").get("value").replace(/ /g, '_')).simulate("click");
                             } else {
                                 var error = parsedResponse.response.error;
@@ -400,13 +403,13 @@ YUI({
                 });
                 this.hide();
             };
-            if (eventObject.currentTarget.hasClass('deletebtn')) {
+            if (args[0].eventObj.currentTarget.hasClass('deletebtn') || args[0].eventObj.currentTarget.hasClass('delete-icon')) {
                 MV.showYesNoDialog("Do you really want to drop the document ?", sendDeleteDocRequest, function() {
                     this.hide();
                 });
             } else {
-                //get the sibling save/edit btn and toggle using that
-                btnIndex = getButtonIndex(eventObject.currentTarget);
+                //get the sibling save/edit bttn and toggle using that
+                btnIndex = getButtonIndex(args[0].eventObj.currentTarget);
                 toggleSaveEdit(Y.one('#delete' + btnIndex).get('parentNode').one('button'), btnIndex, actionMap.save);
             }
         }
@@ -477,15 +480,15 @@ YUI({
         function writeOnJSONTab(response) {
             var jsonView = "<div class='buffer jsonBuffer navigable navigateTable' id='jsonBuffer'>";
             var i;
-            var trTemplate = ["<tr>",
-                                              "  <td id='doc[0]'>",
+            var trTemplate = ["<tr id='doc[0]'>",
+                                              "  <td>",
                                               "      <pre> <textarea id='ta[1]' class='disabled non-navigable' disabled='disabled' cols='75'>[2]</textarea></pre>",
                                               "  </td>",
                                               "  <td>",
-                                              "  <button id='edit[3]'class='btn editbtn non-navigable'>edit</button>",
-                                              "   <button id='delete[4]'class='btn deletebtn non-navigable'>delete</button>",
-                                              "   <button id='save[5]'class='btn savebtn non-navigable invisible'>save</button>",
-                                              "   <button id='cancel[6]'class='btn cancelbtn non-navigable invisible'>cancel</button>",
+                                              "  <button id='edit[3]'class='bttn editbtn non-navigable'>edit</button>",
+                                              "   <button id='delete[4]'class='bttn deletebtn non-navigable'>delete</button>",
+                                              "   <button id='save[5]'class='bttn savebtn non-navigable invisible'>save</button>",
+                                              "   <button id='cancel[6]'class='bttn cancelbtn non-navigable invisible'>cancel</button>",
                                               "   <br/>",
                                               "  </td>",
                                               "</tr>"].join('\n');
@@ -498,12 +501,14 @@ YUI({
                 jsonView = jsonView + "No documents to be displayed";
             }
             jsonView = jsonView + "</tbody></table></div>";
-            tabView.getTab(0).setAttributes({
+            tabView.getTab(1).setAttributes({
                 content: jsonView
             }, false);
             for (i = 0; i < response.length; i++) {
                 Y.on("click", editDoc, "#edit" + i);
-                Y.on("click", deleteDoc, "#delete" + i);
+                Y.on("click", function(e) {
+					MV.deleteDocEvent.fire({eventObj : e});
+				}, "#delete" + i);
                 Y.on("click", saveDoc, "#save" + i);
                 Y.on("click", cancelSave, "#cancel" + i);
             }

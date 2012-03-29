@@ -15,7 +15,7 @@
  */
 YUI({
     filter: 'raw'
-}).use("loading-panel","alert-dialog", "utility", "dialog-box", "yes-no-dialog", "io-base", "node", "json-parse", "event-delegate", "node-event-simulate", "stylize", "custom-datatable", function (Y) {
+}).use("loading-panel","alert-dialog", "utility", "submit-dialog", "yes-no-dialog", "io-base", "node", "json-parse", "event-delegate", "node-event-simulate", "stylize", "custom-datatable", function (Y) {
     // TODO: make loading panel module
     var dbDiv;
     YUI.namespace('com.imaginea.mongoV');
@@ -93,31 +93,34 @@ YUI({
         	showErrorMessage;
         Y.one("#currentDB").set("value", this.contextEventTarget.id);
         MV.toggleClass(Y.one("#" + Y.one("#currentDB").get("value")), Y.all("#dbNames li"));
-        switch (menuItem.index) {
-        case 0:
-            // Delete database
-            dialog = MV.showYesNoDialog("Do you really want to drop the Database?", sendDropDBRequest, function(dialog){this.hide();});
-            break;
-        case 1:
-            // add collection
-            form = "addColDialog";
-            showErrorMessage = function(responseObject) {
-                MV.showAlertDialog("Collection creation failed! Please check if app server is runnning.", MV.warnIcon);
-                Y.log("Collection creation failed. Response Status: [0]".format(responseObject.statusText), "error");
-            };
-            MV.getDialog(form, addCollection, showErrorMessage);
-            break;
-        case 2:
-            // show statistics
-            MV.hideQueryForm();
-            MV.createDatatable(MV.URLMap.dbStatistics(), Y.one("#currentDB").get("value"));
-            break;
-        }
+	    switch (menuItem.index) {
+		    case 0:
+			    // add collection
+			    form = "addColDialog";
+			    showErrorMessage = function(responseObject) {
+				    MV.showAlertDialog("Collection creation failed! Please check if app server is runnning.", MV.warnIcon);
+				    Y.log("Collection creation failed. Response Status: [0]".format(responseObject.statusText), "error");
+			    };
+			    MV.showSubmitDialog(form, addCollection, showErrorMessage);
+			    break;
+		    case 1:
+			    // Delete database
+			    dialog = MV.showYesNoDialog("Do you really want to drop the Database?", sendDropDBRequest, function(dialog) {
+				    this.hide();
+			    });
+
+			    break;
+		    case 2:
+			    // show statistics
+			    MV.hideQueryForm();
+			    MV.createDatatable(MV.URLMap.dbStatistics(), Y.one("#currentDB").get("value"));
+			    break;
+	    }
     }
 
     var dbContextMenu = new YAHOO.widget.ContextMenu("dbContextMenuID", {
         trigger: "dbNames",
-        itemData: ["Delete Database", "Add Collection", "Statistics"]
+        itemData: ["Add Collection", "Drop Database", "Statistics"]
     });
     dbContextMenu.render("dbContextMenu");
     dbContextMenu.clickEvent.subscribe(handleContextMenu);
@@ -224,7 +227,7 @@ YUI({
             MV.showAlertDialog("DB creation failed! Please check if app server is runnning.", MV.warnIcon);
             Y.log("DB creation failed. Response Status: [0]".format(responseObject.statusText), "error");
         };
-        MV.getDialog(form, requestDBNames, showErrorMessage); 
+        MV.showSubmitDialog(form, requestDBNames, showErrorMessage); 
     }
 
     // Make a request to load Database names when the page loads

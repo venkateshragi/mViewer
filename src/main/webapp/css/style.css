@@ -221,6 +221,12 @@ ul.user-menu li label.logout {
 	height: 16px;
 }
 
+.gridFS {
+	background: url("../images/collections.png") no-repeat;
+	padding-left: 22px;
+	height: 16px;
+}
+
 ul.lists li.sel {
 	background: #e6ebec;
 }
@@ -259,7 +265,7 @@ ul.lists li {
 	margin-left: 10px;
 }
 
-.btn {
+.bttn {
 	background: #3472ab;
 	padding: 3px;
 	color: #FFFFFF;
@@ -272,20 +278,19 @@ ul.lists li {
 	cursor: pointer;
 }
 
-.btn:hover {
+.bttn:hover {
 	background: #1874CD;
 }
 
-.btn:active {
+.bttn:active {
 	background: #104E8B;
 }
 
 .tab-cont {
 	font-size: 14px;
 	font-weight: bolder;
-	height: 29px;
 	background: #e5e5e5;
-	padding-left: 5px;
+	padding: 5px;
 }
 
 .tab {
@@ -316,6 +321,20 @@ table {
 table tr td {
 	padding: 10px 5px;
 	border-bottom: 3px solid #E4F6FD;
+}
+
+.table-striped tbody.files {
+    display: block;
+    max-height: 140px;
+    overflow: auto;    
+}
+
+.wrap {
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    width: 120px;
 }
 
 .checklist li {
@@ -391,13 +410,18 @@ fieldset.login legend {
 	border-color: #DD3C10;
 }
 
+.yui-skin-sam .yui-dt-liner {
+    margin: 0;
+    padding: 4px 6px;
+}
+
 .yui-dt td.treeble-nub {
 	border-right-color: transparent;
 }
 
-.yui-dt .row-toggle a.treeble-collapse-nub {
+.yui-dt .row-toggle a.treeble-collapse-nub, a.download-icon, a.delete-icon {
 	padding: 0 8px;
-	height: 14px;
+	height: 18px;
 	margin-left: 2px;
 	display: inline-block;
 }
@@ -410,6 +434,14 @@ fieldset.login legend {
 	background: url(../images/open.png) no-repeat;
 }
 
+.yui-dt .row-toggle a.download-icon {
+    background: url("../images/download.png") no-repeat;
+}
+
+.yui-dt .row-toggle a.delete-icon {
+    background: url("../images/close.png") no-repeat;
+}
+
 .yui-pe-content {
 	display: none;
 }
@@ -417,12 +449,20 @@ fieldset.login legend {
 .dialogLabel {
 	display: block;
 	float: left;
-	width: 45%;
+	width: 100%;
 	clear: left;
 }
 
 .clear {
 	clear: both;
+}
+
+.floatLeft {
+    float: left;
+}
+
+.floatRight {
+    float: right;
 }
 
 #resp {
@@ -438,6 +478,43 @@ fieldset.login legend {
 
 #toggle_console {
 	float: right;
+}
+
+#fileToUpload {
+    width: 378px;
+}
+
+#progressIndicator {
+    font-size: 10pt;
+}
+
+#fileInfo {
+    font-size: 10pt;
+    font-style: italic;
+    color: #aaa;
+    margin-top: 10px;
+}
+
+#progressBar {
+    height: 14px;
+    border: 1px solid #cccccc;
+    display: none;
+    border-radius: 10px;
+    -moz-border-radius: 10px;
+    background-image: -moz-linear-gradient(top, #66cc00, #4b9500);
+    background-image: -webkit-gradient(linear, left top, left bottom, from(#66cc00), to(#4b9500));
+}
+
+#uploadResponse {
+    margin-top: 10px;
+    padding: 20px;
+    display: none;
+    border-radius: 10px;
+    -moz-border-radius: 10px;
+    border: 1px solid #ccc;
+    box-shadow: 0 0 5px #ccc;
+    background-image: -moz-linear-gradient(top, #ff9900, #c77801);
+    background-image: -webkit-gradient(linear, left top, left bottom, from(#ff9900), to(#c77801));
 }
 
 .chart {

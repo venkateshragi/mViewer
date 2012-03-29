@@ -84,11 +84,6 @@ YUI.add('custom-datatable', function(Y) {
                 }
             }
         });
-//        ds.after("response", function() {
-//            MV.header.addClass('tab-cont');
-//            MV.header.set("innerHTML", "Statistics: " + name);
-//            dt.render("#" + MV.mainBody.get('id'));
-//        });
     };
 }, '3.3.0', {
     requires: ["utility", "alert-dialog","io-base", "node", "json-parse", "datatable-scroll", "datasource-io", "datasource-jsonschema", "datatable-datasource", "event-delegate"]
