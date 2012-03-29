@@ -42,6 +42,17 @@ YUI.add('submit-dialog', function(Y) {
             }
         }
 
+	    function addGridFS() {
+		    Y.log("Submit handler for adding gridFS bucket called", "info");
+		    var newCollInfo = this.getData();
+		    if (newCollInfo.name === "") {
+			    MV.showAlertDialog("Please enter the bucket name.");
+		    } else {
+			    Y.one("#" + form + " .bd form").setAttribute("action", MV.URLMap.addGridFS(newCollInfo.name));
+			    this.submit();
+		    }
+	    }
+
         function addDB() {
             var newDBInfo = this.getData();
             if (newDBInfo.name === "") {
@@ -66,29 +77,34 @@ YUI.add('submit-dialog', function(Y) {
         }
         var sumbitHandlerMap = {
             "addColDialogSubmitHandler": addCollection,
+	        "addGridFSDialogSubmitHandler": addGridFS,
             "addDBDialogSubmitHandler": addDB,
             "addDocDialogSubmitHandler": addDocument
         };
-        var dialogBox = new YAHOO.widget.Dialog(form, {
-            width: "30em",
-            fixedcenter: true,
-            visible: false,
-            effect: {
-                effect: YAHOO.widget.ContainerEffect.SLIDE,
-                duration: 0.25
-            },
-            constraintoviewport: true,
-            buttons: [{
-                text: "Submit",
-                handler: sumbitHandlerMap[form + "SubmitHandler"] ||
-                function() {
-                    this.submit();
-                },
-                isDefault: true},
-            {
-                text: "Cancel",
-                handler: cancelCurrent}]
-        });
+	    var dialogBox = new YAHOO.widget.Dialog(form, {
+		    width: "30em",
+		    fixedcenter: true,
+		    visible: false,
+		    effect: {
+			    effect: YAHOO.widget.ContainerEffect.SLIDE,
+			    duration: 0.25
+		    },
+		    constraintoviewport: true,
+		    buttons: [
+			    {
+				    text: "Submit",
+				    handler: sumbitHandlerMap[form + "SubmitHandler"] ||
+						    function() {
+							    this.submit();
+						    },
+				    isDefault: true
+			    },
+			    {
+				    text: "Cancel",
+				    handler: cancelCurrent
+			    }
+		    ]
+	    });
         dialogBox.callback = {
             success: successHandler,
             failure: failureHandler

@@ -45,6 +45,21 @@ import java.util.ArrayList;
 public class GridFSRequestDispatcher extends BaseRequestDispatcher {
     private final static Logger logger = Logger.getLogger(GridFSRequestDispatcher.class);
 
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("create")
+    public String createGridFSStore(@PathParam("dbName") final String dbName, @PathParam("bucketName") final String bucketName,
+                                    @QueryParam("dbInfo") final String dbInfo, @Context final HttpServletRequest request) {
+        String response = new ResponseTemplate().execute(logger, dbInfo, request, new ResponseCallback() {
+            public Object execute() throws Exception {
+                GridFSService gridFSService = new GridFSServiceImpl(dbInfo);
+                String result = gridFSService.createStore(dbName, bucketName);
+                return result;
+            }
+        });
+        return response;
+    }
+
     /**
      * Request handler for getting the list of files stored in GridFS of specified database.
      *

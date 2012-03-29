@@ -1,15 +1,17 @@
 mViewer(Micro/Mongo Viewer) is a light (read web based like Futon for couchdb) GUI for mongo db which does not need any install steps.
 
-### Current Features are:
+### Current Features supported are:
 
-   1. Managed db and collections (usual add/drop of collections and drop of db)
-   2. Viewing collection and db stats (count, size, storage et al)
-   3. query executor
-   4. Mongo stats
+   1. Managing Databases - Create/Drop databases
+   2. Managing Collections - Create/Update/Drop collections
+   3. Managing GridFS files - Add/View/Download/Drop files
+   4. Querying using Query executor
+   5. Viewing stats of databases, collections and gridfs
+   6. Opening multiple connections from same browser to different MongoDB servers 
 
 ### Download and Use
 
-Download the package from here https://github.com/Imaginea/mViewer/downloads
+Download the package from https://github.com/Imaginea/mViewer/downloads
 
 Unzip/Untar it and run the script/batch (with +x permission).
 

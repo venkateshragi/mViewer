@@ -254,7 +254,8 @@
 		<div class="hd">Please enter DB name</div>
 		<div class="bd">
 			<form method="POST">
-				<label class="dialogLabel" for="collSize">DB Name:</label><input value="" type="text" name="name" />
+				<label class="dialogLabel" for="name">DB Name:</label>
+                <input value="" type="text" name="name" />
 				<div class="clear"></div>
 			</form>
 		</div>
@@ -262,7 +263,7 @@
 	<div id="addColDialog" class="yui-pe-content">
 		<div class="hd">Please enter collection details</div>
 		<div class="bd">
-			<form method="POST">
+			<form method="POST" onsubmit="alert('test')">
 				<label class="dialogLabel" for="name">Name:</label><input
 					type="text" name="name" />
 				<div class="clear"></div>
@@ -278,6 +279,16 @@
 			</form>
 		</div>
 	</div>
+    <div id="addGridFSDialog" class="yui-pe-content">
+        <div class="hd">Please enter the GridFS details</div>
+        <div class="bd">
+            <form method="GET">
+                <label class="dialogLabel" for="name">Bucket Name:</label>
+                <input type="text" name="name" value=""/>
+                <div class="clear"></div>
+            </form>
+        </div>
+    </div>
 	<div id="addDocDialog" class="yui-pe-content">
 		<div class="hd">Please enter Document</div>
 		<div class="bd">
@@ -289,7 +300,6 @@
 			</form>
 		</div>
 	</div>
-
     <div id="addFileDialog" class="yui-pe-content">
         <div class="hd">Select the files to be added</div>
         <div class="bd">

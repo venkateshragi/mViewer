@@ -192,7 +192,7 @@ public class DatabaseServiceImpl implements DatabaseService {
 			throw new DeleteDatabaseException("DB_DELETION_EXCEPTION", e.getCause());
 		}
 
-		String result = "Deleted DB with name [" + dbName + "]";
+		String result = "Successfully dropped DB with name [" + dbName + "]";
 		return result;
 	}
 

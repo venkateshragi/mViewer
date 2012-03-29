@@ -15,10 +15,7 @@
  */
 package com.imaginea.mongodb.services;
 
-import com.imaginea.mongodb.common.exceptions.CollectionException;
-import com.imaginea.mongodb.common.exceptions.DatabaseException;
-import com.imaginea.mongodb.common.exceptions.DocumentException;
-import com.imaginea.mongodb.common.exceptions.ValidationException;
+import com.imaginea.mongodb.common.exceptions.*;
 import com.mongodb.DBObject;
 import com.sun.jersey.multipart.FormDataBodyPart;
 import org.bson.types.ObjectId;
@@ -35,6 +32,15 @@ import java.util.ArrayList;
  * @since Dec 3, 2008
  */
 public interface GridFSService {
+
+    /**
+     * Service handler for creating GridFS store in the specified database.
+     *
+     * @param dbName     Name of Database
+     * @param bucketName Name of GridFS Bucket
+     * @returns Status message.
+     */
+    public String createStore(String dbName, String bucketName) throws EmptyDatabaseNameException, DatabaseException, EmptyCollectionNameException;
 
     /**
      * Service handler for getting the list of files stored in GridFS of specified database.

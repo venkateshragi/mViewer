@@ -70,7 +70,35 @@ public class GridFSServiceImpl implements GridFSService {
     }
 
     /**
-     * Service handler for getting the list of files stored in GridFS of specified database.
+     * Service implementation for creating GridFS store in the specified database.
+     *
+     * @param dbName     Name of Database
+     * @param bucketName Name of GridFS Bucket
+     * @returns Status message.
+     */
+    public String createStore(String dbName, String bucketName) throws EmptyDatabaseNameException, EmptyCollectionNameException {
+        mongoInstance = mongoInstanceProvider.getMongoInstance();
+
+        if (dbName == null) {
+            throw new EmptyDatabaseNameException("Database Name Is Null");
+        }
+        if (dbName.equals("")) {
+            throw new EmptyDatabaseNameException("Database Name Empty");
+        }
+        if (bucketName == null) {
+            throw new EmptyCollectionNameException("Bucket name is null");
+        }
+        if (bucketName.equals("")) {
+            throw new EmptyCollectionNameException("Bucket Name Empty");
+        }
+
+        new GridFS(mongoInstance.getDB(dbName), bucketName);
+
+        return "Bucket '" + bucketName + "' successfully added to" + dbName + "'s GridFS";
+    }
+
+    /**
+     * Service implementation for getting the list of files stored in GridFS of specified database.
      *
      * @param dbName     Name of Database
      * @param bucketName Name of GridFS Bucket
@@ -116,7 +144,7 @@ public class GridFSServiceImpl implements GridFSService {
     }
 
     /**
-     * Service handler for retrieving the specified file stored in GridFS.
+     * Service implementation for retrieving the specified file stored in GridFS.
      *
      * @param dbName     Name of Database
      * @param bucketName Name of GridFS Bucket
@@ -157,7 +185,7 @@ public class GridFSServiceImpl implements GridFSService {
     }
 
     /**
-     * Service handler for uploading a file to GridFS.
+     * Service implementation for uploading a file to GridFS.
      *
      * @param dbName      Name of Database
      * @param bucketName  Name of GridFS Bucket
@@ -178,10 +206,10 @@ public class GridFSServiceImpl implements GridFSService {
         }
 
         if (bucketName == null) {
-            throw new EmptyCollectionNameException("Collection name is null");
+            throw new EmptyCollectionNameException("Bucket name is null");
         }
         if (bucketName.equals("")) {
-            throw new EmptyCollectionNameException("Collection Name Empty");
+            throw new EmptyCollectionNameException("Bucket Name Empty");
         }
 
         JSONArray result = new JSONArray();
@@ -211,7 +239,7 @@ public class GridFSServiceImpl implements GridFSService {
     }
 
     /**
-     * Service handler for dropping a file from GridFS.
+     * Service implementation for dropping a file from GridFS.
      *
      * @param dbName     Name of Database
      * @param bucketName Name of GridFS Bucket
@@ -263,7 +291,7 @@ public class GridFSServiceImpl implements GridFSService {
     }
 
     /**
-     * Service handler for dropping all files from a GridFS bucket.
+     * Service implementation for dropping all files from a GridFS bucket.
      *
      * @param dbName     Name of Database
      * @param bucketName Name of GridFS Bucket

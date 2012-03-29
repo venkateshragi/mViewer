@@ -60,9 +60,9 @@ YUI({
                     var parsedResponse = Y.JSON.parse(responseObject.responseText),
                     	error;
                     if (parsedResponse.response.result !== undefined) {
-                        MV.showAlertDialog("[0] is dropped! ".format(Y.one("#currentDB").get("value")), MV.infoIcon, function () {
-                            window.location = "home.html?dbInfo=" + Y.one("#host").get("value")+"_" + Y.one("#port").get("value") + "_" + Y.one("#username").get("value");
-                        });
+	                    MV.showAlertDialog(parsedResponse.response.result, MV.infoIcon, function () {
+		                    window.location = "home.html?dbInfo=" + Y.one("#host").get("value") + "_" + Y.one("#port").get("value") + "_" + Y.one("#username").get("value");
+	                    });
                         Y.log("[0] dropped".format(Y.one("#currentDB").get("value")), "info");
                         Y.one("#currentDB").set("value", "");
                         requestDBNames();
@@ -89,28 +89,41 @@ YUI({
     function handleContextMenu(eventType, args) {
         var menuItem = args[1], // The MenuItem that was clicked
         	dialog,
-        	form,
         	showErrorMessage;
         Y.one("#currentDB").set("value", this.contextEventTarget.id);
         MV.toggleClass(Y.one("#" + Y.one("#currentDB").get("value")), Y.all("#dbNames li"));
 	    switch (menuItem.index) {
 		    case 0:
 			    // add collection
-			    form = "addColDialog";
 			    showErrorMessage = function(responseObject) {
 				    MV.showAlertDialog("Collection creation failed! Please check if app server is runnning.", MV.warnIcon);
 				    Y.log("Collection creation failed. Response Status: [0]".format(responseObject.statusText), "error");
 			    };
-			    MV.showSubmitDialog(form, addCollection, showErrorMessage);
+			    MV.showSubmitDialog("addColDialog", addCollection, showErrorMessage);
 			    break;
 		    case 1:
+			    // add gridfs store
+			    var onSuccess = function(response) {
+				    var parsedResponse = Y.JSON.parse(response.responseText);
+				    var result = parsedResponse.response.result;
+				    if (result !== undefined) {
+					    MV.showAlertDialog(result);
+					    Y.one("#" + Y.one("#currentDB").get("value")).simulate("click");
+				    }
+			    };
+			    showErrorMessage = function(responseObject) {
+				    MV.showAlertDialog("GridFS bucket creation failed! Please check if app server is runnning.", MV.warnIcon);
+				    Y.log("GridFS bucket creation failed. Response Status: [0]".format(responseObject.statusText), "error");
+			    };
+			    MV.showSubmitDialog("addGridFSDialog", onSuccess, showErrorMessage);
+			    break;
+		    case 2:
 			    // Delete database
 			    dialog = MV.showYesNoDialog("Do you really want to drop the Database?", sendDropDBRequest, function(dialog) {
 				    this.hide();
 			    });
-
 			    break;
-		    case 2:
+		    case 3:
 			    // show statistics
 			    MV.hideQueryForm();
 			    MV.createDatatable(MV.URLMap.dbStatistics(), Y.one("#currentDB").get("value"));
@@ -120,7 +133,7 @@ YUI({
 
     var dbContextMenu = new YAHOO.widget.ContextMenu("dbContextMenuID", {
         trigger: "dbNames",
-        itemData: ["Add Collection", "Drop Database", "Statistics"]
+        itemData: ["Add Collection", "Add GridFS Bucket", "Drop Database", "Statistics"]
     });
     dbContextMenu.render("dbContextMenu");
     dbContextMenu.clickEvent.subscribe(handleContextMenu);
@@ -222,12 +235,11 @@ YUI({
      * The function shows a dialog that takes input (i.e. Db name) from user
      */
     function createDB()	{
-        var form = "addDBDialog";
         var showErrorMessage = function(responseObject) {
             MV.showAlertDialog("DB creation failed! Please check if app server is runnning.", MV.warnIcon);
             Y.log("DB creation failed. Response Status: [0]".format(responseObject.statusText), "error");
         };
-        MV.showSubmitDialog(form, requestDBNames, showErrorMessage); 
+        MV.showSubmitDialog("addDBDialog", requestDBNames, showErrorMessage);
     }
 
     // Make a request to load Database names when the page loads

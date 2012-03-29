@@ -458,6 +458,9 @@ YUI.add('utility', function (Y) {
 		deleteDoc: function () {
 			return "services/[0]/[1]/document?dbInfo=[2]&action=DELETE&ts=[3]".format(sm.currentDB(), sm.currentColl(), sm.dbInfo(), sm.now());
 		},
+		addGridFS: function (bucketName) {
+			return "services/[0]/[1]/gridfs/create?dbInfo=[2]&ts=[3]".format(sm.currentDB(), bucketName, sm.dbInfo(), sm.now());
+		},
 		getFiles: function () {
 			return "services/[0]/[1]/gridfs/getfiles?dbInfo=[2]&ts=[3]".format(sm.currentDB(), sm.currentBucket(), sm.dbInfo(), sm.now());
 		},
