@@ -57,7 +57,10 @@ YUI({
             success: function (request, responseObject) {
                 MV.mainBody.set("innerHTML", '<div id="table"></div><div id="table-pagination"></div>');
                 var treebleData = MV.getTreebleDataForServerStats(responseObject);
-                treeble = MV.getTreeble(treebleData);
+	            treeble = MV.getTreeble(treebleData);
+	            // Remove download & delete columns for server statistics
+	            treeble.removeColumn(treeble.getColumn("download_column"));
+	            treeble.removeColumn(treeble.getColumn("delete_column"));
                 treeble.load();
             },
             failure: function (request, responseObject) {

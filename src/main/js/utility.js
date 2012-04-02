@@ -130,7 +130,7 @@ YUI.add('utility', function (Y) {
 			aDoc = allDocs[i];
 			parentNode = newObject();
 			childrenArray = [];
-			parentNode.key = "<a id='openFile[0]'>[1]</a>".format(i, aDoc.filename, i, i);
+			parentNode.key = "<a id='openFile[0]' href='javascript:void(0);' style='color:#0e2137'>[1]</a>".format(i, aDoc.filename, i, i);
 			childrenArray = getChildrenArray(aDoc);
 			parentNode.kiddies = childrenArray.sort(sortFunc);
 			Y.on("click", function(e) {
