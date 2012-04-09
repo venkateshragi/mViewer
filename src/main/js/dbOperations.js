@@ -15,9 +15,9 @@
  */
 YUI({
     filter: 'raw'
-}).use("loading-panel","alert-dialog", "utility", "submit-dialog", "yes-no-dialog", "io-base", "node", "json-parse", "event-delegate", "node-event-simulate", "stylize", "custom-datatable", function (Y) {
+}).use("loading-panel","alert-dialog", "utility", "submit-dialog", "yes-no-dialog", "io-base", "node", "node-menunav", "json-parse", "event-delegate", "node-event-simulate", "stylize", "custom-datatable", function (Y) {
     // TODO: make loading panel module
-    var dbDiv;
+    var dbDiv = Y.one('#dbNames ul.lists');
     YUI.namespace('com.imaginea.mongoV');
     var MV = YUI.com.imaginea.mongoV; 
     var sm = YUI.com.imaginea.mongoV.StateManager;
@@ -33,7 +33,7 @@ YUI({
         	response = parsedResponse.response.result,
         	error;
         if (response !== undefined) {
-            MV.showAlertDialog("[0] added to [1]".format(sm.newName(), sm.currentDB()), MV.infoIcon);
+            MV.showAlertDialog(response, MV.infoIcon);
             Y.log("[0] created in [1]".format(Y.one("#newName").get("value"), Y.one("#currentDB").get("value")), "info");
             sm.clearCurrentColl();
             Y.one("#" + Y.one("#currentDB").get("value")).simulate("click");
@@ -81,19 +81,19 @@ YUI({
     }
     
     /**
-     * The function handles event on the context menu for the database
+     * The function handles event on the menu item for the database
      * @param eventType The event type
      * @param args the arguments containing information about which menu item was clicked
      */
 
-    function handleContextMenu(eventType, args) {
-        var menuItem = args[1], // The MenuItem that was clicked
-        	dialog,
-        	showErrorMessage;
-        Y.one("#currentDB").set("value", this.contextEventTarget.id);
+    function handleClickEvent(event) {
+        var	dialog,	showErrorMessage;
+		var label = $(event.currentTarget._node).closest("ul").closest("li")[0].attributes["label"].value;
+		var index = parseInt(event.currentTarget._node.attributes["index"].value);
+        Y.one("#currentDB").set("value", label);
         MV.toggleClass(Y.one("#" + Y.one("#currentDB").get("value")), Y.all("#dbNames li"));
-	    switch (menuItem.index) {
-		    case 0:
+	    switch (index) {
+		    case 1:
 			    // add collection
 			    showErrorMessage = function(responseObject) {
 				    MV.showAlertDialog("Collection creation failed! Please check if app server is runnning.", MV.warnIcon);
@@ -101,7 +101,7 @@ YUI({
 			    };
 			    MV.showSubmitDialog("addColDialog", addCollection, showErrorMessage);
 			    break;
-		    case 1:
+		    case 2:
 			    // add gridfs store
 			    var onSuccess = function(response) {
 				    var parsedResponse = Y.JSON.parse(response.responseText);
@@ -117,13 +117,13 @@ YUI({
 			    };
 			    MV.showSubmitDialog("addGridFSDialog", onSuccess, showErrorMessage);
 			    break;
-		    case 2:
+		    case 3:
 			    // Delete database
 			    dialog = MV.showYesNoDialog("Do you really want to drop the Database?", sendDropDBRequest, function(dialog) {
 				    this.hide();
 			    });
 			    break;
-		    case 3:
+		    case 4:
 			    // show statistics
 			    MV.hideQueryForm();
 			    MV.createDatatable(MV.URLMap.dbStatistics(), Y.one("#currentDB").get("value"));
@@ -131,13 +131,6 @@ YUI({
 	    }
     }
 
-    var dbContextMenu = new YAHOO.widget.ContextMenu("dbContextMenuID", {
-        trigger: "dbNames",
-        itemData: ["Add Collection", "Add GridFS Bucket", "Drop Database", "Statistics"]
-    });
-    dbContextMenu.render("dbContextMenu");
-    dbContextMenu.clickEvent.subscribe(handleContextMenu);
-   
     /**
      * Gets the parameters from the URL
      */
@@ -177,14 +170,40 @@ YUI({
         try {
             var parsedResponse = Y.JSON.parse(responseObject.responseText);
             if (parsedResponse.response.result !== undefined) {
-                var info, index, dbNames = "";
+	            var info, index, dbNames = "";
+	            var dbTemplate = '' +
+			            '<li class="yui3-menuitem" label=[0]> \
+						  <a id=[1] href="#[2]" class="yui3-menu-label dbLabel">[3]</a> \
+						  <div id="[4]" class="yui3-menu">\
+							  <div class="yui3-menu-content">\
+								  <ul>\
+									  <li class="yui3-menuitem">\
+										  <a index="1" class="yui3-menuitem-content onclick">Add Collection</a>\
+									  </li>\
+									  <li class="yui3-menuitem">\
+										  <a index="2" class="yui3-menuitem-content onclick">Add GridFS Bucket</a>\
+									  </li>\
+	                                  <li class="yui3-menuitem">\
+										  <a index="3" class="yui3-menuitem-content onclick">Drop Database</a>\
+									  </li>\
+									  <li class="yui3-menuitem">\
+										  <a index="4" class="yui3-menuitem-content onclick">Statistics</a>\
+									  </li>\
+								  </ul>\
+							  </div>\
+						  </div>\
+						  </li>';
                 for (index = 0; index < parsedResponse.response.result.length; index++) {
-                    dbNames += "<li id='[0]' >[1]</li>".format(parsedResponse.response.result[index], parsedResponse.response.result[index]);
+	                var id = parsedResponse.response.result[index];
+	                dbNames += dbTemplate.format(id, id, id + "_subMenu", id, id + "_subMenu");
                 }
                 if (index === 0) {
                     dbDiv.set("innerHTML", "No Databases");
                 }
                 dbDiv.set("innerHTML", dbNames);
+	            dbDiv.delegate('click',handleClickEvent, 'a.onclick');
+				var menu = Y.one("#dbNames");
+				menu.plug(Y.Plugin.NodeMenuNav);
                 MV.hideLoadingPanel();
                 Y.log("Database Names succesfully loaded", "info");
                 sm.publish(sm.events.dbsChanged);
@@ -217,8 +236,7 @@ YUI({
      */
     function requestDBNames() {
     	MV.showLoadingPanel("Loading Databases...");
-        setUserInfo();
-        dbDiv = Y.one('#dbNames ul.lists');
+        setUserInfo();        
         var request = Y.io(MV.URLMap.getDBs(),
                            // configuration for loading the database names
                            {
@@ -236,6 +254,7 @@ YUI({
      */
     function createDB()	{
         var showErrorMessage = function(responseObject) {
+	        MV.hideLoadingPanel();
             MV.showAlertDialog("DB creation failed! Please check if app server is runnning.", MV.warnIcon);
             Y.log("DB creation failed. Response Status: [0]".format(responseObject.statusText), "error");
         };

@@ -19,83 +19,6 @@ YUI({
 	YUI.namespace('com.imaginea.mongoV');
 	var MV = YUI.com.imaginea.mongoV, sm = MV.StateManager;
 	MV.treebleData = {};
-	
-	// The Collection context menu object
-	var gridFSContextMenu = new YAHOO.widget.ContextMenu("gridFSContextMenuID", {
-		trigger: "bucketNames",
-		itemData: ["Add File(s)", "Drop Bucket", "Statistics"],
-		lazyload: true
-	});
-
-	gridFSContextMenu.subscribe("render", function(eventType, args) {
-		this.subscribe("click", handleContextMenu);
-	});
-
-	/**
-	 * The function handles event on the context menu for the collection
-	 * @param eventType The event type
-	 * @param args the arguments containing information about which menu item was clicked
-	 */
-	function handleContextMenu(eventType, args) {
-		var menuItem = args[1],	// The MenuItem that was clicked
-				form, showErrorMessage;
-		sm.setCurrentBucket(this.contextEventTarget.innerHTML);
-		MV.toggleClass(sm.currentBucketAsNode(), Y.all("#bucketNames li"));
-		switch (menuItem.index) {
-			case 0:
-				// Add File
-				form = "addFileDialog";
-				showErrorMessage = function(responseObject) {
-					MV.showAlertDialog("File upload failed! Please check if your app server is running and then refresh the page.", MV.warnIcon);
-					Y.log("File upload failed. Response Status: [0]".format(responseObject.statusText), "error");
-				};				
-				MV.showUploadDialog(form);
-				break;
-			case 1:
-				// Delete
-				MV.showYesNoDialog("Do you really want to drop all files in this bucket - " + Y.one("#currentBucket").get("value") + "?", sendDropBucketRequest, function() {
-					this.hide();
-				});
-				break;
-			case 2:
-				// click to view details
-				MV.hideQueryForm();
-				MV.createDatatable(MV.URLMap.bucketStatistics(".files"), Y.one("#currentBucket").get("value"));
-				MV.createDatatable(MV.URLMap.bucketStatistics(".chunks"), Y.one("#currentBucket").get("value"));
-				break;
-		}
-	}
-
-	/**
-	 * Handler for drop bucket request. 
-	 * @param responseObject The response Object
-	 */
-	function sendDropBucketRequest() {
-		//"this" refers to the Yes/No dialog box
-		this.hide();
-		Y.log("Preparing to send request to drop bucket", "info");
-		var request = Y.io(MV.URLMap.dropBucket(), {
-			on: {
-				success: function(ioId, responseObj) {
-					var parsedResponse = Y.JSON.parse(responseObj.responseText);
-					response = parsedResponse.response.result;
-					if (response !== undefined) {
-						MV.showAlertDialog(response, MV.infoIcon);
-						Y.log(response, "info");
-						Y.one("#" + Y.one("#currentBucket").get("value").replace(/ /g, '_')).simulate("click");
-					} else {
-						var error = parsedResponse.response.error;
-						MV.showAlertDialog("Could not delete all files : [0]".format(MV.errorCodeMap[error.code]), MV.warnIcon);
-						Y.log("Could not delete all files, Error message: [0], Error Code: [1]".format(error.message, error.code), "error");
-					}
-				},
-				failure: function(ioId, responseObj) {
-					Y.log("Could not delete the file. Status text: ".format(Y.one("#currentBucket").get("value"), responseObj.statusText), "error");
-					MV.showAlertDialog("Could not drop the file! Please check if your app server is running and try again. Status Text: [1]".format(responseObj.statusText), MV.warnIcon);
-				}
-			}
-		});
-	}
 
 	/**
 	 * The function is an event handler to show the files whenever a bucket name is clicked
@@ -303,7 +226,7 @@ YUI({
 							var parsedResponse = Y.JSON.parse(responseObj.responseText);
 							response = parsedResponse.response.result;
 							if (response !== undefined) {
-								MV.showAlertDialog("File deleted", MV.infoIcon);
+								MV.showAlertDialog(response, MV.infoIcon);
 								Y.log("File with _id= [0] deleted. Response: [1]".format(id, response), "info");
 								//Y.one('#file' + index).remove();
 								Y.one("#" + Y.one("#currentBucket").get("value").replace(/ /g, '_')).simulate("click");
@@ -356,5 +279,5 @@ YUI({
 		MV.header.set("innerHTML", "Contents of " + Y.one("#currentBucket").get("value"));
 		tabView.appendTo(MV.mainBody.get('id'));
 	};
-	Y.delegate("click", showTabView, "#bucketNames", "li");
+	Y.delegate("click", showTabView, "#bucketNames", "a.collectionLabel");
 });

@@ -208,8 +208,7 @@ public class CollectionServiceImpl implements CollectionService {
 			InsertCollectionException e = new InsertCollectionException("COLLECTION_CREATION_EXCEPTION", m.getCause());
 			throw e;
 		}
-		String result = "Created Collection [" + collectionName + "] in Database [" + dbName + "]";
-
+		String result = "Collection [" + collectionName + "] added to Database [" + dbName + "]";
 		return result;
 	}
 

@@ -7,12 +7,20 @@
 	content="This is the Home page for mViewer a MongoDB UI" />
 <LINK rel="SHORTCUT ICON" href="images/icon.png" />
 <!--YUI 3 JS files imported   -->
-<LINK type="text/css" rel="stylesheet"
-	href="lib/yui/build/cssfonts/fonts-min.css" />
 <script type="text/javascript" src="lib/yui/build/yui/yui-min.js"></script>
+<script type="text/javascript" src="lib/yui/build/node-menunav/node-menunav-min.js"></script>
+<LINK type="text/css" rel="stylesheet"
+      href="lib/yui/build/cssfonts/fonts-min.css"/>
+<LINK type="text/css" rel="stylesheet"
+	href="lib/yui/build/node-menunav/assets/node-menunav-core.css" />
+<LINK type="text/css" rel="stylesheet"
+	href="lib/yui/build/node-menunav/assets/skins/sam/node-menunav.css" />  
+-->
 <!--YUI 2 JS files imported   -->
 <LINK rel="stylesheet" type="text/css"
 	href="lib/yui2/build/fonts/fonts-min.css" />
+<link rel="stylesheet" type="text/css"
+	href="lib/yui2/build/button/assets/skins/sam/button.css">
 <link rel="stylesheet" type="text/css"
 	href="lib/yui2/build/menu/assets/skins/sam/menu.css">
 <LINK rel="stylesheet" type="text/css"
@@ -47,6 +55,7 @@
 	src="lib/yui2/build/container/container-min.js"></script>
 <script type="text/javascript"
 	src="lib/yui2/build/animation/animation-min.js"></script>
+<script type="text/javascript" src="lib/yui2/build/button/button-min.js"></script>
 <script type="text/javascript" src="lib/yui2/build/menu/menu-min.js"></script>
 <script type="text/javascript"
 	src="lib/yui2/build/container/container_core.js"></script>
@@ -189,30 +198,36 @@
 				<div class="list-head">
 				  <label class="db">Databases <button id="createDB" class="add bttn">New</button></label>
 				</div>
-				<div id="dbNames">
-				  <ul class="lists">
-				  </ul>
-				  <p></p>
-				</div>
+                  <div id="dbNames" class="yui3-menu">
+                      <div class="yui3-menu-content" style="border:none">
+                          <ul class="lists">
+                          </ul>
+                      </div>
+                      <p></p>
+                  </div>
               </div>
 
-              <div id="collectionBuffer" class="buffer navigable collectionBuffer">
-				<div class="list-head">
-				  <label class="collections">collections</label>
-				</div>
-				<div id="collNames">
-				  <ul class="lists">
-				  </ul>
-				</div>
-              </div>
+                <div id="collectionBuffer" class="buffer navigable collectionBuffer">
+                    <div class="list-head">
+                        <label class="collections">Collections</label>
+                    </div>
+                    <div id="collNames" class="yui3-menu">
+                        <div class="yui3-menu-content" style="border:none">
+                            <ul class="lists">
+                            </ul>
+                        </div>
+                    </div>
+                </div>
 
                 <div id="gridFSBuffer" class="buffer navigable collectionBuffer">
                     <div class="list-head">
                         <label class="gridFS">GridFS</label>
                     </div>
-                    <div id="bucketNames">
-                        <ul class="lists">
-                        </ul>
+                    <div id="bucketNames" class="yui3-menu">
+                        <div class="yui3-menu-content" style="border:none">
+                            <ul class="lists">
+                            </ul>
+                        </div>
                     </div>
                 </div>
 
@@ -263,7 +278,7 @@
 	<div id="addColDialog" class="yui-pe-content">
 		<div class="hd">Please enter collection details</div>
 		<div class="bd">
-			<form method="POST" onsubmit="alert('test')">
+			<form method="POST">
 				<label class="dialogLabel" for="name">Name:</label><input
 					type="text" name="name" />
 				<div class="clear"></div>

@@ -186,7 +186,7 @@ ul.user-menu li label.logout {
 	border: 1px solid #e3eaee;
 	border-right: 0 !important;
 	padding: 10px;
-	margin: 10px 0 10px 0;
+	margin: 10px 0 0 0;
 	height: 16px;
 	text-transform: uppercase;
 	color: #0e2137;
@@ -237,7 +237,7 @@ ul.lists li {
 	font-size: 13px;
 	padding: 5px 5px 5px 12px;
 	height: 15px;
-	margin-left: 10px;
+	margin-left: 20px;
 }
 
 .right-cont {
@@ -504,6 +504,15 @@ fieldset.login legend {
     background-image: -moz-linear-gradient(top, #66cc00, #4b9500);
     background-image: -webkit-gradient(linear, left top, left bottom, from(#66cc00), to(#4b9500));
 }
+
+#dbNames {
+    position: static;
+}
+
+#collNames {
+    position: static;
+}
+
 
 #uploadResponse {
     margin-top: 10px;

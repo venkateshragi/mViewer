@@ -28,7 +28,7 @@ YUI({
      */
     var showTabView = function(e) {
         MV.toggleClass(e.currentTarget, Y.all("#collNames li"));
-        sm.setCurrentColl(e.currentTarget.getContent());
+        Y.one("#currentColl").set("value", e.currentTarget.get("id"));
         MV.mainBody.empty(true);
 	    MV.deleteDocEvent.unsubscribeAll();
 	    MV.deleteDocEvent.subscribe(deleteDoc);
@@ -375,7 +375,7 @@ YUI({
                 var index = getButtonIndex(targetNode);
                 var doc = Y.one('#doc' + index).one("pre").one("textarea").get("value");
                 parsedDoc = Y.JSON.parse(doc);
-                var id = parsedDoc._id;
+                var id = parsedDoc._id.$oid;
                 var request = Y.io(MV.URLMap.deleteDoc(),
                 // configuration for dropping the document
                 {
@@ -466,7 +466,7 @@ YUI({
                 var doc = textArea.get("value");
                 parsedDoc = Y.JSON.parse(doc);
                 idMap[index] = {};
-                idMap[index].id = parsedDoc._id;
+                idMap[index].id = parsedDoc._id.$oid;
                 idMap[index].originalDoc = doc;
                 toggleSaveEdit(targetNode, index, actionMap.edit);
                 textArea.focus();
@@ -563,5 +563,5 @@ YUI({
         MV.header.set("innerHTML", "Contents of " + Y.one("#currentColl").get("value"));
         tabView.appendTo(MV.mainBody.get('id'));
     };
-    Y.delegate("click", showTabView, "#collNames", "li");
+    Y.delegate("click", showTabView, "#collNames", "a.collectionLabel");
 });

@@ -94,7 +94,7 @@ public class GridFSServiceImpl implements GridFSService {
 
         new GridFS(mongoInstance.getDB(dbName), bucketName);
 
-        return "Bucket '" + bucketName + "' successfully added to" + dbName + "'s GridFS";
+        return "Bucket '" + bucketName + "' added to [" + dbName + "'s] GridFS";
     }
 
     /**
@@ -286,7 +286,7 @@ public class GridFSServiceImpl implements GridFSService {
         } catch (MongoException e) {
             throw new DeleteDocumentException("FILE_DELETION_EXCEPTION");
         }
-        result = "Deleted File : [" + gridFSDBFile.getFilename() + "]";
+        result = "File [" + gridFSDBFile.getFilename() + "] has been deleted.";
         return result;
     }
 
