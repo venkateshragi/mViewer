@@ -149,7 +149,7 @@ build: 3167
     padding: 0 0;
     color: #000;
     text-decoration: none;
-    cursor: default;
+    cursor: pointer;
     float: none;
     border: 0;
     margin: 0

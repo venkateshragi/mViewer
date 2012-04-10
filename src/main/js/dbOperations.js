@@ -173,7 +173,7 @@ YUI({
 	            var info, index, dbNames = "";
 	            var dbTemplate = '' +
 			            '<li class="yui3-menuitem" label=[0]> \
-						  <a id=[1] href="#[2]" class="yui3-menu-label dbLabel">[3]</a> \
+						  <a id=[1] href="#[2]" class="yui3-menu-label dbLabel navigable">[3]</a> \
 						  <div id="[4]" class="yui3-menu">\
 							  <div class="yui3-menu-content">\
 								  <ul>\

@@ -142,7 +142,7 @@
                 }, document);
             },
             highlight: function(self) {
-                var regionName = Y.one('.assistText').get('value');
+                var regionName = Y.one('.assistText').get('value').trim();
                 if (regionName && regionName.length > 0) {
                     self.clearStyles();
                     selectedElement = null;
@@ -157,6 +157,8 @@
                             }
                         }
                     }
+                } else {
+	                self.clearStyles();
                 }
             },
             selectElement: function(self) {

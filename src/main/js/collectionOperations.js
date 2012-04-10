@@ -68,7 +68,7 @@ YUI({
 
 			var collTemplate = '' +
 					'<li class="yui3-menuitem" label="[0]"> \
-	                <a id=[1] href="#[2]" class="collectionLabel yui3-menu-label">[3]</a> \
+	                <a id=[1] href="#[2]" class="collectionLabel yui3-menu-label navigable">[3]</a> \
 					<div id="[4]" class="yui3-menu">\
 						<div class="yui3-menu-content">\
 							<ul>\

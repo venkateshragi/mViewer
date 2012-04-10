@@ -102,7 +102,7 @@ ul.nav-cont li a {
 	cursor: pointer;
 }
 
-ul.lists li:hover,ul.lists li.sel:hover,ul.nav-cont li a.sel,ul.nav-cont li a:hover,.user-menu .logout:hover, ul.lists li.simulatedHover, ul.lists li.sel.simulatedHover
+ul.lists li:hover,ul.lists li.sel:hover,ul.nav-cont li a.sel,ul.nav-cont li a:hover,.user-menu .logout:hover, ul.lists li.simulatedHover, ul.lists a.simulatedHover, ul.lists li.sel.simulatedHover
 	{
 	text-decoration: none;
 	background: rgb(191, 191, 191); /* Old browsers */
@@ -117,8 +117,8 @@ ul.lists li:hover,ul.lists li.sel:hover,ul.nav-cont li a.sel,ul.nav-cont li a:ho
 		rgba(2, 7, 3, 1) 100% ); /* Opera11.10+ */
 	background: -ms-linear-gradient(top, rgba(191, 191, 191, 1) 0%,
 		rgba(2, 7, 3, 1) 100% ); /* IE10+ */
-	filter: progid :     DXImageTransform.Microsoft.gradient (     
-		 startColorstr =  
+	filter: progid :     DXImageTransform.Microsoft.gradient (
+		 startColorstr =
 		  '#bfbfbf', endColorstr =     '#020703', GradientType =     0 );
 	/* IE6-9 */
 	background: linear-gradient(top, rgba(191, 191, 191, 1) 0%,
@@ -212,7 +212,7 @@ ul.user-menu li label.logout {
 
 #createDB{
 	margin-left:5px;
-	font-size:11px;	
+	font-size:11px;
 }
 
 .collections {
@@ -235,8 +235,8 @@ ul.lists li {
 	list-style-image: url('../images/bullet.png');
 	font-weight: bold;
 	font-size: 13px;
-	padding: 5px 5px 5px 12px;
-	height: 15px;
+	padding: 5px 5px 5px 5px;
+	height: 18px;
 	margin-left: 20px;
 }
 
@@ -326,7 +326,7 @@ table tr td {
 .table-striped tbody.files {
     display: block;
     max-height: 140px;
-    overflow: auto;    
+    overflow: auto;
 }
 
 .wrap {
@@ -427,19 +427,49 @@ fieldset.login legend {
 }
 
 .yui-dt .row-closed a.treeble-collapse-nub {
-	background: url(../images/closed.png) no-repeat;
+    background: url(../images/closed.png) no-repeat;
+    opacity: 0.4;
+}
+
+.yui-dt .row-closed a.treeble-collapse-nub:hover {
+    opacity: 1;
 }
 
 .yui-dt .row-open a.treeble-collapse-nub {
-	background: url(../images/open.png) no-repeat;
+    background: url(../images/open.png) no-repeat;
+    opacity: 0.4;
+}
+
+.yui-dt .row-open a.treeble-collapse-nub:hover {
+    opacity: 1;
 }
 
 .yui-dt .row-toggle a.download-icon {
     background: url("../images/download.png") no-repeat;
+    height: 16px;
+    opacity: 0.4;
+}
+
+.yui-dt tr.yui-dt-highlighted .row-toggle a.download-icon {
+    opacity: 0.7;
+}
+
+.yui-dt tr.yui-dt-highlighted .row-toggle a.download-icon:hover {
+    opacity: 1;
 }
 
 .yui-dt .row-toggle a.delete-icon {
     background: url("../images/close.png") no-repeat;
+    height: 16px;
+    opacity: 0.4;
+}
+
+.yui-dt tr.yui-dt-highlighted .row-toggle a.delete-icon {
+    opacity: 0.7;
+}
+
+.yui-dt tr.yui-dt-highlighted .row-toggle a.delete-icon:hover {
+    opacity: 1;
 }
 
 .yui-pe-content {
@@ -551,7 +581,7 @@ fieldset.login legend {
 .helpDescriptionImg {
 	margin: 18px;
 	padding: 4px;
-	border:1px solid #ccc; 
+	border:1px solid #ccc;
 }
 
 .loginHelp {
@@ -589,7 +619,7 @@ bottom: 0px;
     /* -moz-box-shadow: rgba(0,0,0,.2) 0px 0px 5px; */
     /* -o-box-shadow: rgba(0,0,0,.2) 0px 0px 5px; */
 
-    box-shadow: 0 0 2px 2px highlight !important; 
+    box-shadow: 0 0 2px 2px highlight !important;
     -webkit-box-shadow: 0 0 2px 2px rgb(255, 255, 255)
     -moz-box-shadow: 0 0 2px 2px highlight !important;
 
@@ -622,7 +652,7 @@ fieldset.bufferFieldSet {
 }
 
 div.generalInfo {
-    width:100%; 
+    width:100%;
     text-align:center;
     border: 1px solid grey
 }
