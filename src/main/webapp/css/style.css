@@ -173,6 +173,12 @@ ul.user-menu li label.logout {
 
 .title-head label span {
 	font-weight: normal !important;
+	padding: 0 25px 0 0;
+}
+
+.title-head label span.informmsg {
+	font-weight: bold !important;
+	color: #331A00;
 }
 
 .left-cont {

@@ -15,46 +15,14 @@
  */
 /**
  * @module alert-dialog
- * The module provides function <tt>showAlertDialog</tt> to show the simple dialog box.
+ * The module provides function <tt>showAlertDialog</tt> to show a simple information message.
  */
 YUI.add('alert-dialog', function (Y) {
-    YUI.namespace('com.imaginea.mongoV');
-    var MV = YUI.com.imaginea.mongoV;
-    if(!MV.simpleDialog){
-    	 // Simple Dialog object
-    	MV.simpleDialog = new YAHOO.widget.SimpleDialog("alertDialog", {
-            width: "300px",
-            fixedcenter: true,
-            visible: false,
-            draggable: true,
-            close: false,
-            constraintoviewport: true,
-            zIndex: 10
-        });
-        MV.simpleDialog.setHeader("Info");
-        MV.simpleDialog.render("alertDialogContainer");
-    }
-    /**
-     * The function pops up a simple dialog box 
-     * @param msg {String} This is the message that the alert dialog box will show
-     * @param ico {Object} The icon to be show with the message. The icon can either be a Warn icon
-     * or a Info icon
-     * @param handler {Function} The call back function when <tt>OK</tt> is clicked on the dialog box   
-     */
     YUI.com.imaginea.mongoV.showAlertDialog = function (msg, ico, handler) {
-        var buttons = [{
-            text: "OK",
-            handler: handler ||
-            function () {
-                this.hide();
-            },
-            isDefault: true
-        }];
-        MV.simpleDialog.cfg.setProperty("buttons", buttons);
-        MV.simpleDialog.setBody(msg);
-        MV.simpleDialog.cfg.setProperty("icon", ico || YAHOO.widget.SimpleDialog.ICON_INFO);
-        MV.simpleDialog.show();
+	document.getElementById('informmsg').style.display='inline';
+	Y.one('#informmsg').set("innerHTML", msg);
+	window.setTimeout("document.getElementById('informmsg').style.display='none'", 6000);
     };
 }, '3.3.0', {
-    requires: []
+    requires: ["node"]
 });
