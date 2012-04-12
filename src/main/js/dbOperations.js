@@ -107,7 +107,7 @@ YUI({
 				    var parsedResponse = Y.JSON.parse(response.responseText);
 				    var result = parsedResponse.response.result;
 				    if (result !== undefined) {
-					    MV.showAlertMessage(result);
+					    MV.showAlertMessage(result, MV.infoIcon);
 					    Y.one("#" + Y.one("#currentDB").get("value")).simulate("click");
 				    }
 			    };

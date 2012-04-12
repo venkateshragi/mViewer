@@ -34,7 +34,7 @@ YUI.add('submit-dialog', function(Y) {
             Y.log("Submit handler for add collection called", "info");
             var newCollInfo = this.getData();
             if (newCollInfo.name === "") {
-                MV.showAlertMessage("Please enter the name.");
+                MV.showAlertMessage("Please enter the name.", MV.warnIcon);
             } else {
                 Y.one("#newName").set("value", newCollInfo.name);
                 Y.one("#" + form + " .bd form").setAttribute("action", MV.URLMap.insertColl());
@@ -46,7 +46,7 @@ YUI.add('submit-dialog', function(Y) {
 		    Y.log("Submit handler for adding gridFS bucket called", "info");
 		    var newCollInfo = this.getData();
 		    if (newCollInfo.name === "") {
-			    MV.showAlertMessage("Please enter the bucket name.");
+			    MV.showAlertMessage("Please enter the bucket name.", MV.warnIcon);
 		    } else {
 			    Y.one("#" + form + " .bd form").setAttribute("action", MV.URLMap.addGridFS(newCollInfo.name));
 			    this.submit();
@@ -56,7 +56,7 @@ YUI.add('submit-dialog', function(Y) {
         function addDB() {
             var newDBInfo = this.getData();
             if (newDBInfo.name === "") {
-                MV.showAlertMessage("Please enter the name.");
+                MV.showAlertMessage("Please enter the name.", MV.warnIcon);
             } else {
                 Y.one("#newName").set("value", newDBInfo.name);
                 Y.one("#" + form + " .bd form").setAttribute("action", MV.URLMap.insertDB());

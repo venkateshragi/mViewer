@@ -94,7 +94,7 @@ public class GridFSServiceImpl implements GridFSService {
 
         new GridFS(mongoInstance.getDB(dbName), bucketName);
 
-        return "Bucket [" + bucketName + "] added to [" + dbName + "'s] GridFS.";
+        return "GridFS bucket [" + bucketName + "] added to database [" + dbName + "].";
     }
 
     /**
