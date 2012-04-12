@@ -71,7 +71,7 @@ YUI({
 				success: showFiles,
 				failure: function(request, responseObject) {
 					MV.hideLoadingPanel();
-					MV.showAlertDialog("Failed: Files could not be loaded", MV.warnIcon);
+					MV.showAlertMessage("Failed: Files could not be loaded", MV.warnIcon);
 					Y.log("Files could not be loaded. Response: [0]".format(responseObject.responseText), "error");
 				},
 				scope: tabView
@@ -226,19 +226,19 @@ YUI({
 							var parsedResponse = Y.JSON.parse(responseObj.responseText);
 							response = parsedResponse.response.result;
 							if (response !== undefined) {
-								MV.showAlertDialog(response, MV.infoIcon);
+								MV.showAlertMessage(response, MV.infoIcon);
 								Y.log("File with _id= [0] deleted. Response: [1]".format(id, response), "info");
 								//Y.one('#file' + index).remove();
 								Y.one("#" + Y.one("#currentBucket").get("value").replace(/ /g, '_')).simulate("click");
 							} else {
 								var error = parsedResponse.response.error;
-								MV.showAlertDialog("Could not delete the file with _id [0]. [1]".format(id, MV.errorCodeMap[error.code]), MV.warnIcon);
+								MV.showAlertMessage("Could not delete the file with _id [0]. [1]".format(id, MV.errorCodeMap[error.code]), MV.warnIcon);
 								Y.log("Could not delete the file with _id =  [0], Error message: [1], Error Code: [2]".format(id, error.message, error.code), "error");
 							}
 						},
 						failure: function(ioId, responseObj) {
 							Y.log("Could not delete the file. Status text: ".format(Y.one("#currentBucket").get("value"), responseObj.statusText), "error");
-							MV.showAlertDialog("Could not drop the file! Please check if your app server is running and try again. Status Text: [1]".format(responseObj.statusText), MV.warnIcon);
+							MV.showAlertMessage("Could not drop the file! Please check if your app server is running and try again. Status Text: [1]".format(responseObj.statusText), MV.warnIcon);
 						}
 					}
 				});

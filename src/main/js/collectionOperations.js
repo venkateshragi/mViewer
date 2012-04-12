@@ -130,8 +130,10 @@ YUI({
 
 				var menu1 = Y.one("#collNames");
 				menu1.plug(Y.Plugin.NodeMenuNav);
+				menu1.set("style.display", "block");
 				var menu2 = Y.one("#bucketNames");
 				menu2.plug(Y.Plugin.NodeMenuNav);
+				menu2.set("style.display", "block");
 				sm.publish(sm.events.collectionsChanged);
 				MV.hideLoadingPanel();
 				Y.log("Collection Names succesfully loaded", "info");
@@ -139,11 +141,11 @@ YUI({
 				error = parsedResponse.response.error;
 				Y.log("Could not load collections. Message: [0]".format(error.message), "error");
 				MV.hideLoadingPanel();
-				MV.showAlertDialog("Could not load Collections! [0]".format(MV.errorCodeMap[error.code]), MV.warnIcon);
+				MV.showAlertMessage("Could not load Collections! [0]".format(MV.errorCodeMap[error.code]), MV.warnIcon);
 			}
 		} catch (e) {
 			MV.hideLoadingPanel();
-			MV.showAlertDialog(e, MV.warnIcon);
+			MV.showAlertMessage(e, MV.warnIcon);
 		}
 	}
 
@@ -161,7 +163,7 @@ YUI({
 			case 1:
 				// Add Document
 				var showError = function(responseObject) {
-					MV.showAlertDialog("Document creation failed! Please check if your app server is running and then refresh the page.", MV.warnIcon);
+					MV.showAlertMessage("Document creation failed! Please check if your app server is running and then refresh the page.", MV.warnIcon);
 					Y.log("Document creation failed. Response Status: [0]".format(responseObject.statusText), "error");
 				};
 				MV.showSubmitDialog("addDocDialog", addDocument, showError);
@@ -194,7 +196,7 @@ YUI({
 			case 1:
 				// Add File
 				var showErrorMessage = function(responseObject) {
-					MV.showAlertDialog("File upload failed! Please check if your app server is running and then refresh the page.", MV.warnIcon);
+					MV.showAlertMessage("File upload failed! Please check if your app server is running and then refresh the page.", MV.warnIcon);
 					Y.log("File upload failed. Response Status: [0]".format(responseObject.statusText), "error");
 				};
 				MV.showUploadDialog("addFileDialog");
@@ -228,18 +230,18 @@ YUI({
 					var parsedResponse = Y.JSON.parse(responseObj.responseText);
 					response = parsedResponse.response.result;
 					if (response !== undefined) {
-						MV.showAlertDialog(response, MV.infoIcon);
 						Y.log(response, "info");
-						Y.one("#" + Y.one("#currentBucket").get("value").replace(/ /g, '_')).simulate("click");
+						MV.showAlertMessage(response, MV.infoIcon);
+						Y.one("#" + Y.one("#currentDB").get("value")).simulate("click");
 					} else {
 						var error = parsedResponse.response.error;
-						MV.showAlertDialog("Could not delete all files : [0]".format(MV.errorCodeMap[error.code]), MV.warnIcon);
+						MV.showAlertMessage("Could not delete all files : [0]".format(MV.errorCodeMap[error.code]), MV.warnIcon);
 						Y.log("Could not delete all files, Error message: [0], Error Code: [1]".format(error.message, error.code), "error");
 					}
 				},
 				failure: function(ioId, responseObj) {
 					Y.log("Could not delete the file. Status text: ".format(Y.one("#currentBucket").get("value"), responseObj.statusText), "error");
-					MV.showAlertDialog("Could not drop the file! Please check if your app server is running and try again. Status Text: [1]".format(responseObj.statusText), MV.warnIcon);
+					MV.showAlertMessage("Could not drop the file! Please check if your app server is running and try again. Status Text: [1]".format(responseObj.statusText), MV.warnIcon);
 				}
 			}
 		});
@@ -264,19 +266,19 @@ YUI({
 							response = parsedResponse.response.result,
 							error;
 					if (response !== undefined) {
-						MV.showAlertDialog(Y.one("#currentColl").get("value") + " dropped", MV.infoIcon);
+						MV.showAlertMessage(response, MV.infoIcon);
 						Y.log("[0] dropped. Response: [1]".format(Y.one("#currentColl").get("value"), response), "info");
 						sm.clearCurrentColl();
 						Y.one("#" + Y.one("#currentDB").get("value")).simulate("click");
 					} else {
 						error = parsedResponse.response.error;
-						MV.showAlertDialog("Could not drop: [0]. [1]".format(Y.one("#currentColl").get("value"), MV.errorCodeMap[error.code]), MV.warnIcon);
+						MV.showAlertMessage("Could not drop: [0]. [1]".format(Y.one("#currentColl").get("value"), MV.errorCodeMap[error.code]), MV.warnIcon);
 						Y.log("Could not drop [0], Error message: [1], Error Code: [2]".format(Y.one("#currentColl").get("value"), error.message, error.code), "error");
 					}
 				},
 				failure: function(ioId, responseObj) {
 					Y.log("Could not drop [0].Status text: ".format(Y.one("#currentColl").get("value"), responseObj.statusText), "error");
-					MV.showAlertDialog("Could not drop [0]!  Please check if your app server is running and try again. Status Text: [1]".format(Y.one("#currentColl").get("value"), responseObj.statusText), MV.warnIcon);
+					MV.showAlertMessage("Could not drop [0]!  Please check if your app server is running and try again. Status Text: [1]".format(Y.one("#currentColl").get("value"), responseObj.statusText), MV.warnIcon);
 				}
 			}
 		});
@@ -291,12 +293,12 @@ YUI({
 				response = parsedResponse.response.result,
 				error;
 		if (response !== undefined) {
-			MV.showAlertDialog("New document added to [0]".format(Y.one("#currentColl").get("value")), MV.infoIcon);
+			MV.showAlertMessage("New document added to [0]".format(Y.one("#currentColl").get("value")), MV.infoIcon);
 			Y.log("New document added to [0]".format(Y.one("#currentColl").get("value"), "info"));
 			sm.currentCollAsNode().simulate("click");
 		} else {
 			error = parsedResponse.response.error;
-			MV.showAlertDialog("Could not add Document! [0]".format(MV.errorCodeMap[error.code]), MV.warnIcon);
+			MV.showAlertMessage("Could not add Document! [0]".format(MV.errorCodeMap[error.code]), MV.warnIcon);
 			Y.log("Could not add Document! [0]".format(MV.errorCodeMap[error.code]), "error");
 		}
 	}
@@ -311,7 +313,7 @@ YUI({
 	function displayError(ioId, responseObj) {
 		if (responseObj.responseText) {
 			Y.log("Could not load collections. Status message: [0]".format(responseObj.statusText), "error");
-			MV.showAlertDialog("Could not load collections! Check if your app server is running and refresh the page.", MV.warnIcon);
+			MV.showAlertMessage("Could not load collections! Check if your app server is running and refresh the page.", MV.warnIcon);
 		}
 		MV.hideLoadingPanel();
 	}

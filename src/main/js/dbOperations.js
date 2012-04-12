@@ -33,13 +33,13 @@ YUI({
         	response = parsedResponse.response.result,
         	error;
         if (response !== undefined) {
-            MV.showAlertDialog(response, MV.infoIcon);
+            MV.showAlertMessage(response, MV.infoIcon);
             Y.log("[0] created in [1]".format(Y.one("#newName").get("value"), Y.one("#currentDB").get("value")), "info");
             sm.clearCurrentColl();
             Y.one("#" + Y.one("#currentDB").get("value")).simulate("click");
         } else {
             error = parsedResponse.response.error;
-            MV.showAlertDialog("Could not add Collection! [0]".format(MV.errorCodeMap[error.code]), MV.warnIcon);
+            MV.showAlertMessage("Could not add Collection! [0]".format(MV.errorCodeMap[error.code]), MV.warnIcon);
             Y.log("Could not add Collection! [0]".format(MV.errorCodeMap[error.code]), "error");
         }
     }
@@ -60,7 +60,7 @@ YUI({
                     var parsedResponse = Y.JSON.parse(responseObject.responseText),
                     	error;
                     if (parsedResponse.response.result !== undefined) {
-	                    MV.showAlertDialog(parsedResponse.response.result, MV.infoIcon, function () {
+	                    MV.showAlertMessage(parsedResponse.response.result, MV.infoIcon, function () {
 		                    window.location = "home.html?dbInfo=" + Y.one("#host").get("value") + "_" + Y.one("#port").get("value") + "_" + Y.one("#username").get("value");
 	                    });
                         Y.log("[0] dropped".format(Y.one("#currentDB").get("value")), "info");
@@ -68,13 +68,13 @@ YUI({
                         requestDBNames();
                     } else {
                         error = parsedResponse.response.error;
-                        MV.showAlertDialog("Could not drop: [0]. [1]".format(Y.one("#currentDB").get("value"), MV.errorCodeMap[error.code]), MV.warnIcon);
+                        MV.showAlertMessage("Could not drop: [0]. [1]".format(Y.one("#currentDB").get("value"), MV.errorCodeMap[error.code]), MV.warnIcon);
                         Y.log("Could not drop: [0], Response Recieved: [1], ErrorCode: [2]".format(Y.one("#currentDB").get("value"), error.message, error.code), "error");
                     }
                 },
                 failure: function (ioId, responseObject) {
                     Y.log("Could not drop: [0]. Status Text: [1]".format(Y.one("#currentDB").get("value"), responseObject.statusText), "error");
-                    MV.showAlertDialog("Could not drop: [0], Status Text: [2]".format(Y.one("#currentDB").get("value"), responseObject.statusText), MV.warnIcon);
+                    MV.showAlertMessage("Could not drop: [0], Status Text: [2]".format(Y.one("#currentDB").get("value"), responseObject.statusText), MV.warnIcon);
                 }
             }
         });
@@ -96,7 +96,7 @@ YUI({
 		    case 1:
 			    // add collection
 			    showErrorMessage = function(responseObject) {
-				    MV.showAlertDialog("Collection creation failed! Please check if app server is runnning.", MV.warnIcon);
+				    MV.showAlertMessage("Collection creation failed! Please check if app server is runnning.", MV.warnIcon);
 				    Y.log("Collection creation failed. Response Status: [0]".format(responseObject.statusText), "error");
 			    };
 			    MV.showSubmitDialog("addColDialog", addCollection, showErrorMessage);
@@ -107,12 +107,12 @@ YUI({
 				    var parsedResponse = Y.JSON.parse(response.responseText);
 				    var result = parsedResponse.response.result;
 				    if (result !== undefined) {
-					    MV.showAlertDialog(result);
+					    MV.showAlertMessage(result);
 					    Y.one("#" + Y.one("#currentDB").get("value")).simulate("click");
 				    }
 			    };
 			    showErrorMessage = function(responseObject) {
-				    MV.showAlertDialog("GridFS bucket creation failed! Please check if app server is runnning.", MV.warnIcon);
+				    MV.showAlertMessage("GridFS bucket creation failed! Please check if app server is runnning.", MV.warnIcon);
 				    Y.log("GridFS bucket creation failed. Response Status: [0]".format(responseObject.statusText), "error");
 			    };
 			    MV.showSubmitDialog("addGridFSDialog", onSuccess, showErrorMessage);
@@ -204,17 +204,18 @@ YUI({
 	            dbDiv.delegate('click',handleClickEvent, 'a.onclick');
 				var menu = Y.one("#dbNames");
 				menu.plug(Y.Plugin.NodeMenuNav);
+	            menu.set("style.display", "block");
                 MV.hideLoadingPanel();
                 Y.log("Database Names succesfully loaded", "info");
                 sm.publish(sm.events.dbsChanged);
             } else {
                 var error = parsedResponse.response.error;
                 Y.log("Could not load databases. Message from server: [0]. Error Code from server:[1] ".format(error.message, error.code), "error");
-                MV.showAlertDialog(MV.errorCodeMap[error.code], MV.warnIcon);
+                MV.showAlertMessage(MV.errorCodeMap[error.code], MV.warnIcon);
                 MV.hideLoadingPanel();
             }
         } catch (e) {
-            MV.showAlertDialog(e, MV.warnIcon);
+            MV.showAlertMessage(e, MV.warnIcon);
         }
     }
 
@@ -227,7 +228,7 @@ YUI({
         Y.log("Could not load the databases", "error");
         Y.log("Status code message: [0]".format(responseObject.statusText), "error");
         MV.hideLoadingPanel();
-        MV.showAlertDialog("Could not load collections! Please check if the app server is running. Status Text: [0]".format(responseObject.statustext), MV.warnIcon);
+        MV.showAlertMessage("Could not load collections! Please check if the app server is running. Status Text: [0]".format(responseObject.statustext), MV.warnIcon);
     }
     
     /**
@@ -255,7 +256,7 @@ YUI({
     function createDB()	{
         var showErrorMessage = function(responseObject) {
 	        MV.hideLoadingPanel();
-            MV.showAlertDialog("DB creation failed! Please check if app server is runnning.", MV.warnIcon);
+            MV.showAlertMessage("DB creation failed! Please check if app server is runnning.", MV.warnIcon);
             Y.log("DB creation failed. Response Status: [0]".format(responseObject.statusText), "error");
         };
         MV.showSubmitDialog("addDBDialog", requestDBNames, showErrorMessage);

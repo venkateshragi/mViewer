@@ -162,6 +162,8 @@ ul.user-menu li label.logout {
 	width: 878px;
 	height: 30px;
 	padding: 0 10px;
+    position: relative;
+    text-align: center;
 }
 
 .title-head label {
@@ -169,16 +171,48 @@ ul.user-menu li label.logout {
 	font-weight: bold;
 	color: #0e2137;
 	line-height: 27px;
+    float: left;
 }
 
 .title-head label span {
 	font-weight: normal !important;
-	padding: 0 25px 0 0;
 }
 
-.title-head label span.informmsg {
-	font-weight: bold !important;
-	color: #331A00;
+.infoIcon {
+    background: url("../images/info16_1.gif") no-repeat;
+    width: 16px;
+    height: 16px;
+    display: inline-block;
+    position:relative;
+    top:1px;
+}
+
+.warnIcon {
+    background: url("../images/warn16_1.gif") no-repeat;
+    width: 16px;
+    height: 16px;
+    display: inline-block;
+    position:relative;
+    top:1px;
+}
+
+.infoMsg span.infoText {
+    position:relative;
+    top:-2px;
+}
+
+.title-head span.infoMsg {
+    font-weight: bold !important;
+    color: #331A00;
+    padding: 5px;
+    display:none;
+    border: 1px solid;
+    border-color: #F0C36D;
+    border-top-color: #F0C36D;
+    border-right-color: #F0C36D;
+    border-bottom-color: #F0C36D;
+    border-left-color: #F0C36D;    
+    background-color: #FFFAF0;
 }
 
 .left-cont {
@@ -280,7 +314,7 @@ ul.lists li {
 	-webkit-border-radius: 5px;
 	border: none;
 	font-weight: bold;
-	margin-top: 1px;
+	margin-top: 4px;
 	cursor: pointer;
 }
 
@@ -543,10 +577,17 @@ fieldset.login legend {
 
 #dbNames {
     position: static;
+    display:none;
 }
 
 #collNames {
     position: static;
+    display:none;
+}
+
+#bucketNames {
+    position: static;
+    display:none;
 }
 
 

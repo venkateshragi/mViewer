@@ -175,13 +175,13 @@ YUI({
             Y.log("Chart initiated");
             drawChart();
         } else {
-            MV.showAlertDialog("Error: [0]".format(parsedResponse.response.error.message), MV.warnIcon);
+            MV.showAlertMessage("Error: [0]".format(parsedResponse.response.error.message), MV.warnIcon);
             Y.log("Error: [0]".format(parsedResponse.response.error.message), "error");
         }
     });
 
     Y.on('io:failure', function (ioId, responseObject) {
-        MV.showAlertDialog("Could not send request!", MV.warnIcon);
+        MV.showAlertMessage("Could not send request!", MV.warnIcon);
         Y.log("Sending request to initiate the graph failed. Response Status: [0]".format(responseObject.statusText), "error", "chart");
     });
 });

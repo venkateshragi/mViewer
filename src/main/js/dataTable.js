@@ -80,7 +80,7 @@ YUI.add('custom-datatable', function(Y) {
                 	var parsedResponse = Y.JSON.parse(e.data.response),
                 		error = parsedResponse.response.error; 
                 	Y.log("Could not get the statistics, Error message: [0], Error Code: [1]".format(error.message, error.code), "error");
-                	MV.showAlertDialog("Could not get the statistics. [0]".format(MV.errorCodeMap[error.code]), MV.warnIcon);
+                	MV.showAlertMessage("Could not get the statistics. [0]".format(MV.errorCodeMap[error.code]), MV.warnIcon);
                 }
             }
         });

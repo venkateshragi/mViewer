@@ -85,7 +85,7 @@ YUI({
                 return ("&limit=[0]&skip=[1]&fields=[2]&query=[3]".format(limit, skip, checkedFields, query));
             } catch (error) {
                 Y.log("Could not parse query. Reason: [0]".format(error), "error");
-                MV.showAlertDialog("Failed:Could not parse query. [0]".format(error), MV.warnIcon);
+                MV.showAlertMessage("Failed:Could not parse query. [0]".format(error), MV.warnIcon);
             }
         }
 
@@ -122,7 +122,7 @@ YUI({
                 success: showDocuments,
                 failure: function(request, responseObject) {
                 	 MV.hideLoadingPanel();
-                    MV.showAlertDialog("Failed: Documents could not be loaded", MV.warnIcon);
+                    MV.showAlertMessage("Failed: Documents could not be loaded", MV.warnIcon);
                     Y.log("Documents could not be loaded. Response: [0]".format(responseObject.responseText), "error");
                 },
                 scope: tabView
@@ -175,12 +175,12 @@ YUI({
                 } else {
                     error = parsedResponse.response.error;
                     Y.log("Could not get keys. Message: [0]".format(error.message), "error");
-                    MV.showAlertDialog("Could not load the query Box! [0]".format(MV.errorCodeMap(error.code)), MV.warnIcon);
+                    MV.showAlertMessage("Could not load the query Box! [0]".format(MV.errorCodeMap(error.code)), MV.warnIcon);
                 }
             } catch (e) {
                 Y.log("Could not parse the JSON response to get the keys", "error");
                 Y.log("Response received: [0]".format(responseObject.resposeText), "error");
-                MV.showAlertDialog("Cannot parse Response to get keys!", MV.warnIcon);
+                MV.showAlertMessage("Cannot parse Response to get keys!", MV.warnIcon);
             }
         }
 
@@ -193,7 +193,7 @@ YUI({
                 success: showQueryBox,
                 failure: function(ioId, responseObject) {
                 	MV.hideLoadingPanel();
-                    MV.showAlertDialog("Unexpected Error: Could not load the query Box", MV.warnIcon);
+                    MV.showAlertMessage("Unexpected Error: Could not load the query Box", MV.warnIcon);
                     Y.log("Could not send the request to get the keys in the collection. Response Status: [0]".format(responseObject.statusText), "error");
                     
                 }
@@ -300,12 +300,12 @@ YUI({
             var parsedResponse = Y.JSON.parse(responseObject.responseText);
             response = parsedResponse.response.result;
             if (response !== undefined) {
-                MV.showAlertDialog("Document updated", MV.infoIcon);
+                MV.showAlertMessage("Document updated", MV.infoIcon);
                 Y.log("Document update to [0]".format(response), "info");
                 Y.one("#" + Y.one("#currentColl").get("value").replace(/ /g, '_')).simulate("click");
             } else {
                 var error = parsedResponse.response.error;
-                MV.showAlertDialog("Could not update Document! [0]".format(MV.errorCodeMap[error.code]), MV.warnIcon, function() {
+                MV.showAlertMessage("Could not update Document! [0]".format(MV.errorCodeMap[error.code]), MV.warnIcon, function() {
                     this.hide();
                     Y.one("#" + Y.one("#currentColl").get("value").replace(/ /g, '_')).simulate("click");
                 });
@@ -326,7 +326,7 @@ YUI({
                 on: {
                     success: parseUpdateDocResponse,
                     failure: function(ioId, responseObject) {
-                        MV.showAlertDialog("Unexpected Error: Could not update the document. Check if app server is running", MV.warnIcon);
+                        MV.showAlertMessage("Unexpected Error: Could not update the document. Check if app server is running", MV.warnIcon);
                         Y.log("Could not send the request to update the document. Response Status: [0]".format(responseObject.statusText), "error");
                     }
                 }
@@ -386,18 +386,18 @@ YUI({
                             var parsedResponse = Y.JSON.parse(responseObj.responseText);
                             response = parsedResponse.response.result;
                             if (response !== undefined) {
-                                MV.showAlertDialog("Document deleted", MV.infoIcon);
+                                MV.showAlertMessage("Document deleted", MV.infoIcon);
                                 Y.log("Document with _id= [0] deleted. Response: [1]".format(id, response), "info");	                            
                                 Y.one("#" + Y.one("#currentColl").get("value").replace(/ /g, '_')).simulate("click");
                             } else {
                                 var error = parsedResponse.response.error;
-                                MV.showAlertDialog("Could not delete the document with _id [0]. [1]".format(id, MV.errorCodeMap[error.code]), MV.warnIcon);
+                                MV.showAlertMessage("Could not delete the document with _id [0]. [1]".format(id, MV.errorCodeMap[error.code]), MV.warnIcon);
                                 Y.log("Could not delete the document with _id =  [0], Error message: [1], Error Code: [2]".format(id, error.message, error.code), "error");
                             }
                         },
                         failure: function(ioId, responseObj) {
                             Y.log("Could not delete the document .Status text: ".format(Y.one("#currentColl").get("value"), responseObj.statusText), "error");
-                            MV.showAlertDialog("Could not drop the document! Please check if your app server is running and try again. Status Text: [1]".format(responseObj.statusText), MV.warnIcon);
+                            MV.showAlertMessage("Could not drop the document! Please check if your app server is running and try again. Status Text: [1]".format(responseObj.statusText), MV.warnIcon);
                         }
                     }
                 });
@@ -430,7 +430,7 @@ YUI({
                 sendUpdateDocRequest(Y.JSON.stringify(parsedDoc), idMap[index].id);
                 toggleSaveEdit(targetNode, index, actionMap.save);
             } catch (e) {
-                MV.showAlertDialog("The document entered is not in the correct JSON format", MV.warnIcon, function() {
+                MV.showAlertMessage("The document entered is not in the correct JSON format", MV.warnIcon, function() {
                     textArea.focus();
                     this.hide();
                 });

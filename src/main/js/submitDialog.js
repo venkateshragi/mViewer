@@ -34,7 +34,7 @@ YUI.add('submit-dialog', function(Y) {
             Y.log("Submit handler for add collection called", "info");
             var newCollInfo = this.getData();
             if (newCollInfo.name === "") {
-                MV.showAlertDialog("Please enter the name.");
+                MV.showAlertMessage("Please enter the name.");
             } else {
                 Y.one("#newName").set("value", newCollInfo.name);
                 Y.one("#" + form + " .bd form").setAttribute("action", MV.URLMap.insertColl());
@@ -46,7 +46,7 @@ YUI.add('submit-dialog', function(Y) {
 		    Y.log("Submit handler for adding gridFS bucket called", "info");
 		    var newCollInfo = this.getData();
 		    if (newCollInfo.name === "") {
-			    MV.showAlertDialog("Please enter the bucket name.");
+			    MV.showAlertMessage("Please enter the bucket name.");
 		    } else {
 			    Y.one("#" + form + " .bd form").setAttribute("action", MV.URLMap.addGridFS(newCollInfo.name));
 			    this.submit();
@@ -56,7 +56,7 @@ YUI.add('submit-dialog', function(Y) {
         function addDB() {
             var newDBInfo = this.getData();
             if (newDBInfo.name === "") {
-                MV.showAlertDialog("Please enter the name.");
+                MV.showAlertMessage("Please enter the name.");
             } else {
                 Y.one("#newName").set("value", newDBInfo.name);
                 Y.one("#" + form + " .bd form").setAttribute("action", MV.URLMap.insertDB());
@@ -71,7 +71,7 @@ YUI.add('submit-dialog', function(Y) {
                 Y.one("#" + form + " .bd form").setAttribute("action", MV.URLMap.insertDoc());
                 this.submit();
             } catch (e) {
-                MV.showAlertDialog("Please enter the new document in JSON format", MV.warnIcon);
+                MV.showAlertMessage("Please enter the new document in JSON format", MV.warnIcon);
                 Y.log("New Document format not JSON", "error");
             }
         }

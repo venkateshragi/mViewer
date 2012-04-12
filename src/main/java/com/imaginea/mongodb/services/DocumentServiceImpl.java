@@ -361,7 +361,7 @@ public class DocumentServiceImpl implements DocumentService {
 		} catch (MongoException e) {
 			throw new UpdateDocumentException("DOCUMENT_UPDATE_EXCEPTION");
 		}
-		result = "Updated Document: [" + documentData + "]";
+		result = "Document: [" + documentData + "] has been updated.";
 
 		return result;
 	}
@@ -451,7 +451,7 @@ public class DocumentServiceImpl implements DocumentService {
 		} catch (MongoException e) {
 			throw new DeleteDocumentException("DOCUMENT_DELETION_EXCEPTION");
 		}
-		result = "Deleted Document with Data : [" + documentData + "]";
+		result = "Document with Data : [" + documentData + "] has been deleted.";
 		return result;
 	}
 }

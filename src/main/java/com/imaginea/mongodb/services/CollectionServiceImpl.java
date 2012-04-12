@@ -208,7 +208,7 @@ public class CollectionServiceImpl implements CollectionService {
 			InsertCollectionException e = new InsertCollectionException("COLLECTION_CREATION_EXCEPTION", m.getCause());
 			throw e;
 		}
-		String result = "Collection [" + collectionName + "] added to Database [" + dbName + "]";
+		String result = "Collection [" + collectionName + "] added to Database [" + dbName + "].";
 		return result;
 	}
 
@@ -274,7 +274,7 @@ public class CollectionServiceImpl implements CollectionService {
 			throw e;
 
 		}
-		String result = "Deleted Collection [" + collectionName + "] in Database [" + dbName + "]";
+		String result = "Collection [" + collectionName + "] has been deleted from Database [" + dbName + "].";
 
 		return result;
 	}

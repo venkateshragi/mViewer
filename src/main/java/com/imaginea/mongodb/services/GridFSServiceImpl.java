@@ -94,7 +94,7 @@ public class GridFSServiceImpl implements GridFSService {
 
         new GridFS(mongoInstance.getDB(dbName), bucketName);
 
-        return "Bucket '" + bucketName + "' added to [" + dbName + "'s] GridFS";
+        return "Bucket [" + bucketName + "] added to [" + dbName + "'s] GridFS.";
     }
 
     /**
@@ -320,14 +320,13 @@ public class GridFSServiceImpl implements GridFSService {
                 throw new UndefinedDatabaseException("DB [" + dbName + "] DOES NOT EXIST");
             }
 
-            GridFS gridFS = new GridFS(mongoInstance.getDB(dbName), bucketName);
-
-            gridFS.remove(new BasicDBObject());
+            mongoInstance.getDB(dbName).getCollection(bucketName + ".files").drop();
+            mongoInstance.getDB(dbName).getCollection(bucketName + ".chunks").drop();
 
         } catch (MongoException e) {
             throw new DeleteDocumentException("FILES_DELETION_EXCEPTION");
         }
-        result = "All files in [" + bucketName + "] have been deleted";
+        result = "Bucket [" + bucketName + "] has been deleted from Database [" + dbName + "].";
         return result;
     }
 }

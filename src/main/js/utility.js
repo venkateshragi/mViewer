@@ -316,8 +316,8 @@ YUI.add('utility', function (Y) {
 	};
 	MV.mainBody = Y.one("#mainBody");
 	MV.header = Y.one("#mainBodyHeader");
-	MV.warnIcon = YAHOO.widget.SimpleDialog.ICON_WARN;
-	MV.infoIcon = YAHOO.widget.SimpleDialog.ICON_INFO;
+	MV.warnIcon = "warnIcon";
+	MV.infoIcon = "infoIcon";
 
 	MV.openFileEvent = new YAHOO.util.CustomEvent("OpenFile");
 	MV.deleteFileEvent = new YAHOO.util.CustomEvent("DeleteFile");

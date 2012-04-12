@@ -15,14 +15,15 @@
  */
 /**
  * @module alert-dialog
- * The module provides function <tt>showAlertDialog</tt> to show a simple information message.
+ * The module provides function <tt>showAlertMessage</tt> to show a simple information message.
  */
 YUI.add('alert-dialog', function (Y) {
-    YUI.com.imaginea.mongoV.showAlertDialog = function (msg, ico, handler) {
-	document.getElementById('informmsg').style.display='inline';
-	Y.one('#informmsg').set("innerHTML", msg);
-	window.setTimeout("document.getElementById('informmsg').style.display='none'", 6000);
-    };
+	YUI.com.imaginea.mongoV.showAlertMessage = function (msg, icon, handler) {
+		document.getElementById('infoMsg').style.display = 'inline-block';
+		Y.one('#infoIcon').set("className", icon);
+		Y.one('#infoText').set("innerHTML", msg);
+		window.setTimeout("document.getElementById('infoMsg').style.display='none'", 12000);
+	};
 }, '3.3.0', {
-    requires: ["node"]
+	requires: ["node"]
 });

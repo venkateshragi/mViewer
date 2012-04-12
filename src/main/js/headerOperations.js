@@ -64,7 +64,7 @@ YUI({
                 treeble.load();
             },
             failure: function (request, responseObject) {
-                MV.showAlertDialog("Failed: ServerStats could not be loaded! Please check if the app server is still running.", MV.warnIcon);
+                MV.showAlertMessage("Failed: ServerStats could not be loaded! Please check if the app server is still running.", MV.warnIcon);
                 Y.log("Server Statistics could not be loaded. Response Status: [0]".format(responseObject.statusText), "error");
             }
         });
@@ -82,12 +82,12 @@ YUI({
                         window.location = "loggedOut.html";
                     } else {
                         var error = parsedResponse.response.error;
-                        MV.showAlertDialog("Cannot logout! [0]".format(MV.errorCodeMap[error.code]), MV.warnIcon);
+                        MV.showAlertMessage("Cannot logout! [0]".format(MV.errorCodeMap[error.code]), MV.warnIcon);
                         Y.log("Could not logout. Message: [0], Code: [1]".format(error.message, error.code), "error");
                     }
                 },
                 failure: function (ioId, responseObject) {
-                    MV.showAlertDialog("Could not send request. Check if app server is running. Response message: [0]".format(responseObject.statusText), MV.warnIcon);
+                    MV.showAlertMessage("Could not send request. Check if app server is running. Response message: [0]".format(responseObject.statusText), MV.warnIcon);
                     Y.log("Could not send request to logout. Status text: [0] ".format(responseObject.statusText), "error");
                 }
             }

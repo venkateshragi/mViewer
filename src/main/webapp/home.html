@@ -15,7 +15,6 @@
 	href="lib/yui/build/node-menunav/assets/node-menunav-core.css" />
 <LINK type="text/css" rel="stylesheet"
 	href="lib/yui/build/node-menunav/assets/skins/sam/node-menunav.css" />  
--->
 <!--YUI 2 JS files imported   -->
 <LINK rel="stylesheet" type="text/css"
 	href="lib/yui2/build/fonts/fonts-min.css" />
@@ -189,9 +188,11 @@
 		</div>
 		<div class="body-cont gen-float">
 			<div class="title-head">
-				<label>Host: <span id="hostname"></span>
-					<span id="informmsg" class="informmsg"></span>
-			       	</label>
+				<label>Host: <span id="hostname"></span></label>
+                <span id="infoMsg" style="border-radius:6px" class="infoMsg">
+                    <span id="infoIcon"></span>
+                    <span id="infoText" class="infoText"></span>
+                </span>
 				<button id="toggle_console" class="bttn">Show UI Log</button>
 			</div>
             <div class="generalInfo" style="display:none"> &nbsp;</div>
