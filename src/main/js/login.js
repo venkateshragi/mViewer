@@ -33,6 +33,7 @@ YUI({
                 resetBGColor();
                 Y.one("#port").setStyle("background", "#FFEBE8");
                 Y.one("#host").setStyle("background", "#FFEBE8");
+	            Y.one("#host").focus();
             },
             "MISSING_LOGIN_FIELDS": function() {
                 resetBGColor();
@@ -46,14 +47,19 @@ YUI({
             "ERROR_PARSING_PORT": function() {
                 resetBGColor();
                 Y.one("#port").setStyle("background", "#FFEBE8");
+	            Y.one("#port").focus();
             },
             "PORT_OUT_OF_RANGE": function() {
                 resetBGColor();
                 Y.one("#port").setStyle("background", "#FFEBE8");
+	            Y.one("#port").focus();
             },
             "INVALID_USERNAME": function() {
                 resetBGColor();
-                Y.one("#username").setStyle("background", "#FFEBE8");
+	            var userNode = Y.one("#username");
+	            userNode.set("value", "");
+                userNode.setStyle("background", "#FFEBE8");
+	            userNode.focus();
                 Y.one("#password").setStyle("background", "#FFEBE8");
             }
         };
@@ -64,16 +70,15 @@ YUI({
                 success: function(ioId, responseObject) {
                     var parsedResponse = Y.JSON.parse(responseObject.responseText),
                         response = parsedResponse.response.result,
-                        error, errorDiv;
-                    if (response !== undefined) {
+                        error = parsedResponse.response.error, errorDiv;
+                    if (error == undefined) {
                         Y.log("Successfully logging in", "info");
                         window.location = "home.html?dbInfo=" + host + "_" + port + "_" + username;
                     } else {
-                        error = parsedResponse.response.error;
                         errorDiv = Y.one("#errorMsg");
-                        errorDiv.setStyle("display", "inline");
-                        errorHandlerMap[error.code]();
                         errorDiv.set("innerHTML", MV.errorCodeMap[error.code] || "Error!");
+	                    errorDiv.setStyle("display", "inline");
+	                    errorHandlerMap[error.code]();
                         Y.log("Could not login. Message: [0]".format(error.message), "error");
                     }
                 },

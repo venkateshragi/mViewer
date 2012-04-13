@@ -209,10 +209,10 @@ YUI({
                 Y.log("Database Names succesfully loaded", "info");
                 sm.publish(sm.events.dbsChanged);
             } else {
+	            MV.hideLoadingPanel();
                 var error = parsedResponse.response.error;
                 Y.log("Could not load databases. Message from server: [0]. Error Code from server:[1] ".format(error.message, error.code), "error");
-                MV.showAlertMessage(MV.errorCodeMap[error.code], MV.warnIcon);
-                MV.hideLoadingPanel();
+                MV.showAlertMessage(MV.errorCodeMap[error.code], MV.warnIcon);                
             }
         } catch (e) {
             MV.showAlertMessage(e, MV.warnIcon);

@@ -509,7 +509,7 @@ YUI.add('utility', function (Y) {
 	};
 
 	MV.errorCodeMap = {
-		"HOST_UNKNOWN": "Please check if Mongod is running on the given host and port !",
+		"HOST_UNKNOWN": "Unkown Host. Please check if MongoDB is running on the given host and port !",
 		"MISSING_LOGIN_FIELDS": "Please fill in all the login fields !",
 		"ERROR_PARSING_PORT": "You have entered an invalid port number !",
 		"PORT_OUT_OF_RANGE": "You have entered an invalid port number !",

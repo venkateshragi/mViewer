@@ -83,9 +83,7 @@ public class BaseRequestDispatcher {
      * Returns the JSON error response after an invalid dbInfo is found.
      *
      * @param logger    Logger to log the error response.
-     * @param message   Error Message to be returned in the JSON Error Object.
-     * @param errorCode Error Code to be returned in the JSON Error Object.
-     * @return JSON Error String.
+     * @return JSON Error response.
      */
     protected static String formErrorResponse(Logger logger, ApplicationException e) {
 
@@ -95,7 +93,6 @@ public class BaseRequestDispatcher {
         try {
             error.put("message", e.getMessage());
             error.put("code", e.getErrorCode());
-            error.put("stackTrace", e.getStackTrace());
             logger.error(error);
 
             JSONObject tempResponse = new JSONObject();
@@ -122,6 +119,24 @@ public class BaseRequestDispatcher {
             Object dispatcherResponse = null;
             try {
                 dispatcherResponse = callback.execute();
+                if (wrapResult) {
+                    JSONObject tempResult = new JSONObject();
+                    JSONObject jsonResponse = new JSONObject();
+                    try {
+                        tempResult.put("result", dispatcherResponse);
+                        jsonResponse.put("response", tempResult);
+                        response = ApplicationUtils.serializeToJSON(jsonResponse);
+                    } catch (JSONException e) {
+                        logger.error(e);
+                        response = "{\"code\":" + "\"" + ErrorCodes.JSON_EXCEPTION + "\"," + "\"message\": \"Error while forming JSON Object\"}";
+                    }
+                } else if (dispatcherResponse instanceof JSONObject) {
+                    response = ((JSONObject) dispatcherResponse).toString();
+                } else if (dispatcherResponse instanceof JSONArray) {
+                    response = ((JSONArray) dispatcherResponse).toString();
+                } else if(dispatcherResponse instanceof String) {
+                    response = dispatcherResponse.toString();
+                }
             } catch (NumberFormatException m) {
                 ApplicationException e = new ApplicationException(ErrorCodes.ERROR_PARSING_PORT, "Invalid Port", m.getCause());
                 response = formErrorResponse(logger, e);
@@ -152,22 +167,6 @@ public class BaseRequestDispatcher {
             } catch (Exception m) {
                 ApplicationException e = new ApplicationException(ErrorCodes.ANY_OTHER_EXCEPTION, m.getMessage(), m.getCause());
                 response = formErrorResponse(logger, e);
-            }
-            if (wrapResult) {
-                JSONObject tempResult = new JSONObject();
-                JSONObject jsonResponse = new JSONObject();
-                try {
-                    tempResult.put("result", dispatcherResponse);
-                    jsonResponse.put("response", tempResult);
-                    response = ApplicationUtils.serializeToJSON(jsonResponse);
-                } catch (JSONException e) {
-                    logger.error(e);
-                    response = "{\"code\":" + "\"" + ErrorCodes.JSON_EXCEPTION + "\"," + "\"message\": \"Error while forming JSON Object\"}";
-                }
-            } else if (dispatcherResponse instanceof JSONObject) {
-                response = ((JSONObject) dispatcherResponse).toString();
-            } else if (dispatcherResponse instanceof JSONArray) {
-                response = ((JSONArray) dispatcherResponse).toString();
             }
             return response;
         }

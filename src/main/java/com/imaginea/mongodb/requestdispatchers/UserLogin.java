@@ -15,11 +15,17 @@
  */
 package com.imaginea.mongodb.requestdispatchers;
 
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.apache.log4j.Logger; 
+
+import com.imaginea.mongodb.common.exceptions.DatabaseException;
+import com.imaginea.mongodb.common.utils.ApplicationUtils;
+import com.mongodb.MongoException;
+import com.mongodb.ReplicaSetStatus;
+import org.apache.log4j.Logger;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
@@ -34,6 +40,8 @@ import com.imaginea.mongodb.common.exceptions.ApplicationException;
 import com.imaginea.mongodb.common.exceptions.ErrorCodes;
 import com.mongodb.DB;
 import com.mongodb.Mongo;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 /**
  * Authenticates User to Mongo Db by checking the user in <system.users>
@@ -102,15 +110,17 @@ public class UserLogin extends BaseRequestDispatcher {
 					ApplicationException e = new ApplicationException(ErrorCodes.MISSING_LOGIN_FIELDS, "Missing Login Fields");
 					return formErrorResponse(logger, e);
 				}
-				Mongo m = new Mongo(mongoHost, Integer.parseInt(mongoPort));
-				boolean loginStatus = false;
-				if ("guest".equals(username) && "".equals(password)) {
-					loginStatus = true;
-				} else {
-					// Authorize User using <admin> Db
-					DB db = m.getDB("admin");
-					loginStatus = db.authenticate(username, password.toCharArray());
-				}
+                Mongo mongo = new Mongo(mongoHost, Integer.parseInt(mongoPort));
+                // Hack. Checking server connectivity status by fetching database names 
+                mongo.getDatabaseNames();
+                boolean loginStatus = false;
+                if ("guest".equals(username) && "".equals(password)) {
+                    loginStatus = true;
+                } else {
+                    // Authorize User using <admin> Db
+                    DB db = mongo.getDB("admin");
+                    loginStatus = db.authenticate(username, password.toCharArray());
+                }
 				if (!loginStatus) {
 					ApplicationException e = new ApplicationException(ErrorCodes.INVALID_USERNAME, "Invalid UserName or Password");
 					return formErrorResponse(logger, e);
@@ -144,10 +154,17 @@ public class UserLogin extends BaseRequestDispatcher {
 				noOfUsers = mongoConfigToUsersMapping.get(mongoConfigKey) + 1;
 				mongoConfigToUsersMapping.put(mongoConfigKey, noOfUsers);
 
-				String status = "Login Success";
-				return status;
-			}
-		});
+                JSONObject tempResult = new JSONObject();
+                JSONObject jsonResponse = new JSONObject();
+                try {
+                    tempResult.put("result", "Login Success");
+                    jsonResponse.put("response", tempResult);
+                } catch (JSONException e) {
+                    logger.error(e);
+                }
+                return jsonResponse;
+            }
+        }, false);
 		return response;
 	}
 }
