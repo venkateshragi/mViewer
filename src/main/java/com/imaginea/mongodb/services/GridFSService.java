@@ -18,7 +18,6 @@ package com.imaginea.mongodb.services;
 import com.imaginea.mongodb.common.exceptions.*;
 import com.mongodb.DBObject;
 import com.sun.jersey.multipart.FormDataBodyPart;
-import org.bson.types.ObjectId;
 import org.json.JSONArray;
 
 import java.io.File;
@@ -79,10 +78,10 @@ public interface GridFSService {
      *
      * @param dbName     Name of Database
      * @param bucketName Name of GridFS Bucket
-     * @param id         Object id of file to be deleted
+     * @param _id         Object id of file to be deleted
      * @returns Status message.
      */
-    public String deleteFile(String dbName, String bucketName, ObjectId id) throws DatabaseException, DocumentException, ValidationException;
+    public String deleteFile(String dbName, String bucketName, String _id) throws DatabaseException, DocumentException, ValidationException;
 
     /**
      * Service handler for dropping all files from a GridFS bucket.

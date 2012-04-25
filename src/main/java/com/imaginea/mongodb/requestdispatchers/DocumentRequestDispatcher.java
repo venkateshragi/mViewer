@@ -241,8 +241,7 @@ public class DocumentRequestDispatcher extends BaseRequestDispatcher {
 						UndefinedDocumentException e = new UndefinedDocumentException("Document Data Missing in Request Body");
 						result = formErrorResponse(logger, e);
 					} else {
-						ObjectId id = new ObjectId(_id);
-						result = documentService.deleteDocument(dbName, collectionName, id);
+						result = documentService.deleteDocument(dbName, collectionName, _id);
 					}
 					break;
 				}
@@ -251,11 +250,9 @@ public class DocumentRequestDispatcher extends BaseRequestDispatcher {
 						UndefinedDocumentException e = new UndefinedDocumentException("Document Data Missing in Request Body");
 						formErrorResponse(logger, e);
 					} else {
-						// Id of Document to update
-						ObjectId id = new ObjectId(_id);
 						// New Document Keys
 						DBObject newDoc = (DBObject) JSON.parse(keys);
-						result = documentService.updateDocument(dbName, collectionName, id, newDoc);
+						result = documentService.updateDocument(dbName, collectionName, _id, newDoc);
 					}
 					break;
 				}

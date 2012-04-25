@@ -16,33 +16,14 @@
 
 package com.imaginea.mongodb.services;
 
-import java.util.ArrayList;
-
-import org.bson.types.ObjectId;
-import org.json.JSONException;
-
 import com.imaginea.mongodb.common.MongoInstanceProvider;
 import com.imaginea.mongodb.common.SessionMongoInstanceProvider;
-import com.imaginea.mongodb.common.exceptions.CollectionException;
-import com.imaginea.mongodb.common.exceptions.DatabaseException;
-import com.imaginea.mongodb.common.exceptions.DeleteDocumentException;
-import com.imaginea.mongodb.common.exceptions.DocumentException;
-import com.imaginea.mongodb.common.exceptions.EmptyCollectionNameException;
-import com.imaginea.mongodb.common.exceptions.EmptyDatabaseNameException;
-import com.imaginea.mongodb.common.exceptions.EmptyDocumentDataException;
-import com.imaginea.mongodb.common.exceptions.ErrorCodes;
-import com.imaginea.mongodb.common.exceptions.InsertDocumentException;
-import com.imaginea.mongodb.common.exceptions.UndefinedCollectionException;
-import com.imaginea.mongodb.common.exceptions.UndefinedDatabaseException;
-import com.imaginea.mongodb.common.exceptions.UndefinedDocumentException;
-import com.imaginea.mongodb.common.exceptions.UpdateDocumentException;
-import com.imaginea.mongodb.common.exceptions.ValidationException;
-import com.mongodb.BasicDBObject;
-import com.mongodb.DBCollection;
-import com.mongodb.DBCursor;
-import com.mongodb.DBObject;
-import com.mongodb.Mongo;
-import com.mongodb.MongoException;
+import com.imaginea.mongodb.common.exceptions.*;
+import com.mongodb.*;
+import com.mongodb.util.JSON;
+import org.json.JSONException;
+
+import java.util.ArrayList;
 
 /**
  * Defines services definitions for performing operations like
@@ -237,21 +218,10 @@ public class DocumentServiceImpl implements DocumentService {
 				throw new UndefinedCollectionException("COLLECTION [ " + collectionName + "] _DOES_NOT_EXIST in Db [ " + dbName + "]");
 			}
 
-			// _id also provided by user
-			if (document.get("_id") != null) {
-				String temp = (String) document.get("_id");
-				ObjectId id = new ObjectId(temp);
-				document.put("_id", id); // Putting object id instead of string
-											// which is there
-			}
 			// MongoDb permits Duplicate document Insert
-
 			mongoInstance.getDB(dbName).getCollection(collectionName).insert(document);
 			result = "Inserted Document with Data : [" + document + "]";
-		} catch (IllegalArgumentException e) {
-			// When error converting object Id
-			throw new DocumentException(ErrorCodes.INVALID_OBJECT_ID, "INVALID_OBJECT_ID");
-		} catch (MongoException e) {
+		}  catch (MongoException e) {
 			throw new InsertDocumentException("DOCUMENT_CREATION_EXCEPTION", e.getCause());
 		}
 		return result;
@@ -265,7 +235,7 @@ public class DocumentServiceImpl implements DocumentService {
 	 *            Name of Database
 	 * @param collectionName
 	 *            Name of Collection from which to get all Documents
-	 * @param id
+	 * @param _id
 	 *            Id of Document to be updated
 	 * @param newData
 	 *            new Document value.
@@ -296,7 +266,7 @@ public class DocumentServiceImpl implements DocumentService {
 	 * 
 	 */
 
-	public String updateDocument(String dbName, String collectionName, ObjectId id, DBObject newData) throws DatabaseException, CollectionException, DocumentException, ValidationException {
+	public String updateDocument(String dbName, String collectionName, String _id, DBObject newData) throws DatabaseException, CollectionException, DocumentException, ValidationException {
 
 		mongoInstance = mongoInstanceProvider.getMongoInstance();
 		if (dbName == null) {
@@ -323,27 +293,27 @@ public class DocumentServiceImpl implements DocumentService {
 			if (!mongoInstance.getDB(dbName).getCollectionNames().contains(collectionName)) {
 				throw new UndefinedCollectionException("COLLECTION [ " + collectionName + "] _DOES_NOT_EXIST in Db [ " + dbName + "]");
 			}
-			if (id == null) {
+			if (_id == null) {
 				throw new EmptyDocumentDataException("Document is empty");
 			}
 
-			String temp = (String) newData.get("_id");
-			if (temp == null) {
+			Object newId = newData.get("_id");
+			if (newId == null) {
 				throw new DocumentException(ErrorCodes.INVALID_OBJECT_ID, "INVALID_OBJECT_ID");
 			}
-			if (temp.equals("")) {
+			if (newId.equals("")) {
 				throw new DocumentException(ErrorCodes.INVALID_OBJECT_ID, "INVALID_OBJECT_ID");
 			}
 
-			ObjectId newId = new ObjectId(temp);
-			if (!newId.equals(id)) {
-				throw new DocumentException(ErrorCodes.INVALID_OBJECT_ID, "Cannot Change Object Id of a document");
+			Object docId = JSON.parse(_id);
+			if (!newId.equals(docId)) {
+				throw new DocumentException(ErrorCodes.UPDATE_OBJECT_ID_EXCEPTION, "UPDATE_OBJECT_ID_EXCEPTION");
 			} else {
 				// Id's equal but putting the id of old document still
 				// as newData as id of string type but we need ObjectId type
-				newData.put("_id", id);
+				newData.put("_id", docId);
 			}
-			DBObject query = new BasicDBObject("_id", id);
+			DBObject query = new BasicDBObject("_id", docId);
 
 			DBCollection collection = mongoInstance.getDB(dbName).getCollection(collectionName);
 			DBObject doc = collection.findOne(query);
@@ -374,7 +344,7 @@ public class DocumentServiceImpl implements DocumentService {
 	 *            Name of Database
 	 * @param collectionName
 	 *            Name of Collection from which to get all Documents
-	 * @param id
+	 * @param _id
 	 *            Id of Document to be updated
 	 * @return Deletion status
 	 * @exception EmptyDatabaseNameException
@@ -402,7 +372,7 @@ public class DocumentServiceImpl implements DocumentService {
 	 * 
 	 */
 
-	public String deleteDocument(String dbName, String collectionName, ObjectId id) throws DatabaseException, CollectionException, DocumentException, ValidationException {
+	public String deleteDocument(String dbName, String collectionName, String _id) throws DatabaseException, CollectionException, DocumentException, ValidationException {
 		mongoInstance = mongoInstanceProvider.getMongoInstance();
 		if (dbName == null) {
 			throw new EmptyDatabaseNameException("Database name is null");
@@ -433,12 +403,13 @@ public class DocumentServiceImpl implements DocumentService {
 			if (coll.isCapped()) {
 				throw new DocumentException(ErrorCodes.DELETING_FROM_CAPPED_COLLECTION, "Cannot Delete From a Capped Collection");
 			}
-			if (id == null) {
+			if (_id == null) {
 				throw new EmptyDocumentDataException("Document is empty");
 			}
 
 			DBObject query = new BasicDBObject();
-			query.put("_id", id);
+            Object docId = JSON.parse(_id);
+			query.put("_id", docId);
 			DBCollection collection = this.mongoInstance.getDB(dbName).getCollection(collectionName);
 			documentData = collection.findOne(query);
 

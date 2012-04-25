@@ -174,8 +174,7 @@ public class GridFSRequestDispatcher extends BaseRequestDispatcher {
                     UndefinedDocumentException e = new UndefinedDocumentException("File Data Missing in Request Body");
                     result = formErrorResponse(logger, e);
                 } else {
-                    ObjectId id = new ObjectId(_id);
-                    result = gridFSService.deleteFile(dbName, bucketName, id);
+                    result = gridFSService.deleteFile(dbName, bucketName, _id);
                 }
                 return result;
             }

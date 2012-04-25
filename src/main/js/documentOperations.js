@@ -35,13 +35,13 @@ YUI({
 
 	    var tabView = new YAHOO.widget.TabView();
 	    tabView.addTab(new YAHOO.widget.Tab({
-		    label: 'Tree Table',
-		    active: true,
-		    content: ' <div id="table"></div><div id="table-pagination"></div> '
+		    label: 'JSON',
+		    cacheData: true,
+		    active: true
 	    }));
 	    tabView.addTab(new YAHOO.widget.Tab({
-		    label: 'JSON',
-		    cacheData: true
+		    label: 'Tree Table',
+		    content: ' <div id="table"></div><div id="table-pagination"></div> '
 	    }));
 	    var actionMap = {
 		    save: "save",
@@ -67,7 +67,7 @@ YUI({
                 checkedFields = [],
                 item;
 
-            if (query === "") {
+            if (query.trim() === "") {
                 query = "{}";
             }
 
@@ -210,7 +210,7 @@ YUI({
             if (text) {
                 var adjustedHeight = text.clientHeight;
                 if (!maxHeight || maxHeight > adjustedHeight) {
-                    adjustedHeight = Math.max(text.scrollHeight, adjustedHeight);
+	                adjustedHeight = Math.max(text.scrollHeight, adjustedHeight) + 4;
                     if (maxHeight) {
                         adjustedHeight = Math.min(maxHeight, adjustedHeight);
                     }
@@ -289,42 +289,32 @@ YUI({
             }
             targetNode.focus();
         }
-        /**
-         * Success handler for update document request. The function checks the response
-         * if the document has been updated successfully or not. If not shows the error.
-         * @param ioId the event ID
-         * @param responseObject the response object
-         */
-
-        function parseUpdateDocResponse(ioId, responseObject) {
-            var parsedResponse = Y.JSON.parse(responseObject.responseText);
-            response = parsedResponse.response.result;
-            if (response !== undefined) {
-                MV.showAlertMessage("Document updated", MV.infoIcon);
-                Y.log("Document update to [0]".format(response), "info");
-                Y.one("#" + Y.one("#currentColl").get("value").replace(/ /g, '_')).simulate("click");
-            } else {
-                var error = parsedResponse.response.error;
-                MV.showAlertMessage("Could not update Document! [0]".format(MV.errorCodeMap[error.code]), MV.warnIcon, function() {
-                    this.hide();
-                    Y.one("#" + Y.one("#currentColl").get("value").replace(/ /g, '_')).simulate("click");
-                });
-                Y.log("Could not update Document! [0]".format(MV.errorCodeMap[error.code]), "error");
-            }
-        }
 
         /**
          * The function sends the update Document request.
          * @param doc The updated document
-         * @param id The id of the updated document
+         * @param docId The id of the updated document
          */
-
-        function sendUpdateDocRequest(doc, id) {
+        function sendUpdateDocRequest(doc, docId, eventObject) {
             var updateDocumentRequest = Y.io(MV.URLMap.updateDoc(), {
                 method: "POST",
-                data: "_id=" + id + "&keys=" + doc,
+                data: "_id=" + docId + "&keys=" + doc,
                 on: {
-                    success: parseUpdateDocResponse,
+                    success: function(ioId, responseObject) {
+	                    var parsedResponse = Y.JSON.parse(responseObject.responseText);
+	                    var response = parsedResponse.response.result;
+	                    if (response !== undefined) {
+		                    var targetNode = eventObject.currentTarget;
+		                    var index = getButtonIndex(targetNode);
+		                    toggleSaveEdit(targetNode, index, actionMap.save);
+		                    MV.showAlertMessage("Document updated successfully.", MV.infoIcon);
+		                    Y.log("Document update to [0]".format(response), "info");
+	                    } else {
+		                    var error = parsedResponse.response.error;
+		                    MV.showAlertMessage("Could not update Document ! [0]".format(MV.errorCodeMap[error.code]), MV.warnIcon);
+		                    Y.log("Could not update Document ! [0]".format(MV.errorCodeMap[error.code]), "error");
+	                    }
+                    },
                     failure: function(ioId, responseObject) {
                         MV.showAlertMessage("Unexpected Error: Could not update the document. Check if app server is running", MV.warnIcon);
                         Y.log("Could not send the request to update the document. Response Status: [0]".format(responseObject.statusText), "error");
@@ -374,25 +364,25 @@ YUI({
                 var targetNode = args[0].eventObj.currentTarget;
                 var index = getButtonIndex(targetNode);
                 var doc = Y.one('#doc' + index).one("pre").one("textarea").get("value");
-                parsedDoc = Y.JSON.parse(doc);
-                var id = parsedDoc._id.$oid;
+                var parsedDoc = Y.JSON.parse(doc);
+	            var docId = Y.JSON.stringify(parsedDoc._id);
                 var request = Y.io(MV.URLMap.deleteDoc(),
                 // configuration for dropping the document
                 {
                     method: "POST",
-                    data: "_id=" + id,
+                    data: "_id=" + docId,
                     on: {
                         success: function(ioId, responseObj) {
                             var parsedResponse = Y.JSON.parse(responseObj.responseText);
                             response = parsedResponse.response.result;
                             if (response !== undefined) {
-                                MV.showAlertMessage("Document deleted", MV.infoIcon);
-                                Y.log("Document with _id= [0] deleted. Response: [1]".format(id, response), "info");	                            
-                                Y.one("#" + Y.one("#currentColl").get("value").replace(/ /g, '_')).simulate("click");
+                                MV.showAlertMessage("Document deleted successfully.", MV.infoIcon);
+                                Y.log("Document with _id= [0] deleted. Response: [1]".format(docId, response), "info");
+                                Y.one('#execQueryButton').simulate('click');
                             } else {
                                 var error = parsedResponse.response.error;
-                                MV.showAlertMessage("Could not delete the document with _id [0]. [1]".format(id, MV.errorCodeMap[error.code]), MV.warnIcon);
-                                Y.log("Could not delete the document with _id =  [0], Error message: [1], Error Code: [2]".format(id, error.message, error.code), "error");
+                                MV.showAlertMessage("Could not delete the document with _id [0]. [1]".format(docId, MV.errorCodeMap[error.code]), MV.warnIcon);
+                                Y.log("Could not delete the document with _id =  [0], Error message: [1], Error Code: [2]".format(docId, error.message, error.code), "error");
                             }
                         },
                         failure: function(ioId, responseObj) {
@@ -419,22 +409,17 @@ YUI({
          */
 
         function saveDoc(eventObject) {
-            var parsedDoc;
             var targetNode = eventObject.currentTarget;
             var index = getButtonIndex(targetNode);
             var textArea = Y.one('#doc' + index).one("pre").one("textarea");
             var doc = textArea.get("value");
             doc = doc.replace(/'/g, '"');
             try {
-                parsedDoc = Y.JSON.parse(doc);
-                sendUpdateDocRequest(Y.JSON.stringify(parsedDoc), idMap[index].id);
-                toggleSaveEdit(targetNode, index, actionMap.save);
+                var parsedDoc = Y.JSON.parse(doc);
+                sendUpdateDocRequest(Y.JSON.stringify(parsedDoc), idMap[index].docId, eventObject);                
             } catch (e) {
-                MV.showAlertMessage("The document entered is not in the correct JSON format", MV.warnIcon, function() {
-                    textArea.focus();
-                    this.hide();
-                });
-
+                MV.showAlertMessage("The document entered is not in the correct JSON format", MV.warnIcon);
+	            textArea.focus();
             }
         }
         /**
@@ -464,9 +449,10 @@ YUI({
                 var index = getButtonIndex(targetNode);
                 var textArea = Y.one('#doc' + index).one("pre").one("textarea");
                 var doc = textArea.get("value");
-                parsedDoc = Y.JSON.parse(doc);
+                var parsedDoc = Y.JSON.parse(doc);
+	            var docId = Y.JSON.stringify(parsedDoc._id);
                 idMap[index] = {};
-                idMap[index].id = parsedDoc._id.$oid;
+                idMap[index].docId = docId;
                 idMap[index].originalDoc = doc;
                 toggleSaveEdit(targetNode, index, actionMap.edit);
                 textArea.focus();
@@ -501,7 +487,7 @@ YUI({
                 jsonView = jsonView + "No documents to be displayed";
             }
             jsonView = jsonView + "</tbody></table></div>";
-            tabView.getTab(1).setAttributes({
+            tabView.getTab(0).setAttributes({
                 content: jsonView
             }, false);
             for (i = 0; i < response.length; i++) {

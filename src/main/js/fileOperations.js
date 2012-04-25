@@ -37,13 +37,13 @@ YUI({
 
 		var tabView = new YAHOO.widget.TabView();
 		tabView.addTab(new YAHOO.widget.Tab({
-			label: 'Tree Table',
-			active: true,
-			content: ' <div id="table"></div><div id="table-pagination"></div> '
-		}));
-		tabView.addTab(new YAHOO.widget.Tab({
 			label: 'JSON',
 			cacheData: true
+		}));
+		tabView.addTab(new YAHOO.widget.Tab({
+			label: 'Tree Table',
+			content: ' <div id="table"></div><div id="table-pagination"></div> ',
+			active: true
 		}));
 
 		/**
@@ -136,7 +136,7 @@ YUI({
 				jsonView = jsonView + "No files to be displayed";
 			}
 			jsonView = jsonView + "</tbody></table></div>";
-			tabView.getTab(1).setAttributes({
+			tabView.getTab(0).setAttributes({
 				content: jsonView
 			}, false);
 			for (i = 0; i < response.length; i++) {
@@ -195,16 +195,17 @@ YUI({
 			var targetNode = args[0].eventObj.currentTarget;
 			var index = getButtonIndex(targetNode);
 			var doc = Y.one('#file' + index).one("pre").one("textarea").get("value");
-			parsedDoc = Y.JSON.parse(doc);
+			var parsedDoc = Y.JSON.parse(doc);
+			var docId = Y.JSON.stringify(parsedDoc._id);
 			if (args[0].isDownload == true) {
 				if(!MV._downloadIframe){
 					MV._downloadIframe = document.createElement("iframe");
 					MV._downloadIframe.style.display = "none";
 					document.body.appendChild(MV._downloadIframe);
 				}
-				MV._downloadIframe.src = MV.URLMap.getFile(parsedDoc._id.$oid, true);
+				MV._downloadIframe.src = MV.URLMap.getFile(docId, true);
 			} else {
-				window.open(MV.URLMap.getFile(parsedDoc._id.$oid, false));
+				window.open(MV.URLMap.getFile(docId, false));
 			}
 		}
 
@@ -218,22 +219,22 @@ YUI({
 				var targetNode = args[0].eventObj.currentTarget;
 				var index = getButtonIndex(targetNode);
 				var doc = Y.one('#file' + index).one("pre").one("textarea").get("value");
-				parsedDoc = Y.JSON.parse(doc);
-				var id = parsedDoc._id.$oid;
-				var request = Y.io(MV.URLMap.deleteFile(id), {
+				var parsedDoc = Y.JSON.parse(doc);
+				var docId = Y.JSON.stringify(parsedDoc._id);
+				var request = Y.io(MV.URLMap.deleteFile(docId), {
 					on: {
 						success: function(ioId, responseObj) {
 							var parsedResponse = Y.JSON.parse(responseObj.responseText);
 							response = parsedResponse.response.result;
 							if (response !== undefined) {
 								MV.showAlertMessage(response, MV.infoIcon);
-								Y.log("File with _id= [0] deleted. Response: [1]".format(id, response), "info");
+								Y.log("File with _id= [0] deleted. Response: [1]".format(docId, response), "info");
 								//Y.one('#file' + index).remove();
 								Y.one("#" + Y.one("#currentBucket").get("value").replace(/ /g, '_')).simulate("click");
 							} else {
 								var error = parsedResponse.response.error;
-								MV.showAlertMessage("Could not delete the file with _id [0]. [1]".format(id, MV.errorCodeMap[error.code]), MV.warnIcon);
-								Y.log("Could not delete the file with _id =  [0], Error message: [1], Error Code: [2]".format(id, error.message, error.code), "error");
+								MV.showAlertMessage("Could not delete the file with _id [0]. [1]".format(docId, MV.errorCodeMap[error.code]), MV.warnIcon);
+								Y.log("Could not delete the file with _id =  [0], Error message: [1], Error Code: [2]".format(docId, error.message, error.code), "error");
 							}
 						},
 						failure: function(ioId, responseObj) {

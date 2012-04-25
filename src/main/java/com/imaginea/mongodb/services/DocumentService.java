@@ -15,15 +15,13 @@
  */
 package com.imaginea.mongodb.services;
 
-import java.util.ArrayList;
-
-import org.bson.types.ObjectId;
-
 import com.imaginea.mongodb.common.exceptions.CollectionException;
 import com.imaginea.mongodb.common.exceptions.DatabaseException;
 import com.imaginea.mongodb.common.exceptions.DocumentException;
 import com.imaginea.mongodb.common.exceptions.ValidationException;
 import com.mongodb.DBObject;
+
+import java.util.ArrayList;
 
 /**
  * Defines services definitions for performing operations like
@@ -160,7 +158,7 @@ public interface DocumentService {
 	 * 
 	 */
 
-	public String updateDocument(String dbName, String collectionName, ObjectId id, DBObject newData) throws DatabaseException, CollectionException, DocumentException, ValidationException;
+	public String updateDocument(String dbName, String collectionName, String _id, DBObject newData) throws DatabaseException, CollectionException, DocumentException, ValidationException;
 
 	/**
 	 * Deletes a document inside a collection in a database in mongo to which
@@ -198,6 +196,6 @@ public interface DocumentService {
 	 * 
 	 */
 
-	public String deleteDocument(String dbName, String collectionName, ObjectId id) throws DatabaseException, CollectionException, DocumentException, ValidationException;
+	public String deleteDocument(String dbName, String collectionName, String _id) throws DatabaseException, CollectionException, DocumentException, ValidationException;
 
 }

@@ -293,12 +293,12 @@ YUI({
 				response = parsedResponse.response.result,
 				error;
 		if (response !== undefined) {
-			MV.showAlertMessage("New document added to [0]".format(Y.one("#currentColl").get("value")), MV.infoIcon);
+			MV.showAlertMessage("New document added successfully to collection '[0]'".format(Y.one("#currentColl").get("value")), MV.infoIcon);
 			Y.log("New document added to [0]".format(Y.one("#currentColl").get("value"), "info"));
 			sm.currentCollAsNode().simulate("click");
 		} else {
 			error = parsedResponse.response.error;
-			MV.showAlertMessage("Could not add Document! [0]".format(MV.errorCodeMap[error.code]), MV.warnIcon);
+			MV.showAlertMessage("Could not add Document ! [0]".format(MV.errorCodeMap[error.code]), MV.warnIcon);
 			Y.log("Could not add Document! [0]".format(MV.errorCodeMap[error.code]), "error");
 		}
 	}

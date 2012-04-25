@@ -49,7 +49,7 @@ YUI({
                 Y.one("#port").setStyle("background", "#FFEBE8");
 	            Y.one("#port").focus();
             },
-            "PORT_OUT_OF_RANGE": function() {
+            "INVALID_ARGUMENT": function() {
                 resetBGColor();
                 Y.one("#port").setStyle("background", "#FFEBE8");
 	            Y.one("#port").focus();

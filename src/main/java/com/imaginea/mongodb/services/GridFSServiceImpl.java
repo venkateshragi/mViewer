@@ -22,9 +22,9 @@ import com.mongodb.*;
 import com.mongodb.gridfs.GridFS;
 import com.mongodb.gridfs.GridFSDBFile;
 import com.mongodb.gridfs.GridFSInputFile;
+import com.mongodb.util.JSON;
 import com.sun.jersey.core.header.FormDataContentDisposition;
 import com.sun.jersey.multipart.FormDataBodyPart;
-import org.bson.types.ObjectId;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -148,10 +148,10 @@ public class GridFSServiceImpl implements GridFSService {
      *
      * @param dbName     Name of Database
      * @param bucketName Name of GridFS Bucket
-     * @param id         ObjectId of the file to be retrieved
+     * @param _id         ObjectId of the file to be retrieved
      * @returns Requested multipartfile for viewing or download based on 'download' param.
      */
-    public File getFile(String dbName, String bucketName, String id) throws ValidationException, DatabaseException, CollectionException {
+    public File getFile(String dbName, String bucketName, String _id) throws ValidationException, DatabaseException, CollectionException {
         mongoInstance = mongoInstanceProvider.getMongoInstance();
 
         if (dbName == null) {
@@ -167,9 +167,10 @@ public class GridFSServiceImpl implements GridFSService {
 
                     "Database with dbName [ " + dbName + "] does not exist");
             }
-
+            Object docId = JSON.parse(_id);
+            BasicDBObject objectId = new BasicDBObject("_id", docId);
             GridFS gridFS = new GridFS(mongoInstance.getDB(dbName), bucketName);
-            GridFSDBFile gridFSDBFile = gridFS.findOne(new ObjectId(id));
+            GridFSDBFile gridFSDBFile = gridFS.findOne(objectId);
             String tempDir = System.getProperty("java.io.tmpdir");
             tempFile = new File(tempDir + "/" + gridFSDBFile.getFilename());
             gridFSDBFile.writeTo(tempFile);
@@ -243,10 +244,10 @@ public class GridFSServiceImpl implements GridFSService {
      *
      * @param dbName     Name of Database
      * @param bucketName Name of GridFS Bucket
-     * @param id         Object id of file to be deleted
+     * @param _id         Object id of file to be deleted
      * @returns Status message.
      */
-    public String deleteFile(String dbName, String bucketName, ObjectId id) throws DatabaseException, DocumentException, ValidationException {
+    public String deleteFile(String dbName, String bucketName, String _id) throws DatabaseException, DocumentException, ValidationException {
         mongoInstance = mongoInstanceProvider.getMongoInstance();
         if (dbName == null) {
             throw new EmptyDatabaseNameException("Database name is null");
@@ -269,19 +270,20 @@ public class GridFSServiceImpl implements GridFSService {
             if (!mongoInstance.getDatabaseNames().contains(dbName)) {
                 throw new UndefinedDatabaseException("DB [" + dbName + "] DOES NOT EXIST");
             }
-            if (id == null) {
+            if (_id == null) {
                 throw new EmptyDocumentDataException("File is empty");
             }
 
             GridFS gridFS = new GridFS(mongoInstance.getDB(dbName), bucketName);
-
-            gridFSDBFile = gridFS.findOne(id);
+            Object docId = JSON.parse(_id);
+            BasicDBObject objectId = new BasicDBObject("_id", docId);
+            gridFSDBFile = gridFS.findOne(objectId);
 
             if (gridFSDBFile == null) {
                 throw new UndefinedDocumentException("DOCUMENT_DOES_NOT_EXIST");
             }
 
-            gridFS.remove(id);
+            gridFS.remove(objectId);
 
         } catch (MongoException e) {
             throw new DeleteDocumentException("FILE_DELETION_EXCEPTION");

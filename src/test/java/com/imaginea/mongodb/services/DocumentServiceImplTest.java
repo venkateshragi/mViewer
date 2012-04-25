@@ -30,6 +30,7 @@ import java.util.ArrayList;
 
 import java.util.List;
 
+import com.mongodb.util.JSON;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
 import org.bson.types.ObjectId;
@@ -279,10 +280,10 @@ public class DocumentServiceImplTest extends TestingTemplate {
 								mongoInstance.getDB(dbName).getCollection(collectionName).insert(documentName);
 								// get Object id of inserted old document
 								DBObject document = mongoInstance.getDB(dbName).getCollection(collectionName).findOne(documentName);
-								ObjectId id = (ObjectId) document.get("_id");
-								newDocument.put("_id", id.toString());
-								testDocService.updateDocument(dbName, collectionName, id, newDocument);
-								DBObject query = new BasicDBObject("_id", id);
+                                String docId = JSON.serialize(document.get("_id"));
+                                newDocument.put("_id", docId);
+								testDocService.updateDocument(dbName, collectionName, docId, newDocument);
+								DBObject query = new BasicDBObject("_id", docId);
 								DBCollection collection = mongoInstance.getDB(dbName).getCollection(collectionName);
 								document = collection.findOne(query);
 								
@@ -343,14 +344,14 @@ public class DocumentServiceImplTest extends TestingTemplate {
 								DBObject document = mongoInstance.getDB(dbName).getCollection(collectionName).findOne(documentName);
 								assertNotNull("chk if doc just created is not null", document);
 
-								ObjectId id = (ObjectId) document.get("_id");
-								assertNotNull("document for that _id not null", id);
+								String docId = JSON.serialize(document.get("_id"));
+								assertNotNull("document for that _id not null", docId);
 								
 								//Testing if doc exists before delete
 								DBCollection coll =  mongoInstance.getDB(dbName).getCollection(collectionName);
 								long countBeforeDelete=coll.getCount();
-								testDocService.deleteDocument(dbName, collectionName, id);
-								DBObject docAfterDelete=coll.findOne(id);
+								testDocService.deleteDocument(dbName, collectionName, docId);
+								DBObject docAfterDelete=coll.findOne(document.get("_id"));
 								assertNull("docAfterDelete should be null if delete was successfull",docAfterDelete);
 								long countAfterDelete=coll.getCount();
 								

@@ -142,7 +142,7 @@ public class BaseRequestDispatcher {
                 response = formErrorResponse(logger, e);
             } catch (IllegalArgumentException m) {
                 // When port out of range
-                ApplicationException e = new ApplicationException(ErrorCodes.PORT_OUT_OF_RANGE, "Port out of range", m.getCause());
+                ApplicationException e = new ApplicationException(ErrorCodes.INVALID_ARGUMENT, m.getMessage(), m.getCause());
                 response = formErrorResponse(logger, e);
             } catch (UnknownHostException m) {
                 MongoHostUnknownException e = new MongoHostUnknownException("Unknown host", m);
