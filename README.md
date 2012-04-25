@@ -42,7 +42,7 @@ or
 Run using maven. It will create a war and run it using the jetty server on a default port (Check the logs that print on your screen to spot it), you can access the service at http://localhost:8080/mViewer/
 
 >
-> $mvn -Pserver -DskipTests
+> $mvn -DskipTests
 >
 
 

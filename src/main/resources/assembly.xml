@@ -38,12 +38,12 @@ xsi:schemaLocation="http://maven.apache.org/plugins/maven-assembly-plugin/assemb
 				<include>mViewer.properties</include>
 			</includes>
 		</fileSet>
-		<fileSet>
-			<directory>${project.build.directory}</directory>
-			<outputDirectory>/</outputDirectory>
-			<includes>
-				<include>mViewer-${project.version}.war</include>
-			</includes>
-		</fileSet>
 	</fileSets>
+    <files>
+        <file> 
+            <source>${project.build.directory}/mViewer-${project.version}.war</source>
+            <outputDirectory>/</outputDirectory>
+            <destName>mViewer.war</destName>
+        </file>
+    </files>
 </assembly>

@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.imaginea</groupId>
 	<artifactId>mViewer</artifactId>
-	<version>0.81-SNAPSHOT</version>
+	<version>0.9</version>
 	<packaging>war</packaging>
 	<build>
 		<plugins>
@@ -21,12 +21,14 @@
 					</webResources>
 				</configuration>
 			</plugin>
-
 		</plugins>
 	</build>
 	<profiles>
 		<profile>
-			<id>server</id>
+            <id>server</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
 			<build>
 				<defaultGoal>jetty:run-war</defaultGoal>
 				<plugins>
