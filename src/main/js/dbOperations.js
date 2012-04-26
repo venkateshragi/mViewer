@@ -18,6 +18,7 @@ YUI({
 }).use("loading-panel","alert-dialog", "utility", "submit-dialog", "yes-no-dialog", "io-base", "node", "node-menunav", "json-parse", "event-delegate", "node-event-simulate", "stylize", "custom-datatable", function (Y) {
     // TODO: make loading panel module
     var dbDiv = Y.one('#dbNames ul.lists');
+	dbDiv.delegate('click',handleClickEvent, 'a.onclick');
     YUI.namespace('com.imaginea.mongoV');
     var MV = YUI.com.imaginea.mongoV; 
     var sm = YUI.com.imaginea.mongoV.StateManager;
@@ -200,9 +201,9 @@ YUI({
                 if (index === 0) {
                     dbDiv.set("innerHTML", "No Databases");
                 }
-                dbDiv.set("innerHTML", dbNames);
-	            dbDiv.delegate('click',handleClickEvent, 'a.onclick');
+                dbDiv.set("innerHTML", dbNames);	            
 				var menu = Y.one("#dbNames");
+	            menu.unplug(Y.Plugin.NodeMenuNav);
 				menu.plug(Y.Plugin.NodeMenuNav);
 	            menu.set("style.display", "block");
                 MV.hideLoadingPanel();

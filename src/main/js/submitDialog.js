@@ -38,7 +38,6 @@ YUI.add('submit-dialog', function(Y) {
             } else {
                 Y.one("#newName").set("value", newCollInfo.name);
                 Y.one("#" + form + " .bd form").setAttribute("action", MV.URLMap.insertColl());
-                this.submit();
             }
         }
 
@@ -49,7 +48,6 @@ YUI.add('submit-dialog', function(Y) {
 			    MV.showAlertMessage("Please enter the bucket name.", MV.warnIcon);
 		    } else {
 			    Y.one("#" + form + " .bd form").setAttribute("action", MV.URLMap.addGridFS(newCollInfo.name));
-			    this.submit();
 		    }
 	    }
 
@@ -60,7 +58,6 @@ YUI.add('submit-dialog', function(Y) {
             } else {
                 Y.one("#newName").set("value", newDBInfo.name);
                 Y.one("#" + form + " .bd form").setAttribute("action", MV.URLMap.insertDB());
-                this.submit();
             }
         }
 
@@ -69,7 +66,6 @@ YUI.add('submit-dialog', function(Y) {
             try {
                 Y.JSON.parse(newDoc);
                 Y.one("#" + form + " .bd form").setAttribute("action", MV.URLMap.insertDoc());
-                this.submit();
             } catch (e) {
                 MV.showAlertMessage("Please enter the new document in JSON format", MV.warnIcon);
                 Y.log("New Document format not JSON", "error");
@@ -81,37 +77,44 @@ YUI.add('submit-dialog', function(Y) {
             "addDBDialogSubmitHandler": addDB,
             "addDocDialogSubmitHandler": addDocument
         };
-	    var dialogBox = new YAHOO.widget.Dialog(form, {
-		    width: "30em",
-		    fixedcenter: true,
-		    visible: false,
-		    effect: {
-			    effect: YAHOO.widget.ContainerEffect.SLIDE,
-			    duration: 0.25
-		    },
-		    constraintoviewport: true,
-		    buttons: [
-			    {
-				    text: "Submit",
-				    handler: sumbitHandlerMap[form + "SubmitHandler"] ||
-						    function() {
-							    this.submit();
-						    },
-				    isDefault: true
+	    var dialogBox = $("#" + form).data("dialogBox");
+	    if (!dialogBox) {
+		    dialogBox = new YAHOO.widget.Dialog(form, {
+			    width: "30em",
+			    fixedcenter: true,
+			    visible: false,
+			    effect: {
+				    effect: YAHOO.widget.ContainerEffect.SLIDE,
+				    duration: 0.25
 			    },
-			    {
-				    text: "Cancel",
-				    handler: cancelCurrent
-			    }
-		    ]
-	    });
-        dialogBox.callback = {
-            success: successHandler,
-            failure: failureHandler
-        };
-        dialogBox.render();
-        dialogBox.show();
-        return dialogBox;
+			    constraintoviewport: true,
+			    buttons: [
+				    {
+					    text: "Submit",
+					    handler: function() {
+						    (sumbitHandlerMap[form + "SubmitHandler"]).call(this);
+						    this.submit();
+					    },
+					    isDefault: true
+				    },
+				    {
+					    text: "Cancel",
+					    handler: cancelCurrent
+				    }
+			    ]
+		    });
+		    dialogBox.callback = {
+			    success: successHandler,
+			    failure: failureHandler
+		    };
+		    dialogBox.beforeSubmitEvent.subscribe(function() {
+			    (sumbitHandlerMap[form + "SubmitHandler"]).call(this);
+		    });
+		    dialogBox.render();
+		    $("#" + form).data("dialogBox", dialogBox);
+	    }
+	    dialogBox.show();
+	    return dialogBox;
     };
 }, '3.3.0', {
     requires: ["utility", "node", "alert-dialog"]

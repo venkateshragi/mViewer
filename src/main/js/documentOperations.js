@@ -158,6 +158,7 @@ YUI({
                 parsedResponse = Y.JSON.parse(responseObject.responseText);
                 keys = parsedResponse.response.result;
                 if (keys !== undefined) {
+	                document.getElementById('queryExecutor').style.display = 'block';
                     queryForm = Y.one('#queryForm');
                     queryForm.addClass('form-cont');
                     queryForm.set("innerHTML", MV.getForm(keys));
@@ -195,7 +196,7 @@ YUI({
                 	MV.hideLoadingPanel();
                     MV.showAlertMessage("Unexpected Error: Could not load the query Box", MV.warnIcon);
                     Y.log("Could not send the request to get the keys in the collection. Response Status: [0]".format(responseObject.statusText), "error");
-                    
+
                 }
             }
         });
@@ -246,7 +247,7 @@ YUI({
 			Y.log("Preparing the treeTable data", "info");
             var treebleData = MV.getTreebleDataForDocs(responseObject);
             var treeble = MV.getTreeble(treebleData, "document");
-			// Remove download column for document operations	        
+			// Remove download column for document operations
 	        treeble.removeColumn(treeble.getColumn("download_column"));
             loadAndSubscribe(treeble);
             Y.log("Tree table view loaded", "info");
@@ -416,7 +417,7 @@ YUI({
             doc = doc.replace(/'/g, '"');
             try {
                 var parsedDoc = Y.JSON.parse(doc);
-                sendUpdateDocRequest(Y.JSON.stringify(parsedDoc), idMap[index].docId, eventObject);                
+                sendUpdateDocRequest(Y.JSON.stringify(parsedDoc), idMap[index].docId, eventObject);
             } catch (e) {
                 MV.showAlertMessage("The document entered is not in the correct JSON format", MV.warnIcon);
 	            textArea.focus();
@@ -468,7 +469,7 @@ YUI({
             var i;
             var trTemplate = ["<tr id='doc[0]'>",
                                               "  <td>",
-                                              "      <pre> <textarea id='ta[1]' class='disabled non-navigable' disabled='disabled' cols='75'>[2]</textarea></pre>",
+                                              "      <pre> <textarea id='ta[1]' class='disabled non-navigable' disabled='disabled' cols='74'>[2]</textarea></pre>",
                                               "  </td>",
                                               "  <td>",
                                               "  <button id='edit[3]'class='bttn editbtn non-navigable'>edit</button>",
@@ -546,7 +547,7 @@ YUI({
             }, 'div.jsonBuffer');
             Y.log("The documents written on the JSON tab", "debug");
         }
-        MV.header.set("innerHTML", "Contents of " + Y.one("#currentColl").get("value"));
+        MV.header.set("innerHTML", "Contents of Collection : " + Y.one("#currentColl").get("value"));
         tabView.appendTo(MV.mainBody.get('id'));
     };
     Y.delegate("click", showTabView, "#collNames", "a.collectionLabel");

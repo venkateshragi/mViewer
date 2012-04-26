@@ -216,15 +216,15 @@ ul.user-menu li label.logout {
 }
 
 .left-cont {
-	width: 190px;
-	padding-left: 10px;
-	/* padding-top: 10px; */
+	width: 200px;
+	padding: 0px;
 }
 
 .list-head {
 	background: #fff;
 	border: 1px solid #e3eaee;
-	border-right: 0 !important;
+    border-left: 0;
+	border-right: 0;
 	padding: 10px;
 	margin: 10px 0 0 0;
 	height: 16px;
@@ -267,6 +267,19 @@ ul.user-menu li label.logout {
 	height: 16px;
 }
 
+.onclick, .collectionLabel, .dbLabel {
+    line-height: 25px;
+}
+
+ul.lists {
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+
+textarea {
+    resize: none;
+}
+
 ul.lists li.sel {
 	background: #e6ebec;
 }
@@ -274,14 +287,14 @@ ul.lists li.sel {
 ul.lists li {
 	list-style-image: url('../images/bullet.png');
 	font-weight: bold;
-	font-size: 13px;
-	padding: 5px 5px 5px 5px;
-	height: 18px;
-	margin-left: 20px;
+	font-size: 12px;
+	height: 25px;
+	margin-left: 25px;
+    padding-right: 10px;
 }
 
 .right-cont {
-	width: 697px;
+	width: 690px;
 	background: #fff;
 	border-left: 1px solid #E3EAEE;
 	min-height: 500px;
@@ -289,9 +302,7 @@ ul.lists li {
 }
 
 .form-cont {
-	background: #ececec;
-	/* width: 677px; */
-	padding: 10px 10px;
+	padding: 15px 15px;
 }
 
 .form-cont textarea,.form-cont select {
@@ -307,7 +318,7 @@ ul.lists li {
 
 .bttn {
 	background: #3472ab;
-	padding: 3px;
+	padding: 4px;
 	color: #FFFFFF;
 	text-shadow: 0.1em 0.1em 0.05em #999;
 	-moz-border-radius: 5px;
@@ -330,7 +341,7 @@ ul.lists li {
 	font-size: 14px;
 	font-weight: bolder;
 	background: #e5e5e5;
-	padding: 5px;
+	padding: 10px;
 }
 
 .tab {
@@ -387,9 +398,9 @@ table tr td {
 	float: right;
 	border: 1px solid #ccc;
 	list-style: none;
-	height: 5em;
+	height: 7.3em;
 	overflow: auto;
-	width: 17em;
+	width: 18em;
 	display: inline;
 }
 
@@ -669,7 +680,7 @@ bottom: 0px;
     box-shadow: 0 0 2px 2px highlight !important;
     -webkit-box-shadow: 0 0 2px 2px rgb(255, 255, 255)
     -moz-box-shadow: 0 0 2px 2px highlight !important;
-
+     outline: none;
 }
 
 div.navigable ul.lists li {

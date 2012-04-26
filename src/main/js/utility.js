@@ -288,7 +288,7 @@ YUI.add('utility', function (Y) {
 	};
 	
 	var upperPartTemplate = [
-		"<textarea id='queryBox' name='queryBox' rows='3' cols='60' class='queryBox'>",
+		"<textarea id='queryBox' name='queryBox' rows='6' cols='75' class='queryBox'>",
 		"{}",
 		"</textarea>",
 		"<label for='fields' ></label><ul id='fields' class='checklist'>"].join('\n');
@@ -313,6 +313,7 @@ YUI.add('utility', function (Y) {
 		var queryForm = Y.one('#queryForm');
 		queryForm.removeClass('form-cont');
 		queryForm.set("innerHTML", "");
+		document.getElementById('queryExecutor').style.display = 'none';
 	};
 	MV.mainBody = Y.one("#mainBody");
 	MV.header = Y.one("#mainBodyHeader");

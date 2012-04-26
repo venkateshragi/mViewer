@@ -121,9 +121,9 @@ YUI({
 				"      <pre> <textarea id='ta[1]' class='disabled non-navigable' disabled='disabled' cols='75'>[2]</textarea></pre>",
 				"  </td>",
 				"  <td>",
-				"  <button id='open[3]'class='bttn non-navigable'>open</button>",
-				"   <button id='download[4]'class='bttn non-navigable'>download</button>",
-				"   <button id='delete[5]'class='bttn non-navigable'>delete</button>",
+				"  <button id='open[3]'class='bttn openbtn non-navigable'>open</button>",
+				"   <button id='download[4]'class='bttn downloadbtn non-navigable'>download</button>",
+				"   <button id='delete[5]'class='bttn deletebtn non-navigable'>delete</button>",
 				"   <br/>",
 				"  </td>",
 				"</tr>"].join('\n');
@@ -185,7 +185,7 @@ YUI({
 			}, 'div.jsonBuffer');
 			Y.log("The files written on the JSON tab", "debug");
 		}
-		
+
 		/**
 		 * The function is an event handler to handle the open button click.
 		 * It opens the file in new tab
@@ -277,7 +277,7 @@ YUI({
 			return (parseInt(match[0], 10));
 		}
 
-		MV.header.set("innerHTML", "Contents of " + Y.one("#currentBucket").get("value"));
+		MV.header.set("innerHTML", "Contents of GridFS Bucket : " + Y.one("#currentBucket").get("value"));
 		tabView.appendTo(MV.mainBody.get('id'));
 	};
 	Y.delegate("click", showTabView, "#bucketNames", "a.collectionLabel");
