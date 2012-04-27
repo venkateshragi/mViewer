@@ -43,7 +43,6 @@ import java.util.Iterator;
  * of a particular file.
  *
  * @author Srinath Anantha
- * @since Dec 3, 2008
  */
 public class GridFSServiceImpl implements GridFSService {
 
@@ -76,20 +75,20 @@ public class GridFSServiceImpl implements GridFSService {
      * @param bucketName Name of GridFS Bucket
      * @returns Status message.
      */
-    public String createStore(String dbName, String bucketName) throws EmptyDatabaseNameException, EmptyCollectionNameException {
+    public String createStore(String dbName, String bucketName) throws DatabaseException, CollectionException {
         mongoInstance = mongoInstanceProvider.getMongoInstance();
 
         if (dbName == null) {
-            throw new EmptyDatabaseNameException("Database Name Is Null");
+            throw new DatabaseException(ErrorCodes.DB_NAME_EMPTY, "Database Name Is Null");
         }
         if (dbName.equals("")) {
-            throw new EmptyDatabaseNameException("Database Name Empty");
+            throw new DatabaseException(ErrorCodes.DB_NAME_EMPTY, "Database Name Empty");
         }
         if (bucketName == null) {
-            throw new EmptyCollectionNameException("Bucket name is null");
+            throw new CollectionException(ErrorCodes.COLLECTION_NAME_EMPTY, "Bucket name is null");
         }
         if (bucketName.equals("")) {
-            throw new EmptyCollectionNameException("Bucket Name Empty");
+            throw new CollectionException(ErrorCodes.COLLECTION_NAME_EMPTY, "Bucket Name Empty");
         }
 
         new GridFS(mongoInstance.getDB(dbName), bucketName);
@@ -109,18 +108,17 @@ public class GridFSServiceImpl implements GridFSService {
         mongoInstance = mongoInstanceProvider.getMongoInstance();
 
         if (dbName == null) {
-            throw new EmptyDatabaseNameException("Database Name Is Null");
+            throw new DatabaseException(ErrorCodes.DB_NAME_EMPTY, "Database Name Is Null");
         }
         if (dbName.equals("")) {
-            throw new EmptyDatabaseNameException("Database Name Empty");
+            throw new DatabaseException(ErrorCodes.DB_NAME_EMPTY, "Database Name Empty");
         }
 
         ArrayList<DBObject> fileList = new ArrayList<DBObject>();
 
         try {
             if (!mongoInstance.getDatabaseNames().contains(dbName)) {
-                throw new UndefinedDatabaseException(
-
+                throw new DatabaseException(ErrorCodes.DB_DOES_NOT_EXISTS,
                     "Database with dbName [ " + dbName + "] does not exist");
             }
 
@@ -136,8 +134,7 @@ public class GridFSServiceImpl implements GridFSService {
             }
 
         } catch (Exception m) {
-            CollectionException e = new CollectionException(ErrorCodes.GET_COLLECTION_LIST_EXCEPTION, "GET_FILES_LIST_EXCEPTION", m.getCause());
-            throw e;
+            throw new CollectionException(ErrorCodes.GET_COLLECTION_LIST_EXCEPTION, m.getMessage());
         }
         return fileList;
 
@@ -148,22 +145,22 @@ public class GridFSServiceImpl implements GridFSService {
      *
      * @param dbName     Name of Database
      * @param bucketName Name of GridFS Bucket
-     * @param _id         ObjectId of the file to be retrieved
+     * @param _id        ObjectId of the file to be retrieved
      * @returns Requested multipartfile for viewing or download based on 'download' param.
      */
     public File getFile(String dbName, String bucketName, String _id) throws ValidationException, DatabaseException, CollectionException {
         mongoInstance = mongoInstanceProvider.getMongoInstance();
 
         if (dbName == null) {
-            throw new EmptyDatabaseNameException("Database Name Is Null");
+            throw new DatabaseException(ErrorCodes.DB_NAME_EMPTY, "Database Name Is Null");
         }
         if (dbName.equals("")) {
-            throw new EmptyDatabaseNameException("Database Name Empty");
+            throw new DatabaseException(ErrorCodes.DB_NAME_EMPTY, "Database Name Empty");
         }
         File tempFile = null;
         try {
             if (!mongoInstance.getDatabaseNames().contains(dbName)) {
-                throw new UndefinedDatabaseException(
+                throw new DatabaseException(ErrorCodes.DB_DOES_NOT_EXISTS,
 
                     "Database with dbName [ " + dbName + "] does not exist");
             }
@@ -176,11 +173,9 @@ public class GridFSServiceImpl implements GridFSService {
             gridFSDBFile.writeTo(tempFile);
 
         } catch (MongoException m) {
-            CollectionException e = new CollectionException(ErrorCodes.GET_COLLECTION_LIST_EXCEPTION, "GET_FILE_EXCEPTION", m.getCause());
-            throw e;
+            throw new CollectionException(ErrorCodes.GET_COLLECTION_LIST_EXCEPTION, m.getMessage());
         } catch (IOException e) {
-            CollectionException ce = new CollectionException(ErrorCodes.GET_COLLECTION_LIST_EXCEPTION, "GET_FILE_EXCEPTION", e.getCause());
-            throw ce;
+            throw new CollectionException(ErrorCodes.GET_COLLECTION_LIST_EXCEPTION, e.getMessage());
         }
         return tempFile;
     }
@@ -199,25 +194,25 @@ public class GridFSServiceImpl implements GridFSService {
     public JSONArray insertFile(String dbName, String bucketName, String dbInfo, InputStream inputStream, FormDataBodyPart formData) throws DatabaseException, CollectionException, DocumentException, ValidationException {
         mongoInstance = mongoInstanceProvider.getMongoInstance();
         if (dbName == null) {
-            throw new EmptyDatabaseNameException("Database name is null");
+            throw new DatabaseException(ErrorCodes.DB_NAME_EMPTY, "Database name is null");
 
         }
         if (dbName.equals("")) {
-            throw new EmptyDatabaseNameException("Database Name Empty");
+            throw new DatabaseException(ErrorCodes.DB_NAME_EMPTY, "Database Name Empty");
         }
 
         if (bucketName == null) {
-            throw new EmptyCollectionNameException("Bucket name is null");
+            throw new CollectionException(ErrorCodes.COLLECTION_NAME_EMPTY, "Bucket name is null");
         }
         if (bucketName.equals("")) {
-            throw new EmptyCollectionNameException("Bucket Name Empty");
+            throw new CollectionException(ErrorCodes.COLLECTION_NAME_EMPTY, "Bucket Name Empty");
         }
 
         JSONArray result = new JSONArray();
         FormDataContentDisposition fileData = formData.getFormDataContentDisposition();
         try {
             if (!mongoInstance.getDatabaseNames().contains(dbName)) {
-                throw new UndefinedDatabaseException("DB [" + dbName + "] DOES NOT EXIST");
+                throw new DatabaseException(ErrorCodes.DB_DOES_NOT_EXISTS, "DB [" + dbName + "] DOES NOT EXIST");
             }
 
             GridFS gridFS = new GridFS(mongoInstance.getDB(dbName), bucketName);
@@ -233,8 +228,7 @@ public class GridFSServiceImpl implements GridFSService {
             result.put(obj);
 
         } catch (Exception e) {
-            CollectionException ce = new CollectionException(ErrorCodes.UPLOAD_FILE_EXCEPTION, "UPLOAD_FILE_EXCEPTION", e.getCause());
-            throw ce;
+            throw new CollectionException(ErrorCodes.UPLOAD_FILE_EXCEPTION, e.getMessage());
         }
         return result;
     }
@@ -244,34 +238,34 @@ public class GridFSServiceImpl implements GridFSService {
      *
      * @param dbName     Name of Database
      * @param bucketName Name of GridFS Bucket
-     * @param _id         Object id of file to be deleted
+     * @param _id        Object id of file to be deleted
      * @returns Status message.
      */
-    public String deleteFile(String dbName, String bucketName, String _id) throws DatabaseException, DocumentException, ValidationException {
+    public String deleteFile(String dbName, String bucketName, String _id) throws DatabaseException, DocumentException, CollectionException, ValidationException {
         mongoInstance = mongoInstanceProvider.getMongoInstance();
         if (dbName == null) {
-            throw new EmptyDatabaseNameException("Database name is null");
+            throw new DatabaseException(ErrorCodes.DB_NAME_EMPTY, "Database name is null");
 
         }
         if (dbName.equals("")) {
-            throw new EmptyDatabaseNameException("Database Name Empty");
+            throw new DatabaseException(ErrorCodes.DB_NAME_EMPTY, "Database Name Empty");
         }
 
         if (bucketName == null) {
-            throw new EmptyCollectionNameException("Bucket name is null");
+            throw new CollectionException(ErrorCodes.COLLECTION_NAME_EMPTY, "Bucket name is null");
         }
         if (bucketName.equals("")) {
-            throw new EmptyCollectionNameException("Bucket Name Empty");
+            throw new CollectionException(ErrorCodes.COLLECTION_NAME_EMPTY, "Bucket Name Empty");
         }
 
         String result = null;
         GridFSDBFile gridFSDBFile = null;
         try {
             if (!mongoInstance.getDatabaseNames().contains(dbName)) {
-                throw new UndefinedDatabaseException("DB [" + dbName + "] DOES NOT EXIST");
+                throw new DatabaseException(ErrorCodes.DB_DOES_NOT_EXISTS, "DB [" + dbName + "] DOES NOT EXIST");
             }
             if (_id == null) {
-                throw new EmptyDocumentDataException("File is empty");
+                throw new DocumentException(ErrorCodes.DOCUMENT_EMPTY, "File is empty");
             }
 
             GridFS gridFS = new GridFS(mongoInstance.getDB(dbName), bucketName);
@@ -280,13 +274,13 @@ public class GridFSServiceImpl implements GridFSService {
             gridFSDBFile = gridFS.findOne(objectId);
 
             if (gridFSDBFile == null) {
-                throw new UndefinedDocumentException("DOCUMENT_DOES_NOT_EXIST");
+                throw new DocumentException(ErrorCodes.DOCUMENT_DOES_NOT_EXIST, "Document does not exist !");
             }
 
             gridFS.remove(objectId);
 
         } catch (MongoException e) {
-            throw new DeleteDocumentException("FILE_DELETION_EXCEPTION");
+            throw new DocumentException(ErrorCodes.DOCUMENT_DELETION_EXCEPTION, e.getMessage());
         }
         result = "File [" + gridFSDBFile.getFilename() + "] has been deleted.";
         return result;
@@ -299,34 +293,34 @@ public class GridFSServiceImpl implements GridFSService {
      * @param bucketName Name of GridFS Bucket
      * @returns Status message.
      */
-    public String dropBucket(String dbName, String bucketName) throws DatabaseException, DocumentException, ValidationException {
+    public String dropBucket(String dbName, String bucketName) throws DatabaseException, DocumentException, CollectionException, ValidationException {
         mongoInstance = mongoInstanceProvider.getMongoInstance();
         if (dbName == null) {
-            throw new EmptyDatabaseNameException("Database name is null");
+            throw new DatabaseException(ErrorCodes.DB_NAME_EMPTY, "Database name is null");
 
         }
         if (dbName.equals("")) {
-            throw new EmptyDatabaseNameException("Database Name Empty");
+            throw new DatabaseException(ErrorCodes.DB_NAME_EMPTY, "Database Name Empty");
         }
 
         if (bucketName == null) {
-            throw new EmptyCollectionNameException("Bucket name is null");
+            throw new CollectionException(ErrorCodes.COLLECTION_NAME_EMPTY, "Bucket name is null");
         }
         if (bucketName.equals("")) {
-            throw new EmptyCollectionNameException("Bucket Name Empty");
+            throw new CollectionException(ErrorCodes.COLLECTION_NAME_EMPTY, "Bucket Name Empty");
         }
 
         String result = null;
         try {
             if (!mongoInstance.getDatabaseNames().contains(dbName)) {
-                throw new UndefinedDatabaseException("DB [" + dbName + "] DOES NOT EXIST");
+                throw new DatabaseException(ErrorCodes.DB_DOES_NOT_EXISTS, "DB [" + dbName + "] DOES NOT EXIST");
             }
 
             mongoInstance.getDB(dbName).getCollection(bucketName + ".files").drop();
             mongoInstance.getDB(dbName).getCollection(bucketName + ".chunks").drop();
 
         } catch (MongoException e) {
-            throw new DeleteDocumentException("FILES_DELETION_EXCEPTION");
+            throw new DocumentException(ErrorCodes.DOCUMENT_DELETION_EXCEPTION, e.getMessage());
         }
         result = "Bucket [" + bucketName + "] has been deleted from Database [" + dbName + "].";
         return result;

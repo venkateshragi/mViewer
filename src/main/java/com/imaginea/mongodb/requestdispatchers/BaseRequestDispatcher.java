@@ -82,7 +82,7 @@ public class BaseRequestDispatcher {
     /**
      * Returns the JSON error response after an invalid dbInfo is found.
      *
-     * @param logger    Logger to log the error response.
+     * @param logger Logger to log the error response.
      * @return JSON Error response.
      */
     protected static String formErrorResponse(Logger logger, ApplicationException e) {
@@ -111,7 +111,7 @@ public class BaseRequestDispatcher {
      */
     protected static class ErrorTemplate {
         public static String execute(Logger logger, ResponseCallback callback) {
-            return execute(logger, callback, true);    
+            return execute(logger, callback, true);
         }
 
         public static String execute(Logger logger, ResponseCallback callback, boolean wrapResult) {
@@ -134,7 +134,7 @@ public class BaseRequestDispatcher {
                     response = ((JSONObject) dispatcherResponse).toString();
                 } else if (dispatcherResponse instanceof JSONArray) {
                     response = ((JSONArray) dispatcherResponse).toString();
-                } else if(dispatcherResponse instanceof String) {
+                } else if (dispatcherResponse instanceof String) {
                     response = dispatcherResponse.toString();
                 }
             } catch (NumberFormatException m) {

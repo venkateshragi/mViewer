@@ -15,7 +15,10 @@
  */
 package com.imaginea.mongodb.services;
 
-import com.imaginea.mongodb.common.exceptions.*;
+import com.imaginea.mongodb.common.exceptions.CollectionException;
+import com.imaginea.mongodb.common.exceptions.DatabaseException;
+import com.imaginea.mongodb.common.exceptions.DocumentException;
+import com.imaginea.mongodb.common.exceptions.ValidationException;
 import com.mongodb.DBObject;
 import com.sun.jersey.multipart.FormDataBodyPart;
 import org.json.JSONArray;
@@ -28,7 +31,6 @@ import java.util.ArrayList;
  * Declares service methods for performing CRUD operations on files stored in GridFS.
  *
  * @author Srinath Anantha
- * @since Dec 3, 2008
  */
 public interface GridFSService {
 
@@ -39,7 +41,7 @@ public interface GridFSService {
      * @param bucketName Name of GridFS Bucket
      * @returns Status message.
      */
-    public String createStore(String dbName, String bucketName) throws EmptyDatabaseNameException, DatabaseException, EmptyCollectionNameException;
+    public String createStore(String dbName, String bucketName) throws DatabaseException, CollectionException;
 
     /**
      * Service handler for getting the list of files stored in GridFS of specified database.
@@ -78,10 +80,10 @@ public interface GridFSService {
      *
      * @param dbName     Name of Database
      * @param bucketName Name of GridFS Bucket
-     * @param _id         Object id of file to be deleted
+     * @param _id        Object id of file to be deleted
      * @returns Status message.
      */
-    public String deleteFile(String dbName, String bucketName, String _id) throws DatabaseException, DocumentException, ValidationException;
+    public String deleteFile(String dbName, String bucketName, String _id) throws DatabaseException, DocumentException, ValidationException, CollectionException;
 
     /**
      * Service handler for dropping all files from a GridFS bucket.
@@ -90,5 +92,5 @@ public interface GridFSService {
      * @param bucketName Name of GridFS Bucket
      * @returns Status message.
      */
-    public String dropBucket(String dbName, String bucketName) throws DatabaseException, DocumentException, ValidationException;
+    public String dropBucket(String dbName, String bucketName) throws DatabaseException, DocumentException, ValidationException, CollectionException;
 }

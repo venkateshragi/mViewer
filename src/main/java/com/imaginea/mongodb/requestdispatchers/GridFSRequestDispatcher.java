@@ -15,7 +15,9 @@
  */
 package com.imaginea.mongodb.requestdispatchers;
 
-import com.imaginea.mongodb.common.exceptions.UndefinedDocumentException;
+import com.imaginea.mongodb.common.exceptions.ApplicationException;
+import com.imaginea.mongodb.common.exceptions.DocumentException;
+import com.imaginea.mongodb.common.exceptions.ErrorCodes;
 import com.imaginea.mongodb.common.utils.ApplicationUtils;
 import com.imaginea.mongodb.services.GridFSService;
 import com.imaginea.mongodb.services.GridFSServiceImpl;
@@ -23,7 +25,6 @@ import com.mongodb.DBObject;
 import com.sun.jersey.multipart.FormDataBodyPart;
 import com.sun.jersey.multipart.FormDataParam;
 import org.apache.log4j.Logger;
-import org.bson.types.ObjectId;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -39,7 +40,6 @@ import java.util.ArrayList;
  * Defines handlers for performing CRUD operations on files stored in GridFS.
  *
  * @author Srinath Anantha
- * @since Dec 3, 2008
  */
 @Path("/{dbName}/{bucketName}/gridfs")
 public class GridFSRequestDispatcher extends BaseRequestDispatcher {
@@ -171,7 +171,7 @@ public class GridFSRequestDispatcher extends BaseRequestDispatcher {
                 GridFSService gridFSService = new GridFSServiceImpl(dbInfo);
                 String result = null;
                 if ("".equals(_id)) {
-                    UndefinedDocumentException e = new UndefinedDocumentException("File Data Missing in Request Body");
+                    ApplicationException e = new DocumentException(ErrorCodes.DOCUMENT_DOES_NOT_EXIST, "File Data Missing in Request Body");
                     result = formErrorResponse(logger, e);
                 } else {
                     result = gridFSService.deleteFile(dbName, bucketName, _id);

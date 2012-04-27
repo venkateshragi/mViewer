@@ -29,9 +29,7 @@ import com.imaginea.mongodb.common.exceptions.ValidationException;
  * about controlling the current instance. Also provides service to get list of
  * all databases present and Statistics of a particular database.
  * 
- * @author Rachit Mittal
- * @since 2 July 2011
- * 
+* @author Srinath Anantha
  * 
  */
 public interface DatabaseService {
@@ -54,10 +52,6 @@ public interface DatabaseService {
 	 *            Name of Database
 	 * @return Array of JSON Objects each containing a key value pair in Db
 	 *         Stats.
-	 * @exception EmptyDatabaseNameException
-	 *                DbName is empty
-	 * @exception UndefinedDatabaseException
-	 *                Db not present
 	 * @exception JSONException
 	 *                While parsing JSON
 	 * @exception DatabaseException
@@ -75,12 +69,6 @@ public interface DatabaseService {
 	 *            Name of Database to be created
 	 * @return Success if Created else throws Exception
 	 * 
-	 * @exception EmptyDatabaseNameException
-	 *                When dbName is null
-	 * @exception DuplicateDatabaseException
-	 *                When database is already present
-	 * @exception InsertDatabaseException
-	 *                Any exception while trying to create db
 	 * @exception DatabaseException
 	 *                throw super type of
 	 *                DuplicateDatabaseException,InsertDatabaseException
@@ -100,12 +88,6 @@ public interface DatabaseService {
 	 *            Name of Database to be deleted
 	 * @return Success if deleted else throws Exception
 	 * 
-	 * @exception EmptyDatabaseNameException
-	 *                When dbName is null
-	 * @exception UndefinedDatabaseException
-	 *                When database is not present
-	 * @exception DeleteDatabaseException
-	 *                Any exception while trying to create db
 	 * @exception DatabaseException
 	 *                throw super type of
 	 *                UndefinedDatabaseException,DeleteDatabaseException

@@ -537,7 +537,7 @@ YUI.add('utility', function (Y) {
 		"COLLECTION_CREATION_EXCEPTION": "Please check if mongod is running and refresh the page.",
 		"COLLECTION_DELETION_EXCEPTION": "Please check if mongod is running and refresh the page.",
 		"INVALID_OBJECT_ID": "Value provided for '_id' is invalid .",
-		"UPDATE_OBJECT_ID_EXCEPTION" : "_id cannot be updated .",
+		"UPDATE_OBJECT_ID_EXCEPTION" : "_id cannot be updated.",
 		"ANY_OTHER_EXCEPTION": "An unknown exception occured ! Please try to login again.",
 		"ERROR_INITIATING_GRAPH": "Could not initiate the graph ! Please check if mongod is running.",
 		"FILE_NOT_FOUND": "Logger Config File or Mongo Config File cannot be found ! Please check if they are present in the resources of src/main and src/test respectively.",
