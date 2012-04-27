@@ -18,6 +18,7 @@ package com.imaginea.mongodb.services;
 import com.imaginea.mongodb.common.MongoInstanceProvider;
 import com.imaginea.mongodb.common.SessionMongoInstanceProvider;
 import com.imaginea.mongodb.common.exceptions.*;
+import com.imaginea.mongodb.common.utils.ApplicationUtils;
 import com.mongodb.*;
 import com.mongodb.gridfs.GridFS;
 import com.mongodb.gridfs.GridFSDBFile;
@@ -219,11 +220,12 @@ public class GridFSServiceImpl implements GridFSService {
             GridFSInputFile fsInputFile = gridFS.createFile(inputStream, fileData.getFileName());
             fsInputFile.setContentType(formData.getMediaType().toString());
             fsInputFile.save();
+            String objectId = JSON.serialize(fsInputFile.getId());
             JSONObject obj = new JSONObject();
             obj.put("name", fsInputFile.getFilename());
             obj.put("size", fsInputFile.getLength());
-            obj.put("url", String.format("services/%s/%s/gridfs/getfile?id=%s&download=%s&dbInfo=%s&ts=%s", dbName, bucketName, fsInputFile.getId().toString(), false, dbInfo, new Date()));
-            obj.put("delete_url", String.format("services/%s/%s/gridfs/dropfile?id=%s&dbInfo=%s&ts=%s", dbName, bucketName, fsInputFile.getId().toString(), dbInfo, new Date().getTime()));
+            obj.put("url", String.format("services/%s/%s/gridfs/getfile?id=%s&download=%s&dbInfo=%s&ts=%s", dbName, bucketName, objectId, false, dbInfo, new Date()));
+            obj.put("delete_url", String.format("services/%s/%s/gridfs/dropfile?id=%s&dbInfo=%s&ts=%s", dbName, bucketName, objectId, dbInfo, new Date().getTime()));
             obj.put("delete_type", "GET");
             result.put(obj);
 

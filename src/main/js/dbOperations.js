@@ -236,31 +236,33 @@ YUI({
      * The function handles the onLoad event for the home page.
      * It sends request to get the DB names
      */
-    function requestDBNames() {
-    	MV.showLoadingPanel("Loading Databases...");
-        setUserInfo();        
-        var request = Y.io(MV.URLMap.getDBs(),
-                           // configuration for loading the database names
-                           {
-                               method: "GET",
-                               on: {
-                                   success: showDBs,
-                                   failure: displayError
-                               }
-                           });
-        Y.log("Sending request to load DB names", "info");
-    }
+	function requestDBNames(response, a, b, c) {
+		var parsedResponse = (response.responseText != undefined) ? Y.JSON.parse(response.responseText) : null;
+		var error = parsedResponse == undefined ? undefined : parsedResponse.response.error;
+		if (error) {                         
+			MV.showAlertMessage("DB creation failed ! [0].".format(error.message), MV.warnIcon);
+			Y.log("DB creation failed. Response Status: [0]".format(error.message), "error");
+		} else {
+			MV.showLoadingPanel("Loading Databases...");
+			setUserInfo();
+			var request = Y.io(MV.URLMap.getDBs(),
+				// configuration for loading the database names
+			{
+				method: "GET",
+				on: {
+					success: showDBs,
+					failure: displayError
+				}
+			});
+			Y.log("Sending request to load DB names", "info");
+		}
+	}
         
     /**
      * The function shows a dialog that takes input (i.e. Db name) from user
      */
     function createDB()	{
-        var showErrorMessage = function(responseObject) {
-	        MV.hideLoadingPanel();
-            MV.showAlertMessage("DB creation failed! Please check if app server is runnning.", MV.warnIcon);
-            Y.log("DB creation failed. Response Status: [0]".format(responseObject.statusText), "error");
-        };
-        MV.showSubmitDialog("addDBDialog", requestDBNames, showErrorMessage);
+        MV.showSubmitDialog("addDBDialog", requestDBNames, null);
     }
 
     // Make a request to load Database names when the page loads

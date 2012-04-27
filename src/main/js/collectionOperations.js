@@ -33,7 +33,7 @@ YUI({
 	 * @param e The event Object
 	 */
 	function requestCollNames(e) {
-		Y.one("#currentDB").set("value", e.currentTarget.get("id"));
+		Y.one("#currentDB").set("value", e.currentTarget.get("text"));
 		Y.one("#currentColl").set("value", "");
 		Y.one("#collNames").unplug(Y.Plugin.NodeMenuNav);
 		Y.one("#bucketNames").unplug(Y.Plugin.NodeMenuNav);
@@ -113,12 +113,12 @@ YUI({
 					if (pos > 0) {
 						var name = collectionName.substring(0, pos);
 						id = name.replace(/ /g, '_');
-						gridFSBuckets += bucketTemplate.format(id, id, id + "_subMenu", name, id + "_subMenu");
+						gridFSBuckets += bucketTemplate.format(name, id, id + "_subMenu", name, id + "_subMenu");
 					}
 					// Issue 17 https://github.com/Imaginea/mViewer/issues/17
 					if (pos < 0 && collectionName.search(".chunks") < 0) {
 						id = collectionName.replace(/ /g, '_');
-						collections += collTemplate.format(id, id, id +  "_subMenu", collectionName, id +  "_subMenu");
+						collections += collTemplate.format(collectionName, id, id +  "_subMenu", collectionName, id +  "_subMenu");
 					}
 				}
 				if (index === 0) {
