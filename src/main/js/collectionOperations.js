@@ -105,6 +105,7 @@ YUI({
 					</div>\
 		            </li>';
 
+			var hasCollections = false, hasFiles = false;
 			if (parsedResult) {
 				for (index = 0; index < parsedResult.length; index++) {
 					var collectionName = parsedResult[index];
@@ -114,17 +115,19 @@ YUI({
 						var name = collectionName.substring(0, pos);
 						id = name.replace(/ /g, '_');
 						gridFSBuckets += bucketTemplate.format(name, id, id + "_subMenu", name, id + "_subMenu");
+						hasFiles = true;
 					}
 					// Issue 17 https://github.com/Imaginea/mViewer/issues/17
 					if (pos < 0 && collectionName.search(".chunks") < 0) {
 						id = collectionName.replace(/ /g, '_');
-						collections += collTemplate.format(collectionName, id, id +  "_subMenu", collectionName, id +  "_subMenu");
+						collections += collTemplate.format(collectionName, id, id + "_subMenu", collectionName, id + "_subMenu");
+						hasCollections = true;
 					}
 				}
-				if (index === 0) {
-					collections = "No Collections";
-					gridFSBuckets = "No Files";
-				}
+
+				if (!hasFiles) gridFSBuckets = "&nbsp&nbsp No Files present.";
+				if (!hasCollections)	collections = "&nbsp&nbsp No Collections present.";
+
 				collDiv.set("innerHTML", collections);
 				gridFSDiv.set("innerHTML", gridFSBuckets);
 

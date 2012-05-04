@@ -237,7 +237,7 @@ YUI({
      * It sends request to get the DB names
      */
 	function requestDBNames(response, a, b, c) {
-		var parsedResponse = (response.responseText != undefined) ? Y.JSON.parse(response.responseText) : null;
+		var parsedResponse = (response != undefined && response.responseText != undefined) ? Y.JSON.parse(response.responseText) : null;
 		var error = parsedResponse == undefined ? undefined : parsedResponse.response.error;
 		if (error) {                         
 			MV.showAlertMessage("DB creation failed ! [0].".format(error.message), MV.warnIcon);
