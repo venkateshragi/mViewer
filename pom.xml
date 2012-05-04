@@ -26,9 +26,6 @@
 	<profiles>
 		<profile>
             <id>server</id>
-            <activation>
-                <activeByDefault>true</activeByDefault>
-            </activation>
 			<build>
 				<defaultGoal>jetty:run-war</defaultGoal>
 				<plugins>
