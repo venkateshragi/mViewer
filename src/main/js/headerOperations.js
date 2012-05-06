@@ -15,7 +15,7 @@
  */
 YUI({
     filter: 'raw'
-}).use("alert-dialog", "utility", "node", "event-delegate", "stylize", "custom-datatable", function (Y) {
+}).use("alert-dialog", "utility", "treeble-paginator", "node", "event-delegate", "stylize", "custom-datatable", function (Y) {
     YUI.namespace('com.imaginea.mongoV');
     var MV = YUI.com.imaginea.mongoV;
 

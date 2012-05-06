@@ -20,6 +20,7 @@ import com.imaginea.mongodb.common.exceptions.DatabaseException;
 import com.imaginea.mongodb.common.exceptions.DocumentException;
 import com.imaginea.mongodb.common.exceptions.ValidationException;
 import com.mongodb.DBObject;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 
@@ -51,7 +52,7 @@ public interface DocumentService {
      * @throws DocumentException   exception while performing get doc list
      */
 
-    public ArrayList<DBObject> getQueriedDocsList(String dbName, String collectionName, DBObject query, DBObject keys, int limit, int skip) throws DatabaseException, CollectionException,
+    public JSONObject getQueriedDocsList(String dbName, String collectionName, DBObject query, DBObject keys, int limit, int skip) throws DatabaseException, CollectionException,
         DocumentException, ValidationException;
 
     /**

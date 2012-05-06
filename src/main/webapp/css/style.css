@@ -302,19 +302,13 @@ ul.lists li {
 }
 
 .form-cont {
-	padding: 15px 15px;
+	padding: 10px 10px;
 }
 
-.form-cont textarea,.form-cont select {
+/*.form-cont textarea,.form-cont select {
 	border: 1px solid #B7DCEA;
 	border-top: 1px solid #93BAC7;
-}
-
-.form-cont select {
-	vertical-align: top;
-	width: 160px;
-	margin-left: 10px;
-}
+}*/
 
 .bttn {
 	background: #3472ab;
@@ -425,8 +419,29 @@ table tr td {
 	height: 1%;
 }
 
+#skip {
+  margin-right: 45;
+}
+
+#first, #prev {
+    margin-right: 10;
+}
+
+#selectAll {
+    margin-left: 15;
+}
+
+#next {
+    margin-left: 10;    
+}
+
+#last {
+    margin-left: 10;
+    margin-right: 110;
+}
+
 #execQueryButton {
-	float: right;
+	margin-left: 130;
 }
 textarea{
 	overflow:auto;
@@ -670,17 +685,18 @@ bottom: 0px;
     filter: progid:DXImageTransform.Microsoft.Shadow(Strength=4, Direction=135, Color='#000000');
 }
 
-.shadow, * input:focus, button:focus, textarea:focus, tr.selected {
+.shadow, * input:focus, button:focus, textarea:focus, a:focus, select:focus, tr.selected {
     /* border: 1px solid #CCCCCC; */
     /* box-shadow: 0 0 5px rgba(0, 0, 0, 0.2); */
     /* -webkit-box-shadow: rgba(0,0,0,.2) 0px 0px 5px; */
     /* -moz-box-shadow: rgba(0,0,0,.2) 0px 0px 5px; */
     /* -o-box-shadow: rgba(0,0,0,.2) 0px 0px 5px; */
 
+    border: 1px solid #CCCCCC;
     box-shadow: 0 0 2px 2px highlight !important;
     -webkit-box-shadow: 0 0 2px 2px rgb(255, 255, 255)
     -moz-box-shadow: 0 0 2px 2px highlight !important;
-     outline: none;
+    outline: none;
 }
 
 div.navigable ul.lists li {
@@ -688,8 +704,9 @@ div.navigable ul.lists li {
 }
 
 div.buffer {
-    overflow:auto;
-    margin: 2px
+    overflow-y: auto;
+    margin: 2px;
+    overflow-x: hidden;
 }
 
 div.dbBuffer {

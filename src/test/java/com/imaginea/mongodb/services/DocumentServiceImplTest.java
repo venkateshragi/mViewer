@@ -34,6 +34,7 @@ import com.mongodb.util.JSON;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
 import org.bson.types.ObjectId;
+import org.json.JSONObject;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
@@ -146,8 +147,9 @@ public class DocumentServiceImplTest extends TestingTemplate {
 								DBObject keys = new BasicDBObject();
 								keys.put("p", 1);
 
-								ArrayList<DBObject> documentList = testDocService.getQueriedDocsList(dbName, collectionName, null, keys, 0, 0);
+								JSONObject result = testDocService.getQueriedDocsList(dbName, collectionName, null, keys, 0, 0);
 
+                                ArrayList<DBObject> documentList = (ArrayList<DBObject>) result.get("documents");
 								boolean flag = false;
 								for (DBObject document : documentList) {
 									for (String key : documentName.keySet()) {

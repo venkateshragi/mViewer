@@ -15,7 +15,7 @@
  */
 YUI({
 	filter: 'raw'
-}).use("loading-panel", "yes-no-dialog", "alert-dialog", "upload-dialog", "io-base", "json-parse", "node-event-simulate", "node", "event-delegate", "stylize", "json-stringify", "utility", "event-key", "event-focus", "node-focusmanager", function(Y) {
+}).use("loading-panel", "yes-no-dialog", "alert-dialog", "upload-dialog", "io-base", "json-parse", "node-event-simulate", "node", "event-delegate", "stylize", "json-stringify", "utility", "treeble-paginator", "event-key", "event-focus", "node-focusmanager", function(Y) {
 	YUI.namespace('com.imaginea.mongoV');
 	var MV = YUI.com.imaginea.mongoV, sm = MV.StateManager;
 	MV.treebleData = {};
@@ -26,8 +26,8 @@ YUI({
 	 *
 	 */
 	var showTabView = function(e) {
+		Y.one("#currentBucket").set("value", e.currentTarget.getAttribute("label"));
 		MV.toggleClass(e.currentTarget, Y.all("#bucketNames li"));
-		sm.setCurrentBucket(e.currentTarget.getContent());
 		MV.openFileEvent.unsubscribeAll();
 		MV.openFileEvent.subscribe(getFile);
 		MV.deleteFileEvent.unsubscribeAll();

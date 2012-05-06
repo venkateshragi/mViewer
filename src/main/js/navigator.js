@@ -19,7 +19,7 @@
         }
 
         function addChildren(node, regionManager) {
-            node.all('* input, * ul li, * textarea, * button').each(
+            node.all('* input, * ul li, * textarea, * button, * select, * a').each(
 
             function(item) {
                 if (!item.hasClass('non-navigable')) {

@@ -68,8 +68,8 @@ YUI({
 
 			var collTemplate = '' +
 					'<li class="yui3-menuitem" label="[0]"> \
-	                <a id=[1] href="#[2]" class="collectionLabel yui3-menu-label navigable">[3]</a> \
-					<div id="[4]" class="yui3-menu">\
+	                <a id=[1] label="[2]" href="#[3]" class="collectionLabel yui3-menu-label navigable">[4]</a> \
+					<div id="[5]" class="yui3-menu">\
 						<div class="yui3-menu-content">\
 							<ul>\
 								<li class="yui3-menuitem">\
@@ -87,8 +87,8 @@ YUI({
 		            </li>';
 			var bucketTemplate = '' +
 					'<li class="yui3-menuitem" label="[0]"> \
-	                <a id=[1] href="#[2]" class="collectionLabel yui3-menu-label">[3]</a> \
-					<div id="[4]" class="yui3-menu">\
+	                <a id=[1] label="[2]" href="#[3]" class="collectionLabel yui3-menu-label">[4]</a> \
+					<div id="[5]" class="yui3-menu">\
 						<div class="yui3-menu-content">\
 							<ul>\
 								<li class="yui3-menuitem">\
@@ -109,18 +109,21 @@ YUI({
 			if (parsedResult) {
 				for (index = 0; index < parsedResult.length; index++) {
 					var collectionName = parsedResult[index];
-					var pos = collectionName.search(".files");
+					var formattedName = collectionName.length > 20 ? collectionName.substring(0, 20) + "..." : collectionName;
+					var pos = collectionName.lastIndexOf(".files");
 					var id;
 					if (pos > 0) {
-						var name = collectionName.substring(0, pos);
-						id = name.replace(/ /g, '_');
-						gridFSBuckets += bucketTemplate.format(name, id, id + "_subMenu", name, id + "_subMenu");
+						collectionName = collectionName.substring(0, pos);
+						formattedName = collectionName.length > 20 ? collectionName.substring(0, 20) + "..." : collectionName;						
+						id = collectionName.replace(/ /g, '_');
+						id = id.replace('.', '_');
+						gridFSBuckets += bucketTemplate.format(collectionName, id, collectionName, id + "_subMenu", formattedName, id + "_subMenu");
 						hasFiles = true;
 					}
 					// Issue 17 https://github.com/Imaginea/mViewer/issues/17
 					if (pos < 0 && collectionName.search(".chunks") < 0) {
 						id = collectionName.replace(/ /g, '_');
-						collections += collTemplate.format(collectionName, id, id + "_subMenu", collectionName, id + "_subMenu");
+						collections += collTemplate.format(collectionName, id, collectionName, id + "_subMenu", formattedName, id + "_subMenu");
 						hasCollections = true;
 					}
 				}

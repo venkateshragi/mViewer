@@ -27,6 +27,7 @@ import com.mongodb.Mongo;
 import com.mongodb.util.JSON;
 import org.apache.log4j.Logger;
 import org.json.JSONException;
+import org.json.JSONObject;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.*;
@@ -93,8 +94,8 @@ public class DocumentRequestDispatcher extends BaseRequestDispatcher {
                 }
                 int docsLimit = Integer.parseInt(limit);
                 int docsSkip = Integer.parseInt(skip);
-                ArrayList<DBObject> documentList = documentService.getQueriedDocsList(dbName, collectionName, queryObj, keyObj, docsLimit, docsSkip);
-                return documentList;
+                JSONObject result = documentService.getQueriedDocsList(dbName, collectionName, queryObj, keyObj, docsLimit, docsSkip);
+                return result;
             }
         });
 
@@ -123,6 +124,7 @@ public class DocumentRequestDispatcher extends BaseRequestDispatcher {
             public Object execute() throws Exception {
                 // Perform the operation here only.
                 Mongo mongoInstance = UserLogin.mongoConfigToInstanceMapping.get(dbInfo);
+                long count = mongoInstance.getDB(dbName).getCollection(collectionName).count();
                 DBCursor cursor = mongoInstance.getDB(dbName).getCollection(collectionName).find();
                 DBObject doc = new BasicDBObject();
                 Set<String> completeSet = new HashSet<String>();
@@ -131,7 +133,10 @@ public class DocumentRequestDispatcher extends BaseRequestDispatcher {
                     getNestedKeys(doc, completeSet, "");
                 }
                 completeSet.remove("_id");
-                return completeSet;
+                JSONObject result = new JSONObject();
+                result.put("keys", completeSet);
+                result.put("count", count);
+                return result;
             }
         });
         return response;

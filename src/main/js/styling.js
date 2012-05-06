@@ -30,7 +30,7 @@ YUI.add('stylize', function (Y) {
      */
     MV.toggleClass = function (node, otherNodes) {
         otherNodes.removeClass('sel');
-        node.addClass('sel');
+        node.get("parentNode").addClass('sel');
     };
 }, '3.3.0', {
     requires: ["node"]

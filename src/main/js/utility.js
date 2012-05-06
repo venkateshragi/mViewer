@@ -1,18 +1,3 @@
-/*
- * Copyright (c) 2011 Imaginea Technologies Private Ltd.
- * Hyderabad, India
- * 
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *     http://www.apache.org/licenses/LICENSE-2.0
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 var gRegistry = [];
 YUI.add('utility', function (Y) {
 	YUI.namespace('com.imaginea.mongoV');
@@ -43,11 +28,6 @@ YUI.add('utility', function (Y) {
 			}
 		};
 	}
-	// TODO: IS this function redundant
-
-	function newObject() {
-		return {};
-	}
 
 	MV.getProperties = function (doc) {
 		var key, name, allKeys = [];
@@ -64,229 +44,7 @@ YUI.add('utility', function (Y) {
 	MV.isObject = function (o) {
 		return (typeof o === "object");
 	};
-	var getChildrenArray;
-	getChildrenArray = function (doc) {
-		var i, tempObject, key, value, newArray, childrenArray = [];
-		var allKeys = MV.getProperties(doc);
-		for (i = 0; i < allKeys.length; i++) {
-			tempObject = newObject();
-			key = allKeys[i];
-			tempObject.key = key;
-			value = doc[key];
-			if (MV.isArray(value)) {
-				newArray = [];
-				// tempObject.type = "BasicDBList";
-				newArray = getChildrenArray(value);
-				tempObject.kiddies = newArray;
-			} else if (MV.isObject(value)) {
-				newArray = [];
-				// tempObject.type = "BasicDBObject";
-				newArray = getChildrenArray(value);
-				tempObject.kiddies = newArray;
-			} else {
-				tempObject.value = value;
-			}
-			childrenArray.push(tempObject);
-		}
-		return childrenArray;
-	};
-	var prepareReturnObject = function (response, result) {
-		var returnObject = newObject();
-		var resultObject = newObject();
-		resultObject.results = result;
-		returnObject.response = resultObject;
-		returnObject.total_records = response.meta.totalRecords;
-		returnObject.records_returned = response.meta.recordsReturned;
-		returnObject.first_index = response.meta.startIndex;
-		Y.log("Tree table data prepared", "info");
-		return (returnObject);
-	};
 
-	function sortFunc(a, b) {
-		return a.key.localeCompare(b.key);
-	};
-
-	MV.getTreebleDataForDocs = function (response) {
-		var allDocs = response.results,
-				aDoc, parentNode, childrenArray, result = [];
-		var i;
-		for (i = 0; i < allDocs.length; i++) {
-			aDoc = allDocs[i];
-			parentNode = newObject();
-			childrenArray = [];
-			parentNode.key = "Document [0]".format(i + 1);
-			childrenArray = getChildrenArray(aDoc);
-			parentNode.kiddies = childrenArray.sort(sortFunc);
-			result.push(parentNode);
-		}
-		return (prepareReturnObject(response, result));
-	};
-
-	MV.getTreebleDataForFiles = function (response) {
-		var allDocs = response.results,
-				aDoc, parentNode, childrenArray, result = [];
-		var i;
-		for (i = 0; i < allDocs.length; i++) {
-			aDoc = allDocs[i];
-			parentNode = newObject();
-			childrenArray = [];
-			parentNode.key = "<a id='openFile[0]' href='javascript:void(0);' style='color:#0e2137'>[1]</a>".format(i, aDoc.filename, i, i);
-			childrenArray = getChildrenArray(aDoc);
-			parentNode.kiddies = childrenArray.sort(sortFunc);
-			Y.on("click", function(e) {
-				MV.openFileEvent.fire({eventObj : e, isDownload: false});
-			}, "#openFile" + i);
-			result.push(parentNode);
-		}
-		return (prepareReturnObject(response, result));
-	};
-
-	MV.getTreebleDataForServerStats = function (response) {
-		var data = response.results[0];
-		var aDoc, docCopy, parentNode, childrenArray, result = [],
-				finalObject, resultObject;
-		var i;
-		var allKeys = MV.getProperties(data);
-		for (i = 0; i < allKeys.length; i++) {
-			parentNode = newObject();
-			parentNode.key = allKeys[i];
-			var value = data[allKeys[i]];
-			if (MV.isObject(value)) {
-				newArray = [];
-				newArray = getChildrenArray(value);
-				parentNode.kiddies = newArray;
-			} else {
-				parentNode.value = value;
-			}
-			result.push(parentNode);
-		}
-		return (prepareReturnObject(response, result));
-	};
-	
-	MV.getTreeble = function (dataSource, type) {
-		var Dom = YAHOO.util.Dom,
-				Event = YAHOO.util.Event,
-				DT = YAHOO.widget.DataTable;
-
-		function localGenerateRequest(state, path) {
-			return state;
-		}
-
-		var treeTable = new YAHOO.widget.DataTable(
-			// Root element id
-				"table",
-			// Column configuration
-				[
-					{
-						key: "toggle_column",
-						label: "",
-						formatter: function (elCell, oRecord, oColumn, oData) {
-							Dom.addClass(elCell.parentNode, 'treeble-nub');
-							if (oRecord.getData('kiddies')) {
-								var path = oRecord.getData('_yui_node_path');
-								var open = this.rowIsOpen(path);
-								var clazz = open ? 'row-open' : 'row-closed';
-								Dom.addClass(elCell, 'row-toggle');
-								Dom.replaceClass(elCell, /row-(open|closed)/, clazz);
-								elCell.innerHTML = '<a class="treeble-collapse-nub" href="javascript:void(0);"></a>';
-								Event.on(elCell, 'click', function (e, path) {
-									this.toggleRow(path);
-								}, path, this);
-							}
-						}
-					},  						
-					{
-						key: "download_column",
-						label: "",
-						formatter: function (elCell, oRecord, oColumn, oData) {
-							var depth = oRecord.getData('_yui_node_depth');
-							var index = oRecord.getData('_yui_node_path'); 
-							if (depth == 0) {
-								Dom.addClass(elCell.parentNode, 'treeble-nub');
-								Dom.addClass(elCell, 'row-toggle');
-								elCell.innerHTML = "<a id='downloadFile[0]' class='download-icon' href='javascript:void(0);'></a>".format(index);
-								Y.on("click", function(e) {
-									MV.openFileEvent.fire({eventObj : e, isDownload: true});
-								}, elCell.firstChild);
-							}
-						}
-					},
-					{
-						key: "delete_column",
-						label: "",
-						formatter: function (elCell, oRecord, oColumn, oData) {
-							var depth = oRecord.getData('_yui_node_depth');
-							var index = oRecord.getData('_yui_node_path');
-							if (depth == 0) {
-								Dom.addClass(elCell.parentNode, 'treeble-nub');
-								Dom.addClass(elCell, 'row-toggle');
-								elCell.innerHTML = "<a id='deleteIcon[0]' class='delete-icon' href='javascript:void(0);'></a>".format(index);
-								Y.on("click", function(e) {
-									if (type == "file") {
-										MV.deleteFileEvent.fire({eventObj : e});
-									} else if (type == "document") {
-										MV.deleteDocEvent.fire({eventObj : e});
-									}
-								}, elCell.firstChild);
-							}
-						}
-					},
-					{
-						key: "key",
-						label: "Key",
-						width: MV.mainBody.get('scrollWidth') / 2 - 48,
-						formatter: function (elCell, oRecord, oColumn, oData) {
-							elCell.innerHTML = '<span style="font-weight: bolder;padding-left:' + oRecord.getData('_yui_node_depth') * 15 + 'px;">' + oData + '</span>';
-						}
-					},
-					{
-						key: "value",
-						label: "Value",
-						width: MV.mainBody.get('scrollWidth') / 2 - 48,
-						editor: new YAHOO.widget.TextboxCellEditor()
-					}
-				],
-			// Data Source
-				new YAHOO.util.TreebleDataSource(new YAHOO.util.DataSource(dataSource.response.results, {
-					responseType: YAHOO.util.DataSource.TYPE_JSARRAY,
-					responseSchema: {
-						fields: ["key", "value", 
-							{
-								key: 'kiddies',
-								parser: 'datasource'
-							}]
-					},
-					treebleConfig: {
-						generateRequest: localGenerateRequest,
-						totalRecordsReturnExpr: '.meta.totalRecords'
-					}
-				}), {
-					paginateChildren: false
-				}),
-			// Attribute Config
-		{
-			paginator: new YAHOO.widget.Paginator({
-				rowsPerPage: 25,
-				rowsPerPageOptions: [1, 2, 5, 10, 25, 50],
-				containers: 'table-pagination',
-				template: '{FirstPageLink}{PreviousPageLink}{PageLinks}{NextPageLink}{LastPageLink}{RowsPerPageDropdown}'
-			}),
-			initialLoad: false,
-			initialRequest: {
-				startIndex: 0,
-				results: 25
-			},
-			dynamicData: true,
-			displayAllRecords: true,
-			generateRequest: DT.generateTreebleDataSourceRequest
-		});
-		treeTable.handleDataReturnPayload = function (oRequest, oResponse, oPayload) {
-			oPayload.totalRecords = oResponse.meta.totalRecords;
-			return oPayload;
-		};
-		return treeTable;
-	};
-	
 	var upperPartTemplate = [
 		"<textarea id='queryBox' name='queryBox' rows='6' cols='75' class='queryBox'>",
 		"{}",
@@ -294,19 +52,30 @@ YUI.add('utility', function (Y) {
 		"<label for='fields' ></label><ul id='fields' class='checklist'>"].join('\n');
 
 	var lowerPartTemplate = [
-		"</ul><br/><br/>",
-		"<label for='limit'> Limit: </label><input id='limit' type='text' name='limit' value='0' size='5' />",
-		"<label for='skip'> Skip: </label><input id='skip' type='text' name='skip' value='0' size='5' />",
-		"<button id='execQueryButton' class='bttn'>Execute Query</button>"].join('\n');
+		"</ul><br/>",
+		"<label for='skip'> Skip: </label><input id='skip' type='text' name='skip' value='0' size='3'/>",
+		"<label for='limit'> Limit: </label><select id='limit' name='limit'><option value='10'>10</option><option value='25'>25</option><option value='50'>50</option></select>",
+		"<button id='execQueryButton' class='bttn'>Execute Query</button>",
+		"<a id='selectAll' class='navigationRight' href='javascript:void(0)'>Select All</a>",
+		"<label> / </label>",
+		"<a id='unselectAll' href='javascript:void(0)'>Unselect All</a>",
+		"</br></br>",
+		"<a id='first' href='javascript:void(0)'>&laquo; First</a>",
+		"<a id='prev'  href='javascript:void(0)'>&lsaquo; Previous</a>",
+		"<a id='next' href='javascript:void(0)'>Next &rsaquo;</a>",
+		"<a id='last' href='javascript:void(0)'>Last &raquo;</a>",
+		"<label>Showing</label>","<label id='startLabel'> 1 </label>","<label> - </label>",
+		"<label id='endLabel'> [0] </label>", "<label> of </label>","<label id='countLabel'> [1] </label>"			
+	].join('\n');
 
 	var checkListTemplate = "<li><label for='[0]'><input id='[1]' name='[2]' type='checkbox' checked=true />[3]</label></li>";
 
-	MV.getForm = function (data) {
+	MV.getForm = function (keys, count) {
 		var checkList = "";
-		for (index = 0; index < data.length; index++) {
-			checkList += checkListTemplate.format(data[index], data[index], data[index], data[index]);
+		for (index = 0; index < keys.length; index++) {
+			checkList += checkListTemplate.format(keys[index], keys[index], keys[index], keys[index]);
 		}
-		return upperPartTemplate + checkList + lowerPartTemplate;
+		return upperPartTemplate + checkList + lowerPartTemplate.format(count < 25 ? count : 25, count);
 	};
 
 	MV.hideQueryForm = function () {
@@ -351,7 +120,8 @@ YUI.add('utility', function (Y) {
 				return getVal(stateVariable);
 			};
 			exports[stateVariable + "AsNode"] = function() {
-				return Y.one('#' + getVal(stateVariable).replace(/ /g, '_'));
+				var id = getVal(stateVariable).replace(/ /g, '_').replace('.', '_');
+				return Y.one('#' + id);
 			};
 
 			var upcasedVar = stateVariable.substring(0, 1).toUpperCase() + stateVariable.substring(1);
@@ -447,8 +217,8 @@ YUI.add('utility', function (Y) {
 		documentKeys: function () {
 			return "services/[0]/[1]/document/keys?dbInfo=[2]&ts=[3]".format(sm.currentDB(), sm.currentColl(), sm.dbInfo(), sm.now());
 		},
-		getDocs: function () {
-			return "services/[0]/[1]/document?dbInfo=[2]&ts=[3]".format(sm.currentDB(), sm.currentColl(), sm.dbInfo(), sm.now());
+		getDocs: function (params) {
+			return "services/[0]/[1]/document?dbInfo=[2]&ts=[3][4]".format(sm.currentDB(), sm.currentColl(), sm.dbInfo(), sm.now(), params);
 		},
 		insertDoc: function () {
 			return "services/[0]/[1]/document?dbInfo=[2]&action=PUT&ts=[3]".format(sm.currentDB(), sm.currentColl(), sm.dbInfo(), sm.now());

@@ -22,6 +22,7 @@ import com.imaginea.mongodb.common.exceptions.*;
 import com.mongodb.*;
 import com.mongodb.util.JSON;
 import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 
@@ -76,7 +77,7 @@ public class DocumentServiceImpl implements DocumentService {
      * @throws DocumentException   exception while performing get doc list
      */
 
-    public ArrayList<DBObject> getQueriedDocsList(String dbName, String collectionName, DBObject query, DBObject keys, int limit, int skip) throws DatabaseException, CollectionException,
+    public JSONObject getQueriedDocsList(String dbName, String collectionName, DBObject query, DBObject keys, int limit, int skip) throws DatabaseException, CollectionException,
         DocumentException, ValidationException {
 
         mongoInstance = mongoInstanceProvider.getMongoInstance();
@@ -96,7 +97,7 @@ public class DocumentServiceImpl implements DocumentService {
             throw new CollectionException(ErrorCodes.COLLECTION_NAME_EMPTY, "Collection Name Empty");
         }
 
-        ArrayList<DBObject> dataList = new ArrayList<DBObject>();
+        JSONObject result = new JSONObject();
         try {
             if (!mongoInstance.getDatabaseNames().contains(dbName)) {
                 throw new DatabaseException(ErrorCodes.DB_DOES_NOT_EXISTS, "DB with name [" + dbName + "]DOES_NOT_EXIST");
@@ -114,16 +115,21 @@ public class DocumentServiceImpl implements DocumentService {
             cursor.limit(limit);
             cursor.skip(skip);
 
+            ArrayList<DBObject> dataList = new ArrayList<DBObject>();
             if (cursor.hasNext()) {
                 while (cursor.hasNext()) {
                     dataList.add(cursor.next());
                 }
             }
+            long count = mongoInstance.getDB(dbName).getCollection(collectionName).count(query);
+            result.put("documents", dataList);
+            result.put("count", count);
         } catch (MongoException e) {
             throw new DocumentException(ErrorCodes.GET_DOCUMENT_LIST_EXCEPTION, e.getMessage());
+        } catch (JSONException e) {
+            throw new DocumentException(ErrorCodes.JSON_EXCEPTION, e.getMessage());
         }
-        return dataList;
-
+        return result;
     }
 
     /**

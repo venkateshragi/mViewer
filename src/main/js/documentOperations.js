@@ -15,7 +15,7 @@
  */
 YUI({
     filter: 'raw'
-}).use("loading-panel","yes-no-dialog", "alert-dialog", "io-base", "json-parse", "node-event-simulate", "node", "event-delegate", "stylize", "json-stringify", "utility", "event-key", "event-focus", "node-focusmanager", function(Y) {
+}).use("loading-panel","yes-no-dialog", "alert-dialog", "io-base", "json-parse", "node-event-simulate", "node", "event-delegate", "stylize", "json-stringify", "utility", "treeble-paginator", "event-key", "event-focus", "node-focusmanager", function(Y) {
     YUI.namespace('com.imaginea.mongoV');
     var MV = YUI.com.imaginea.mongoV,
         sm = MV.StateManager;
@@ -28,7 +28,7 @@ YUI({
      */
     var showTabView = function(e) {
         MV.toggleClass(e.currentTarget, Y.all("#collNames li"));
-        Y.one("#currentColl").set("value", e.currentTarget.get("text"));
+        Y.one("#currentColl").set("value", e.currentTarget.getAttribute("label"));
         MV.mainBody.empty(true);
 	    MV.deleteDocEvent.unsubscribeAll();
 	    MV.deleteDocEvent.subscribe(deleteDoc);
@@ -50,6 +50,163 @@ YUI({
 
 	    var idMap = {};
 
+	    /**
+	     * It sends request to get all  the keys of the  current collection
+	     */
+	    var getKeyRequest = Y.io(MV.URLMap.documentKeys(), {
+		    method: "GET",
+		    on: {
+			    success: showQueryBox,
+			    failure: function(ioId, responseObject) {
+				    MV.hideLoadingPanel();
+				    MV.showAlertMessage("Unexpected Error: Could not load the query Box", MV.warnIcon);
+				    Y.log("Could not send the request to get the keys in the collection. Response Status: [0]".format(responseObject.statusText), "error");
+
+			    }
+		    }
+	    });
+
+        /**
+         *The function is success handler for the request of getting all the keys in a collections.
+         *It parses the response, gets the keys and makes the query box. It also sends the request to load the
+         *documents after the query box has been populated,
+         * @param {Number} e Id
+         * @param {Object} The response Object
+         */
+
+        function showQueryBox(ioId, responseObject) {
+            var parsedResponse, keys, count, queryForm, error;
+            Y.log("Preparing to show QueryBox", "info");
+            try {
+                Y.log("Parsing the JSON response to get the keys", "info");
+                parsedResponse = Y.JSON.parse(responseObject.responseText);
+                keys = parsedResponse.response.result.keys;
+	            count = parsedResponse.response.result.count;
+                if (keys !== undefined) {
+	                document.getElementById('queryExecutor').style.display = 'block';
+                    queryForm = Y.one('#queryForm');
+                    queryForm.addClass('form-cont');
+                    queryForm.set("innerHTML", MV.getForm(keys, count));
+                    // insert a ctrl + enter listener for query evaluation
+                    Y.one("#queryBox").on("keyup", function(eventObject) {
+                        if (eventObject.ctrlKey && eventObject.keyCode === 13) {
+                            Y.one('#execQueryButton').simulate('click');
+                        }
+                    });
+                    Y.log("QueryBox loaded", "info");
+                    //TODO instead of assigning it every time delegate it
+                    Y.on("click", executeQuery, "#execQueryButton");
+	                Y.on("click", handleSelect, "#selectAll");
+	                Y.on("click", handleSelect, "#unselectAll");
+	                Y.on("click", handlePagination, "#first");
+	                Y.on("click", handlePagination, "#prev");
+	                Y.on("click", handlePagination, "#next");
+	                Y.on("click", handlePagination, "#last");
+	                defineDatasource();
+                    requestDocuments(getQueryParameters());
+	                updateAnchors(count);
+                } else {
+                    error = parsedResponse.response.error;
+                    Y.log("Could not get keys. Message: [0]".format(error.message), "error");
+                    MV.showAlertMessage("Could not load the query Box! [0]".format(MV.errorCodeMap(error.code)), MV.warnIcon);
+                }
+            } catch (e) {
+                Y.log("Could not parse the JSON response to get the keys", "error");
+                Y.log("Response received: [0]".format(responseObject.resposeText), "error");
+                MV.showAlertMessage("Cannot parse Response to get keys!", MV.warnIcon);
+            }
+        }
+
+	    /**
+	     *The function is an event handler for the execute query button. It gets the query parameters
+	     *and sends a request to get the documents
+	     * @param {Object} event The event object
+	     */
+	    function executeQuery(event) {
+		    var queryParams = getQueryParameters();
+		    if (queryParams !== undefined) {
+			    requestDocuments(queryParams);
+		    }
+	    }
+
+	    function handleSelect(event) {
+		    var id = event.currentTarget.get("id");
+		    var elements = Y.Selector.query('ul[id=fields] input');
+		    if (id === "selectAll") {
+			    Y.Array.each(elements, function(element) {
+				    element.checked = true;
+			    });
+		    } else {
+			    Y.Array.each(elements, function(element) {
+				    element.checked = false;
+			    });
+		    }
+	    }
+
+	    function handlePagination(event) {
+		    var href = event.currentTarget.get("href");
+		    if (href == null || href == undefined || href == "")
+			    return;
+		    var id = event.currentTarget.get("id");
+		    var skip = Y.one('#skip'), limit = Y.one('#limit'), count = Y.one('#countLabel');
+		    var skipValue = parseInt(skip.get('value')), limitValue = parseInt(limit.get('value')), countValue = parseInt(count.get('text'));
+		    if (id === "first") {
+			    skip.set('value', 0);
+		    } else if (id === "prev") {
+			    skip.set('value', (skipValue - limitValue) < 0 ? 0 : (skipValue - limitValue));
+		    } else if (id === "next") {
+			    skip.set('value', skipValue + limitValue);
+		    } else if (id === "last") {
+			    skip.set('value', countValue - limitValue);
+		    }
+		    Y.one('#execQueryButton').simulate('click');
+		    updateAnchors(countValue);
+	    }
+
+	    function updateAnchors(count) {
+		    var first = Y.one('#first'), prev = Y.one('#prev'), next = Y.one('#next'), last = Y.one('#last');
+		    var start = Y.one('#startLabel'), end = Y.one('#endLabel'), countLabel = Y.one('#countLabel');
+		    var skip = parseInt(Y.one('#skip').get('value')), limit = parseInt(Y.one('#limit').get('value'));
+		    if (skip == 0) disableAnchor(first);
+		    else enableAnchor(first);
+		    if (skip + limit <= limit) disableAnchor(prev);
+		    else enableAnchor(prev);
+		    if (skip >= count - limit) disableAnchor(next);
+		    else enableAnchor(next);
+		    if (skip + limit >= count) disableAnchor(last);
+		    else enableAnchor(last);
+		    start.set('text', count != 0 ? skip + 1 : 0);
+		    end.set('text', count < skip + limit ? count : skip + limit);
+		    countLabel.set('text', count);
+
+	    }
+
+	    function enableAnchor(obj) {
+		    obj.setAttribute('href', 'javascript:void(0)');
+		    obj.setStyle('color', '#39C');
+	    }
+
+	    function disableAnchor(obj) {
+		    obj.removeAttribute('href');
+		    obj.setStyle('color', 'grey');
+	    }
+
+        /**
+         * The function creates and XHR data source which will get all the documents.
+         * A data source is created so that we don't have to send separate requests to load
+         * the JSON view and the Treeble view
+         *
+         */
+
+        function defineDatasource() {
+            MV.getDocsRequest = new YAHOO.util.XHRDataSource(MV.URLMap.getDocs(), {
+                responseType: YAHOO.util.XHRDataSource.TYPE_JSON,
+                responseSchema: {
+                    resultsList: "response.result"
+                }
+            });
+        }
+
         /**
          * This function gets the query parameters from the query box. It takes the
          * query string, the limit value, skip value and the fields selected and return a
@@ -57,7 +214,6 @@ YUI({
          * @returns {String} Query prameter string
          *
          */
-
         function getQueryParameters() {
             var parsedQuery, query = Y.one('#queryBox').get("value"),
                 limit = Y.one('#limit').get("value"),
@@ -90,35 +246,13 @@ YUI({
         }
 
         /**
-         * The function creates and XHR data source which will get all the documents.
-         * A data source is created so that we don't have to send separate requests to load
-         * the JSON view and the Treeble view
-         *
-         */
-
-        function defineDatasource() {
-            MV.data = new YAHOO.util.XHRDataSource(MV.URLMap.getDocs(), {
-                responseType: YAHOO.util.XHRDataSource.TYPE_JSON,
-                responseSchema: {
-                    resultsList: "response.result",
-                    metaFields: {
-                        startIndex: 'first_index',
-                        recordsReturned: 'records_returned',
-                        totalRecords: 'total_records'
-                    }
-                }
-            });
-        }
-
-        /**
          * The function sends a request to the data source create by function <tt>defineDatasource</tt>
          * to get all the documents.
          * @param {String} param The query parameter string that has to be sent to get the documents
          */
-
         function requestDocuments(param) {
         	MV.showLoadingPanel("Loading Documents...")
-            MV.data.sendRequest(param, {
+            MV.getDocsRequest.sendRequest(param, {
                 success: showDocuments,
                 failure: function(request, responseObject) {
                 	 MV.hideLoadingPanel();
@@ -129,77 +263,113 @@ YUI({
             });
         }
 
-        /**
-         *The function is an event handler for the execute query button. It gets the query parameters
-         *and sends a request to get the documents
-         * @param {Object} e The event object
-         */
-
-        function executeQuery(e) {
-            var queryParams = getQueryParameters();
-            if (queryParams !== undefined) {
-                requestDocuments(queryParams);
-            }
+        function showDocuments(request, responseObject) {
+	        try {
+		        Y.log("Preparing the treeTable data", "info");
+		        var treebleData = MV.getTreebleDataForDocs(responseObject.results[0]);
+		        var treeble = MV.getTreeble(treebleData, "document");
+		        // Remove download column for document operations
+		        treeble.removeColumn(treeble.getColumn("download_column"));
+		        loadAndSubscribe(treeble);
+		        Y.log("Tree table view loaded", "info");
+		        Y.log("Preparing to write on JSON tab", "info");
+		        writeOnJSONTab(responseObject.results[0].documents);
+		        updateAnchors(responseObject.results[0].count);
+		        sm.publish(sm.events.queryFired);
+		        MV.hideLoadingPanel();
+	        } catch(error) {
+		        Y.log("Failed to initailise data tabs. Reason: [0]".format(error), "error");
+		        MV.showAlertMessage("Failed to initailise data tabs. [0]".format(error), MV.warnIcon);
+	        }
         }
 
         /**
-         *The function is success handler for the request of getting all the keys in a collections.
-         *It parses the response, gets the keys and makes the query box. It also sends the request to load the
-         *documents after the query box has been populated,
-         * @param {Number} e Id
-         * @param {Object} The response Object
+         * The function creates the json view and adds the edit,delete,save and cancel buttons for each document
+         * @param response The response Object containing all the documents
          */
+        function writeOnJSONTab(response) {
+            var jsonView = "<div class='buffer jsonBuffer navigable navigateTable' id='jsonBuffer'>";
+            var i;
+            var trTemplate = ["<tr id='doc[0]'>",
+                                              "  <td>",
+                                              "      <pre> <textarea id='ta[1]' class='disabled non-navigable' disabled='disabled' cols='74'>[2]</textarea></pre>",
+                                              "  </td>",
+                                              "  <td>",
+                                              "  <button id='edit[3]'class='bttn editbtn non-navigable'>edit</button>",
+                                              "   <button id='delete[4]'class='bttn deletebtn non-navigable'>delete</button>",
+                                              "   <button id='save[5]'class='bttn savebtn non-navigable invisible'>save</button>",
+                                              "   <button id='cancel[6]'class='bttn cancelbtn non-navigable invisible'>cancel</button>",
+                                              "   <br/>",
+                                              "  </td>",
+                                              "</tr>"].join('\n');
+            jsonView += "<table class='jsonTable'><tbody>";	        
 
-        function showQueryBox(ioId, responseObject) {
-            var parsedResponse, keys, queryForm, error;
-            Y.log("Preparing to show QueryBox", "info");
-            try {
-                Y.log("Parsing the JSON response to get the keys", "info");
-                parsedResponse = Y.JSON.parse(responseObject.responseText);
-                keys = parsedResponse.response.result;
-                if (keys !== undefined) {
-	                document.getElementById('queryExecutor').style.display = 'block';
-                    queryForm = Y.one('#queryForm');
-                    queryForm.addClass('form-cont');
-                    queryForm.set("innerHTML", MV.getForm(keys));
-                    // insert a ctrl + enter listener for query evaluation
-                    Y.one("#queryBox").on("keyup", function(eventObject) {
-                        if (eventObject.ctrlKey && eventObject.keyCode === 13) {
-                            Y.one('#execQueryButton').simulate('click');
+            for (i = 0; i < response.length; i++) {
+                jsonView += trTemplate.format(i, i, Y.JSON.stringify(response[i], null, 4), i, i, i, i);
+            }
+            if (i === 0) {
+                jsonView = jsonView + "No documents to be displayed";
+            }
+            jsonView = jsonView + "</tbody></table></div>";
+            tabView.getTab(0).setAttributes({
+                content: jsonView
+            }, false);
+            for (i = 0; i < response.length; i++) {
+                Y.on("click", editDoc, "#edit" + i);
+                Y.on("click", function(e) {
+					MV.deleteDocEvent.fire({eventObj : e});
+				}, "#delete" + i);
+                Y.on("click", saveDoc, "#save" + i);
+                Y.on("click", cancelSave, "#cancel" + i);
+            }
+            for (i = 0; i < response.length; i++) {
+                fitToContent(500, document.getElementById("ta" + i));
+            }
+            var trSelectionClass = 'selected';
+            // add click listener to select and deselect rows.
+            Y.all('.jsonTable tr').on("click", function(eventObject) {
+                var currentTR = eventObject.currentTarget;
+                var alreadySelected = currentTR.hasClass(trSelectionClass);
+
+                Y.all('.jsonTable tr').each(function(item) {
+                    item.removeClass(trSelectionClass);
+                });
+
+                if (!alreadySelected) {
+                    currentTR.addClass(trSelectionClass);
+                    var editBtn = currentTR.one('button.editbtn');
+                    if (editBtn) {
+                        editBtn.focus();
+                    }
+                }
+            });
+            Y.on('blur', function(eventObject) {
+                var resetAll = true;
+                // FIXME ugly hack for avoiding blur when scroll happens
+                if (sm.isNavigationSideEffect()) {
+                    resetAll = false;
+                }
+                if (resetAll) {
+                    Y.all('tr.selected').each(function(item) {
+                        item.removeClass(trSelectionClass);
+                    });
+                }
+            }, 'div.jsonBuffer');
+
+            Y.on('keyup', function(eventObject) {
+                var firstItem;
+                // escape edit mode
+                if (eventObject.keyCode === 27) {
+                    Y.all("button.savebtn").each(function(item) {
+                        toggleSaveEdit(item, getButtonIndex(item), actionMap.save);
+                        if (!(firstItem)) {
+                            firstItem = item;
                         }
                     });
-                    Y.log("QueryBox loaded", "info");
-                    //TODO instead of assigning it every time delegate it
-                    Y.on("click", executeQuery, "#execQueryButton");
-                    defineDatasource();
-                    requestDocuments(getQueryParameters());
-                } else {
-                    error = parsedResponse.response.error;
-                    Y.log("Could not get keys. Message: [0]".format(error.message), "error");
-                    MV.showAlertMessage("Could not load the query Box! [0]".format(MV.errorCodeMap(error.code)), MV.warnIcon);
                 }
-            } catch (e) {
-                Y.log("Could not parse the JSON response to get the keys", "error");
-                Y.log("Response received: [0]".format(responseObject.resposeText), "error");
-                MV.showAlertMessage("Cannot parse Response to get keys!", MV.warnIcon);
-            }
+            }, 'div.jsonBuffer');
+            Y.log("The documents written on the JSON tab", "debug");
         }
-
-        /**
-         * It sends request to get all  the keys of the  current collection
-         */
-        var getKeyRequest = Y.io(MV.URLMap.documentKeys(), {
-            method: "GET",
-            on: {
-                success: showQueryBox,
-                failure: function(ioId, responseObject) {
-                	MV.hideLoadingPanel();
-                    MV.showAlertMessage("Unexpected Error: Could not load the query Box", MV.warnIcon);
-                    Y.log("Could not send the request to get the keys in the collection. Response Status: [0]".format(responseObject.statusText), "error");
-
-                }
-            }
-        });
 
         /**
          * Sets the size of the text area according to the content in the text area.
@@ -227,7 +397,6 @@ YUI({
          * When the mouse over over the rows the complete row is highlighted
          * @param treeble the treeble structure to be loaded
          */
-
         function loadAndSubscribe(treeble) {
             treeble.load();
             treeble.subscribe("rowMouseoverEvent", treeble.onEventHighlightRow);
@@ -242,21 +411,6 @@ YUI({
          * @param {Object} responseObject The response object containing the response of the get documents request
          *
          */
-
-        function showDocuments(request, responseObject) {
-			Y.log("Preparing the treeTable data", "info");
-            var treebleData = MV.getTreebleDataForDocs(responseObject);
-            var treeble = MV.getTreeble(treebleData, "document");
-			// Remove download column for document operations
-	        treeble.removeColumn(treeble.getColumn("download_column"));
-            loadAndSubscribe(treeble);
-            Y.log("Tree table view loaded", "info");
-            Y.log("Preparing to write on JSON tab", "info");
-            writeOnJSONTab(responseObject.results);
-            sm.publish(sm.events.queryFired);
-            MV.hideLoadingPanel();
-        }
-
         function getButtonIndex(targetNode) {
             var btnID = targetNode.get("id");
             var match = btnID.match(/\d+/);
@@ -270,7 +424,6 @@ YUI({
          * @param index the index number of the node that is clicked
          * @param action The action (save/edit) that has been performed
          */
-
         function toggleSaveEdit(targetNode, index, action) {
             var textArea = Y.one('#doc' + index).one("pre").one("textarea");
             if (action === actionMap.save) {
@@ -459,94 +612,7 @@ YUI({
                 textArea.focus();
             }
         }
-        /**
-         * The function creates the json view and adds the edit,delete,save and cancel buttons for each document
-         * @param response The response Object containing all the documents
-         */
 
-        function writeOnJSONTab(response) {
-            var jsonView = "<div class='buffer jsonBuffer navigable navigateTable' id='jsonBuffer'>";
-            var i;
-            var trTemplate = ["<tr id='doc[0]'>",
-                                              "  <td>",
-                                              "      <pre> <textarea id='ta[1]' class='disabled non-navigable' disabled='disabled' cols='74'>[2]</textarea></pre>",
-                                              "  </td>",
-                                              "  <td>",
-                                              "  <button id='edit[3]'class='bttn editbtn non-navigable'>edit</button>",
-                                              "   <button id='delete[4]'class='bttn deletebtn non-navigable'>delete</button>",
-                                              "   <button id='save[5]'class='bttn savebtn non-navigable invisible'>save</button>",
-                                              "   <button id='cancel[6]'class='bttn cancelbtn non-navigable invisible'>cancel</button>",
-                                              "   <br/>",
-                                              "  </td>",
-                                              "</tr>"].join('\n');
-            jsonView += "<table class='jsonTable'><tbody>";
-
-            for (i = 0; i < response.length; i++) {
-                jsonView += trTemplate.format(i, i, Y.JSON.stringify(response[i], null, 4), i, i, i, i);
-            }
-            if (i === 0) {
-                jsonView = jsonView + "No documents to be displayed";
-            }
-            jsonView = jsonView + "</tbody></table></div>";
-            tabView.getTab(0).setAttributes({
-                content: jsonView
-            }, false);
-            for (i = 0; i < response.length; i++) {
-                Y.on("click", editDoc, "#edit" + i);
-                Y.on("click", function(e) {
-					MV.deleteDocEvent.fire({eventObj : e});
-				}, "#delete" + i);
-                Y.on("click", saveDoc, "#save" + i);
-                Y.on("click", cancelSave, "#cancel" + i);
-            }
-            for (i = 0; i < response.length; i++) {
-                fitToContent(500, document.getElementById("ta" + i));
-            }
-            var trSelectionClass = 'selected';
-            // add click listener to select and deselect rows.
-            Y.all('.jsonTable tr').on("click", function(eventObject) {
-                var currentTR = eventObject.currentTarget;
-                var alreadySelected = currentTR.hasClass(trSelectionClass);
-
-                Y.all('.jsonTable tr').each(function(item) {
-                    item.removeClass(trSelectionClass);
-                });
-
-                if (!alreadySelected) {
-                    currentTR.addClass(trSelectionClass);
-                    var editBtn = currentTR.one('button.editbtn');
-                    if (editBtn) {
-                        editBtn.focus();
-                    }
-                }
-            });
-            Y.on('blur', function(eventObject) {
-                var resetAll = true;
-                // FIXME ugly hack for avoiding blur when scroll happens
-                if (sm.isNavigationSideEffect()) {
-                    resetAll = false;
-                }
-                if (resetAll) {
-                    Y.all('tr.selected').each(function(item) {
-                        item.removeClass(trSelectionClass);
-                    });
-                }
-            }, 'div.jsonBuffer');
-
-            Y.on('keyup', function(eventObject) {
-                var firstItem;
-                // escape edit mode
-                if (eventObject.keyCode === 27) {
-                    Y.all("button.savebtn").each(function(item) {
-                        toggleSaveEdit(item, getButtonIndex(item), actionMap.save);
-                        if (!(firstItem)) {
-                            firstItem = item;
-                        }
-                    });
-                }
-            }, 'div.jsonBuffer');
-            Y.log("The documents written on the JSON tab", "debug");
-        }
         MV.header.set("innerHTML", "Contents of Collection : " + Y.one("#currentColl").get("value"));
         tabView.appendTo(MV.mainBody.get('id'));
     };
