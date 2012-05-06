@@ -82,7 +82,7 @@ YUI({
                         window.location = "loggedOut.html";
                     } else {
                         var error = parsedResponse.response.error;
-                        MV.showAlertMessage("Cannot logout! [0]".format(MV.errorCodeMap[error.code]), MV.warnIcon);
+                        MV.showAlertMessage("Cannot logout! [0]", MV.warnIcon, error.code);
                         Y.log("Could not logout. Message: [0], Code: [1]".format(error.message, error.code), "error");
                     }
                 },

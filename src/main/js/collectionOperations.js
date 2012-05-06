@@ -147,7 +147,7 @@ YUI({
 				error = parsedResponse.response.error;
 				Y.log("Could not load collections. Message: [0]".format(error.message), "error");
 				MV.hideLoadingPanel();
-				MV.showAlertMessage("Could not load Collections! [0]".format(MV.errorCodeMap[error.code]), MV.warnIcon);
+				MV.showAlertMessage("Could not load Collections! [0]", MV.warnIcon, error.code);
 			}
 		} catch (e) {
 			MV.hideLoadingPanel();
@@ -165,6 +165,7 @@ YUI({
 		var index = parseInt(event.currentTarget._node.attributes["index"].value);
 		Y.one("#currentColl").set("value", label);
 		MV.toggleClass(sm.currentCollAsNode(), Y.all("#collNames li"));
+		MV.toggleClass(sm.currentCollAsNode(), Y.all("#bucketNames li"));
 		switch (index) {
 			case 1:
 				// Add Document
@@ -197,7 +198,8 @@ YUI({
 		var label = $(event.currentTarget._node).closest("ul").closest("li")[0].attributes["label"].value;
 		var index = parseInt(event.currentTarget._node.attributes["index"].value);
 		Y.one("#currentBucket").set("value", label);
-		MV.toggleClass(sm.currentBucketAsNode(), Y.all("#bucketNames li"));
+		MV.toggleClass(sm.currentCollAsNode(), Y.all("#collNames li"));
+		MV.toggleClass(sm.currentCollAsNode(), Y.all("#bucketNames li"));
 		switch (index) {
 			case 1:
 				// Add File
@@ -241,7 +243,7 @@ YUI({
 						Y.one("#" + Y.one("#currentDB").get("value")).simulate("click");
 					} else {
 						var error = parsedResponse.response.error;
-						MV.showAlertMessage("Could not delete all files : [0]".format(MV.errorCodeMap[error.code]), MV.warnIcon);
+						MV.showAlertMessage("Could not delete all files : [0]", MV.warnIcon, error.code);
 						Y.log("Could not delete all files, Error message: [0], Error Code: [1]".format(error.message, error.code), "error");
 					}
 				},
@@ -304,7 +306,7 @@ YUI({
 			sm.currentCollAsNode().simulate("click");
 		} else {
 			error = parsedResponse.response.error;
-			MV.showAlertMessage("Could not add Document ! [0]".format(MV.errorCodeMap[error.code]), MV.warnIcon);
+			MV.showAlertMessage("Could not add Document ! [0]", MV.warnIcon, error.code);
 			Y.log("Could not add Document! [0]".format(MV.errorCodeMap[error.code]), "error");
 		}
 	}

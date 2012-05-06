@@ -285,7 +285,7 @@ YUI.add('utility', function (Y) {
 		"ERROR_PARSING_PORT": "You have entered an invalid port number !",
 		"INVALID_ARGUMENT": "You have entered an invalid input data !",
 		"INVALID_USERNAME": "You have entered an invalid username and password combination ! To access you need to add user in admin database of mongodb OR leave both the fields empty.",
-		"INVALID_SESSION": "Your session is corrupted or timed out ! Please login again from the login page.",
+		"INVALID_SESSION": "Your session has timed out ! Please login again.",
 		"GET_DB_LIST_EXCEPTION": "Could not load the DB list ! Please check if mongo is still running and then refresh the page.",
 		"GET_COLLECTION_LIST_EXCEPTION": "Please check if mongod is still running and then refresh the page.",
 		"DB_DELETION_EXCEPTION": "Please check if mongo is running and then refresh the page and try again.",

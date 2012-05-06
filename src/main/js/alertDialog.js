@@ -18,14 +18,19 @@
  * The module provides function <tt>showAlertMessage</tt> to show a simple information message.
  */
 YUI.add('alert-dialog', function (Y) {
-	var timeoutId;
+	var MV = YUI.com.imaginea.mongoV, timeoutId;
 
-	YUI.com.imaginea.mongoV.showAlertMessage = function (msg, icon, handler) {
-		document.getElementById('infoMsg').style.display = 'inline-block';
-		clearTimeout(timeoutId);
-		Y.one('#infoIcon').set("className", icon);
-		Y.one('#infoText').set("innerHTML", msg);
-		timeoutId = setTimeout("document.getElementById('infoMsg').style.display='none'", 12000);
+	MV.showAlertMessage = function (msg, icon, errorCode) {
+		msg = errorCode != undefined ? msg.format(MV.errorCodeMap[errorCode]) : msg;
+		if (errorCode === "INVALID_SESSION") {
+			window.location = "index.html?code=INVALID_SESSION";
+		} else {
+			document.getElementById('infoMsg').style.display = 'inline-block';
+			clearTimeout(timeoutId);
+			Y.one('#infoIcon').set("className", icon);
+			Y.one('#infoText').set("innerHTML", msg);
+			timeoutId = setTimeout("document.getElementById('infoMsg').style.display='none'", 12000);
+		}
 	};
 }, '3.3.0', {
 	requires: ["node"]

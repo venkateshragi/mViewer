@@ -466,7 +466,7 @@ YUI({
 		                    Y.log("Document update to [0]".format(response), "info");
 	                    } else {
 		                    var error = parsedResponse.response.error;
-		                    MV.showAlertMessage("Could not update Document ! [0]".format(MV.errorCodeMap[error.code]), MV.warnIcon);
+		                    MV.showAlertMessage("Could not update Document ! [0]", MV.warnIcon, error.code);
 		                    Y.log("Could not update Document ! [0]".format(MV.errorCodeMap[error.code]), "error");
 	                    }
                     },

@@ -96,7 +96,19 @@ YUI({
             tryLogin();
         }
     });
+	
+	var checkSession = function() {
+		var query = window.location.search.substring(1);
+		var code = query.split("=");
+		if (code[1] === "INVALID_SESSION") {
+			var errorDiv = Y.one("#errorMsg");
+			var msg = "[0]".format(MV.errorCodeMap[code[1]])
+			errorDiv.set("innerHTML", msg || "Error!");
+			errorDiv.setStyle("display", "inline");
+		}
+	};
 
-    Y.one("#login").on('click', tryLogin);
-    Y.one("#login").focus();
+	Y.on("load", checkSession);
+	Y.one("#login").on('click', tryLogin);
+	Y.one("#login").focus();
 });

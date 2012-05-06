@@ -40,7 +40,7 @@ YUI({
             Y.one("#" + Y.one("#currentDB").get("value")).simulate("click");
         } else {
             error = parsedResponse.response.error;
-            MV.showAlertMessage("Could not add Collection! [0]".format(MV.errorCodeMap[error.code]), MV.warnIcon);
+            MV.showAlertMessage("Could not add Collection! [0]", MV.warnIcon, error.code);
             Y.log("Could not add Collection! [0]".format(MV.errorCodeMap[error.code]), "error");
         }
     }
@@ -213,7 +213,7 @@ YUI({
 	            MV.hideLoadingPanel();
                 var error = parsedResponse.response.error;
                 Y.log("Could not load databases. Message from server: [0]. Error Code from server:[1] ".format(error.message, error.code), "error");
-                MV.showAlertMessage(MV.errorCodeMap[error.code], MV.warnIcon);                
+                MV.showAlertMessage("[0]", MV.warnIcon, error.code);                
             }
         } catch (e) {
             MV.showAlertMessage(e, MV.warnIcon);
