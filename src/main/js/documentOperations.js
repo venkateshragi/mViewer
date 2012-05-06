@@ -27,8 +27,9 @@ YUI({
      *
      */
     var showTabView = function(e) {
-        MV.toggleClass(e.currentTarget, Y.all("#collNames li"));
         Y.one("#currentColl").set("value", e.currentTarget.getAttribute("label"));
+	    MV.toggleClass(e.currentTarget, Y.all("#collNames li"));
+	    MV.toggleClass(e.currentTarget, Y.all("#bucketNames li"));
         MV.mainBody.empty(true);
 	    MV.deleteDocEvent.unsubscribeAll();
 	    MV.deleteDocEvent.subscribe(deleteDoc);

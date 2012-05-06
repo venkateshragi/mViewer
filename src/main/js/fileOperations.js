@@ -27,6 +27,7 @@ YUI({
 	 */
 	var showTabView = function(e) {
 		Y.one("#currentBucket").set("value", e.currentTarget.getAttribute("label"));
+		MV.toggleClass(e.currentTarget, Y.all("#collNames li"));
 		MV.toggleClass(e.currentTarget, Y.all("#bucketNames li"));
 		MV.openFileEvent.unsubscribeAll();
 		MV.openFileEvent.subscribe(getFile);
