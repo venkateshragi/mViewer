@@ -33,7 +33,7 @@ YUI({
 	 * @param e The event Object
 	 */
 	function requestCollNames(e) {
-		Y.one("#currentDB").set("value", e.currentTarget.get("text"));
+		Y.one("#currentDB").set("value", e.currentTarget.getAttribute("label"));
 		Y.one("#currentColl").set("value", "");
 		Y.one("#collNames").unplug(Y.Plugin.NodeMenuNav);
 		Y.one("#bucketNames").unplug(Y.Plugin.NodeMenuNav);
@@ -198,8 +198,8 @@ YUI({
 		var label = $(event.currentTarget._node).closest("ul").closest("li")[0].attributes["label"].value;
 		var index = parseInt(event.currentTarget._node.attributes["index"].value);
 		Y.one("#currentBucket").set("value", label);
-		MV.toggleClass(sm.currentCollAsNode(), Y.all("#collNames li"));
-		MV.toggleClass(sm.currentCollAsNode(), Y.all("#bucketNames li"));
+		MV.toggleClass(sm.currentBucketAsNode(), Y.all("#collNames li"));
+		MV.toggleClass(sm.currentBucketAsNode(), Y.all("#bucketNames li"));
 		switch (index) {
 			case 1:
 				// Add File

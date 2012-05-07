@@ -46,15 +46,15 @@ YUI.add('utility', function (Y) {
 	};
 
 	var upperPartTemplate = [
-		"<textarea id='queryBox' name='queryBox' rows='6' cols='75' class='queryBox'>",
+		"<textarea id='queryBox' name='queryBox' class='queryBox'>",
 		"{}",
 		"</textarea>",
 		"<label for='fields' ></label><ul id='fields' class='checklist'>"].join('\n');
 
 	var lowerPartTemplate = [
 		"</ul><br/>",
-		"<label for='skip'> Skip: </label><input id='skip' type='text' name='skip' value='0' size='3'/>",
-		"<label for='limit'> Limit: </label><select id='limit' name='limit'><option value='10'>10</option><option value='25'>25</option><option value='50'>50</option></select>",
+		"<label for='skip'> Skip: </label><input id='skip' type='text' name='skip' value='0'/>",
+		"<label for='limit'> Limit: </label><span><select id='limit' name='limit'><option value='10'>10</option><option value='25'>25</option><option value='50'>50</option></select></span>",
 		"<button id='execQueryButton' class='bttn'>Execute Query</button>",
 		"<a id='selectAll' class='navigationRight' href='javascript:void(0)'>Select All</a>",
 		"<label> / </label>",

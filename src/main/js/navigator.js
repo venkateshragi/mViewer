@@ -183,8 +183,10 @@
                                 selectedElement.simulate('click');
                             }
                         }
+                    } else if ('SELECT' === selectedNodeName) {
+	                    selectedElement.simulate('mousedown');
                     } else {
-                        selectedElement.simulate('click');
+	                    selectedElement.simulate('click');
                     }
                 }
             },

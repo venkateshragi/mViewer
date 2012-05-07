@@ -61,12 +61,10 @@ YUI({
                     var parsedResponse = Y.JSON.parse(responseObject.responseText),
                     	error;
                     if (parsedResponse.response.result !== undefined) {
-	                    MV.showAlertMessage(parsedResponse.response.result, MV.infoIcon, function () {
-		                    window.location = "home.html?dbInfo=" + Y.one("#host").get("value") + "_" + Y.one("#port").get("value") + "_" + Y.one("#username").get("value");
-	                    });
                         Y.log("[0] dropped".format(Y.one("#currentDB").get("value")), "info");
                         Y.one("#currentDB").set("value", "");
-                        requestDBNames();
+	                    alert(parsedResponse.response.result);
+                        window.location.reload();
                     } else {
                         error = parsedResponse.response.error;
                         MV.showAlertMessage("Could not drop: [0]. [1]".format(Y.one("#currentDB").get("value"), MV.errorCodeMap[error.code]), MV.warnIcon);
@@ -174,8 +172,8 @@ YUI({
 	            var info, index, dbNames = "";
 	            var dbTemplate = '' +
 			            '<li class="yui3-menuitem" label=[0]> \
-						  <a id=[1] href="#[2]" class="yui3-menu-label dbLabel navigable">[3]</a> \
-						  <div id="[4]" class="yui3-menu">\
+						  <a id=[1] label=[2] href="#[3]" class="yui3-menu-label dbLabel navigable">[4]</a> \
+						  <div id="[5]" class="yui3-menu">\
 							  <div class="yui3-menu-content">\
 								  <ul>\
 									  <li class="yui3-menuitem">\
@@ -196,7 +194,8 @@ YUI({
 						  </li>';
                 for (index = 0; index < parsedResponse.response.result.length; index++) {
 	                var id = parsedResponse.response.result[index];
-	                dbNames += dbTemplate.format(id, id, id + "_subMenu", id, id + "_subMenu");
+	                var formattedName = id.length > 20 ? id.substring(0, 20) + "..." : id;
+	                dbNames += dbTemplate.format(id, id, id, id + "_subMenu", formattedName, id + "_subMenu");
                 }
                 if (index === 0) {
                     dbDiv.set("innerHTML", "No Databases");
