@@ -77,7 +77,7 @@ public class ApplicationUtils {
         if (value instanceof Number) {
             return JSONObject.numberToString((Number) value);
         }
-        if (value instanceof Boolean || value instanceof JSONArray) {
+        if (value instanceof Boolean) {
             return value.toString();
         }
         if (value instanceof JSONObject) {
@@ -86,6 +86,9 @@ public class ApplicationUtils {
         if (value instanceof Map) {
             JSONObject jsonObject = new JSONObject((Map) value);
             return serializeToJSON((JSONObject) jsonObject);
+        }
+        if (value instanceof JSONArray) {
+            return join((JSONArray) value);
         }
         if (value instanceof Collection) {
             return join(new ArrayList((Collection) value));
@@ -106,6 +109,27 @@ public class ApplicationUtils {
      */
     private static String join(ArrayList value) throws JSONException {
         int len = value.size();
+        StringBuffer sb = new StringBuffer();
+
+        for (int i = 0; i < len; i += 1) {
+            if (i > 0) {
+                sb.append(",");
+            }
+            sb.append(valueToString(value.get(i)));
+        }
+        return '[' + sb.toString() + ']';
+    }
+
+    /**
+     * Make a string from the contents of this collection. The
+     * <code>separator</code> string is inserted between each element.
+     * Warning: This method assumes that the data structure is acyclical.
+     *
+     * @return a string.
+     * @throws JSONException If the array contains an invalid number.
+     */
+    private static String join(JSONArray value) throws JSONException {
+        int len = value.length();
         StringBuffer sb = new StringBuffer();
 
         for (int i = 0; i < len; i += 1) {
