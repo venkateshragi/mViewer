@@ -156,7 +156,7 @@ public class DatabaseServiceImpl implements DatabaseService {
             throw new DatabaseException("DB_DELETION_EXCEPTION", e.getMessage());
         }
 
-        String result = "Successfully dropped DB with name '" + dbName + "'";
+        String result = "Successfully dropped DB '" + dbName + "'. The page will reload now.";
         return result;
     }
 
