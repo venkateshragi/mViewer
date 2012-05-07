@@ -392,9 +392,9 @@ table tr td {
 	float: right;
 	border: 1px solid #ccc;
 	list-style: none;
-	height: 7.3em;
+	height: 90px;
 	overflow: auto;
-	width: 18em;
+	width: 220px;
 	display: inline;
 }
 
@@ -419,29 +419,35 @@ table tr td {
 	height: 1%;
 }
 
+.queryBox {
+    width : 420px;
+    height : 90px;
+}
+
 #skip {
-  margin-right: 45;
+  margin-right: 55px;
+  width: 38px;
 }
 
 #first, #prev {
-    margin-right: 10;
+    margin-right: 10px;
 }
 
 #selectAll {
-    margin-left: 15;
+    margin-left: 15px;
 }
 
 #next {
-    margin-left: 10;    
+    margin-left: 10px;
 }
 
 #last {
-    margin-left: 10;
-    margin-right: 110;
+    margin-left: 10px;
+    margin-right: 95px;
 }
 
 #execQueryButton {
-	margin-left: 130;
+	margin-left: 120px;
 }
 textarea{
 	overflow:auto;
@@ -694,7 +700,7 @@ bottom: 0px;
 
     border: 1px solid #CCCCCC;
     box-shadow: 0 0 2px 2px highlight !important;
-    -webkit-box-shadow: 0 0 2px 2px rgb(255, 255, 255)
+    -webkit-box-shadow: 0 0 2px 2px rgb(255, 255, 255);
     -moz-box-shadow: 0 0 2px 2px highlight !important;
     outline: none;
 }
