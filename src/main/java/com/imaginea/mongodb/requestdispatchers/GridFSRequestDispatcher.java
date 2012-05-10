@@ -25,6 +25,7 @@ import com.mongodb.DBObject;
 import com.sun.jersey.multipart.FormDataBodyPart;
 import com.sun.jersey.multipart.FormDataParam;
 import org.apache.log4j.Logger;
+import org.json.JSONObject;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -60,6 +61,21 @@ public class GridFSRequestDispatcher extends BaseRequestDispatcher {
         return response;
     }
 
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/count")
+    public String getCount(@PathParam("dbName") final String dbName, @PathParam("bucketName") final String bucketName,
+                                    @QueryParam("dbInfo") final String dbInfo, @Context final HttpServletRequest request) {
+        String response = new ResponseTemplate().execute(logger, dbInfo, request, new ResponseCallback() {
+            public Object execute() throws Exception {
+                GridFSService gridFSService = new GridFSServiceImpl(dbInfo);
+                JSONObject result = gridFSService.getCount(dbName, bucketName);
+                return result;
+            }
+        });
+        return response;
+    }
+
     /**
      * Request handler for getting the list of files stored in GridFS of specified database.
      *
@@ -72,13 +88,14 @@ public class GridFSRequestDispatcher extends BaseRequestDispatcher {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("getfiles")
-    public String getFileList(@PathParam("dbName") final String dbName, @PathParam("bucketName") final String bucketName,
+    public String getFileList(@PathParam("dbName") final String dbName, @PathParam("bucketName") final String bucketName, @QueryParam("query") final String query,
+                              @QueryParam("fields") final String keys, @QueryParam("limit") final String limit, @QueryParam("skip") final String skip,
                               @QueryParam("dbInfo") final String dbInfo, @Context final HttpServletRequest request) {
         String response = new ResponseTemplate().execute(logger, dbInfo, request, new ResponseCallback() {
             public Object execute() throws Exception {
                 GridFSService gridFSService = new GridFSServiceImpl(dbInfo);
-                ArrayList<DBObject> fileObjects = gridFSService.getFileList(dbName, bucketName);
-                return fileObjects;
+                JSONObject result =  gridFSService.getFileList(dbName, bucketName, query, keys, skip, limit);
+                return result;
             }
         });
         return response.replace("\\", "").replace("\"{", "{").replace("}\"", "}");

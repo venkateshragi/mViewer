@@ -19,7 +19,7 @@
  */
 YUI({
 	filter: 'raw'
-}).use("loading-panel", "alert-dialog", "utility", "submit-dialog", "yes-no-dialog", "io", "node", "node-menunav", "json-parse", "event-delegate", "node-event-simulate", "stylize", "custom-datatable", function(Y) {
+}).use("loading-panel", "alert-dialog", "query-executor", "utility", "submit-dialog", "yes-no-dialog", "io", "node", "node-menunav", "json-parse", "event-delegate", "node-event-simulate", "stylize", "custom-datatable", function(Y) {
 	var MV = YUI.com.imaginea.mongoV,
 			sm = MV.StateManager,
 			collDiv = Y.one("#collNames ul.lists"),

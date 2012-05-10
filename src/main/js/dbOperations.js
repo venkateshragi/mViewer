@@ -225,10 +225,9 @@ YUI({
      * @param responseObject The response Object
      */ 
     function displayError(ioId, responseObject) {
-        Y.log("Could not load the databases", "error");
-        Y.log("Status code message: [0]".format(responseObject.statusText), "error");
+        Y.log("Could not load the databases. [0]".format(responseObject.statusText), "error");
         MV.hideLoadingPanel();
-        MV.showAlertMessage("Could not load collections! Please check if the app server is running. Status Text: [0]".format(responseObject.statustext), MV.warnIcon);
+        MV.showAlertMessage("Could not load Databases ! Please check if the app server is running. Status Text: [0]".format(responseObject.statusText), MV.warnIcon);
     }
     
     /**

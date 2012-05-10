@@ -45,45 +45,6 @@ YUI.add('utility', function (Y) {
 		return (typeof o === "object");
 	};
 
-	var upperPartTemplate = [
-		"<textarea id='queryBox' name='queryBox' class='queryBox'>",
-		"{}",
-		"</textarea>",
-		"<label for='fields' ></label><ul id='fields' class='checklist'>"].join('\n');
-
-	var lowerPartTemplate = [
-		"</ul><br/>",
-		"<label for='skip'> Skip: </label><input id='skip' type='text' name='skip' value='0'/>",
-		"<label for='limit'> Limit: </label><span><select id='limit' name='limit'><option value='10'>10</option><option value='25'>25</option><option value='50'>50</option></select></span>",
-		"<button id='execQueryButton' class='bttn'>Execute Query</button>",
-		"<a id='selectAll' class='navigationRight' href='javascript:void(0)'>Select All</a>",
-		"<label> / </label>",
-		"<a id='unselectAll' href='javascript:void(0)'>Unselect All</a>",
-		"</br></br>",
-		"<a id='first' href='javascript:void(0)'>&laquo; First</a>",
-		"<a id='prev'  href='javascript:void(0)'>&lsaquo; Previous</a>",
-		"<a id='next' href='javascript:void(0)'>Next &rsaquo;</a>",
-		"<a id='last' href='javascript:void(0)'>Last &raquo;</a>",
-		"<label>Showing</label>","<label id='startLabel'> 1 </label>","<label> - </label>",
-		"<label id='endLabel'> [0] </label>", "<label> of </label>","<label id='countLabel'> [1] </label>"			
-	].join('\n');
-
-	var checkListTemplate = "<li><label for='[0]'><input id='[1]' name='[2]' type='checkbox' checked=true />[3]</label></li>";
-
-	MV.getForm = function (keys, count) {
-		var checkList = "";
-		for (index = 0; index < keys.length; index++) {
-			checkList += checkListTemplate.format(keys[index], keys[index], keys[index], keys[index]);
-		}
-		return upperPartTemplate + checkList + lowerPartTemplate.format(count < 25 ? count : 25, count);
-	};
-
-	MV.hideQueryForm = function () {
-		var queryForm = Y.one('#queryForm');
-		queryForm.removeClass('form-cont');
-		queryForm.set("innerHTML", "");
-		document.getElementById('queryExecutor').style.display = 'none';
-	};
 	MV.mainBody = Y.one("#mainBody");
 	MV.header = Y.one("#mainBodyHeader");
 	MV.warnIcon = "warnIcon";
@@ -214,7 +175,7 @@ YUI.add('utility', function (Y) {
 		collStatistics: function () {
 			return "services/stats/db/[0]/collection/[1]?dbInfo=[2]&ts=[3]".format(sm.currentDB(), sm.currentColl(), sm.dbInfo(), sm.now());
 		},
-		documentKeys: function () {
+		getDocKeys: function () {
 			return "services/[0]/[1]/document/keys?dbInfo=[2]&ts=[3]".format(sm.currentDB(), sm.currentColl(), sm.dbInfo(), sm.now());
 		},
 		getDocs: function (params) {
@@ -231,6 +192,9 @@ YUI.add('utility', function (Y) {
 		},
 		addGridFS: function (bucketName) {
 			return "services/[0]/[1]/gridfs/create?dbInfo=[2]&ts=[3]".format(sm.currentDB(), bucketName, sm.dbInfo(), sm.now());
+		},
+		getFilesCount: function () {
+			return "services/[0]/[1]/gridfs/count?dbInfo=[2]&ts=[3]".format(sm.currentDB(), sm.currentBucket(), sm.dbInfo(), sm.now());
 		},
 		getFiles: function () {
 			return "services/[0]/[1]/gridfs/getfiles?dbInfo=[2]&ts=[3]".format(sm.currentDB(), sm.currentBucket(), sm.dbInfo(), sm.now());

@@ -142,7 +142,7 @@ YUI.add('treeble-paginator', function(Y) {
 		};
 
 		var treeTable = new YAHOO.widget.DataTable(
-				"table", // Root element id
+				"treeTable", // Root element id
 				treeColumnDef, // Column configuration
 				treeDataSource, // Data Source
 				treeConfig);
@@ -173,19 +173,16 @@ YUI.add('treeble-paginator', function(Y) {
 	};
 
 	MV.getTreebleDataForFiles = function (response) {
-		var allDocs = response.results,
+		var allDocs = response.documents,
 				aDoc, parentNode, kiddiesArray, result = [];
 		var i;
 		for (i = 0; i < allDocs.length; i++) {
 			aDoc = allDocs[i];
 			parentNode = {};
 			kiddiesArray = [];
-			parentNode.key = "<a id='openFile[0]' href='javascript:void(0);' style='color:#0e2137'>[1]</a>".format(i, aDoc.filename, i, i);
+			parentNode.key = "<a class='openFile' href='javascript:void(0);' style='color:#0e2137'>[1]</a>".format(i, aDoc.filename, i, i);
 			kiddiesArray = getChildrenArray(aDoc);
 			parentNode.kiddies = kiddiesArray.sort(sortFunc);
-			Y.on("click", function(e) {
-				MV.openFileEvent.fire({eventObj : e, isDownload: false});
-			}, "#openFile" + i);
 			result.push(parentNode);
 		}
 		return (prepareReturnObject(response, result));
@@ -243,9 +240,6 @@ YUI.add('treeble-paginator', function(Y) {
 		var returnObject = {};
 		var resultObject = {};
 		resultObject.documents = result;
-		resultObject.totalRecords = response.totalRecords;
-		resultObject.recordsReturned = response.recordsReturned;
-		resultObject.startIndex = response.startIndex;
 		returnObject.result = resultObject;
 		Y.log("Tree table data prepared", "info");
 		return (returnObject);

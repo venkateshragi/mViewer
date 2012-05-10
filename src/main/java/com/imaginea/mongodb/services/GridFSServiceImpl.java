@@ -18,7 +18,6 @@ package com.imaginea.mongodb.services;
 import com.imaginea.mongodb.common.MongoInstanceProvider;
 import com.imaginea.mongodb.common.SessionMongoInstanceProvider;
 import com.imaginea.mongodb.common.exceptions.*;
-import com.imaginea.mongodb.common.utils.ApplicationUtils;
 import com.mongodb.*;
 import com.mongodb.gridfs.GridFS;
 import com.mongodb.gridfs.GridFSDBFile;
@@ -33,9 +32,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.Iterator;
+import java.util.*;
 
 /**
  * Defines services definitions for performing operations like create/drop on
@@ -102,42 +99,61 @@ public class GridFSServiceImpl implements GridFSService {
      *
      * @param dbName     Name of Database
      * @param bucketName Name of GridFS Bucket
-     * @returns JSON representation of list of all files as a String.
+     * @param query
+     * @param fields
+     * @param skip
+     * @param limit      @returns JSON representation of list of all files as a String.
      */
-    public ArrayList<DBObject> getFileList(String dbName, String bucketName) throws ValidationException, DatabaseException, CollectionException {
-
+    public JSONObject getFileList(String dbName, String bucketName, String query, String fields, String skip, String limit) throws ValidationException, DatabaseException, CollectionException {
         mongoInstance = mongoInstanceProvider.getMongoInstance();
-
         if (dbName == null) {
             throw new DatabaseException(ErrorCodes.DB_NAME_EMPTY, "Database Name Is Null");
         }
         if (dbName.equals("")) {
             throw new DatabaseException(ErrorCodes.DB_NAME_EMPTY, "Database Name Empty");
         }
+        if (bucketName == null) {
+            throw new CollectionException(ErrorCodes.COLLECTION_NAME_EMPTY, "Bucket name is null");
+        }
+        if (bucketName.equals("")) {
+            throw new CollectionException(ErrorCodes.COLLECTION_NAME_EMPTY, "Bucket Name Empty");
+        }
 
-        ArrayList<DBObject> fileList = new ArrayList<DBObject>();
 
+        JSONObject result = new JSONObject();
         try {
             if (!mongoInstance.getDatabaseNames().contains(dbName)) {
                 throw new DatabaseException(ErrorCodes.DB_DOES_NOT_EXISTS,
                     "Database with dbName [ " + dbName + "] does not exist");
             }
 
+            DBObject queryObj = (DBObject) JSON.parse(query);
+            int filesLimit = Integer.parseInt(limit);
+            int filesSkip = Integer.parseInt(skip);
+
             GridFS gridFS = new GridFS(mongoInstance.getDB(dbName), bucketName);
             Field field = GridFS.class.getDeclaredField("_filesCollection");
             field.setAccessible(true);
             DBCollection filesCollection = (DBCollection) field.get(gridFS);
-            DBCursor cursor = filesCollection.find().sort(new BasicDBObject("uploadDate", -1));
+            // Partial Keys cant be fetched for a file 
+            DBCursor cursor = filesCollection.find(queryObj, null).sort(new BasicDBObject("uploadDate", -1));
+            cursor.limit(filesLimit);
+            cursor.skip(filesSkip);
+
             Iterator<DBObject> it = cursor.iterator();
 
+            ArrayList<DBObject> fileList = new ArrayList<DBObject>();
             while (it.hasNext()) {
                 fileList.add(it.next());
             }
 
+            long count = mongoInstance.getDB(dbName).getCollection(bucketName + ".files").count(queryObj);
+            result.put("documents", fileList);
+            result.put("count", count);
         } catch (Exception m) {
             throw new CollectionException(ErrorCodes.GET_COLLECTION_LIST_EXCEPTION, m.getMessage());
         }
-        return fileList;
+        return result;
 
     }
 
@@ -325,6 +341,45 @@ public class GridFSServiceImpl implements GridFSService {
             throw new DocumentException(ErrorCodes.DOCUMENT_DELETION_EXCEPTION, e.getMessage());
         }
         result = "Bucket [" + bucketName + "] has been deleted from Database [" + dbName + "].";
+        return result;
+    }
+
+    /**
+     * Service handler for getting count of all files in a GridFS bucket.
+     *
+     * @param dbName     Name of Database
+     * @param bucketName Name of GridFS Bucket
+     * @returns Status message.
+     */
+    public JSONObject getCount(String dbName, String bucketName) throws DatabaseException, DocumentException, ValidationException, CollectionException {
+        mongoInstance = mongoInstanceProvider.getMongoInstance();
+        if (dbName == null) {
+            throw new DatabaseException(ErrorCodes.DB_NAME_EMPTY, "Database name is null");
+
+        }
+        if (dbName.equals("")) {
+            throw new DatabaseException(ErrorCodes.DB_NAME_EMPTY, "Database Name Empty");
+        }
+
+        if (bucketName == null) {
+            throw new CollectionException(ErrorCodes.COLLECTION_NAME_EMPTY, "Bucket name is null");
+        }
+        if (bucketName.equals("")) {
+            throw new CollectionException(ErrorCodes.COLLECTION_NAME_EMPTY, "Bucket Name Empty");
+        }
+
+        JSONObject result = new JSONObject();
+        try {
+            if (!mongoInstance.getDatabaseNames().contains(dbName)) {
+                throw new DatabaseException(ErrorCodes.DB_DOES_NOT_EXISTS, "DB [" + dbName + "] DOES NOT EXIST");
+            }
+
+            long count = mongoInstance.getDB(dbName).getCollection(bucketName + ".files").count();
+            result.put("count", count);
+            
+        } catch (Exception e) {
+            throw new DocumentException(ErrorCodes.GET_COLLECTION_LIST_EXCEPTION, e.getMessage());
+        }
         return result;
     }
 }

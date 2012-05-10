@@ -126,6 +126,7 @@ public class DocumentRequestDispatcher extends BaseRequestDispatcher {
                 Mongo mongoInstance = UserLogin.mongoConfigToInstanceMapping.get(dbInfo);
                 long count = mongoInstance.getDB(dbName).getCollection(collectionName).count();
                 DBCursor cursor = mongoInstance.getDB(dbName).getCollection(collectionName).find();
+                cursor.limit(10);
                 DBObject doc = new BasicDBObject();
                 Set<String> completeSet = new HashSet<String>();
                 while (cursor.hasNext()) {

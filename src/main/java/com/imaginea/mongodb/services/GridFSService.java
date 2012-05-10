@@ -22,6 +22,7 @@ import com.imaginea.mongodb.common.exceptions.ValidationException;
 import com.mongodb.DBObject;
 import com.sun.jersey.multipart.FormDataBodyPart;
 import org.json.JSONArray;
+import org.json.JSONObject;
 
 import java.io.File;
 import java.io.InputStream;
@@ -48,9 +49,12 @@ public interface GridFSService {
      *
      * @param dbName     Name of Database
      * @param bucketName Name of GridFS Bucket
-     * @returns JSON representation of list of all files as a String.
+     * @param query
+     *@param keys
+     * @param skip
+     * @param limit @returns JSON representation of list of all files as a String.
      */
-    public ArrayList<DBObject> getFileList(String dbName, String bucketName) throws ValidationException, DatabaseException, CollectionException;
+    public JSONObject getFileList(String dbName, String bucketName, String query, String keys, String skip, String limit) throws ValidationException, DatabaseException, CollectionException;
 
     /**
      * Service handler for retrieving the specified file stored in GridFS.
@@ -93,4 +97,13 @@ public interface GridFSService {
      * @returns Status message.
      */
     public String dropBucket(String dbName, String bucketName) throws DatabaseException, DocumentException, ValidationException, CollectionException;
+
+    /**
+     * Service handler for getting count of all files in a GridFS bucket.
+     *
+     * @param dbName     Name of Database
+     * @param bucketName Name of GridFS Bucket
+     * @returns Status message.
+     */
+    public JSONObject getCount(String dbName, String bucketName) throws DatabaseException, DocumentException, ValidationException, CollectionException;
 }
