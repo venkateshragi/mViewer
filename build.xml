@@ -216,7 +216,7 @@
 			<fileset dir="${scripts.dir}" />
 		</copy>
 
-		<chmod file="${release.app.dir}/start_mviewer.sh" perm="ugo+rx"/>
+		<chmod file="${release.app.dir}/start_mViewer.sh" perm="ugo+rx"/>
 
 		<zip destfile="${release.dir}/mViewer-v${app.version}.zip"
  		     basedir="${release.app.dir}" 

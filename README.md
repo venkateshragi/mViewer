@@ -16,13 +16,13 @@ Download the package from https://github.com/Imaginea/mViewer/downloads
 Unzip/Untar it and run the script/batch (with +x permission).
 
 >
-> $./start_mviewer.sh \<port\> 
+> $./start_mViewer.sh \<port\> 
 >
 
 or
 
 > 
-> \>start_mviewer.bat \<port\>
+> \>start_mViewer.bat \<port\>
 >
 
 <port> is optional, if not given it'll take the default port from properties file.

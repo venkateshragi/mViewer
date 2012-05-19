@@ -23,7 +23,7 @@ YUI({
         var menuOpt = eventObject.currentTarget.get("id");
         MV.toggleClass(eventObject.currentTarget, Y.all(".nav-cont li a"));
         _clearContents(MV.mainBody);
-        _clearContents(Y.one('#queryForm'));
+        MV.hideQueryForm();
         if (menuOpt === "home") {
             window.location = "home.html?dbInfo=" + Y.one("#host").get("value")+"_" + Y.one("#port").get("value") + "_" + Y.one("#username").get("value");
         } else if (menuOpt === "serverStats") {
@@ -45,17 +45,12 @@ YUI({
         var data = new YAHOO.util.XHRDataSource(MV.URLMap.serverStatistics(), {
             responseType: YAHOO.util.XHRDataSource.TYPE_JSON,
             responseSchema: {
-                resultsList: "response.result",
-                metaFields: {
-                    startIndex: 'first_index',
-                    recordsReturned: 'records_returned',
-                    totalRecords: 'total_records'
-                }
+                resultsList: "response.result"                
             }
         });
         data.sendRequest("", {
             success: function (request, responseObject) {
-                MV.mainBody.set("innerHTML", '<div id="table"></div><div id="table-pagination"></div>');
+                MV.mainBody.set("innerHTML", '<div id="treeTable"></div><div id="table-pagination"></div>');
                 var treebleData = MV.getTreebleDataForServerStats(responseObject);
 	            treeble = MV.getTreeble(treebleData);
 	            // Remove download & delete columns for server statistics
