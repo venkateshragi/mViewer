@@ -18,6 +18,16 @@ div#logo {
 	overflow: hidden;
 }
 
+.loginMsg {
+    visibility:hidden;
+    text-align: center;
+    font-weight: bold;
+    font-family: Arial, Helvetica, sans-serif;
+    color: #0e2137;
+    font-size: 12px;
+    line-height: 25px;
+}
+
 #loginForm {
 	width: 22em;
 	text-align: center;

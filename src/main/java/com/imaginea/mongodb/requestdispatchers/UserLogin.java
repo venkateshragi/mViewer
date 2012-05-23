@@ -99,9 +99,6 @@ public class UserLogin extends BaseRequestDispatcher {
 		if ("".equals(user) && "".equals(password)) {
 			user = "guest";
 		}
-		if ("127.0.0.1".equals(host)) {
-			host = "localhost"; // 1 key for both in map
-		}
 		final String mongoHost = host;
 		final String username = user;
 		String response = ErrorTemplate.execute(logger, new ResponseCallback() {

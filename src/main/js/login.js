@@ -19,6 +19,9 @@ YUI({
 }).use("io", "json", "node", "utility", function(Y) {
     var MV = YUI.com.imaginea.mongoV;
     var tryLogin = function(e) {
+	    
+	    Y.one('#loginMsg').setStyle('visibility', 'visible');
+
         var username = Y.one("#username").get("value").trim(),
             password = Y.one("#password").get("value").trim(),
             port = Y.one("#port").get("value").trim(),
@@ -80,6 +83,7 @@ YUI({
 	                    errorDiv.setStyle("display", "inline");
 	                    errorHandlerMap[error.code]();
                         Y.log("Could not login. Message: [0]".format(error.message), "error");
+	                    Y.one('#loginMsg').setStyle('visibility', 'hidden');
                     }
                 },
                 failure: function(ioId, responseObject) {
