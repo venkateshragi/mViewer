@@ -28,6 +28,7 @@ YUI({
             window.location = "home.html?dbInfo=" + Y.one("#host").get("value")+"_" + Y.one("#port").get("value") + "_" + Y.one("#username").get("value");
         } else if (menuOpt === "serverStats") {
             showServerStats();
+	        MV.header.addClass('tab-cont');
             MV.header.set("innerHTML", "Server Statistics");
         } else if (menuOpt === 'graphs') {
             _clearContents(MV.header);

@@ -243,9 +243,5 @@ YUI({
 		return (parseInt(match[0], 10));
 	}
 
-	Y.delegate("click", function(e) {
-		MV.openFileEvent.fire({eventObj : e, isDownload: false});
-	}, "#treeTable", "a.openFile");
-
 	Y.delegate("click", initQueryBox, "#bucketNames", "a.collectionLabel");
 });

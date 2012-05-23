@@ -34,7 +34,7 @@ input[type="file"] {
 }
 
 .btn-success {
-    background-color: #5BB75B;
+    background-color: #5BB9F6;
     background-image: -moz-linear-gradient(center top , #62C462, #51A351);
     background-repeat: repeat-x;
     border-color: rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.25);
@@ -55,7 +55,7 @@ input[type="file"] {
 }
 
 .btn-primary {
-    background-color: #0074CC;
+    background-color: #0074E6;
     background-image: -moz-linear-gradient(center top , #0088CC, #0055CC);
     background-repeat: repeat-x;
     border-color: rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.25);

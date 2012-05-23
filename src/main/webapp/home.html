@@ -7,14 +7,12 @@
 	content="This is the Home page for mViewer a MongoDB UI" />
 <LINK rel="SHORTCUT ICON" href="images/icon.png" />
 <!--YUI 3 JS files imported   -->
-<script type="text/javascript" src="lib/yui/build/yui/yui-min.js"></script>
-<script type="text/javascript" src="lib/yui/build/node-menunav/node-menunav-min.js"></script>
 <LINK type="text/css" rel="stylesheet"
       href="lib/yui/build/cssfonts/fonts-min.css"/>
 <LINK type="text/css" rel="stylesheet"
 	href="lib/yui/build/node-menunav/assets/node-menunav-core.css" />
 <LINK type="text/css" rel="stylesheet"
-	href="lib/yui/build/node-menunav/assets/skins/sam/node-menunav.css" />  
+	href="lib/yui/build/node-menunav/assets/skins/sam/node-menunav.css" />   
 <!--YUI 2 JS files imported   -->
 <LINK rel="stylesheet" type="text/css"
 	href="lib/yui2/build/fonts/fonts-min.css" />
@@ -29,7 +27,15 @@
 <LINK rel="stylesheet" type="text/css"
 	href="lib/yui2/build/datatable/assets/skins/sam/datatable.css">
 <LINK rel="stylesheet" type="text/css"
-	href="lib/yui2/build/container/assets/skins/sam/container.css" />
+  href="lib/yui2/build/container/assets/skins/sam/container.css"/>
+<link href="css/fileupload.css" rel="stylesheet" type="text/css">
+<!-- Bootstrap Image Gallery styles -->
+<LINK rel="stylesheet" href="lib/jQuery/css/bootstrap-image-gallery.min.css"/>
+<!-- CSS to style the file input field as button and adjust the Bootstrap progress bars -->
+<LINK rel="stylesheet" href="lib/jQuery/css/jquery.fileupload-ui.css"/>
+<LINK href="css/style.css" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="lib/yui/build/yui/yui-min.js"></script>
+<script type="text/javascript" src="lib/yui/build/node-menunav/node-menunav-min.js"></script>
 <script type="text/javascript"
 	src="lib/yui2/build/yahoo-dom-event/yahoo-dom-event.js"></script>
 <script type="text/javascript" src="lib/yui2/build/json/json-min.js"></script>
@@ -59,15 +65,7 @@
 <script type="text/javascript"
 	src="lib/yui2/build/container/container_core.js"></script>
 
-<link href="css/style.css" rel="stylesheet" type="text/css">
-
-<link href="css/fileupload.css" rel="stylesheet" type="text/css">
-
-<!-- Bootstrap Image Gallery styles -->
-<link rel="stylesheet" href="lib/jQuery/css/bootstrap-image-gallery.min.css"> 
-<!-- CSS to style the file input field as button and adjust the Bootstrap progress bars -->
-<link rel="stylesheet" href="lib/jQuery/css/jquery.fileupload-ui.css">
-    <!-- jQuery files-->    
+    <!-- jQuery files-->
 <script src="lib/jQuery/jquery-1.7.2.js"></script>
 <!-- The jQuery UI widget factory, can be omitted if jQuery UI is already included -->
 <script src="lib/jQuery/fileupload/jquery.ui.widget.js"></script>
@@ -203,7 +201,7 @@
 				<div class="list-head">
 				  <label class="db">Databases <button id="createDB" class="add bttn">New</button></label>
 				</div>
-                  <div id="dbNames" class="yui3-menu">
+                  <div id="dbNames" class="yui3-menu yui3-splitbuttonnav">
                       <div class="yui3-menu-content" style="border:none">
                           <ul class="lists">
                           </ul>
@@ -216,7 +214,7 @@
                     <div class="list-head">
                         <label class="collections">Collections</label>
                     </div>
-                    <div id="collNames" class="yui3-menu">
+                    <div id="collNames" class="yui3-menu yui3-splitbuttonnav">
                         <div class="yui3-menu-content" style="border:none">
                             <ul class="lists">
                             </ul>
@@ -228,7 +226,7 @@
                     <div class="list-head">
                         <label class="gridFS">GridFS</label>
                     </div>
-                    <div id="bucketNames" class="yui3-menu">
+                    <div id="bucketNames" class="yui3-menu yui3-splitbuttonnav">
                         <div class="yui3-menu-content" style="border:none">
                             <ul class="lists">
                             </ul>
@@ -288,14 +286,13 @@
 				<label class="dialogLabel" for="name">Name:</label><input
 					type="text" name="name" />
 				<div class="clear"></div>
-				<label class="dialogLabel" for="collSize">Size:</label><input
+                <label class="dialogLabel" for="isCapped">Capped: <input type="checkbox" name="isCapped" /></label>
+				<div class="clear"></div>
+				<label class="dialogLabel" for="collSize">Size (in bytes):</label><input
 					value="0" type="text" name="collSize" />
 				<div class="clear"></div>
-				<label class="dialogLabel" for="collMaxSize">Maximum Size:</label><input
+				<label class="dialogLabel" for="collMaxSize">Max Documents:</label><input
 					value="0" type="text" name="collMaxSize" />
-				<div class="clear"></div>
-				<label class="dialogLabel" for="isCapped">Is capped:</label><input
-					type="checkbox" name="isCapped" />
 				<div class="clear"></div>
 			</form>
 		</div>

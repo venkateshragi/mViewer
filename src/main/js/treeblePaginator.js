@@ -82,6 +82,9 @@ YUI.add('treeble-paginator', function(Y) {
 				width: MV.mainBody.get('scrollWidth') / 2 - 48,
 				formatter: function (elCell, oRecord, oColumn, oData) {
 					elCell.innerHTML = '<span style="font-weight: bolder;padding-left:' + oRecord.getData('_yui_node_depth') * 15 + 'px;">' + oData + '</span>';
+					Y.on("click", function(e) {
+						MV.openFileEvent.fire({eventObj : e, isDownload: false});
+					}, elCell.firstChild.firstChild);
 				}
 			},
 			{
@@ -180,7 +183,7 @@ YUI.add('treeble-paginator', function(Y) {
 			aDoc = allDocs[i];
 			parentNode = {};
 			kiddiesArray = [];
-			parentNode.key = "<a class='openFile' href='javascript:void(0);' style='color:#0e2137'>[1]</a>".format(i, aDoc.filename, i, i);
+			parentNode.key = "<a id='openFile[0]' href='javascript:void(0);' style='color:#0e2137'>[1]</a>".format(i, aDoc.filename);
 			kiddiesArray = getChildrenArray(aDoc);
 			parentNode.kiddies = kiddiesArray.sort(sortFunc);
 			result.push(parentNode);

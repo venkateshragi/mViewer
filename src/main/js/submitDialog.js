@@ -80,7 +80,7 @@ YUI.add('submit-dialog', function(Y) {
 	    var dialogBox = $("#" + form).data("dialogBox");
 	    if (!dialogBox) {
 		    dialogBox = new YAHOO.widget.Dialog(form, {
-			    width: "30em",
+			    width: "25em",
 			    fixedcenter: true,
 			    visible: false,
 			    effect: {
