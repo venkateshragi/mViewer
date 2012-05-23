@@ -42,5 +42,5 @@ YUI({
 		globalConsole.show();
 		globalConsole.syncUI(); // to handle any UI changes queued while hidden.
 	}
-    Y.on('click', showConsole, '#show_console', null, globalConsole);
+    Y.on('click', showConsole, '#console', null, globalConsole);
 });

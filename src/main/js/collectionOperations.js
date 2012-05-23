@@ -72,7 +72,7 @@ YUI({
 						<a id=[1] label="[2]" href="javascript:void(0)" class="collectionLabel navigable">[3]</a> \
 						<a href="#[4]" class="yui3-menu-toggle"></a>\
 				    </span>\
-					<div id="[5]" class="yui3-menu">\
+					<div id="[5]" class="yui3-menu menu-width">\
 						<div class="yui3-menu-content">\
 							<ul>\
 								<li class="yui3-menuitem">\
@@ -94,7 +94,7 @@ YUI({
 						<a id=[1] label="[2]" href="javascript:void(0)" class="collectionLabel navigable">[3]</a> \
 						<a href="#[4]" class="yui3-menu-toggle"></a>\
 				    </span>\
-					<div id="[5]" class="yui3-menu">\
+					<div id="[5]" class="yui3-menu menu-width">\
 						<div class="yui3-menu-content">\
 							<ul>\
 								<li class="yui3-menuitem">\

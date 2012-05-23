@@ -148,7 +148,7 @@
                     selectedElement = null;
                     var index = 0;
                     for (; index < self.regions.length; index++) {
-                        if (self.regions[index].get('id').toUpperCase().indexOf(regionName.toUpperCase()) === 0) {
+                        if (self.regions[index].get('id').toUpperCase().indexOf(regionName.toUpperCase()) !== -1) {
                             self.regions[index].addClass('shadow');
                             self.regions[index].addClass('simulatedHover');
                             //just go for the first selected element as result
