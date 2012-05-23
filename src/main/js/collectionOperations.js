@@ -68,7 +68,10 @@ YUI({
 
 			var collTemplate = '' +
 					'<li class="yui3-menuitem" label="[0]"> \
-	                <a id=[1] label="[2]" href="#[3]" class="collectionLabel yui3-menu-label navigable">[4]</a> \
+					<span class="yui3-menu-label"> \
+						<a id=[1] label="[2]" href="javascript:void(0)" class="collectionLabel navigable">[3]</a> \
+						<a href="#[4]" class="yui3-menu-toggle"></a>\
+				    </span>\
 					<div id="[5]" class="yui3-menu">\
 						<div class="yui3-menu-content">\
 							<ul>\
@@ -87,7 +90,10 @@ YUI({
 		            </li>';
 			var bucketTemplate = '' +
 					'<li class="yui3-menuitem" label="[0]"> \
-	                <a id=[1] label="[2]" href="#[3]" class="collectionLabel yui3-menu-label">[4]</a> \
+					<span class="yui3-menu-label"> \
+						<a id=[1] label="[2]" href="javascript:void(0)" class="collectionLabel navigable">[3]</a> \
+						<a href="#[4]" class="yui3-menu-toggle"></a>\
+				    </span>\
 					<div id="[5]" class="yui3-menu">\
 						<div class="yui3-menu-content">\
 							<ul>\
@@ -117,13 +123,13 @@ YUI({
 						formattedName = collectionName.length > 20 ? collectionName.substring(0, 20) + "..." : collectionName;						
 						id = collectionName.replace(/ /g, '_');
 						id = id.replace('.', '_');
-						gridFSBuckets += bucketTemplate.format(collectionName, id, collectionName, id + "_subMenu", formattedName, id + "_subMenu");
+						gridFSBuckets += bucketTemplate.format(collectionName, id, formattedName, collectionName, id + "_subMenu", id + "_subMenu");
 						hasFiles = true;
 					}
 					// Issue 17 https://github.com/Imaginea/mViewer/issues/17
 					if (pos < 0 && collectionName.search(".chunks") < 0) {
 						id = collectionName.replace(/ /g, '_');
-						collections += collTemplate.format(collectionName, id, collectionName, id + "_subMenu", formattedName, id + "_subMenu");
+						collections += collTemplate.format(collectionName, id, collectionName, formattedName, id + "_subMenu", id + "_subMenu");
 						hasCollections = true;
 					}
 				}
@@ -135,10 +141,10 @@ YUI({
 				gridFSDiv.set("innerHTML", gridFSBuckets);
 
 				var menu1 = Y.one("#collNames");
-				menu1.plug(Y.Plugin.NodeMenuNav);
+				menu1.plug(Y.Plugin.NodeMenuNav, { autoSubmenuDisplay: false, mouseOutHideDelay: 0 });
 				menu1.set("style.display", "block");
 				var menu2 = Y.one("#bucketNames");
-				menu2.plug(Y.Plugin.NodeMenuNav);
+				menu2.plug(Y.Plugin.NodeMenuNav, { autoSubmenuDisplay: false, mouseOutHideDelay: 0 });
 				menu2.set("style.display", "block");
 				sm.publish(sm.events.collectionsChanged);
 				MV.hideLoadingPanel();

@@ -172,8 +172,11 @@ YUI({
 	            var info, index, dbNames = "";
 	            var dbTemplate = '' +
 			            '<li class="yui3-menuitem" label=[0]> \
-						  <a id=[1] label=[2] href="#[3]" class="yui3-menu-label dbLabel navigable">[4]</a> \
-						  <div id="[5]" class="yui3-menu">\
+	                      <span class="yui3-menu-label"> \
+						        <a id=[1] label=[2] href="javascript:void(0)" class="dbLabel navigable">[3]</a> \
+	                            <a href="#[4]" class="yui3-menu-toggle"></a>\
+			              </span>\
+	                      <div id="[5]" class="yui3-menu">\
 							  <div class="yui3-menu-content">\
 								  <ul>\
 									  <li class="yui3-menuitem">\
@@ -195,7 +198,7 @@ YUI({
                 for (index = 0; index < parsedResponse.response.result.length; index++) {
 	                var id = parsedResponse.response.result[index];
 	                var formattedName = id.length > 20 ? id.substring(0, 20) + "..." : id;
-	                dbNames += dbTemplate.format(id, id, id, id + "_subMenu", formattedName, id + "_subMenu");
+	                dbNames += dbTemplate.format(id, id, id, formattedName, id + "_subMenu", id + "_subMenu");
                 }
                 if (index === 0) {
                     dbDiv.set("innerHTML", "No Databases");
@@ -203,7 +206,7 @@ YUI({
                 dbDiv.set("innerHTML", dbNames);	            
 				var menu = Y.one("#dbNames");
 	            menu.unplug(Y.Plugin.NodeMenuNav);
-				menu.plug(Y.Plugin.NodeMenuNav);
+				menu.plug(Y.Plugin.NodeMenuNav, { autoSubmenuDisplay: false, mouseOutHideDelay: 0 });
 	            menu.set("style.display", "block");
                 MV.hideLoadingPanel();
                 Y.log("Database Names succesfully loaded", "info");
