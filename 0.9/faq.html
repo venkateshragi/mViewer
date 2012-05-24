@@ -1,0 +1,347 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+    <title>mViewer-Help Page</title>
+    <META http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <META name="description"
+          content="This is the help page for mViewer- a MongoDB UI"/>
+    <LINK rel="SHORTCUT ICON" href="images/icon.png"/>
+    <link href="stylesheets/style.css" rel="stylesheet" type="text/css">
+</head>
+<body width="100%">
+<center>
+    <img src="images/index_logo.png" alt="logo" align="center" id="logo">
+    <br>
+</center>
+<div class="wrapper">
+<div class="body-cont gen-float">
+<div class="gen-float">
+<div class="left-cont gen-float">
+    <div class="list-head">
+        <label>General</label>
+    </div>
+    <ul class="lists">
+        <li><a href="#gettingStarted">Getting Started</a></li>
+    </ul>
+    <div class="list-head">
+        <label>Database Operations</label>
+    </div>
+    <ul class="lists">
+        <li><a href="#addDB">Add a Database</a></li>
+        <li><a href="#deleteDB">Delete a Database</a></li>
+        <li><a href="#dbStatistics">Database Statistics</a></li>
+    </ul>
+    <div class="list-head">
+        <label>Collection Operations</label>
+    </div>
+    <ul class="lists">
+        <li><a href="#addCol">Add a Collection</a></li>
+        <li><a href="#deleteCol">Delete a Collection</a></li>
+        <li><a href="#colStatistics">Collection Statistics</a></li>
+    </ul>
+    <div class="list-head">
+        <label>Document Operations</label>
+    </div>
+    <ul class="lists">
+        <li><a href="#addDoc">Add a Document</a></li>
+        <li><a href="#viewDoc">View Documents</a></li>
+        <li><a href="#editDoc">Edit a Document</a></li>
+        <li><a href="#deleteDoc">Delete a Document</a></li>
+    </ul>
+    <div class="list-head">
+        <label>GridFS Operations</label>
+    </div>
+    <ul class="lists">
+        <li><a href="#addGFS">Add a GridFS Bucket</a></li>
+        <li><a href="#deleteGFS">Delete a GridFS Bucket</a></li>
+        <li><a href="#GFSStatistics">GridFS Bucket Statistics</a></li>
+    </ul>
+    <div class="list-head">
+        <label>File Operations</label>
+    </div>
+    <ul class="lists">
+        <li><a href="#addFile">Add a File</a></li>
+        <li><a href="#viewFiles">View Files</a></li>
+        <li><a href="#openFile">Open a File</a></li>
+        <li><a href="#downloadFile">Download a File</a></li>
+        <li><a href="#deleteFile">Delete a File</a></li>
+    </ul>
+    <div class="list-head">
+        <label>Troubleshooting</label>
+    </div>
+    <ul class="lists">
+        <li><a href="#noDBs">No DBs displayed</a></li>
+        <li><a href="#corruptedSession">Corrupted Session</a></li>
+        <li><a href="#reportIssue">Reporting Issues</a></li>
+    </ul>
+</div>
+<div class="right-cont gen-float">
+<div class="main-head list-head">
+    <label id="General">General</label>
+</div>
+<div class="sublist-head list-head">
+    <label id="gettingStarted">How do I get started with mViewer?</label>
+</div>
+<div class="helpDescription">
+    <p>
+        First install mongoDB and ensure that mongo daemon is running. The installation process for mongoDB can be found
+        <a href="http://www.mongodb.org/display/DOCS/Quickstart">here</a>.
+    </p>
+</div>
+<div class="sub-sub-head list-head">
+    <label id="gettingStarted2">I've installed mongoDB! What next?</label>
+</div>
+<div class="helpDescription">
+    <p>
+        Make sure mViewer is running. If not already started, run start_mViewer.bat or start_mViewer.sh file packaged in
+        the zip.
+        </br></br>
+        Proceed to the Login page of mViewer (<a href="http://127.0.0.1:8080/index.html">http://127.0.0.1:8080/index.html</a>) and enter the Host and Port Number of
+        the mongoDB.
+    </p>
+    <img class="helpDescriptionImg" alt="login screen" src="images/help/login.png">
+
+    <p>
+        If you haven’t been provided with credentials, the UserName and Password field can be left blank. By the way, to
+        add a user to the admin database of mongoDB, read the help below.
+    </p>
+</div>
+<div class="sub-sub-head list-head">
+    <label id="addUser">How do I add a user to the admin database of mongoDB?</label>
+</div>
+<div class="helpDescription">
+    <p>To add a user, start the mongo process and follow the sequence in the screenshot below.</p>
+    <img class="helpDescriptionImg" alt="add user " src="images/help/add_user.png">
+
+    <p> Now you can login with these credentials as described in the previous help section.</p>
+</div>
+<div class="main-head list-head">
+    <label id="dbOperations">Database Operations</label>
+</div>
+<div class="sublist-head list-head">
+    <label id="addDB">How do I add a database?</label>
+</div>
+<div class="helpDescription">
+    <p>You can add a new database by clicking on "New" button next to Databases on the left sidebar</p>
+    <img class="helpDescriptionImg" alt="add db " src="images/help/add_db.png">
+
+    <p>Enter the new database name and click submit.</p>
+    <img class="helpDescriptionImg" alt="add db " src="images/help/add_db2.png">
+</div>
+<div class="sublist-head list-head">
+    <label id="deleteDB">How do I delete a database?</label>
+</div>
+<div class="helpDescription">
+    <p>
+        Hover on the database name to see a menu appear. Click on <strong>Drop Database</strong> from the
+        menu as shown below.
+    </p>
+    <img class="helpDescriptionImg" alt="delete Database" src="images/help/delete_db.png">
+
+    <p>Click <strong>Yes</strong> on the confirmation alert to delete the database. The database will be deleted and a
+        confirmation of successful database deletion will be shown mentioning a page reload. </p>
+</div>
+<div class="sublist-head list-head">
+    <label id="dbStatistics">How do I view the database Statistics</label>
+</div>
+<div class="helpDescription">
+    <p>Just click on the database name to view the statistics. Alternatively, you can hover on the database name
+        and click <strong>Statistics</strong> from the menu as shown below.
+    </p>
+    <img class="helpDescriptionImg" alt="Database stats" src="images/help/db_stats.png">
+</div>
+<div class="main-head list-head">
+    <label>Collection Operations</label>
+</div>
+<div class="sublist-head list-head">
+    <label id="addCol">How do I add a Collection to a DB?</label>
+</div>
+<div class="helpDescription">
+    <p>You can add a new collection to a DB by clicking on <strong>Add Collection</strong> in the menu that appears when
+        you hover over the database name.</p>
+    <img class="helpDescriptionImg" alt="add col " src="images/help/add_col.png">
+
+    <p>Enter the new collection name and click submit. To create a fixed size capped collection, check
+        <strong>Capped</strong>
+        and enter <strong>collection size</strong> and <strong>max no. of documents</strong> in the collection.</p>
+    <img class="helpDescriptionImg" alt="add col " src="images/help/add_col2.png">
+</div>
+<div class="sublist-head list-head">
+    <label id="deleteCol">How do I delete a Collection in a DB?</label>
+</div>
+<div class="helpDescription">
+    <p>Hover on the Collection name and click <strong>Drop Collection</strong> from the menu that appears as shown
+        below.</p>
+    <img class="helpDescriptionImg" alt="delete Collection" src="images/help/drop_coll.png">
+
+    <p>Click <strong>Yes</strong> on the confirmation alert to delete the collection. The collection along with all its
+        documents will then be dropped. </p>
+</div>
+<div class="sublist-head list-head">
+    <label id="colStatistics">How do I view the Collection Statistics</label>
+</div>
+<div class="helpDescription">
+    <p>You can hover on the collection name and click <strong>Statistics</strong> from the menu as shown below.
+    </p>
+    <img class="helpDescriptionImg" alt="collection Statistics" src="images/help/col_stats.png">
+</div>
+<div class="main-head list-head">
+    <label>Document Operations</label>
+</div>
+<div class="sublist-head list-head">
+    <label id="addDoc">How do I add a document to a Collection?</label>
+</div>
+<div class="helpDescription">
+    <p>You can add a new document to a collection by clicking on <strong>Add Document</strong> in the menu that appears
+        when you hover over the collection name.</p>
+    <img class="helpDescriptionImg" alt="add doc " src="images/help/add_doc.png">
+
+    <p>Enter the document data in a valid JSON format.</p>
+    <img class="helpDescriptionImg" alt="add doc " src="images/help/add_doc2.png">
+</div>
+<div class="sublist-head list-head">
+    <label id="viewDoc">How do I view the documents in a Collection?</label>
+</div>
+<div class="helpDescription">
+    <p>Click on the Collection name to view the documents in it. By default, only 10 documents are shown per page.
+        To see more documents per page, update <strong>Limit</strong> combo value to 25 or 50. <strong>Skip</strong>
+        field allows you to skip the specified no. of documents from start.
+        Add selectors/conditions in the query box to filter your results. Click on <strong>Execute Query</strong>
+        button to update on results on modifying query, skip , limit or fields.</p>
+    <img class="helpDescriptionImg" alt="collection Statistics" src="images/help/page_nav.png">
+
+    <p>Use the navigation buttons below namely <strong>First, Previous, Next & Last </strong> to navigate to a
+        particular set of documents
+        in the collection.</p>
+</div>
+<div class="sublist-head list-head">
+    <label id="editDoc">How do I edit a document in a Collection?</label>
+</div>
+<div class="helpDescription">
+    <p>You can edit a document in a collection by clicking on <strong>Edit</strong> button next to the documents list
+        that are displayed when you click on a Collection Name</p>
+    <img class="helpDescriptionImg" alt="edit doc " src="images/help/edit_doc.png">
+
+    <p>After editing, click on the <strong>Save</strong>/<strong>Cancel</strong> button to store/discard the changes
+        respectively.</p>
+    <img class="helpDescriptionImg" alt="edit doc " src="images/help/edit_doc2.png">
+</div>
+<div class="sublist-head list-head">
+    <label id="deleteDoc">How do I delete a document in a Collection?</label>
+</div>
+<div class="helpDescription">
+    <p>Click on <strong>Delete</strong> button next to the listed documents to delete a specific document from a
+        collection.</p>
+    <img class="helpDescriptionImg" alt="edit doc " src="images/help/edit_doc.png">
+</div>
+<div class="main-head list-head">
+    <label>GridFS Operations</label>
+</div>
+<div class="sublist-head list-head">
+    <label id="addGFS">How do I add a GridFS Bucket to a DB?</label>
+</div>
+<div class="helpDescription">
+    <p>You can add a new collection to a DB by clicking on <strong>Add GridFS Bucket</strong> in the menu that appears
+        when you hover over the database name.</p>
+    <img class="helpDescriptionImg" alt="add user " src="images/help/add_gfs.png">
+
+    <p>Enter the bucket name and click submit.</p>
+    <img class="helpDescriptionImg" alt="add user " src="images/help/add_gfs2.png">
+</div>
+<div class="sublist-head list-head">
+    <label id="deleteGFS">How do I delete a GridFS Bucket in a DB?</label>
+</div>
+<div class="helpDescription">
+    <p>Hover on the Collection name and click <strong>Drop Bucket</strong> from the menu that appears as shown
+        below.</p>
+    <img class="helpDescriptionImg" alt="delete Bucket" src="images/help/delete_gfs.png">
+
+    <p>Click <strong>Yes</strong> on the confirmation alert to delete the bucket. The bucket along with all its
+        files will then be dropped.</p>
+</div>
+<div class="sublist-head list-head">
+    <label id="GFSStatistics">How do I view the GridFS Bucket Statistics</label>
+</div>
+<div class="helpDescription">
+    <p>Hover on the GridFS Bucket name and click <strong>Statistics</strong> from the menu.
+</div>
+<div class="main-head list-head">
+    <label>File Operations</label>
+</div>
+<div class="sublist-head list-head">
+    <label id="addFile">How do I add a File(s) to a GridFS Bucket?</label>
+</div>
+<div class="helpDescription">
+    <p>You can add new file(s) to a bucket by clicking on <strong>Add File(s)</strong> in the menu that appears when
+        you hover over the GridFS Bucket name.</p>
+    <img class="helpDescriptionImg" alt="add file " src="images/help/add_file.png">
+
+    <p>In the file upload dialog that appears, click <strong>Add Files</strong> to select the files to be uploaded and
+        then click on <strong>Start Upload.</strong></p>
+    <img class="helpDescriptionImg" alt="add file " src="images/help/add_file2.png">
+
+    <p>You can cancel a specific file before starting upload, by clicking <strong>Cancel</strong>. You can even remove a
+        specific file after uploading by clicking <strong>Delete</strong>.</p>
+</div>
+<div class="sublist-head list-head">
+    <label id="viewFiles">How do I view the files in a GridFS Bucket?</label>
+</div>
+<div class="helpDescription">
+    <p>You can view the files in a GridFS Bucket by clicking on the Bucket Name</p>
+    <img class="helpDescriptionImg" alt="download file " src="images/help/view_files.png">
+
+</div>
+<div class="sublist-head list-head">
+    <label id="openFile">How do I open a File?</label>
+</div>
+<div class="helpDescription">
+    <p>You can open a file directly in the browser, by clicking the <strong>file name</strong> in Tree Table view or
+        <strong>Open</strong> button in JSON view.</p>
+</div>
+<div class="sublist-head list-head">
+    <label id="downloadFile">How do I download a File?</label>
+</div>
+<div class="helpDescription">
+    <p>You can download a file by clicking on <strong>download</strong> button in JSON view or clicking
+        <img src="images/download.png"> icon in Tree Table view.</p>
+</div>
+<div class="sublist-head list-head">
+    <label id="deleteFile">How do I delete a File?</label>
+</div>
+<div class="helpDescription">
+    <p>You can delete a file by clicking on <strong>delete</strong> button in JSON view or clicking
+        <img src="images/close.png"> icon in Tree Table view.</p>
+</div>
+<div class="main-head list-head">
+    <label>Troubleshooting</label>
+</div>
+<div class="sublist-head list-head">
+    <label id="noDBs">No dbs are displayed for localhost, what should I do?</label>
+</div>
+<div class="helpDescription">
+    <p>Try to use localhost.localdomain as the host name, in fact the best idea would be to look at your hosts file and
+        use the first value.</p>
+</div>
+<div class="sublist-head list-head">
+    <label id="corruptedSession">My Session is corrupted, what does this mean?</label>
+</div>
+<div class="helpDescription">
+    <p>You should be redirected back to login page automatically. Corrupted session just means that the token used for
+        session tracking has been lost. No data at the db end would be compromised.</p>
+</div>
+
+<div class="sublist-head list-head">
+    <label id="reportIssue">Something is broken, how do I report it</label>
+</div>
+<div class="helpDescription">
+    <p>You can open up an issue at <a href="https://github.com/Imaginea/mViewer">https://github.com/Imaginea/mViewer</a>.
+        Would be great if you attach the server logs to the issue.</p>
+</div>
+
+</div>
+</div>
+</div>
+</div>
+</body>
+</html>
+
