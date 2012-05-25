@@ -15,15 +15,15 @@ mViewer(Micro/Mongo Viewer) is a light web-based GUI for managing MongoDB withou
 
 ### Download mViewer-v0.9
 
-    Windows :- https://github.com/downloads/Imaginea/mViewer/mViewer-v0.9.zip
+Windows :- https://github.com/downloads/Imaginea/mViewer/mViewer-v0.9.zip
 
-    Mac/Linux :- https://github.com/downloads/Imaginea/mViewer/mViewer-v0.9.tar.gz
+Mac/Linux :- https://github.com/downloads/Imaginea/mViewer/mViewer-v0.9.tar.gz
 
-    Download previous versions from https://github.com/Imaginea/mViewer/downloads
+Download previous versions from https://github.com/Imaginea/mViewer/downloads
     
 ### Usage
 
-    Unzip/Untar the downloaded package and simply run start_mViewer.bat/start_mViewer.sh (with +x permission).
+Unzip/Untar the downloaded package and simply run start_mViewer.bat/start_mViewer.sh (with +x permission).
 
 >
 > $./start_mViewer.sh \<port\> 
