@@ -10,14 +10,20 @@ mViewer(Micro/Mongo Viewer) is a light web-based GUI for managing MongoDB withou
    4. Querying using Query executor
    5. Quick Navigation to all actions items, just needing to type few visible letters of the name using CTRL + Space.
    6. Pagination and Navigation to any subset of documents.
-   7. Viewing stats of databases, collections and gridfs
+   7. Viewing stats of databases, collections and gridFS
    8. Opening multiple connections from same browser to different MongoDB servers
 
-### Download and Use
+### Download mViewer-v0.9
 
-Download the package from https://github.com/Imaginea/mViewer/downloads
+    Windows :- https://github.com/downloads/Imaginea/mViewer/mViewer-v0.9.zip
 
-Unzip/Untar it and run the script/batch (with +x permission).
+    Mac/Linux :- https://github.com/downloads/Imaginea/mViewer/mViewer-v0.9.tar.gz
+
+    Download previous versions from https://github.com/Imaginea/mViewer/downloads
+    
+### Usage
+
+    Unzip/Untar the downloaded package and simply run start_mViewer.bat/start_mViewer.sh (with +x permission).
 
 >
 > $./start_mViewer.sh \<port\> 
@@ -29,7 +35,8 @@ or
 > \>start_mViewer.bat \<port\>
 >
 
-<port> is optional, if not given it'll take the default port from properties file.
+'port' is optional, if not provided default port from properties file will be used.
+
 
 ### How to Build (If you prefer maven)
 
