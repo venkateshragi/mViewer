@@ -249,6 +249,7 @@ YUI({
 						var index = getButtonIndex(targetNode);
 						toggleSaveEdit(targetNode, index, actionMap.save);
 						MV.showAlertMessage("Document updated successfully.", MV.infoIcon);
+						Y.one('#execQueryButton').simulate('click');
 						Y.log("Document update to [0]".format(response), "info");
 					} else {
 						var error = parsedResponse.response.error;

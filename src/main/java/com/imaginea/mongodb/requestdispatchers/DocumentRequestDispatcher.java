@@ -117,7 +117,8 @@ public class DocumentRequestDispatcher extends BaseRequestDispatcher {
     @GET
     @Path("/keys")
     @Produces(MediaType.APPLICATION_JSON)
-    public String getKeysRequest(@PathParam("dbName") final String dbName, @PathParam("collectionName") final String collectionName, @QueryParam("dbInfo") final String dbInfo,
+    public String getKeysRequest(@PathParam("dbName") final String dbName, @PathParam("collectionName") final String collectionName,
+                                 @QueryParam("allKeys") final Boolean allKeys, @QueryParam("dbInfo") final String dbInfo,
                                  @Context final HttpServletRequest request) {
 
         String response = new ResponseTemplate().execute(logger, dbInfo, request, new ResponseCallback() {
@@ -126,7 +127,8 @@ public class DocumentRequestDispatcher extends BaseRequestDispatcher {
                 Mongo mongoInstance = UserLogin.mongoConfigToInstanceMapping.get(dbInfo);
                 long count = mongoInstance.getDB(dbName).getCollection(collectionName).count();
                 DBCursor cursor = mongoInstance.getDB(dbName).getCollection(collectionName).find();
-                cursor.limit(10);
+                if(!allKeys)
+                    cursor.limit(10);
                 DBObject doc = new BasicDBObject();
                 Set<String> completeSet = new HashSet<String>();
                 while (cursor.hasNext()) {

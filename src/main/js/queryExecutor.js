@@ -19,14 +19,17 @@ YUI.add('query-executor', function (Y) {
 		});
 
 		/**
-		 * It sends request to get all  the keys of the  current collection
+		 * It sends request to get the keys from first 10 records only. Updates all key with another request.
 		 */
-		var getKeyRequest = Y.io(keysUrl, {
+		Y.io(keysUrl, {
 			method: "GET",
+			data : 'allKeys=false',
 			on: {
 				success: function(ioId, responseObject) {
 					populateQueryBox(ioId, responseObject);
 					executeQuery(null);
+					// Now sending request to fetch all keys
+					populateAllKeys();
 				},
 				failure: function(ioId, responseObject) {
 					MV.hideLoadingPanel();
@@ -35,6 +38,26 @@ YUI.add('query-executor', function (Y) {
 				}
 			}
 		});
+
+		function populateAllKeys() {
+			Y.io(keysUrl, {
+				method: "GET",
+				data : 'allKeys=true',
+				on: {
+					success: function(ioId, responseObject) {
+						var parsedResponse = Y.JSON.parse(responseObject.responseText);
+						var keys = parsedResponse.response.result.keys;
+						var innerHTML = formatKeys(keys);
+						Y.one('#fields').set('innerHTML', innerHTML);
+					},
+					failure: function(ioId, responseObject) {
+						MV.hideLoadingPanel();
+						MV.showAlertMessage("Unexpected Error: Could not load the query Box", MV.warnIcon);
+						Y.log("Could not send the request to get the keys in the collection. Response Status: [0]".format(responseObject.statusText), "error");
+					}
+				}
+			});
+		}
 	};
 
 	/**
@@ -129,13 +152,19 @@ YUI.add('query-executor', function (Y) {
 
 			].join('\n');
 			checkList = "<label for='fields' ></label><ul id='fields' class='checklist'>";
-			for (var index = 0; index < keys.length; index++) {
-				checkList += checkListTemplate.format(keys[index], keys[index], keys[index], keys[index]);
-			}
+			checkList += formatKeys(keys);
 			checkList += "</ul>";
 		}
-		return upperPartTemplate + checkList + lowerPartTemplate + selectTemplate +paginatorTemplate.format(count < 25 ? count : 25, count);
+		return upperPartTemplate + checkList + lowerPartTemplate + selectTemplate + paginatorTemplate.format(count < 25 ? count : 25, count);
 	};
+
+	function formatKeys(keys) {
+		var checkList = "";
+		for (var index = 0; index < keys.length; index++) {
+			checkList += checkListTemplate.format(keys[index], keys[index], keys[index], keys[index]);
+		}
+		return checkList;
+	}
 
 	var upperPartTemplate = [
 		"<textarea id='queryBox' name='queryBox' class='queryBox'>",
@@ -272,7 +301,7 @@ YUI.add('query-executor', function (Y) {
 			MV.showAlertMessage("Failed:Could not parse query. [0]".format(error), MV.warnIcon);
 		}
 	}
-	
+
 }, '3.3.0', {
 	requires : ["json-parse", "node-event-simulate"]
 });

@@ -224,7 +224,7 @@ YUI.add('utility', function (Y) {
 			return "services/stats?dbInfo=[0]&ts=[1]".format(sm.dbInfo(), sm.now());
 		},
 		help: function () {
-			return "help.html";
+			return "http://imaginea.github.com/mViewer/";
 		},
 		troubleShootPage: function () {
 			return "troubleshoot.html";

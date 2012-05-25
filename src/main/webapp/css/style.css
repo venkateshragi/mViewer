@@ -740,8 +740,9 @@ fieldset.login legend {
 .loginHelp {
     text-align: right;
     font-weight: bold;
-    padding-bottom: 1em;
-    padding-right: 3em;
+    padding-bottom: 10px;
+    padding-right: 22px;
+    font-size: 13px;
 }
 
 .floatingFooter {
