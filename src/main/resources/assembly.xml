@@ -24,6 +24,7 @@ xsi:schemaLocation="http://maven.apache.org/plugins/maven-assembly-plugin/assemb
 			<directory>${project.basedir}/scripts</directory>
 			<outputDirectory>/</outputDirectory>
 			<fileMode>0755</fileMode>
+            <lineEnding>unix</lineEnding>
 			<includes>
 				<include>*</include>
 			</includes>
@@ -31,6 +32,7 @@ xsi:schemaLocation="http://maven.apache.org/plugins/maven-assembly-plugin/assemb
 		<fileSet>
 			<directory>${project.basedir}</directory>
 			<outputDirectory>/</outputDirectory>
+            <lineEnding>unix</lineEnding>
 			<includes>
 				<include>README*</include>
 				<include>LICENSE*</include>
