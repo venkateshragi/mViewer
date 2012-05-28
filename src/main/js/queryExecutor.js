@@ -47,8 +47,10 @@ YUI.add('query-executor', function (Y) {
 					success: function(ioId, responseObject) {
 						var parsedResponse = Y.JSON.parse(responseObject.responseText);
 						var keys = parsedResponse.response.result.keys;
-						var innerHTML = formatKeys(keys);
-						Y.one('#fields').set('innerHTML', innerHTML);
+						if (keys !== undefined) {
+							var innerHTML = formatKeys(keys);
+							Y.one('#fields').set('innerHTML', innerHTML);
+						}
 					},
 					failure: function(ioId, responseObject) {
 						MV.hideLoadingPanel();
