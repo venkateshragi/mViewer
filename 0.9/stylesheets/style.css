@@ -309,6 +309,9 @@ ul.user-menu li label.logout {
 .left-cont {
 	width: 220px;
 	padding: 0px;
+    /*Left panel needs to be removed and an index needs to be added at page top if necessary.
+    Hence hiding it for now. */
+    display: none;
 }
 
 .list-head {
@@ -368,8 +371,7 @@ textarea {
     resize: none;
 }
 
-.right-cont {
-	width: 699px;
+.right-cont {	
 	background: #fff;
 	border-left: 1px solid #E3EAEE;
 	min-height: 500px;
