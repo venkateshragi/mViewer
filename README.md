@@ -54,7 +54,7 @@ Detailed documentation on mViewer features & usage can be found at http://imagin
    Q. Why do we skip tests ?.
 
    A. Because we need to configure src/test/resources/mongo.config to point to running mongod service. To let the test run.
-   Once set, tests should run out of the box.
+   Once set, tests can run.
    
 ##### Running standalone
 Run using maven. It will create a war and run it using the jetty server on a default port (Check the logs that print on your screen to spot it), you can access the service at http://localhost:8080/mViewer/
