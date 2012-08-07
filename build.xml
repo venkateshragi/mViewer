@@ -2,12 +2,12 @@
 
 
 	<property name="app.name" value="mViewer" />
-    <property name="app.version" value="0.9.1" />
+    <property name="app.version" value="0.9.2" />
 	<property name="app.war" value="${app.name}.war" />
 	<property name="app.jar" value="${app.name}.jar" />
 	<property name="src.dir" value="${basedir}/src" />
 	<property name="java.src.dir" value="${src.dir}/main/java" />
-	<property name="js.src.dir" value="${src.dir}/main/js" />
+	<property name="js.src.dir" value="${src.dir}/main/webapp/js" />
 	<property name="src.resources.dir" value="${src.dir}/resources" />
 	<property name="main.resources.dir" value="${src.dir}/main/resources" />
 	<property name="lib.dir" value="${src.resources.dir}" />
@@ -29,9 +29,9 @@
 	<property name="java.test.dir" value="${src.dir}/test/java" />
 	<property name="test.reports.dir" value="${staging.dir}/testreports" />
 	<property name="test.classes.dir" value="${staging.dir}/testclasses" />
-	
+
 	<property file="${basedir}/mViewer.properties" />
-	
+
 	<taskdef uri="antlib:net.sf.antcontrib" resource="net/sf/antcontrib/antlib.xml" classpath=" ${src.dir}/tools/ant-contrib.jar" />
 
 	<taskdef uri="antlib:com.googlecode.jslint4java" resource="com/googlecode/jslint4java/antlib.xml" classpath="${src.dir}/tools/jslint4java.jar" />
@@ -106,7 +106,7 @@
 		</copy>
 		<mkdir dir="${app.dir}/js" />
 		<copy toDir="${app.dir}/js">
-			<fileset dir="${js.src.dir}">
+			<fileset dir="/js">
 			</fileset>
 		</copy>
 		<mkdir dir="${app.dir}/WEB-INF" />
@@ -219,12 +219,12 @@
 		<chmod file="${release.app.dir}/start_mViewer.sh" perm="ugo+rx"/>
 
 		<zip destfile="${release.dir}/mViewer-v${app.version}.zip"
- 		     basedir="${release.app.dir}" 
+ 		     basedir="${release.app.dir}"
 		/>
 		<tar destfile="${release.dir}/mViewer-v${app.version}.tar"
      		     basedir="${release.app.dir}"
      		/>
-		<gzip destfile="${release.dir}/mViewer-v${app.version}.tar.gz" 
+		<gzip destfile="${release.dir}/mViewer-v${app.version}.tar.gz"
 		      src="${release.dir}/mViewer-v${app.version}.tar"/>
 		<delete file="${release.dir}/mViewer-v${app.version}.tar"/>
 		<delete dir="${release.app.dir}" />
@@ -241,7 +241,7 @@
 		<delete dir="${test.reports.dir}" />
 		<delete file="${basedir}/mViewer.log" />
 	</target>
-	
+
 	<target name="start" depends="compile, jar, war-staging, war" description="Starts the winstone server with the war deployed.">
 		<echo>----------------------------------------------------------</echo>
 		<echo>On server start goto localhost:${WINSTONE_PORT}/index.html</echo>

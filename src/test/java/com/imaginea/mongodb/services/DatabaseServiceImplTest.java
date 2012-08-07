@@ -30,6 +30,8 @@ import static org.junit.Assert.*;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.imaginea.mongodb.controllers.LoginController;
+import com.imaginea.mongodb.services.impl.DatabaseServiceImpl;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
 import org.json.JSONArray;
@@ -38,19 +40,18 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.imaginea.mongodb.common.ConfigMongoInstanceProvider;
-import com.imaginea.mongodb.common.MongoInstanceProvider;
-import com.imaginea.mongodb.common.exceptions.ApplicationException;
-import com.imaginea.mongodb.common.exceptions.ErrorCodes;
-import com.imaginea.mongodb.requestdispatchers.TestingTemplate;
-import com.imaginea.mongodb.requestdispatchers.UserLogin;
+import com.imaginea.mongodb.utils.ConfigMongoInstanceProvider;
+import com.imaginea.mongodb.utils.MongoInstanceProvider;
+import com.imaginea.mongodb.exceptions.ApplicationException;
+import com.imaginea.mongodb.exceptions.ErrorCodes;
+import com.imaginea.mongodb.controllers.TestingTemplate;
 import com.mongodb.Mongo;
 import com.mongodb.MongoException;
 
 /**
  * Test service functions for performing operations like create/drop on
  * databases present in Mongo Db.
- * 
+ *
  * @author Rachit Mittal
  * @since 16 July 2011
  */
@@ -60,7 +61,7 @@ public class DatabaseServiceImplTest extends TestingTemplate {
     /**
      * Instance of class to be tested.
      */
-    private DatabaseServiceImpl   testDbService;
+    private DatabaseServiceImpl testDbService;
     /**
      * Provides Mongo Instance.
      */
@@ -91,7 +92,7 @@ public class DatabaseServiceImplTest extends TestingTemplate {
      * Instantiates the object of class under test and also creates an instance
      * of mongo using the mongo service provider that reads from config file in
      * order to test resources.Here we also put our tokenId in session and in
-     * mappings defined in UserLogin class so that user is authentcated.
+     * mappings defined in LoginController class so that user is authentcated.
      */
     @Before
     public void instantiateTestClass() {
@@ -99,7 +100,7 @@ public class DatabaseServiceImplTest extends TestingTemplate {
         mongoInstance = mongoInstanceProvider.getMongoInstance();
         // Add user to mappings in userLogin for authentication
         String dbInfo = mongoInstance.getAddress() + "_" + mongoInstance.getConnectPoint();
-        UserLogin.mongoConfigToInstanceMapping.put(dbInfo, mongoInstance);
+        LoginController.mongoConfigToInstanceMapping.put(dbInfo, mongoInstance);
         // Class to be tested
         testDbService = new DatabaseServiceImpl(dbInfo);
     }

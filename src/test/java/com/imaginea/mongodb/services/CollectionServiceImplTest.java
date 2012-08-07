@@ -31,6 +31,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+import com.imaginea.mongodb.services.impl.CollectionServiceImpl;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
 import org.json.JSONArray;
@@ -39,12 +40,12 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.imaginea.mongodb.common.ConfigMongoInstanceProvider;
-import com.imaginea.mongodb.common.MongoInstanceProvider;
-import com.imaginea.mongodb.common.exceptions.ApplicationException; 
-import com.imaginea.mongodb.common.exceptions.ErrorCodes;
-import com.imaginea.mongodb.requestdispatchers.UserLogin;
-import com.imaginea.mongodb.requestdispatchers.TestingTemplate;
+import com.imaginea.mongodb.utils.ConfigMongoInstanceProvider;
+import com.imaginea.mongodb.utils.MongoInstanceProvider;
+import com.imaginea.mongodb.exceptions.ApplicationException;
+import com.imaginea.mongodb.exceptions.ErrorCodes;
+import com.imaginea.mongodb.controllers.LoginController;
+import com.imaginea.mongodb.controllers.TestingTemplate;
 
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
@@ -54,10 +55,10 @@ import com.mongodb.MongoException;
 /**
  * Test all the Service functions on collections inside Databases present in
  * MongoDb.
- * 
+ *
  * @author Rachit Mittal
  * @since 16 July 2011
- * 
+ *
  */
 
 public class CollectionServiceImplTest extends TestingTemplate {
@@ -85,7 +86,7 @@ public class CollectionServiceImplTest extends TestingTemplate {
 		TestingTemplate.execute(logger, new ResponseCallback() {
 			public Object execute() throws Exception {
 				mongoInstanceProvider = new ConfigMongoInstanceProvider();
-				PropertyConfigurator.configure(logConfigFile); 
+				PropertyConfigurator.configure(logConfigFile);
 				return null;
 			}
 		});
@@ -95,8 +96,8 @@ public class CollectionServiceImplTest extends TestingTemplate {
 	 * Instantiates the object of class under test and also creates an instance
 	 * of mongo using the mongo service provider that reads from config file in
 	 * order to test resources.Here we also put our tokenId in session and in
-	 * mappings defined in UserLogin class so that user is authentcated.
-	 * 
+	 * mappings defined in LoginController class so that user is authentcated.
+	 *
 	 */
 	@Before
 	public void instantiateTestClass() {
@@ -105,7 +106,7 @@ public class CollectionServiceImplTest extends TestingTemplate {
 		mongoInstance = mongoInstanceProvider.getMongoInstance();
 		// Add user to mappings in userLogin for authentication
 		String dbInfo = mongoInstance.getAddress() + "_" + mongoInstance.getConnectPoint();
-		UserLogin.mongoConfigToInstanceMapping.put(dbInfo, mongoInstance);
+		LoginController.mongoConfigToInstanceMapping.put(dbInfo, mongoInstance);
 		// Class to be tested
 		testCollService = new CollectionServiceImpl(dbInfo);
 	}
@@ -114,8 +115,8 @@ public class CollectionServiceImplTest extends TestingTemplate {
 	 * Tests get collection service to get all Collections in a database. Here
 	 * we will create a test collection inside a Database and will check if that
 	 * collection exists in the collection list from the service.
-	 * 
-	 * 
+	 *
+	 *
 	 */
 	@Test
 	public void getCollList() {
@@ -159,9 +160,9 @@ public class CollectionServiceImplTest extends TestingTemplate {
 	 * Tests insert collection service on collections in a Database. Hereby we
 	 * will insert a collection using the service and then will check if that
 	 * collection is present in the list of collections.
-	 * 
-	 * 
-	 * 
+	 *
+	 *
+	 *
 	 */
 	@Test
 	public void insertColl() {
@@ -206,9 +207,9 @@ public class CollectionServiceImplTest extends TestingTemplate {
 	 * Tests delete collection service on collections in a Database. Hereby we
 	 * will delete a collection using the service and then will check if that
 	 * collection is not present in the collection list.
-	 * 
-	 * 
-	 * 
+	 *
+	 *
+	 *
 	 */
 	@Test
 	public void deleteColl() {

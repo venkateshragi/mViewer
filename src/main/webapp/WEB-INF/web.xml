@@ -11,30 +11,30 @@
 		<servlet-class>com.sun.jersey.spi.container.servlet.ServletContainer</servlet-class>
 		<init-param>
 			<param-name>com.sun.jersey.config.property.packages</param-name>
-			<param-value>com.imaginea.mongodb.requestdispatchers</param-value>
+			<param-value>com.imaginea.mongodb.controllers</param-value>
 		</init-param>
-	</servlet> 
+	</servlet>
     <servlet>
 		<servlet-name>TroubleShoot Servlet</servlet-name>
-		<servlet-class>com.imaginea.mongodb.requestdispatchers.TroubleShoot</servlet-class>		 
-	</servlet> 
+		<servlet-class>com.imaginea.mongodb.controllers.TroubleShootController</servlet-class>
+	</servlet>
 	<servlet>
 		<servlet-name>Mongo Graphs</servlet-name>
-		<servlet-class>com.imaginea.mongodb.requestdispatchers.Graphs</servlet-class>		 
-	</servlet> 
-	
+		<servlet-class>com.imaginea.mongodb.controllers.GraphController</servlet-class>
+	</servlet>
+
 	<!-- Servlet Mapping -->
 	<servlet-mapping>
 		<servlet-name>Jersey Servlet</servlet-name>
 		<url-pattern>/services/*</url-pattern>
-	</servlet-mapping> 
+	</servlet-mapping>
 	<servlet-mapping>
 		<servlet-name>TroubleShoot Servlet</servlet-name>
 		<url-pattern>/admin</url-pattern>
-	</servlet-mapping> 
+	</servlet-mapping>
 	<servlet-mapping>
 		<servlet-name>Mongo Graphs</servlet-name>
 		<url-pattern>/graphs/initiate</url-pattern>
 		<url-pattern>/graphs/query</url-pattern>
-	</servlet-mapping> 
+	</servlet-mapping>
 </web-app>

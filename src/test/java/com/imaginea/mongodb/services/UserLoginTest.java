@@ -26,7 +26,7 @@
 package com.imaginea.mongodb.services;
 
 import static org.junit.Assert.*;
- 
+
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -37,26 +37,26 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.mock.web.MockHttpServletRequest;
-import com.imaginea.mongodb.common.ConfigMongoInstanceProvider; 
-import com.imaginea.mongodb.common.MongoInstanceProvider;
-import com.imaginea.mongodb.common.exceptions.ApplicationException;
-import com.imaginea.mongodb.common.exceptions.ErrorCodes;
-import com.imaginea.mongodb.common.exceptions.MongoHostUnknownException;
-import com.imaginea.mongodb.requestdispatchers.BaseRequestDispatcher;
-import com.imaginea.mongodb.requestdispatchers.UserLogin; 
+import com.imaginea.mongodb.utils.ConfigMongoInstanceProvider;
+import com.imaginea.mongodb.utils.MongoInstanceProvider;
+import com.imaginea.mongodb.exceptions.ApplicationException;
+import com.imaginea.mongodb.exceptions.ErrorCodes;
+import com.imaginea.mongodb.exceptions.MongoHostUnknownException;
+import com.imaginea.mongodb.controllers.BaseController;
+import com.imaginea.mongodb.controllers.LoginController;
 import com.mongodb.Mongo;
 import com.mongodb.MongoException;
 
 /**
- * Tests the UserLogin Resource functionality. Here we will try to register a
+ * Tests the LoginController Resource functionality. Here we will try to register a
  * user and will check if a valid token Id is provided and then will check if a
  * Mongo Instance is also added corresponding to that tokenId.
- * 
+ *
  * @author Rachit Mittal
  * @since 15 July 2011
- * 
+ *
  */
-public class UserLoginTest extends BaseRequestDispatcher {
+public class UserLoginTest extends BaseController {
 
 	private MongoInstanceProvider mongoInstanceProvider;
 	private static Mongo mongoInstance;
@@ -64,7 +64,7 @@ public class UserLoginTest extends BaseRequestDispatcher {
 	/**
 	 * Class to be tested
 	 */
-	private UserLogin testLoginResource;
+	private LoginController loginController;
 
 	/**
 	 * Logger object
@@ -87,29 +87,29 @@ public class UserLoginTest extends BaseRequestDispatcher {
 		ErrorTemplate.execute(logger, new ResponseCallback() {
 			public Object execute() throws Exception {
 				mongoInstanceProvider = new ConfigMongoInstanceProvider();
-				PropertyConfigurator.configure(logConfigFile);  
+				PropertyConfigurator.configure(logConfigFile);
 				return null;
 			}
 		});
 	}
 
 	/**
-	 * Instantiates the class UserLogin which is to be tested and also gets a
+	 * Instantiates the class LoginController which is to be tested and also gets a
 	 * mongo instance from mongo instance provider.
 	 */
 
 	@Before
 	public void instantiateTestClass() {
-		testLoginResource = new UserLogin();
+		loginController = new LoginController();
 		mongoInstance = mongoInstanceProvider.getMongoInstance();
 	}
 
 	/**
-	 * Test Post login Request made by User to UserLogin resource for
+	 * Test Post login Request made by User to LoginController resource for
 	 * authentication. Hereby we will check if a token ID is generated and also
 	 * will check if a mongoInstacne is set by the servlet.
-	 * 
-	 * 
+	 *
+	 *
 	 */
 
 	@Test
@@ -123,11 +123,11 @@ public class UserLoginTest extends BaseRequestDispatcher {
 					Integer port = (Integer) (mongoInstance.getAddress().getPort());
 					HttpServletRequest request = new MockHttpServletRequest();
 					// Call Service for login
-					testLoginResource.authenticateUser(testUsername, testPassword, host, port.toString(), request);
+					loginController.authenticateUser(testUsername, testPassword, host, port.toString(), request);
 					// Check if we got a mongoInstance corresponding to our host
 					// and port.
 					String dbInfo = host + "_" + port;
-					Mongo m = UserLogin.mongoConfigToInstanceMapping.get(dbInfo);
+					Mongo m = LoginController.mongoConfigToInstanceMapping.get(dbInfo);
 					assertNotNull(m);
 
 				} catch (MongoException m) {

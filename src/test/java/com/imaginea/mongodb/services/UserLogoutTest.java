@@ -25,52 +25,52 @@
 package com.imaginea.mongodb.services;
 
 import static org.junit.Assert.*;
- 
 
+
+import com.imaginea.mongodb.controllers.LogoutController;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Test; 
+import org.junit.Test;
 
-import com.imaginea.mongodb.common.ConfigMongoInstanceProvider;
-import com.imaginea.mongodb.common.MongoInstanceProvider; 
-import com.imaginea.mongodb.requestdispatchers.BaseRequestDispatcher;
-import com.imaginea.mongodb.requestdispatchers.UserLogin;
-import com.imaginea.mongodb.requestdispatchers.UserLogout; 
+import com.imaginea.mongodb.utils.ConfigMongoInstanceProvider;
+import com.imaginea.mongodb.utils.MongoInstanceProvider;
+import com.imaginea.mongodb.controllers.BaseController;
+import com.imaginea.mongodb.controllers.LoginController;
 import com.mongodb.Mongo;
 
 /**
  * Tests the GET request made by user to logout from the application. Here we
  * will register a user first and then will check if logout invalidates a user's
  * tokenId.
- * 
+ *
  * @author Rachit Mittal
  * @since 15 July 2011
  */
-public class UserLogoutTest extends BaseRequestDispatcher {
+public class UserLogoutTest extends BaseController {
 	private MongoInstanceProvider mongoInstanceProvider;
 	private static Mongo mongoInstance;
 
 	/**
 	 * Class to be tested
 	 */
-	private UserLogout testLogoutResource;
+	private LogoutController logoutController;
 
 	/**
 	 * Logger object
 	 */
 	private static Logger logger = Logger.getLogger(UserLoginTest.class);
 
-	private String testdbInfo = "localhost_27017"; 
+	private String testdbInfo = "localhost_27017";
 	private static final String logConfigFile = "src/main/resources/log4j.properties";
 
 	public UserLogoutTest() throws Exception {
 		ErrorTemplate.execute(logger, new ResponseCallback() {
 			public Object execute() throws Exception {
 				mongoInstanceProvider = new ConfigMongoInstanceProvider();
-				PropertyConfigurator.configure(logConfigFile);  
+				PropertyConfigurator.configure(logConfigFile);
 				return null;
 			}
 		});
@@ -78,29 +78,29 @@ public class UserLogoutTest extends BaseRequestDispatcher {
 	}
 
 	/**
-	 * Instantiates the class UserLogin which is to be tested and also gets a
+	 * Instantiates the class LoginController which is to be tested and also gets a
 	 * mongo instance from mongo instance provider.
 	 */
 	@Before
 	public void instantiateTestClass() {
-		testLogoutResource = new UserLogout();
+		logoutController = new LogoutController();
 		mongoInstance = mongoInstanceProvider.getMongoInstance();
 		// Add User to maps
-		UserLogin.mongoConfigToInstanceMapping.put(testdbInfo, mongoInstance);
-		UserLogin.mongoConfigToUsersMapping.put(testdbInfo, 1);
+		LoginController.mongoConfigToInstanceMapping.put(testdbInfo, mongoInstance);
+		LoginController.mongoConfigToUsersMapping.put(testdbInfo, 1);
 	}
 
 	/**
 	 * Test GET Request made by User to logout from the application.
-	 * 
+	 *
 	 */
 	@Test
 	public void testUserLoginRequest() {
 
-		testLogoutResource.doGet(testdbInfo);
-		assertNotNull(UserLogin.mongoConfigToInstanceMapping.get(testdbInfo));
+		logoutController.doGet(testdbInfo);
+		assertNotNull(LoginController.mongoConfigToInstanceMapping.get(testdbInfo));
 		Integer value = 0;
-		assertEquals(value, UserLogin.mongoConfigToUsersMapping.get(testdbInfo)); 
+		assertEquals(value, LoginController.mongoConfigToUsersMapping.get(testdbInfo));
 	}
 
 	@After
