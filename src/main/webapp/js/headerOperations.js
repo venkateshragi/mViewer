@@ -66,8 +66,8 @@ YUI({
         });
     }
 
-    function logout(eventObject) {
-        Y.io(MV.URLMap.logout(), {
+    function disconnect(eventObject) {
+        Y.io(MV.URLMap.disconnect(), {
             method: "GET",
             on: {
                 success: function (ioId, responseObject) {
@@ -78,13 +78,13 @@ YUI({
                         window.location = "loggedOut.html";
                     } else {
                         var error = parsedResponse.response.error;
-                        MV.showAlertMessage("Cannot logout! [0]", MV.warnIcon, error.code);
-                        Y.log("Could not logout. Message: [0], Code: [1]".format(error.message, error.code), "error");
+                        MV.showAlertMessage("Cannot disconnect! [0]", MV.warnIcon, error.code);
+                        Y.log("Could not disconnect. Message: [0], Code: [1]".format(error.message, error.code), "error");
                     }
                 },
                 failure: function (ioId, responseObject) {
                     MV.showAlertMessage("Could not send request. Check if app server is running. Response message: [0]".format(responseObject.statusText), MV.warnIcon);
-                    Y.log("Could not send request to logout. Status text: [0] ".format(responseObject.statusText), "error");
+                    Y.log("Could not send request to disconnect. Status text: [0] ".format(responseObject.statusText), "error");
                 }
             }
         });
@@ -96,5 +96,5 @@ YUI({
     }
 
     Y.delegate("click", handleHeaderOption, ".nav-cont", "li a");
-    Y.on("click", logout, "#logout");
+    Y.on("click", disconnect, "#disconnect");
 });

@@ -217,8 +217,8 @@ YUI.add('utility', function (Y) {
 		login: function () {
 			return "services/login";
 		},
-		logout: function () {
-			return "services/logout?dbInfo=[0]".format(sm.dbInfo());
+		disconnect: function () {
+			return "services/disconnect?dbInfo=[0]".format(sm.dbInfo());
 		},
 		serverStatistics: function () {
 			return "services/stats?dbInfo=[0]&ts=[1]".format(sm.dbInfo(), sm.now());
@@ -248,7 +248,8 @@ YUI.add('utility', function (Y) {
 		"MISSING_LOGIN_FIELDS": "Please fill in all the login fields !",
 		"ERROR_PARSING_PORT": "You have entered an invalid port number !",
 		"INVALID_ARGUMENT": "You have entered an invalid input data !",
-		"INVALID_USERNAME": "You have entered an invalid username and password combination ! To access you need to add user in admin database of mongodb OR leave both the fields empty.",
+		"INVALID_USERNAME": "You have entered an invalid username and password combination ! To access you need to add user in admin database of mongodb.",
+        "NEED_AUTHORISATION": "Mongo DB is running in auth mode. Please enter username and password.",
 		"INVALID_SESSION": "Your session has timed out ! Please login again.",
 		"GET_DB_LIST_EXCEPTION": "Could not load the DB list ! Please check if mongo is still running and then refresh the page.",
 		"GET_COLLECTION_LIST_EXCEPTION": "Please check if mongod is still running and then refresh the page.",

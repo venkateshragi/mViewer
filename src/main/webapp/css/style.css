@@ -54,6 +54,10 @@ div#logo {
 	text-align: left;
 }
 
+.userLabel {
+    padding-left: 20px;
+}
+
 .gen-float {
 	float: left;
 }
@@ -113,7 +117,7 @@ ul.nav-cont li a {
 	cursor: pointer;
 }
 
-ul.nav-cont li a.sel,ul.nav-cont li a:hover,.user-menu .logout:hover, ul.lists li.simulatedHover, ul.lists a.simulatedHover, ul.lists li.sel.simulatedHover,
+ul.nav-cont li a.sel,ul.nav-cont li a:hover,.user-menu .disconnect:hover, ul.lists li.simulatedHover, ul.lists a.simulatedHover, ul.lists li.sel.simulatedHover,
 ul.lists li:hover, ul.lists li.sel:hover, .floatingFooter {
     text-decoration: none;
     background: rgb(208,228,247); /* Old browsers */
@@ -236,7 +240,7 @@ ul.user-menu li label {
 	margin-top: 25px;
 }
 
-ul.user-menu li label.logout {
+ul.user-menu li label.disconnect {
 	color: #ccc !important;
 	cursor: pointer
 }

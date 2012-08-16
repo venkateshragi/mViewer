@@ -24,26 +24,23 @@
  */
 package com.imaginea.mongodb.services;
 
-import static org.junit.Assert.*;
-
-
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import com.imaginea.mongodb.controllers.BaseController;
+import com.imaginea.mongodb.controllers.LoginController;
 import com.imaginea.mongodb.controllers.LogoutController;
+import com.imaginea.mongodb.utils.ConfigMongoInstanceProvider;
+import com.imaginea.mongodb.utils.MongoInstanceProvider;
+import com.mongodb.Mongo;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.imaginea.mongodb.utils.ConfigMongoInstanceProvider;
-import com.imaginea.mongodb.utils.MongoInstanceProvider;
-import com.imaginea.mongodb.controllers.BaseController;
-import com.imaginea.mongodb.controllers.LoginController;
-import com.mongodb.Mongo;
-
 /**
- * Tests the GET request made by user to logout from the application. Here we
- * will register a user first and then will check if logout invalidates a user's
+ * Tests the GET request made by user to disconnect from the application. Here we
+ * will register a user first and then will check if disconnect invalidates a user's
  * tokenId.
  *
  * @author Rachit Mittal
@@ -91,7 +88,7 @@ public class UserLogoutTest extends BaseController {
 	}
 
 	/**
-	 * Test GET Request made by User to logout from the application.
+	 * Test GET Request made by User to disconnect from the application.
 	 *
 	 */
 	@Test

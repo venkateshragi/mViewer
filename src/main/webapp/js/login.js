@@ -64,6 +64,14 @@ YUI({
                 userNode.setStyle("background", "#FFEBE8");
 	            userNode.focus();
                 Y.one("#password").setStyle("background", "#FFEBE8");
+            },
+            "NEED_AUTHORISATION": function() {
+                resetBGColor();
+                var userNode = Y.one("#username");
+                userNode.set("value", "");
+                userNode.setStyle("background", "#FFEBE8");
+                userNode.focus();
+                Y.one("#password").setStyle("background", "#FFEBE8");
             }
         };
         var request = Y.io(MV.URLMap.login(), {

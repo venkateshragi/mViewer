@@ -155,7 +155,8 @@ YUI({
         Y.one("#port").set("value", params[1]);
         Y.one("#username").set("value", params[2]);
     	Y.one('#user').set("innerHTML", Y.one("#username").get("value"));
-        Y.one('#hostname').set("innerHTML", Y.one("#host").get("value"));
+        var hostVal = params[0] + ":" + params[1];
+        Y.one('#hostname').set("innerHTML", hostVal);
     }
     /**
      *  A function handler to use for successful requests to get DB names.
