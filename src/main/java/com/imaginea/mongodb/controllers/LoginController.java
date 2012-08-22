@@ -15,12 +15,14 @@
  */
 package com.imaginea.mongodb.controllers;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
+import com.imaginea.mongodb.exceptions.ApplicationException;
+import com.imaginea.mongodb.exceptions.ErrorCodes;
+import com.mongodb.DB;
+import com.mongodb.Mongo;
+import com.mongodb.MongoException;
 import org.apache.log4j.Logger;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
@@ -30,13 +32,10 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
-
-import com.imaginea.mongodb.exceptions.ApplicationException;
-import com.imaginea.mongodb.exceptions.ErrorCodes;
-import com.mongodb.DB;
-import com.mongodb.Mongo;
-import org.json.JSONException;
-import org.json.JSONObject;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Authenticates User to Mongo Db by checking the user in <system.users>
@@ -46,7 +45,7 @@ import org.json.JSONObject;
  * mongoPort provided by user to a mongo Instance. This mongo Instance is used
  * for requests made to this database configuration. Also stores a map of active
  * users on a given mongo configuration for closing the mongo instance at time
- * of logout.
+ * of disconnect.
  *
  *
  * @author Rachit Mittal
@@ -89,11 +88,6 @@ public class LoginController extends BaseController {
 	public String authenticateUser(@FormParam("username") String user, @FormParam("password") final String password, @FormParam("host") String host, @FormParam("port") final String mongoPort,
 			@Context final HttpServletRequest request) {
 
-		// Reassign username for guest user in case of empty username and
-		// password fields
-		if ("".equals(user) && "".equals(password)) {
-			user = "guest";
-		}
 		final String mongoHost = host;
 		final String username = user;
 		String response = ErrorTemplate.execute(logger, new ResponseCallback() {
@@ -104,20 +98,21 @@ public class LoginController extends BaseController {
 				}
                 Mongo mongo = new Mongo(mongoHost, Integer.parseInt(mongoPort));
                 // Hack. Checking server connectivity status by fetching database names
-                mongo.getDatabaseNames();
                 boolean loginStatus = false;
-                if ("guest".equals(username) && "".equals(password)) {
-                    loginStatus = true;
-                } else {
-                    // Authorize User using <admin> Db
-                    DB db = mongo.getDB("admin");
+
+                // Authorize User using <admin> Db
+                DB db = mongo.getDB("admin");
+                try {
+                    mongo.getDatabaseNames();
+                } catch (MongoException me) {
                     loginStatus = db.authenticate(username, password.toCharArray());
+                    if (!loginStatus) {
+                        ApplicationException e = new ApplicationException(("".equals(username) && "".equals(password)) ?
+                                ErrorCodes.NEED_AUTHORISATION : ErrorCodes.INVALID_USERNAME, "Invalid UserName or Password");
+                        return formErrorResponse(logger, e);
+                    }
                 }
-				if (!loginStatus) {
-					ApplicationException e = new ApplicationException(ErrorCodes.INVALID_USERNAME, "Invalid UserName or Password");
-					return formErrorResponse(logger, e);
-				}
-				// Add mongo Configuration Key to key dbInfo in session
+                // Add mongo Configuration Key to key dbInfo in session
 				String mongoConfigKey = mongoHost + "_" + mongoPort;
 				HttpSession session = request.getSession();
 
@@ -135,8 +130,7 @@ public class LoginController extends BaseController {
 
 				// Store a MongoInstance
 				if (!mongoConfigToInstanceMapping.containsKey(mongoConfigKey)) {
-					Mongo mongoInstance = new Mongo(mongoHost, Integer.parseInt(mongoPort));
-					mongoConfigToInstanceMapping.put(mongoConfigKey, mongoInstance);
+					mongoConfigToInstanceMapping.put(mongoConfigKey, mongo);
 				}
 				Object usersPresent = mongoConfigToUsersMapping.get(mongoConfigKey);
 				int noOfUsers = 0;
