@@ -1,11 +1,11 @@
 /*
  * Copyright (c) 2011 Imaginea Technologies Private Ltd.
  * Hyderabad, India
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     http://www.apache.org/licenses/LICENSE-2.0
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -20,12 +20,12 @@ YUI({
     var dbDiv = Y.one('#dbNames ul.lists');
 	dbDiv.delegate('click',handleClickEvent, 'a.onclick');
     YUI.namespace('com.imaginea.mongoV');
-    var MV = YUI.com.imaginea.mongoV; 
+    var MV = YUI.com.imaginea.mongoV;
     var sm = YUI.com.imaginea.mongoV.StateManager;
 
     /**
      * The function handles the successful sending of add Collection request.
-     * It parses the response and checks if the collection is successfully added. If not, 
+     * It parses the response and checks if the collection is successfully added. If not,
      * then prompt the user
      * @param responseObject The response Object
      */
@@ -78,7 +78,7 @@ YUI({
             }
         });
     }
-    
+
     /**
      * The function handles event on the menu item for the database
      * @param eventType The event type
@@ -145,7 +145,7 @@ YUI({
         params.push(dbInfo); // last token
         return params;
     }
-    
+
     /**
      * Gets the user information from the URL and sets it
      */
@@ -155,7 +155,8 @@ YUI({
         Y.one("#port").set("value", params[1]);
         Y.one("#username").set("value", params[2]);
     	Y.one('#user').set("innerHTML", Y.one("#username").get("value"));
-        Y.one('#hostname').set("innerHTML", Y.one("#host").get("value"));
+        var hostVal = params[0] + ":" + params[1];
+        Y.one('#hostname').set("innerHTML", hostVal);
     }
     /**
      *  A function handler to use for successful requests to get DB names.
@@ -203,7 +204,7 @@ YUI({
                 if (index === 0) {
                     dbDiv.set("innerHTML", "No Databases");
                 }
-                dbDiv.set("innerHTML", dbNames);	            
+                dbDiv.set("innerHTML", dbNames);
 				var menu = Y.one("#dbNames");
 	            menu.unplug(Y.Plugin.NodeMenuNav);
 				menu.plug(Y.Plugin.NodeMenuNav, { autoSubmenuDisplay: false, mouseOutHideDelay: 0 });
@@ -215,7 +216,7 @@ YUI({
 	            MV.hideLoadingPanel();
                 var error = parsedResponse.response.error;
                 Y.log("Could not load databases. Message from server: [0]. Error Code from server:[1] ".format(error.message, error.code), "error");
-                MV.showAlertMessage("[0]", MV.warnIcon, error.code);                
+                MV.showAlertMessage("[0]", MV.warnIcon, error.code);
             }
         } catch (e) {
             MV.showAlertMessage(e, MV.warnIcon);
@@ -226,13 +227,13 @@ YUI({
      * A function handler to use for failed requests to get DB names.
      * @param ioId
      * @param responseObject The response Object
-     */ 
+     */
     function displayError(ioId, responseObject) {
         Y.log("Could not load the databases. [0]".format(responseObject.statusText), "error");
         MV.hideLoadingPanel();
         MV.showAlertMessage("Could not load Databases ! Please check if the app server is running. Status Text: [0]".format(responseObject.statusText), MV.warnIcon);
     }
-    
+
     /**
      * The function handles the onLoad event for the home page.
      * It sends request to get the DB names
@@ -240,7 +241,7 @@ YUI({
 	function requestDBNames(response, a, b, c) {
 		var parsedResponse = (response != undefined && response.responseText != undefined) ? Y.JSON.parse(response.responseText) : null;
 		var error = parsedResponse == undefined ? undefined : parsedResponse.response.error;
-		if (error) {                         
+		if (error) {
 			MV.showAlertMessage("DB creation failed ! [0].".format(error.message), MV.warnIcon);
 			Y.log("DB creation failed. Response Status: [0]".format(error.message), "error");
 		} else {
@@ -258,7 +259,7 @@ YUI({
 			Y.log("Sending request to load DB names", "info");
 		}
 	}
-        
+
     /**
      * The function shows a dialog that takes input (i.e. Db name) from user
      */
@@ -268,7 +269,7 @@ YUI({
 
     // Make a request to load Database names when the page loads
     Y.on("load", requestDBNames);
-    
+
     //Adding click handler for new DB button that calls createDB()
     Y.on("click", createDB, "#createDB");
 });

@@ -1,11 +1,11 @@
 /*
  * Copyright (c) 2011 Imaginea Technologies Private Ltd.
  * Hyderabad, India
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     http://www.apache.org/licenses/LICENSE-2.0
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -46,7 +46,7 @@ YUI({
         var data = new YAHOO.util.XHRDataSource(MV.URLMap.serverStatistics(), {
             responseType: YAHOO.util.XHRDataSource.TYPE_JSON,
             responseSchema: {
-                resultsList: "response.result"                
+                resultsList: "response.result"
             }
         });
         data.sendRequest("", {
@@ -66,8 +66,8 @@ YUI({
         });
     }
 
-    function logout(eventObject) {
-        Y.io(MV.URLMap.logout(), {
+    function disconnect(eventObject) {
+        Y.io(MV.URLMap.disconnect(), {
             method: "GET",
             on: {
                 success: function (ioId, responseObject) {
@@ -78,13 +78,13 @@ YUI({
                         window.location = "loggedOut.html";
                     } else {
                         var error = parsedResponse.response.error;
-                        MV.showAlertMessage("Cannot logout! [0]", MV.warnIcon, error.code);
-                        Y.log("Could not logout. Message: [0], Code: [1]".format(error.message, error.code), "error");
+                        MV.showAlertMessage("Cannot disconnect! [0]", MV.warnIcon, error.code);
+                        Y.log("Could not disconnect. Message: [0], Code: [1]".format(error.message, error.code), "error");
                     }
                 },
                 failure: function (ioId, responseObject) {
                     MV.showAlertMessage("Could not send request. Check if app server is running. Response message: [0]".format(responseObject.statusText), MV.warnIcon);
-                    Y.log("Could not send request to logout. Status text: [0] ".format(responseObject.statusText), "error");
+                    Y.log("Could not send request to disconnect. Status text: [0] ".format(responseObject.statusText), "error");
                 }
             }
         });
@@ -96,5 +96,5 @@ YUI({
     }
 
     Y.delegate("click", handleHeaderOption, ".nav-cont", "li a");
-    Y.on("click", logout, "#logout");
+    Y.on("click", disconnect, "#disconnect");
 });

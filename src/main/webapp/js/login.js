@@ -19,7 +19,7 @@ YUI({
 }).use("io", "json", "node", "utility", function(Y) {
     var MV = YUI.com.imaginea.mongoV;
     var tryLogin = function(e) {
-	    
+
 	    Y.one('#loginMsg').setStyle('visibility', 'visible');
 
         var username = Y.one("#username").get("value").trim(),
@@ -64,6 +64,14 @@ YUI({
                 userNode.setStyle("background", "#FFEBE8");
 	            userNode.focus();
                 Y.one("#password").setStyle("background", "#FFEBE8");
+            },
+            "NEED_AUTHORISATION": function() {
+                resetBGColor();
+                var userNode = Y.one("#username");
+                userNode.set("value", "");
+                userNode.setStyle("background", "#FFEBE8");
+                userNode.focus();
+                Y.one("#password").setStyle("background", "#FFEBE8");
             }
         };
         var request = Y.io(MV.URLMap.login(), {
@@ -100,7 +108,7 @@ YUI({
             tryLogin();
         }
     });
-	
+
 	var checkSession = function() {
 		var query = window.location.search.substring(1);
 		var code = query.split("=");
