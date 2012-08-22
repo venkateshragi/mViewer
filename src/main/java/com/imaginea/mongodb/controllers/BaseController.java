@@ -15,7 +15,16 @@
  */
 package com.imaginea.mongodb.controllers;
 
-import com.imaginea.mongodb.exceptions.*;
+import com.imaginea.mongodb.exceptions.ApplicationException;
+import com.imaginea.mongodb.exceptions.CollectionException;
+import com.imaginea.mongodb.exceptions.DatabaseException;
+import com.imaginea.mongodb.exceptions.DocumentException;
+import com.imaginea.mongodb.exceptions.ErrorCodes;
+import com.imaginea.mongodb.exceptions.InvalidHTTPRequestException;
+import com.imaginea.mongodb.exceptions.MongoHostUnknownException;
+import com.imaginea.mongodb.exceptions.ValidationException;
+import com.imaginea.mongodb.services.AuthService;
+import com.imaginea.mongodb.services.impl.AuthServiceImpl;
 import com.imaginea.mongodb.utils.ApplicationUtils;
 import com.mongodb.MongoException;
 import com.mongodb.MongoInternalException;
@@ -25,9 +34,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
 import java.net.UnknownHostException;
-import java.util.List;
 
 /**
  * Defines validation functions for validating dbInfo from session. An error
@@ -37,6 +44,8 @@ import java.util.List;
  */
 public class BaseController {
 
+    protected static final AuthService authService = AuthServiceImpl.getInstance();
+
     /**
      * To identify the HTTP Request type made to the request dispatchers.
      */
@@ -45,33 +54,24 @@ public class BaseController {
     }
 
     /**
-     * Validates dbInfo with the dbInfo Array present in session.
+     * Validates connectionId with the connectionId Array present in session.
      *
-     * @param dbInfo  Mongo Db config information provided to user at time of login.
+     * @param connectionId  Mongo Db config information provided to user at time of login.
      * @param logger  Logger to write error message to
      * @param request Request made by client containing session attributes.
-     * @return null if dbInfo is valid else error object.
+     * @return null if connectionId is valid else error object.
      */
-    protected static String validateDbInfo(String dbInfo, Logger logger, HttpServletRequest request) {
+    protected static String validateConnectionId(String connectionId, Logger logger, HttpServletRequest request) {
 
         String response = null;
-        if (dbInfo == null) {
-            InvalidHTTPRequestException e = new InvalidHTTPRequestException(ErrorCodes.DB_INFO_ABSENT, "Mongo Config parameters not provided in the URL");
+        if (connectionId == null) {
+            InvalidHTTPRequestException e = new InvalidHTTPRequestException(ErrorCodes.CONNECTION_ID_ABSENT, "Invalid Connection Id");
             return formErrorResponse(logger, e);
         }
 
-        // Check if db information is present in session
-        HttpSession session = request.getSession();
-        @SuppressWarnings("unchecked")
-        List<String> mongosInSession = (List<String>) session.getAttribute("dbInfo");
-
-        InvalidHTTPRequestException e = null;
-        if (mongosInSession == null) {
-            e = new InvalidHTTPRequestException(ErrorCodes.INVALID_SESSION, "No Mongo Config parameters present in Session.");
-            return formErrorResponse(logger, e);
-        }
-        if (!mongosInSession.contains(dbInfo)) {
-            e = new InvalidHTTPRequestException(ErrorCodes.INVALID_SESSION, "Provided Mongo Config parameters not present in session");
+        boolean connectionExists = authService.doesConnectionExists(connectionId);
+        if (!connectionExists) {
+            InvalidHTTPRequestException e = new InvalidHTTPRequestException(ErrorCodes.INVALID_SESSION, "Invalid Connection Id");
             return formErrorResponse(logger, e);
         }
         return response;
@@ -172,13 +172,13 @@ public class BaseController {
 
     protected static class ResponseTemplate {
 
-        public String execute(Logger logger, String dbInfo, HttpServletRequest request, ResponseCallback callback) {
-            return execute(logger, dbInfo, request, callback, true);
+        public String execute(Logger logger, String connectionId, HttpServletRequest request, ResponseCallback callback) {
+            return execute(logger, connectionId, request, callback, true);
         }
 
-        public String execute(Logger logger, String dbInfo, HttpServletRequest request, ResponseCallback callback, boolean wrapResult) {
+        public String execute(Logger logger, String connectionId, HttpServletRequest request, ResponseCallback callback, boolean wrapResult) {
             // Validate first
-            String response = validateDbInfo(dbInfo, logger, request);
+            String response = validateConnectionId(connectionId, logger, request);
             if (response != null) {
                 return response;
             }

@@ -25,13 +25,18 @@
 
 package com.imaginea.mongodb.services;
 
-import static org.junit.Assert.*;
-
-import java.util.ArrayList;
-import java.util.List;
-
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import com.imaginea.mongodb.controllers.LoginController;
+import com.imaginea.mongodb.controllers.TestingTemplate;
+import com.imaginea.mongodb.exceptions.ApplicationException;
+import com.imaginea.mongodb.exceptions.ErrorCodes;
 import com.imaginea.mongodb.services.impl.DatabaseServiceImpl;
+import com.imaginea.mongodb.utils.ConfigMongoInstanceProvider;
+import com.imaginea.mongodb.utils.MongoInstanceProvider;
+import com.mongodb.Mongo;
+import com.mongodb.MongoException;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
 import org.json.JSONArray;
@@ -40,13 +45,8 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.imaginea.mongodb.utils.ConfigMongoInstanceProvider;
-import com.imaginea.mongodb.utils.MongoInstanceProvider;
-import com.imaginea.mongodb.exceptions.ApplicationException;
-import com.imaginea.mongodb.exceptions.ErrorCodes;
-import com.imaginea.mongodb.controllers.TestingTemplate;
-import com.mongodb.Mongo;
-import com.mongodb.MongoException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Test service functions for performing operations like create/drop on
@@ -95,7 +95,7 @@ public class DatabaseServiceImplTest extends TestingTemplate {
      * mappings defined in LoginController class so that user is authentcated.
      */
     @Before
-    public void instantiateTestClass() {
+    public void instantiateTestClass() throws ApplicationException {
         // Creates Mongo Instance.
         mongoInstance = mongoInstanceProvider.getMongoInstance();
         // Add user to mappings in userLogin for authentication

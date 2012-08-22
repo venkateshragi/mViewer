@@ -25,27 +25,24 @@
 
 package com.imaginea.mongodb.services;
 
-import static org.junit.Assert.*;
-
-
-import javax.servlet.http.HttpServletRequest;
-
+import static org.junit.Assert.assertNotNull;
+import com.imaginea.mongodb.controllers.BaseController;
+import com.imaginea.mongodb.controllers.LoginController;
+import com.imaginea.mongodb.exceptions.ApplicationException;
+import com.imaginea.mongodb.exceptions.ErrorCodes;
+import com.imaginea.mongodb.exceptions.MongoHostUnknownException;
+import com.imaginea.mongodb.utils.ConfigMongoInstanceProvider;
+import com.imaginea.mongodb.utils.MongoInstanceProvider;
+import com.mongodb.Mongo;
+import com.mongodb.MongoException;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.mock.web.MockHttpServletRequest;
-import com.imaginea.mongodb.utils.ConfigMongoInstanceProvider;
-import com.imaginea.mongodb.utils.MongoInstanceProvider;
-import com.imaginea.mongodb.exceptions.ApplicationException;
-import com.imaginea.mongodb.exceptions.ErrorCodes;
-import com.imaginea.mongodb.exceptions.MongoHostUnknownException;
-import com.imaginea.mongodb.controllers.BaseController;
-import com.imaginea.mongodb.controllers.LoginController;
-import com.mongodb.Mongo;
-import com.mongodb.MongoException;
+
+import javax.servlet.http.HttpServletRequest;
 
 /**
  * Tests the LoginController Resource functionality. Here we will try to register a
@@ -123,7 +120,7 @@ public class UserLoginTest extends BaseController {
 					Integer port = (Integer) (mongoInstance.getAddress().getPort());
 					HttpServletRequest request = new MockHttpServletRequest();
 					// Call Service for login
-					loginController.authenticateUser(testUsername, testPassword, host, port.toString(), request);
+					loginController.authenticateUser(testUsername, testPassword, host, port.toString(), null, request);
 					// Check if we got a mongoInstance corresponding to our host
 					// and port.
 					String dbInfo = host + "_" + port;

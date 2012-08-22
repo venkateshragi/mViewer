@@ -15,26 +15,26 @@
  */
 package com.imaginea.mongodb.controllers;
 
+import com.imaginea.mongodb.domain.ConnectionDetails;
+import com.imaginea.mongodb.domain.MongoConnectionDetails;
 import com.imaginea.mongodb.exceptions.ApplicationException;
 import com.imaginea.mongodb.exceptions.ErrorCodes;
-import com.mongodb.DB;
+import com.imaginea.mongodb.services.impl.DatabaseServiceImpl;
 import com.mongodb.Mongo;
-import com.mongodb.MongoException;
 import org.apache.log4j.Logger;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
 import javax.ws.rs.FormParam;
+import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -85,65 +85,23 @@ public class LoginController extends BaseController {
 
 	@POST
 	@Produces(MediaType.APPLICATION_JSON)
-	public String authenticateUser(@FormParam("username") String user, @FormParam("password") final String password, @FormParam("host") String host, @FormParam("port") final String mongoPort,
-			@Context final HttpServletRequest request) {
+	public String authenticateUser(final @FormParam("username") String user, @FormParam("password") final String password,final @FormParam("host") String host, @FormParam("port") final String mongoPort,
+                                   @FormParam("dbName") final String dbName,@Context final HttpServletRequest request) {
 
-		final String mongoHost = host;
-		final String username = user;
 		String response = ErrorTemplate.execute(logger, new ResponseCallback() {
 			public Object execute() throws Exception {
-				if ("".equals(mongoHost) || "".equals(mongoPort)) {
+				if ("".equals(host) || "".equals(mongoPort)) {
 					ApplicationException e = new ApplicationException(ErrorCodes.MISSING_LOGIN_FIELDS, "Missing Login Fields");
 					return formErrorResponse(logger, e);
 				}
-                Mongo mongo = new Mongo(mongoHost, Integer.parseInt(mongoPort));
-                // Hack. Checking server connectivity status by fetching database names
-                boolean loginStatus = false;
-
-                // Authorize User using <admin> Db
-                DB db = mongo.getDB("admin");
-                try {
-                    mongo.getDatabaseNames();
-                } catch (MongoException me) {
-                    loginStatus = db.authenticate(username, password.toCharArray());
-                    if (!loginStatus) {
-                        ApplicationException e = new ApplicationException(("".equals(username) && "".equals(password)) ?
-                                ErrorCodes.NEED_AUTHORISATION : ErrorCodes.INVALID_USERNAME, "Invalid UserName or Password");
-                        return formErrorResponse(logger, e);
-                    }
-                }
-                // Add mongo Configuration Key to key dbInfo in session
-				String mongoConfigKey = mongoHost + "_" + mongoPort;
-				HttpSession session = request.getSession();
-
-				Object dbInfo = session.getAttribute("dbInfo");
-				if (dbInfo == null) {
-					List<String> mongosInSession = new ArrayList<String>();
-					mongosInSession.add(mongoConfigKey);
-					session.setAttribute("dbInfo", mongosInSession);
-				} else {
-					@SuppressWarnings("unchecked")
-					List<String> mongosInSession = (List<String>) dbInfo;
-					mongosInSession.add(mongoConfigKey);
-					session.setAttribute("dbInfo", mongosInSession);
-				}
-
-				// Store a MongoInstance
-				if (!mongoConfigToInstanceMapping.containsKey(mongoConfigKey)) {
-					mongoConfigToInstanceMapping.put(mongoConfigKey, mongo);
-				}
-				Object usersPresent = mongoConfigToUsersMapping.get(mongoConfigKey);
-				int noOfUsers = 0;
-				if (usersPresent == null) {
-					mongoConfigToUsersMapping.put(mongoConfigKey, noOfUsers);
-				}
-				noOfUsers = mongoConfigToUsersMapping.get(mongoConfigKey) + 1;
-				mongoConfigToUsersMapping.put(mongoConfigKey, noOfUsers);
+                ConnectionDetails connectionDetails = new ConnectionDetails(host,Integer.parseInt(mongoPort),user,password,dbName);
+                String connectionId = authService.authenticate(connectionDetails);
 
                 JSONObject tempResult = new JSONObject();
                 JSONObject jsonResponse = new JSONObject();
                 try {
                     tempResult.put("result", "Login Success");
+                    tempResult.put("connectionId", connectionId);
                     jsonResponse.put("response", tempResult);
                 } catch (JSONException e) {
                     logger.error(e);
@@ -153,4 +111,27 @@ public class LoginController extends BaseController {
         }, false);
 		return response;
 	}
+
+    @Path("/details")
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    public String getConnectionDetails(@QueryParam("connectionId") final String connectionId,@Context final HttpServletRequest request) {
+        String response = new ResponseTemplate().execute(logger, connectionId, request, new ResponseCallback() {
+            public Object execute() throws Exception {
+                MongoConnectionDetails mongoConnectionDetails = authService.getMongoConnectionDetails(connectionId);
+                ConnectionDetails connectionDetails = mongoConnectionDetails.getConnectionDetails();
+                JSONObject jsonResponse = new JSONObject();
+                try {
+                    jsonResponse.put("username", connectionDetails.getUsername());
+                    jsonResponse.put("host", connectionDetails.getHostIp());
+                    jsonResponse.put("port", connectionDetails.getHostPort());
+                    jsonResponse.put("dbNames", new DatabaseServiceImpl(connectionId).getDbList());
+                } catch (JSONException e) {
+                    logger.error(e);
+                }
+                return jsonResponse;
+            }
+        });
+        return response;
+    }
 }

@@ -25,13 +25,18 @@
 
 package com.imaginea.mongodb.services;
 
-import static org.junit.Assert.*;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-
+import static org.junit.Assert.assertEquals;
+import com.imaginea.mongodb.controllers.LoginController;
+import com.imaginea.mongodb.controllers.TestingTemplate;
+import com.imaginea.mongodb.exceptions.ApplicationException;
+import com.imaginea.mongodb.exceptions.ErrorCodes;
 import com.imaginea.mongodb.services.impl.CollectionServiceImpl;
+import com.imaginea.mongodb.utils.ConfigMongoInstanceProvider;
+import com.imaginea.mongodb.utils.MongoInstanceProvider;
+import com.mongodb.BasicDBObject;
+import com.mongodb.DBObject;
+import com.mongodb.Mongo;
+import com.mongodb.MongoException;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
 import org.json.JSONArray;
@@ -40,17 +45,9 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.imaginea.mongodb.utils.ConfigMongoInstanceProvider;
-import com.imaginea.mongodb.utils.MongoInstanceProvider;
-import com.imaginea.mongodb.exceptions.ApplicationException;
-import com.imaginea.mongodb.exceptions.ErrorCodes;
-import com.imaginea.mongodb.controllers.LoginController;
-import com.imaginea.mongodb.controllers.TestingTemplate;
-
-import com.mongodb.BasicDBObject;
-import com.mongodb.DBObject;
-import com.mongodb.Mongo;
-import com.mongodb.MongoException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 
 /**
  * Test all the Service functions on collections inside Databases present in
@@ -100,7 +97,7 @@ public class CollectionServiceImplTest extends TestingTemplate {
 	 *
 	 */
 	@Before
-	public void instantiateTestClass() {
+	public void instantiateTestClass() throws ApplicationException {
 
 		// Creates Mongo Instance.
 		mongoInstance = mongoInstanceProvider.getMongoInstance();

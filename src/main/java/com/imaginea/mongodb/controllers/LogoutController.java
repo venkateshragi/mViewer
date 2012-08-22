@@ -15,7 +15,6 @@
  */
 package com.imaginea.mongodb.controllers;
 
-import com.mongodb.Mongo;
 import org.apache.log4j.Logger;
 
 import javax.ws.rs.GET;
@@ -47,27 +46,17 @@ public class LogoutController extends BaseController {
 	/**
 	 * Listens to a disconnect reuest made by user to end his session from mViewer.
 	 *
-	 * @param dbInfo
+	 * @param connectionId
 	 *            Mongo Db Configuration provided by user to connect to.
 	 * @return Logout status
 	 *
 	 */
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
-	public String doGet(@QueryParam("dbInfo") final String dbInfo) {
+	public String doGet(@QueryParam("connectionId") final String connectionId) {
 		String response = ErrorTemplate.execute(logger, new ResponseCallback() {
 			public Object execute() throws Exception {
-				// Not checking in disconnect if session has dbInfo or not
-				Mongo m = LoginController.mongoConfigToInstanceMapping.get(dbInfo);
-				if (m != null) {
-					int noOfActiveUsers = LoginController.mongoConfigToUsersMapping.get(dbInfo);
-					if (noOfActiveUsers == 0) {
-						m.close();
-						LoginController.mongoConfigToInstanceMapping.remove(dbInfo);
-					} else {
-						LoginController.mongoConfigToUsersMapping.put(dbInfo, noOfActiveUsers - 1);
-					}
-				}
+                authService.disconnectConnection(connectionId);
 				String status = "User Logged Out";
 				return status;
 			}

@@ -131,31 +131,14 @@ YUI({
     }
 
     /**
-     * Gets the parameters from the URL
-     */
-    function getParameters() {
-        var params = [], token;
-        var fullUrl = window.location.search;
-        var dbInfo= fullUrl.substring(fullUrl.indexOf("=")+1);
-        while (dbInfo.indexOf("_") !== -1) {
-            token = dbInfo.substring(0, dbInfo.indexOf("_"));
-			dbInfo = dbInfo.substring(dbInfo.indexOf("_")+1);
-            params.push(token);
-        }
-        params.push(dbInfo); // last token
-        return params;
-    }
-
-    /**
      * Gets the user information from the URL and sets it
      */
-    function setUserInfo(){
-    	var params = getParameters();
-    	Y.one("#host").set("value", params[0]);
-        Y.one("#port").set("value", params[1]);
-        Y.one("#username").set("value", params[2]);
-    	Y.one('#user').set("innerHTML", Y.one("#username").get("value"));
-        var hostVal = params[0] + ":" + params[1];
+    function setUserInfo(params){
+    	Y.one("#host").set("value", params.host);
+        Y.one("#port").set("value", params.port);
+        Y.one("#username").set("value", params.username);
+    	Y.one('#user').set("innerHTML", params.username);
+        var hostVal = params.host + ":" + params.port;
         Y.one('#hostname').set("innerHTML", hostVal);
     }
     /**
@@ -165,12 +148,14 @@ YUI({
      *  @param ioId eventId
      *  @param responseObject The response Object
      */
-    function showDBs(ioId, responseObject) {
+    function showConnectionDetails(ioId, responseObject) {
         Y.log("Response Recieved of get DB request", "info");
         try {
             var parsedResponse = Y.JSON.parse(responseObject.responseText);
-            if (parsedResponse.response.result !== undefined) {
-	            var info, index, dbNames = "";
+            var result = parsedResponse.response.result;
+            if (result !== undefined) {
+                setUserInfo(result);
+                var info, index, dbNames = "";
 	            var dbTemplate = '' +
 			            '<li class="yui3-menuitem" label=[0]> \
 	                      <span class="yui3-menu-label"> \
@@ -196,8 +181,8 @@ YUI({
 							  </div>\
 						  </div>\
 						  </li>';
-                for (index = 0; index < parsedResponse.response.result.length; index++) {
-	                var id = parsedResponse.response.result[index];
+                for (index = 0; index < result.dbNames.length; index++) {
+	                var id = result.dbNames[index];
 	                var formattedName = id.length > 20 ? id.substring(0, 20) + "..." : id;
 	                dbNames += dbTemplate.format(id, id, id, formattedName, id + "_subMenu", id + "_subMenu");
                 }
@@ -238,37 +223,36 @@ YUI({
      * The function handles the onLoad event for the home page.
      * It sends request to get the DB names
      */
-	function requestDBNames(response, a, b, c) {
-		var parsedResponse = (response != undefined && response.responseText != undefined) ? Y.JSON.parse(response.responseText) : null;
-		var error = parsedResponse == undefined ? undefined : parsedResponse.response.error;
-		if (error) {
-			MV.showAlertMessage("DB creation failed ! [0].".format(error.message), MV.warnIcon);
-			Y.log("DB creation failed. Response Status: [0]".format(error.message), "error");
-		} else {
-			MV.showLoadingPanel("Loading Databases...");
-			setUserInfo();
-			var request = Y.io(MV.URLMap.getDBs(),
-				// configuration for loading the database names
-			{
-				method: "GET",
-				on: {
-					success: showDBs,
-					failure: displayError
-				}
-			});
-			Y.log("Sending request to load DB names", "info");
-		}
-	}
+    function requestConnectionDetails(response, a, b, c) {
+        var parsedResponse = (response != undefined && response.responseText != undefined) ? Y.JSON.parse(response.responseText) : null;
+        var error = parsedResponse == undefined ? undefined : parsedResponse.response.error;
+        if (error) {
+            MV.showAlertMessage("DB creation failed ! [0].".format(error.message), MV.warnIcon);
+            Y.log("DB creation failed. Response Status: [0]".format(error.message), "error");
+        } else {
+            MV.showLoadingPanel("Loading Databases...");
+            var request = Y.io(MV.URLMap.getConnectionDetails(),
+                // configuration for loading the database names
+            {
+                method: "GET",
+                on: {
+                    success: showConnectionDetails,
+                    failure: displayError
+                }
+            });
+            Y.log("Sending request to load DB names", "info");
+        }
+    }
 
     /**
      * The function shows a dialog that takes input (i.e. Db name) from user
      */
     function createDB()	{
-        MV.showSubmitDialog("addDBDialog", requestDBNames, null);
+        MV.showSubmitDialog("addDBDialog", requestConnectionDetails, null);
     }
 
     // Make a request to load Database names when the page loads
-    Y.on("load", requestDBNames);
+    Y.on("load", requestConnectionDetails);
 
     //Adding click handler for new DB button that calls createDB()
     Y.on("click", createDB, "#createDB");

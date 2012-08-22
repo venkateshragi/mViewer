@@ -56,7 +56,7 @@ YUI.add('utility', function (Y) {
 
 	MV.StateManager = (function() {
 		var self = this;
-		var stateVariables = ['currentDB', 'currentColl', 'currentBucket', 'host', 'port','dbInfo','newName'];
+		var stateVariables = ['currentDB', 'currentColl', 'currentBucket', 'host', 'port','connectionId','newName'];
 		var i = 0;
 		var exports = {};
 
@@ -100,12 +100,9 @@ YUI.add('utility', function (Y) {
 			methodMaker(currVariable);
 		}
 
-		exports.dbInfo = function() {
-			var currDBInfo = getVal('dbInfo');
-			if (currDBInfo === undefined || currDBInfo.length === 0) {
-				currDBInfo = getVal('host') + "_" + getVal('port');
-			}
-			return currDBInfo;
+		exports.connectionId = function() {
+            var fullUrl = window.location.search;
+            return fullUrl.substring(fullUrl.indexOf("=") + 1);
 		};
 		exports.publish = function(eventName, eventArgs) {
 			if (gRegistry[eventName]) {
@@ -151,77 +148,80 @@ YUI.add('utility', function (Y) {
 	var sm = MV.StateManager;
 
 	MV.URLMap = {
+        getConnectionDetails: function () {
+            return "services/login/details?connectionId=[0]&ts=[1]".format(sm.connectionId());
+        },
 		getDBs: function () {
-			return "services/db?dbInfo=[0]&ts=[1]".format(sm.dbInfo());
+			return "services/db?connectionId=[0]&ts=[1]".format(sm.connectionId());
 		},
 		insertDB: function () {
-			return "services/db/[0]?dbInfo=[1]&action=PUT&ts=[2]".format(sm.newName(), sm.dbInfo(), sm.now());
+			return "services/db/[0]?connectionId=[1]&action=PUT&ts=[2]".format(sm.newName(), sm.connectionId(), sm.now());
 		},
 		dropDB: function () {
-			return "services/db/[0]?dbInfo=[1]&action=DELETE&ts=[2]".format(sm.currentDB(), sm.dbInfo(), sm.now());
+			return "services/db/[0]?connectionId=[1]&action=DELETE&ts=[2]".format(sm.currentDB(), sm.connectionId(), sm.now());
 		},
 		dbStatistics: function () {
-			return "services/stats/db/[0]?dbInfo=[1]&ts=[2]".format(sm.currentDB(), sm.dbInfo(), sm.now());
+			return "services/stats/db/[0]?connectionId=[1]&ts=[2]".format(sm.currentDB(), sm.connectionId(), sm.now());
 		},
 		getColl: function () {
-			return "services/[0]/collection?dbInfo=[1]&ts=[2]".format(sm.currentDB(), sm.dbInfo(), sm.now());
+			return "services/[0]/collection?connectionId=[1]&ts=[2]".format(sm.currentDB(), sm.connectionId(), sm.now());
 		},
 		insertColl: function () {
-			return "services/[0]/collection/[1]?dbInfo=[2]&action=PUT&ts=[3]".format(sm.currentDB(), sm.newName(), sm.dbInfo(), sm.now());
+			return "services/[0]/collection/[1]?connectionId=[2]&action=PUT&ts=[3]".format(sm.currentDB(), sm.newName(), sm.connectionId(), sm.now());
 		},
 		dropColl: function () {
-			return "services/[0]/collection/[1]?dbInfo=[2]&action=DELETE&ts=[3]".format(sm.currentDB(), sm.currentColl(), sm.dbInfo(), sm.now());
+			return "services/[0]/collection/[1]?connectionId=[2]&action=DELETE&ts=[3]".format(sm.currentDB(), sm.currentColl(), sm.connectionId(), sm.now());
 		},
 		collStatistics: function () {
-			return "services/stats/db/[0]/collection/[1]?dbInfo=[2]&ts=[3]".format(sm.currentDB(), sm.currentColl(), sm.dbInfo(), sm.now());
+			return "services/stats/db/[0]/collection/[1]?connectionId=[2]&ts=[3]".format(sm.currentDB(), sm.currentColl(), sm.connectionId(), sm.now());
 		},
 		getDocKeys: function () {
-			return "services/[0]/[1]/document/keys?dbInfo=[2]&ts=[3]".format(sm.currentDB(), sm.currentColl(), sm.dbInfo(), sm.now());
+			return "services/[0]/[1]/document/keys?connectionId=[2]&ts=[3]".format(sm.currentDB(), sm.currentColl(), sm.connectionId(), sm.now());
 		},
 		getDocs: function (params) {
-			return "services/[0]/[1]/document?dbInfo=[2]&ts=[3][4]".format(sm.currentDB(), sm.currentColl(), sm.dbInfo(), sm.now(), params);
+			return "services/[0]/[1]/document?connectionId=[2]&ts=[3][4]".format(sm.currentDB(), sm.currentColl(), sm.connectionId(), sm.now(), params);
 		},
 		insertDoc: function () {
-			return "services/[0]/[1]/document?dbInfo=[2]&action=PUT&ts=[3]".format(sm.currentDB(), sm.currentColl(), sm.dbInfo(), sm.now());
+			return "services/[0]/[1]/document?connectionId=[2]&action=PUT&ts=[3]".format(sm.currentDB(), sm.currentColl(), sm.connectionId(), sm.now());
 		},
 		updateDoc: function () {
-			return "services/[0]/[1]/document?dbInfo=[2]&ts=[3]".format(sm.currentDB(), sm.currentColl(), sm.dbInfo(), sm.now());
+			return "services/[0]/[1]/document?connectionId=[2]&ts=[3]".format(sm.currentDB(), sm.currentColl(), sm.connectionId(), sm.now());
 		},
 		deleteDoc: function () {
-			return "services/[0]/[1]/document?dbInfo=[2]&action=DELETE&ts=[3]".format(sm.currentDB(), sm.currentColl(), sm.dbInfo(), sm.now());
+			return "services/[0]/[1]/document?connectionId=[2]&action=DELETE&ts=[3]".format(sm.currentDB(), sm.currentColl(), sm.connectionId(), sm.now());
 		},
 		addGridFS: function (bucketName) {
-			return "services/[0]/[1]/gridfs/create?dbInfo=[2]&ts=[3]".format(sm.currentDB(), bucketName, sm.dbInfo(), sm.now());
+			return "services/[0]/[1]/gridfs/create?connectionId=[2]&ts=[3]".format(sm.currentDB(), bucketName, sm.connectionId(), sm.now());
 		},
 		getFilesCount: function () {
-			return "services/[0]/[1]/gridfs/count?dbInfo=[2]&ts=[3]".format(sm.currentDB(), sm.currentBucket(), sm.dbInfo(), sm.now());
+			return "services/[0]/[1]/gridfs/count?connectionId=[2]&ts=[3]".format(sm.currentDB(), sm.currentBucket(), sm.connectionId(), sm.now());
 		},
 		getFiles: function () {
-			return "services/[0]/[1]/gridfs/getfiles?dbInfo=[2]&ts=[3]".format(sm.currentDB(), sm.currentBucket(), sm.dbInfo(), sm.now());
+			return "services/[0]/[1]/gridfs/getfiles?connectionId=[2]&ts=[3]".format(sm.currentDB(), sm.currentBucket(), sm.connectionId(), sm.now());
 		},
 		getFile: function (id, download) {
-			return "services/[0]/[1]/gridfs/getfile?id=[2]&download=[3]&dbInfo=[4]&ts=[5]".format(sm.currentDB(), sm.currentBucket(), id, download, sm.dbInfo(), sm.now());
+			return "services/[0]/[1]/gridfs/getfile?id=[2]&download=[3]&connectionId=[4]&ts=[5]".format(sm.currentDB(), sm.currentBucket(), id, download, sm.connectionId(), sm.now());
 		},
 		insertFile: function () {
-			return "services/[0]/[1]/gridfs/uploadfile?dbInfo=[2]&ts=[3]".format(sm.currentDB(), sm.currentBucket(), sm.dbInfo(), sm.now());
+			return "services/[0]/[1]/gridfs/uploadfile?connectionId=[2]&ts=[3]".format(sm.currentDB(), sm.currentBucket(), sm.connectionId(), sm.now());
 		},
 		deleteFile: function (id) {
-			return "services/[0]/[1]/gridfs/dropfile?id=[2]&dbInfo=[3]&ts=[4]".format(sm.currentDB(), sm.currentBucket(), id, sm.dbInfo(), sm.now());
+			return "services/[0]/[1]/gridfs/dropfile?id=[2]&connectionId=[3]&ts=[4]".format(sm.currentDB(), sm.currentBucket(), id, sm.connectionId(), sm.now());
 		},
 		dropBucket: function () {
-			return "services/[0]/[1]/gridfs/dropbucket?dbInfo=[2]&ts=[3]".format(sm.currentDB(), sm.currentBucket(), sm.dbInfo(), sm.now());
+			return "services/[0]/[1]/gridfs/dropbucket?connectionId=[2]&ts=[3]".format(sm.currentDB(), sm.currentBucket(), sm.connectionId(), sm.now());
 		},
 		bucketStatistics: function (ext) {
-			return "services/stats/db/[0]/collection/[1]?dbInfo=[2]&ts=[3]".format(sm.currentDB(), sm.currentBucket() + ext, sm.dbInfo(), sm.now());
+			return "services/stats/db/[0]/collection/[1]?connectionId=[2]&ts=[3]".format(sm.currentDB(), sm.currentBucket() + ext, sm.connectionId(), sm.now());
 		},
 		login: function () {
 			return "services/login";
 		},
 		disconnect: function () {
-			return "services/disconnect?dbInfo=[0]".format(sm.dbInfo());
+			return "services/disconnect?connectionId=[0]".format(sm.connectionId());
 		},
 		serverStatistics: function () {
-			return "services/stats?dbInfo=[0]&ts=[1]".format(sm.dbInfo(), sm.now());
+			return "services/stats?connectionId=[0]&ts=[1]".format(sm.connectionId(), sm.now());
 		},
 		help: function () {
 			return "http://imaginea.github.com/mViewer/";
@@ -233,13 +233,13 @@ YUI.add('utility', function (Y) {
 			return "admin";
 		},
 		graphs: function () {
-			return "graphs.html?dbInfo=[0]&ts=[1]".format(sm.dbInfo(), sm.now());
+			return "graphs.html?connectionId=[0]&ts=[1]".format(sm.connectionId(), sm.now());
 		},
 		graphInitiate: function () {
-			return "graphs/initiate?dbInfo=[0]&ts=[1]".format(sm.dbInfo(), sm.now());
+			return "graphs/initiate?connectionId=[0]&ts=[1]".format(sm.connectionId(), sm.now());
 		},
 		graphQuery: function () {
-			return "graphs/query?dbInfo=[0]&ts=[1]".format(sm.dbInfo(), sm.now());
+			return "graphs/query?connectionId=[0]&ts=[1]".format(sm.connectionId(), sm.now());
 		}
 	};
 
@@ -251,6 +251,7 @@ YUI.add('utility', function (Y) {
 		"INVALID_USERNAME": "You have entered an invalid username and password combination ! To access you need to add user in admin database of mongodb.",
         "NEED_AUTHORISATION": "Mongo DB is running in auth mode. Please enter username and password.",
 		"INVALID_SESSION": "Your session has timed out ! Please login again.",
+        "SUCCESFULLY_LOGGED_OUT": "You have been Successfully disconnected.",
 		"GET_DB_LIST_EXCEPTION": "Could not load the DB list ! Please check if mongo is still running and then refresh the page.",
 		"GET_COLLECTION_LIST_EXCEPTION": "Please check if mongod is still running and then refresh the page.",
 		"DB_DELETION_EXCEPTION": "Please check if mongo is running and then refresh the page and try again.",

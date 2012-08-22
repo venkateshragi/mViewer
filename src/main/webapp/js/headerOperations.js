@@ -25,7 +25,7 @@ YUI({
         _clearContents(MV.mainBody);
         MV.hideQueryForm();
         if (menuOpt === "home") {
-            window.location = "home.html?dbInfo=" + Y.one("#host").get("value")+"_" + Y.one("#port").get("value") + "_" + Y.one("#username").get("value");
+            window.location = "home.html?connectionId=" + Y.one("#host").get("value")+"_" + Y.one("#port").get("value") + "_" + Y.one("#username").get("value");
         } else if (menuOpt === "serverStats") {
             showServerStats();
 	        MV.header.addClass('tab-cont');
@@ -75,7 +75,7 @@ YUI({
                     var response = parsedResponse.response.result;
                     if (response !== undefined) {
                         Y.log("Successfully logging out.", "info");
-                        window.location = "loggedOut.html";
+                        window.location = "index.html?code=SUCCESFULLY_LOGGED_OUT";
                     } else {
                         var error = parsedResponse.response.error;
                         MV.showAlertMessage("Cannot disconnect! [0]", MV.warnIcon, error.code);

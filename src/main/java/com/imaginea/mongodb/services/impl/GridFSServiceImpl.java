@@ -15,11 +15,20 @@
  */
 package com.imaginea.mongodb.services.impl;
 
+import com.imaginea.mongodb.exceptions.ApplicationException;
+import com.imaginea.mongodb.exceptions.CollectionException;
+import com.imaginea.mongodb.exceptions.DatabaseException;
+import com.imaginea.mongodb.exceptions.DocumentException;
+import com.imaginea.mongodb.exceptions.ErrorCodes;
+import com.imaginea.mongodb.exceptions.ValidationException;
+import com.imaginea.mongodb.services.AuthService;
 import com.imaginea.mongodb.services.GridFSService;
-import com.imaginea.mongodb.utils.MongoInstanceProvider;
-import com.imaginea.mongodb.utils.SessionMongoInstanceProvider;
-import com.imaginea.mongodb.exceptions.*;
-import com.mongodb.*;
+import com.mongodb.BasicDBObject;
+import com.mongodb.DBCollection;
+import com.mongodb.DBCursor;
+import com.mongodb.DBObject;
+import com.mongodb.Mongo;
+import com.mongodb.MongoException;
 import com.mongodb.gridfs.GridFS;
 import com.mongodb.gridfs.GridFSDBFile;
 import com.mongodb.gridfs.GridFSInputFile;
@@ -33,7 +42,9 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Field;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.Iterator;
 
 /**
  * Defines services definitions for performing operations like create/drop on
@@ -46,14 +57,11 @@ import java.util.*;
 public class GridFSServiceImpl implements GridFSService {
 
     /**
-     * Instance variable used to get a mongo instance after binding to an
-     * implementation.
-     */
-    private MongoInstanceProvider mongoInstanceProvider;
-    /**
      * Mongo Instance to communicate with mongo
      */
     private Mongo mongoInstance;
+
+    private static final AuthService AUTH_SERVICE = AuthServiceImpl.getInstance();
 
     /**
      * Creates an instance of MongoInstanceProvider which is used to get a mongo
@@ -61,10 +69,10 @@ public class GridFSServiceImpl implements GridFSService {
      * based on a userMappingKey which is received from the file request
      * dispatcher and is obtained from tokenId of user.
      *
-     * @param dbInfo A combination of username,mongoHost and mongoPort
+     * @param connectionId A combination of username,mongoHost and mongoPort
      */
-    public GridFSServiceImpl(String dbInfo) {
-        mongoInstanceProvider = new SessionMongoInstanceProvider(dbInfo);
+    public GridFSServiceImpl(String connectionId) throws ApplicationException {
+        mongoInstance = AUTH_SERVICE.getMongoInstance(connectionId);
     }
 
     /**
@@ -75,8 +83,6 @@ public class GridFSServiceImpl implements GridFSService {
      * @returns Status message.
      */
     public String createStore(String dbName, String bucketName) throws DatabaseException, CollectionException {
-        mongoInstance = mongoInstanceProvider.getMongoInstance();
-
         if (dbName == null) {
             throw new DatabaseException(ErrorCodes.DB_NAME_EMPTY, "Database Name Is Null");
         }
@@ -106,7 +112,6 @@ public class GridFSServiceImpl implements GridFSService {
      * @param limit      @returns JSON representation of list of all files as a String.
      */
     public JSONObject getFileList(String dbName, String bucketName, String query, String fields, String skip, String limit) throws ValidationException, DatabaseException, CollectionException {
-        mongoInstance = mongoInstanceProvider.getMongoInstance();
         if (dbName == null) {
             throw new DatabaseException(ErrorCodes.DB_NAME_EMPTY, "Database Name Is Null");
         }
@@ -167,8 +172,6 @@ public class GridFSServiceImpl implements GridFSService {
      * @returns Requested multipartfile for viewing or download based on 'download' param.
      */
     public File getFile(String dbName, String bucketName, String _id) throws ValidationException, DatabaseException, CollectionException {
-        mongoInstance = mongoInstanceProvider.getMongoInstance();
-
         if (dbName == null) {
             throw new DatabaseException(ErrorCodes.DB_NAME_EMPTY, "Database Name Is Null");
         }
@@ -210,7 +213,6 @@ public class GridFSServiceImpl implements GridFSService {
      * download url & deletion url as JSON Array string.
      */
     public JSONArray insertFile(String dbName, String bucketName, String dbInfo, InputStream inputStream, FormDataBodyPart formData) throws DatabaseException, CollectionException, DocumentException, ValidationException {
-        mongoInstance = mongoInstanceProvider.getMongoInstance();
         if (dbName == null) {
             throw new DatabaseException(ErrorCodes.DB_NAME_EMPTY, "Database name is null");
 
@@ -261,7 +263,6 @@ public class GridFSServiceImpl implements GridFSService {
      * @returns Status message.
      */
     public String deleteFile(String dbName, String bucketName, String _id) throws DatabaseException, DocumentException, CollectionException, ValidationException {
-        mongoInstance = mongoInstanceProvider.getMongoInstance();
         if (dbName == null) {
             throw new DatabaseException(ErrorCodes.DB_NAME_EMPTY, "Database name is null");
 
@@ -313,7 +314,6 @@ public class GridFSServiceImpl implements GridFSService {
      * @returns Status message.
      */
     public String dropBucket(String dbName, String bucketName) throws DatabaseException, DocumentException, CollectionException, ValidationException {
-        mongoInstance = mongoInstanceProvider.getMongoInstance();
         if (dbName == null) {
             throw new DatabaseException(ErrorCodes.DB_NAME_EMPTY, "Database name is null");
 
@@ -353,7 +353,6 @@ public class GridFSServiceImpl implements GridFSService {
      * @returns Status message.
      */
     public JSONObject getCount(String dbName, String bucketName) throws DatabaseException, DocumentException, ValidationException, CollectionException {
-        mongoInstance = mongoInstanceProvider.getMongoInstance();
         if (dbName == null) {
             throw new DatabaseException(ErrorCodes.DB_NAME_EMPTY, "Database name is null");
 
