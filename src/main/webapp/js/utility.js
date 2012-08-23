@@ -244,12 +244,12 @@ YUI.add('utility', function (Y) {
 	};
 
 	MV.errorCodeMap = {
-		"HOST_UNKNOWN": "Unkown Host. Please check if MongoDB is running on the given host and port !",
+		"HOST_UNKNOWN": "Connection Failed ! Please check if MongoDB is running at the given host and port !",
 		"MISSING_LOGIN_FIELDS": "Please fill in all the login fields !",
 		"ERROR_PARSING_PORT": "You have entered an invalid port number !",
 		"INVALID_ARGUMENT": "You have entered an invalid input data !",
 		"INVALID_USERNAME": "You have entered an invalid username and password combination ! To access you need to add user in admin database of mongodb.",
-        "NEED_AUTHORISATION": "Mongo DB is running in auth mode. Please enter username and password.",
+        "NEED_AUTHORISATION": "mongod is running in secure mode. Please enter username and password.",
 		"INVALID_SESSION": "Your session has timed out ! Please login again.",
 		"GET_DB_LIST_EXCEPTION": "Could not load the DB list ! Please check if mongo is still running and then refresh the page.",
 		"GET_COLLECTION_LIST_EXCEPTION": "Please check if mongod is still running and then refresh the page.",

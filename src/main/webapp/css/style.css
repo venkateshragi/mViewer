@@ -18,6 +18,69 @@ div#logo {
 	overflow: hidden;
 }
 
+/*Login Screen*/
+
+.loginScreen {
+    width: 400px;
+    height: 350px;
+    margin-top: 20%;
+}
+
+.loginFieldSet {
+	border-color: #e5e5e5;
+	border-style: solid;
+	border-width: 2px 0px;
+}
+
+.loginFormContents {
+    display: inline-block;
+}
+
+.loginFormLabels {
+    text-align: right;
+    line-height: 22px;
+}
+
+div.loginFormContents div {
+    padding-bottom: 10px;
+    padding-right: 10px;
+}
+
+div.loginFormContents input {
+    height: 20px;
+    border: 1px solid #B2D4D3;
+    border-radius: 3px;
+    padding-left: 5px;
+}
+
+.loginHelp {
+    display: inline-block;
+    float: left;
+    font-weight: bold;
+    font-size: 12px;
+}
+
+.imaginea {
+    display: inline-block;
+    float: right;
+    font-weight: bold;
+    font-size: 12px;
+}
+
+#errorMsg {
+	padding: 10px;
+	display: none;
+}
+
+.notify {
+	border-style: solid;
+	border-width: 1px;
+	padding: 10px;
+	font-weight: bold;
+	background-color: #FFEBE8;
+	border-color: #DD3C10;
+}
+
 .loginMsg {
     visibility:hidden;
     text-align: center;
@@ -26,32 +89,6 @@ div#logo {
     color: #0e2137;
     font-size: 12px;
     line-height: 25px;
-}
-
-#loginForm {
-	width: 22em;
-	text-align: center;
-}
-
-#loginForm th {
-	background: #e5e5e5;
-	color: #000000;
-	padding: .2em 1em;
-	border: 1px solid #ccc;
-	text-align: center;
-}
-
-#loginForm td {
-	padding: .2em 1ex;
-	width: auto;
-	border: 1px solid #ccc;
-	text-align: center;
-}
-
-#loginForm code {
-	background: #eee;
-	display: block;
-	text-align: left;
 }
 
 .userLabel {
@@ -535,31 +572,6 @@ textarea .disabled {
 	font-weight: bold;
 }
 
-fieldset.login {
-	width: 25em;
-	border-color: #e5e5e5;
-	border-style: solid;
-	border-width: 3px;
-}
-
-fieldset.login legend {
-	font-weight: bolder;
-}
-
-#errorMsg {
-	padding: 10px;
-	display: none;
-}
-
-.notify {
-	border-style: solid;
-	border-width: 1px;
-	padding: 10px;
-	font-weight: bold;
-	background-color: #FFEBE8;
-	border-color: #DD3C10;
-}
-
 .yui-skin-sam .yui-dt-liner {
     margin: 0;
     padding: 4px 6px;
@@ -739,14 +751,6 @@ fieldset.login legend {
 	margin: 18px;
 	padding: 4px;
 	border:1px solid #ccc;
-}
-
-.loginHelp {
-    text-align: right;
-    font-weight: bold;
-    padding-bottom: 10px;
-    padding-right: 22px;
-    font-size: 13px;
 }
 
 .floatingFooter {
