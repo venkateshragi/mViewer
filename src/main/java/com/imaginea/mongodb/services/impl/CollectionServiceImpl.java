@@ -15,20 +15,26 @@
  */
 package com.imaginea.mongodb.services.impl;
 
-import com.imaginea.mongodb.services.CollectionService;
-import com.imaginea.mongodb.utils.MongoInstanceProvider;
-import com.imaginea.mongodb.utils.SessionMongoInstanceProvider;
+import com.imaginea.mongodb.exceptions.ApplicationException;
 import com.imaginea.mongodb.exceptions.CollectionException;
 import com.imaginea.mongodb.exceptions.DatabaseException;
 import com.imaginea.mongodb.exceptions.ErrorCodes;
 import com.imaginea.mongodb.exceptions.ValidationException;
-import com.mongodb.*;
+import com.imaginea.mongodb.services.AuthService;
+import com.imaginea.mongodb.services.CollectionService;
+import com.imaginea.mongodb.services.DatabaseService;
+import com.mongodb.BasicDBObject;
+import com.mongodb.CommandResult;
+import com.mongodb.DBObject;
+import com.mongodb.Mongo;
+import com.mongodb.MongoException;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -41,15 +47,13 @@ import java.util.Set;
  */
 public class CollectionServiceImpl implements CollectionService {
 
-    /**
-     * Instance variable used to get a mongo instance after binding to an
-     * implementation.
-     */
-    private MongoInstanceProvider mongoInstanceProvider;
+    private DatabaseService databaseService;
     /**
      * Mongo Instance to communicate with mongo
      */
     private Mongo mongoInstance;
+
+    private static final AuthService AUTH_SERVICE = AuthServiceImpl.getInstance();
 
     /**
      * Creates an instance of MongoInstanceProvider which is used to get a mongo
@@ -57,10 +61,11 @@ public class CollectionServiceImpl implements CollectionService {
      * based on a userMappingKey which is recieved from the collection request
      * dispatcher and is obtained from tokenId of user.
      *
-     * @param dbInfo A combination of username,mongoHost and mongoPort
+     * @param connectionId A combination of username,mongoHost and mongoPort
      */
-    public CollectionServiceImpl(String dbInfo) {
-        mongoInstanceProvider = new SessionMongoInstanceProvider(dbInfo);
+    public CollectionServiceImpl(String connectionId) throws ApplicationException {
+        mongoInstance = AUTH_SERVICE.getMongoInstance(connectionId);
+        databaseService = new DatabaseServiceImpl(connectionId);
     }
 
     /**
@@ -76,8 +81,6 @@ public class CollectionServiceImpl implements CollectionService {
      */
     public Set<String> getCollList(String dbName) throws ValidationException, DatabaseException, CollectionException {
 
-        mongoInstance = mongoInstanceProvider.getMongoInstance();
-
         if (dbName == null) {
             throw new DatabaseException(ErrorCodes.DB_NAME_EMPTY, "Database Name Is Null");
         }
@@ -88,7 +91,8 @@ public class CollectionServiceImpl implements CollectionService {
         Set<String> collList = new HashSet<String>();
 
         try {
-            if (!mongoInstance.getDatabaseNames().contains(dbName)) {
+            List<String> dbList = databaseService.getDbList();
+            if (!dbList.contains(dbName)) {
                 throw new DatabaseException(ErrorCodes.DB_DOES_NOT_EXISTS, "Database with dbName [ " + dbName + "] does not exist");
             }
 
@@ -128,7 +132,6 @@ public class CollectionServiceImpl implements CollectionService {
      */
     public String insertCollection(String dbName, String collectionName, boolean capped, int size, int maxDocs) throws DatabaseException, CollectionException, ValidationException {
 
-        mongoInstance = mongoInstanceProvider.getMongoInstance();
         if (dbName == null) {
             throw new DatabaseException(ErrorCodes.DB_NAME_EMPTY, "Database name is null");
 
@@ -144,7 +147,7 @@ public class CollectionServiceImpl implements CollectionService {
             throw new CollectionException(ErrorCodes.COLLECTION_NAME_EMPTY, "Collection Name Empty");
         }
         try {
-            if (!mongoInstance.getDatabaseNames().contains(dbName)) {
+            if (!databaseService.getDbList().contains(dbName)) {
                 throw new DatabaseException(ErrorCodes.DB_DOES_NOT_EXISTS, "Db with name [" + dbName + "] doesn't exist.");
             }
             if (mongoInstance.getDB(dbName).getCollectionNames().contains(collectionName)) {
@@ -181,7 +184,6 @@ public class CollectionServiceImpl implements CollectionService {
 
     public String deleteCollection(String dbName, String collectionName) throws DatabaseException, CollectionException, ValidationException {
 
-        mongoInstance = mongoInstanceProvider.getMongoInstance();
         if (dbName == null) {
             throw new DatabaseException(ErrorCodes.DB_NAME_EMPTY, "Database name is null");
 
@@ -197,7 +199,7 @@ public class CollectionServiceImpl implements CollectionService {
             throw new CollectionException(ErrorCodes.COLLECTION_NAME_EMPTY, "Collection Name Empty");
         }
         try {
-            if (!mongoInstance.getDatabaseNames().contains(dbName)) {
+            if (!databaseService.getDbList().contains(dbName)) {
                 throw new DatabaseException(ErrorCodes.DB_DOES_NOT_EXISTS, "DB with name [" + dbName + "]DOES_NOT_EXIST");
             }
             if (!mongoInstance.getDB(dbName).getCollectionNames().contains(collectionName)) {
@@ -228,7 +230,6 @@ public class CollectionServiceImpl implements CollectionService {
      */
 
     public JSONArray getCollStats(String dbName, String collectionName) throws DatabaseException, CollectionException, ValidationException, JSONException {
-        mongoInstance = mongoInstanceProvider.getMongoInstance();
         if (dbName == null) {
             throw new DatabaseException(ErrorCodes.DB_NAME_EMPTY, "Database name is null");
 
@@ -247,7 +248,7 @@ public class CollectionServiceImpl implements CollectionService {
         JSONArray collStats = new JSONArray();
 
         try {
-            if (!mongoInstance.getDatabaseNames().contains(dbName)) {
+            if (!databaseService.getDbList().contains(dbName)) {
                 throw new DatabaseException(ErrorCodes.DB_DOES_NOT_EXISTS, "DB with name [" + dbName + "]DOES_NOT_EXIST");
             }
             if (!mongoInstance.getDB(dbName).getCollectionNames().contains(collectionName)) {

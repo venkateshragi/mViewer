@@ -30,10 +30,20 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.*;
+import javax.ws.rs.DefaultValue;
+import javax.ws.rs.FormParam;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
-import java.util.*;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
+import java.util.StringTokenizer;
 
 /**
  * Defines resources for performing create/delete/update operations on documents
@@ -64,7 +74,7 @@ public class DocumentController extends BaseController {
      *
      * @param dbName         Name of Database
      * @param collectionName Name of Collection
-     * @param dbInfo         Mongo Db Configuration provided by user to connect to.
+     * @param connectionId         Mongo Db Configuration provided by user to connect to.
      * @param request        Get the HTTP request context to extract session parameters
      * @return A String of JSON format with list of All Documents in a
      *         collection.
@@ -72,7 +82,7 @@ public class DocumentController extends BaseController {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public String getQueriedDocsList(@PathParam("dbName") final String dbName, @PathParam("collectionName") final String collectionName, @QueryParam("query") final String query,
-                                     @QueryParam("dbInfo") final String dbInfo, @QueryParam("fields") String keys, @QueryParam("limit") final String limit, @QueryParam("skip") final String skip,
+                                     @QueryParam("connectionId") final String connectionId, @QueryParam("fields") String keys, @QueryParam("limit") final String limit, @QueryParam("skip") final String skip,
                                      @Context final HttpServletRequest request) throws JSONException {
 
         // Get all fields with "_id" in case of keys = null
@@ -81,10 +91,10 @@ public class DocumentController extends BaseController {
         }
         final String fields = keys;
 
-        String response = new ResponseTemplate().execute(logger, dbInfo, request, new ResponseCallback() {
+        String response = new ResponseTemplate().execute(logger, connectionId, request, new ResponseCallback() {
             public Object execute() throws Exception {
 
-                DocumentService documentService = new DocumentServiceImpl(dbInfo);
+                DocumentService documentService = new DocumentServiceImpl(connectionId);
                 // Get query
                 DBObject queryObj = (DBObject) JSON.parse(query);
                 StringTokenizer strtok = new StringTokenizer(fields, ",");
@@ -110,7 +120,7 @@ public class DocumentController extends BaseController {
      *
      * @param dbName         Name of Database
      * @param collectionName Name of Collection
-     * @param dbInfo         Mongo Db Configuration provided by user to connect to.
+     * @param connectionId         Mongo Db Configuration provided by user to connect to.
      * @param request        Get the HTTP request context to extract session parameters
      * @return A String of JSON format with all keys in a collection.
      */
@@ -118,13 +128,13 @@ public class DocumentController extends BaseController {
     @Path("/keys")
     @Produces(MediaType.APPLICATION_JSON)
     public String getKeysRequest(@PathParam("dbName") final String dbName, @PathParam("collectionName") final String collectionName,
-                                 @QueryParam("allKeys") final Boolean allKeys, @QueryParam("dbInfo") final String dbInfo,
+                                 @QueryParam("allKeys") final Boolean allKeys, @QueryParam("connectionId") final String connectionId,
                                  @Context final HttpServletRequest request) {
 
-        String response = new ResponseTemplate().execute(logger, dbInfo, request, new ResponseCallback() {
+        String response = new ResponseTemplate().execute(logger, connectionId, request, new ResponseCallback() {
             public Object execute() throws Exception {
                 // Perform the operation here only.
-                Mongo mongoInstance = LoginController.mongoConfigToInstanceMapping.get(dbInfo);
+                Mongo mongoInstance = authService.getMongoInstance(connectionId);
                 long count = mongoInstance.getDB(dbName).getCollection(collectionName).count();
                 DBCursor cursor = mongoInstance.getDB(dbName).getCollection(collectionName).find();
                 if(!allKeys)
@@ -180,20 +190,20 @@ public class DocumentController extends BaseController {
      * @param keys           new Document values in case of update
      * @param action         Query Paramater with value PUT for identifying a create
      *                       database request and value DELETE for dropping a database.
-     * @param dbInfo         Mongo Db Configuration provided by user to connect to.
+     * @param connectionId         Mongo Db Configuration provided by user to connect to.
      * @param request        Get the HTTP request context to extract session parameters
      * @return String with Status of operation performed.
      */
     @POST
     @Produces(MediaType.APPLICATION_JSON)
     public String postDocsRequest(@PathParam("dbName") final String dbName, @PathParam("collectionName") final String collectionName, @DefaultValue("POST") @QueryParam("action") final String action,
-                                  @FormParam("document") final String documentData, @FormParam("_id") final String _id, @FormParam("keys") final String keys, @QueryParam("dbInfo") final String dbInfo,
+                                  @FormParam("document") final String documentData, @FormParam("_id") final String _id, @FormParam("keys") final String keys, @QueryParam("connectionId") final String connectionId,
                                   @Context final HttpServletRequest request) {
 
-        String response = new ResponseTemplate().execute(logger, dbInfo, request, new ResponseCallback() {
+        String response = new ResponseTemplate().execute(logger, connectionId, request, new ResponseCallback() {
             public Object execute() throws Exception {
 
-                DocumentService documentService = new DocumentServiceImpl(dbInfo);
+                DocumentService documentService = new DocumentServiceImpl(connectionId);
                 String result = null;
                 RequestMethod method = null;
                 for (RequestMethod m : RequestMethod.values()) {

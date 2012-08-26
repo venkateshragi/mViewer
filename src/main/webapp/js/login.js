@@ -25,7 +25,8 @@ YUI({
         var username = Y.one("#username").get("value").trim(),
             password = Y.one("#password").get("value").trim(),
             port = Y.one("#port").get("value").trim(),
-            host = Y.one("#host").get("value").trim();
+            host = Y.one("#host").get("value").trim(),
+            dbName = Y.one("#dbName").get("value").trim();
 
         var resetBGColor = function() {
             Y.all("input").setStyle("background", "#FFFFFF");
@@ -75,7 +76,7 @@ YUI({
             }
         };
         var request = Y.io(MV.URLMap.login(), {
-            data: "username=" + username + "&password=" + password + "&port=" + port + "&host=" + host,
+            data: "username=" + username + "&password=" + password + "&port=" + port + "&host=" + host + "&dbName=" + dbName,
             method: "POST",
             on: {
                 success: function(ioId, responseObject) {
@@ -84,7 +85,7 @@ YUI({
                         error = parsedResponse.response.error, errorDiv;
                     if (error == undefined) {
                         Y.log("Successfully logging in", "info");
-                        window.location = "home.html?dbInfo=" + host + "_" + port + "_" + username;
+                        window.location = "home.html?connectionId=" + parsedResponse.response.connectionId;
                     } else {
                         errorDiv = Y.one("#errorMsg");
                         errorDiv.set("innerHTML", MV.errorCodeMap[error.code] || "Error!");
@@ -118,6 +119,12 @@ YUI({
 			errorDiv.set("innerHTML", msg || "Error!");
 			errorDiv.setStyle("display", "inline");
 		}
+        if (code[1] === "INVALID_CONNECTION") {
+            var errorDiv = Y.one("#errorMsg");
+            var msg = "[0]".format(MV.errorCodeMap[code[1]])
+            errorDiv.set("innerHTML", msg || "Error!");
+            errorDiv.setStyle("display", "inline");
+        }
 	};
 
 	Y.on("load", checkSession);

@@ -15,26 +15,26 @@
  */
 package com.imaginea.mongodb.controllers;
 
-import java.io.IOException;
-import java.io.PrintWriter;
-
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
+import com.imaginea.mongodb.controllers.BaseController.ResponseCallback;
+import com.imaginea.mongodb.controllers.BaseController.ResponseTemplate;
+import com.imaginea.mongodb.exceptions.ErrorCodes;
+import com.imaginea.mongodb.services.AuthService;
+import com.imaginea.mongodb.services.impl.AuthServiceImpl;
+import com.mongodb.BasicDBObject;
+import com.mongodb.CommandResult;
+import com.mongodb.DB;
+import com.mongodb.Mongo;
 import org.apache.log4j.Logger;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.imaginea.mongodb.exceptions.ErrorCodes;
-import com.imaginea.mongodb.controllers.BaseController.ResponseCallback;
-import com.imaginea.mongodb.controllers.BaseController.ResponseTemplate;
-import com.mongodb.BasicDBObject;
-import com.mongodb.CommandResult;
-import com.mongodb.DB;
-import com.mongodb.Mongo;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.io.PrintWriter;
 
 /**
  * Return values of queries,updates,inserts and deletes being performed on Mongo
@@ -59,6 +59,8 @@ public class GraphController extends HttpServlet {
 	private static int lastNoOfDeletes = 0;
 	int maxLen = 20;
 	int jump = 1;
+
+    private AuthService authService = AuthServiceImpl.getInstance();
 
 	private static Logger logger = Logger.getLogger(GraphController.class);
 
@@ -90,10 +92,10 @@ public class GraphController extends HttpServlet {
 		response.setContentType("application/x-json");
 		PrintWriter out = response.getWriter();
 
-		final String dbInfo = request.getParameter("dbInfo");
-		String result = new ResponseTemplate().execute(logger, dbInfo, request, new ResponseCallback() {
+		final String connectionId = request.getParameter("connectionId");
+		String result = new ResponseTemplate().execute(logger, connectionId, request, new ResponseCallback() {
 			public Object execute() throws Exception {
-				Mongo mongoInstance = LoginController.mongoConfigToInstanceMapping.get(dbInfo);
+				Mongo mongoInstance = authService.getMongoInstance(connectionId);
 				// Need a Db to get ServerStats
 				DB db = mongoInstance.getDB("admin");
 				String uri = request.getRequestURI();

@@ -22,7 +22,13 @@ import com.imaginea.mongodb.services.impl.CollectionServiceImpl;
 import org.apache.log4j.Logger;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.*;
+import javax.ws.rs.FormParam;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import java.util.Set;
@@ -54,17 +60,17 @@ public class CollectionController extends BaseController {
      * from the service files an error object if formed.
      *
      * @param dbName  Name of database
-     * @param dbInfo  Mongo Db Configuration provided by user to connect to.
+     * @param connectionId  Mongo Db Configuration provided by user to connect to.
      * @param request Get the HTTP request context to extract session parameters
      * @return String of JSON Format with list of all collections.
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public String getCollList(@PathParam("dbName") final String dbName, @QueryParam("dbInfo") final String dbInfo, @Context final HttpServletRequest request) {
+    public String getCollList(@PathParam("dbName") final String dbName, @QueryParam("connectionId") final String connectionId, @Context final HttpServletRequest request) {
 
-        String response = new ResponseTemplate().execute(logger, dbInfo, request, new ResponseCallback() {
+        String response = new ResponseTemplate().execute(logger, connectionId, request, new ResponseCallback() {
             public Object execute() throws Exception {
-                CollectionService collectionService = new CollectionServiceImpl(dbInfo);
+                CollectionService collectionService = new CollectionServiceImpl(connectionId);
                 Set<String> collectionNames = collectionService.getCollList(dbName);
 
                 return collectionNames;
@@ -88,14 +94,14 @@ public class CollectionController extends BaseController {
      * @param action         Query Paramater with value PUT for identifying a create
      *                       database request and value DELETE for dropping a database.
      * @param request        Get the HTTP request context to extract session parameters
-     * @param dbInfo         Mongo Db Configuration provided by user to connect to.
+     * @param connectionId         Mongo Db Configuration provided by user to connect to.
      * @return String with status of operation performed.
      */
     @POST
     @Path("/{collectionName}")
     @Produces(MediaType.APPLICATION_JSON)
     public String postCollRequest(@PathParam("dbName") final String dbName, @PathParam("collectionName") final String collectionName, @FormParam("isCapped") String capped,
-                                  @QueryParam("collSize") final int size, @QueryParam("collMaxSize") final int maxDocs, @QueryParam("action") final String action, @QueryParam("dbInfo") final String dbInfo,
+                                  @QueryParam("collSize") final int size, @QueryParam("collMaxSize") final int maxDocs, @QueryParam("action") final String action, @QueryParam("connectionId") final String connectionId,
                                   @Context final HttpServletRequest request) {
 
         if (action == null) {
@@ -110,9 +116,9 @@ public class CollectionController extends BaseController {
             capp = true;
         }
         final boolean iscapped = capp;
-        String response = new ResponseTemplate().execute(logger, dbInfo, request, new ResponseCallback() {
+        String response = new ResponseTemplate().execute(logger, connectionId, request, new ResponseCallback() {
             public Object execute() throws Exception {
-                CollectionService collectionService = new CollectionServiceImpl(dbInfo);
+                CollectionService collectionService = new CollectionServiceImpl(connectionId);
                 String status = null;
                 RequestMethod method = null;
                 for (RequestMethod m : RequestMethod.values()) {

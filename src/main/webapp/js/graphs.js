@@ -1,11 +1,11 @@
 /*
  * Copyright (c) 2011 Imaginea Technologies Private Ltd.
  * Hyderabad, India
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     http://www.apache.org/licenses/LICENSE-2.0
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -148,7 +148,7 @@ YUI({
 
     function requestInitialData() {
         var fullUrl = window.location.search;
-        Y.one("#dbInfo").set("value", fullUrl.substring(fullUrl.indexOf("=") + 1));
+        Y.one("#connectionId").set("value", fullUrl.substring(fullUrl.indexOf("=") + 1));
         var sUrl = MV.URLMap.graphInitiate();
         var request = Y.io(sUrl, cfg);
     }

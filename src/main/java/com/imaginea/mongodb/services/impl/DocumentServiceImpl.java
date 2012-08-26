@@ -16,16 +16,27 @@
 
 package com.imaginea.mongodb.services.impl;
 
+import com.imaginea.mongodb.exceptions.ApplicationException;
+import com.imaginea.mongodb.exceptions.CollectionException;
+import com.imaginea.mongodb.exceptions.DatabaseException;
+import com.imaginea.mongodb.exceptions.DocumentException;
+import com.imaginea.mongodb.exceptions.ErrorCodes;
+import com.imaginea.mongodb.exceptions.ValidationException;
+import com.imaginea.mongodb.services.AuthService;
+import com.imaginea.mongodb.services.DatabaseService;
 import com.imaginea.mongodb.services.DocumentService;
-import com.imaginea.mongodb.utils.MongoInstanceProvider;
-import com.imaginea.mongodb.utils.SessionMongoInstanceProvider;
-import com.imaginea.mongodb.exceptions.*;
-import com.mongodb.*;
+import com.mongodb.BasicDBObject;
+import com.mongodb.DBCollection;
+import com.mongodb.DBCursor;
+import com.mongodb.DBObject;
+import com.mongodb.Mongo;
+import com.mongodb.MongoException;
 import com.mongodb.util.JSON;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Defines services definitions for performing operations like
@@ -38,14 +49,12 @@ import java.util.ArrayList;
 
 public class DocumentServiceImpl implements DocumentService {
     /**
-     * Instance variable used to get a mongo instance after binding to an
-     * implementation.
-     */
-    private MongoInstanceProvider mongoInstanceProvider;
-    /**
      * Mongo Instance to communicate with mongo
      */
     private Mongo mongoInstance;
+    private DatabaseService databaseService;
+
+    private static final AuthService AUTH_SERVICE = AuthServiceImpl.getInstance();
 
     /**
      * Creates an instance of MongoInstanceProvider which is used to get a mongo
@@ -53,10 +62,11 @@ public class DocumentServiceImpl implements DocumentService {
      * based on a userMappingKey which is recieved from the database request
      * dispatcher and is obtained from tokenId of user.
      *
-     * @param dbInfo A combination of username,mongoHost and mongoPort
+     * @param connectionId A combination of username,mongoHost and mongoPort
      */
-    public DocumentServiceImpl(String dbInfo) {
-        mongoInstanceProvider = new SessionMongoInstanceProvider(dbInfo);
+    public DocumentServiceImpl(String connectionId) throws ApplicationException {
+        mongoInstance = AUTH_SERVICE.getMongoInstance(connectionId);
+        databaseService = new DatabaseServiceImpl(connectionId);
     }
 
     /**
@@ -81,8 +91,6 @@ public class DocumentServiceImpl implements DocumentService {
     public JSONObject getQueriedDocsList(String dbName, String collectionName, DBObject query, DBObject keys, int limit, int skip) throws DatabaseException, CollectionException,
         DocumentException, ValidationException {
 
-        mongoInstance = mongoInstanceProvider.getMongoInstance();
-
         if (dbName == null) {
             throw new DatabaseException(ErrorCodes.DB_NAME_EMPTY, "Database name is null");
 
@@ -100,7 +108,8 @@ public class DocumentServiceImpl implements DocumentService {
 
         JSONObject result = new JSONObject();
         try {
-            if (!mongoInstance.getDatabaseNames().contains(dbName)) {
+            List<String> databaseNames = databaseService.getDbList();
+            if (!databaseNames.contains(dbName)) {
                 throw new DatabaseException(ErrorCodes.DB_DOES_NOT_EXISTS, "DB with name [" + dbName + "]DOES_NOT_EXIST");
             }
 
@@ -150,7 +159,6 @@ public class DocumentServiceImpl implements DocumentService {
      */
 
     public String insertDocument(String dbName, String collectionName, DBObject document) throws DatabaseException, CollectionException, DocumentException, ValidationException {
-        mongoInstance = mongoInstanceProvider.getMongoInstance();
         if (dbName == null) {
             throw new DatabaseException(ErrorCodes.DB_NAME_EMPTY, "Database name is null");
 
@@ -168,7 +176,7 @@ public class DocumentServiceImpl implements DocumentService {
 
         String result = null;
         try {
-            if (!mongoInstance.getDatabaseNames().contains(dbName)) {
+            if (!databaseService.getDbList().contains(dbName)) {
                 throw new DatabaseException(ErrorCodes.DB_DOES_NOT_EXISTS, "DB [" + dbName + "] DOES NOT EXIST");
             }
 
@@ -205,7 +213,6 @@ public class DocumentServiceImpl implements DocumentService {
 
     public String updateDocument(String dbName, String collectionName, String _id, DBObject newData) throws DatabaseException, CollectionException, DocumentException, ValidationException {
 
-        mongoInstance = mongoInstanceProvider.getMongoInstance();
         if (dbName == null) {
             throw new DatabaseException(ErrorCodes.DB_NAME_EMPTY, "Database name is null");
 
@@ -223,7 +230,7 @@ public class DocumentServiceImpl implements DocumentService {
         String result = null;
         DBObject documentData = null;
         try {
-            if (!mongoInstance.getDatabaseNames().contains(dbName)) {
+            if (!databaseService.getDbList().contains(dbName)) {
                 throw new DatabaseException(ErrorCodes.DB_DOES_NOT_EXISTS, "DB [" + dbName + "] DOES NOT EXIST");
             }
 
@@ -290,7 +297,6 @@ public class DocumentServiceImpl implements DocumentService {
      */
 
     public String deleteDocument(String dbName, String collectionName, String _id) throws DatabaseException, CollectionException, DocumentException, ValidationException {
-        mongoInstance = mongoInstanceProvider.getMongoInstance();
         if (dbName == null) {
             throw new DatabaseException(ErrorCodes.DB_NAME_EMPTY, "Database name is null");
 
@@ -309,7 +315,7 @@ public class DocumentServiceImpl implements DocumentService {
         String result = null;
         DBObject documentData = null;
         try {
-            if (!mongoInstance.getDatabaseNames().contains(dbName)) {
+            if (!databaseService.getDbList().contains(dbName)) {
                 throw new DatabaseException(ErrorCodes.DB_DOES_NOT_EXISTS, "DB [" + dbName + "] DOES NOT EXIST");
             }
 
