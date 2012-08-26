@@ -34,7 +34,9 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 import java.net.UnknownHostException;
+import java.util.Set;
 
 /**
  * Defines validation functions for validating dbInfo from session. An error
@@ -63,15 +65,16 @@ public class BaseController {
      */
     protected static String validateConnectionId(String connectionId, Logger logger, HttpServletRequest request) {
 
-        String response = null;
-        if (connectionId == null) {
-            InvalidHTTPRequestException e = new InvalidHTTPRequestException(ErrorCodes.CONNECTION_ID_ABSENT, "Invalid Connection Id");
+        HttpSession session = request.getSession();
+        Set<String> existingConnectionIdsInSession = (Set<String>) session.getAttribute("existingConnectionIdsInSession");
+        if(existingConnectionIdsInSession == null) {
+            InvalidHTTPRequestException e = new InvalidHTTPRequestException(ErrorCodes.INVALID_SESSION, "Invalid Session");
             return formErrorResponse(logger, e);
         }
 
-        boolean connectionExists = authService.doesConnectionExists(connectionId);
-        if (!connectionExists) {
-            InvalidHTTPRequestException e = new InvalidHTTPRequestException(ErrorCodes.INVALID_SESSION, "Invalid Connection Id");
+        String response = null;
+        if (connectionId == null || !existingConnectionIdsInSession.contains(connectionId)) {
+            InvalidHTTPRequestException e = new InvalidHTTPRequestException(ErrorCodes.INVALID_CONNECTION, "Invalid Connection");
             return formErrorResponse(logger, e);
         }
         return response;

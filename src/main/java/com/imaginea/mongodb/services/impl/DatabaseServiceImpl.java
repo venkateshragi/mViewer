@@ -112,7 +112,7 @@ public class DatabaseServiceImpl implements DatabaseService {
         }
 
         try {
-            boolean dbAlreadyPresent = mongoInstance.getDatabaseNames().contains(dbName);
+            boolean dbAlreadyPresent = getDbList().contains(dbName);
             if (dbAlreadyPresent) {
                 throw new DatabaseException(ErrorCodes.DB_ALREADY_EXISTS, "DB with name '" + dbName + "' ALREADY EXISTS");
             }
@@ -146,7 +146,7 @@ public class DatabaseServiceImpl implements DatabaseService {
             throw new DatabaseException(ErrorCodes.DB_NAME_EMPTY, "Database Name Empty");
         }
         try {
-            boolean dbPresent = mongoInstance.getDatabaseNames().contains(dbName);
+            boolean dbPresent = getDbList().contains(dbName);
             if (!dbPresent) {
                 throw new DatabaseException(ErrorCodes.DB_DOES_NOT_EXISTS, "DB with name '" + dbName + "'  DOES NOT EXIST");
             }

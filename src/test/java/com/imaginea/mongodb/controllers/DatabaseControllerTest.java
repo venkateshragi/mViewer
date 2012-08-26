@@ -25,13 +25,18 @@
 
 package com.imaginea.mongodb.controllers;
 
-import static org.junit.Assert.*;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.servlet.http.HttpSession;
-
+import static org.junit.Assert.assertEquals;
+import com.imaginea.mongodb.exceptions.ApplicationException;
+import com.imaginea.mongodb.exceptions.DatabaseException;
+import com.imaginea.mongodb.exceptions.ErrorCodes;
+import com.imaginea.mongodb.utils.ConfigMongoInstanceProvider;
+import com.imaginea.mongodb.utils.MongoInstanceProvider;
+import com.mongodb.BasicDBList;
+import com.mongodb.BasicDBObject;
+import com.mongodb.DBObject;
+import com.mongodb.Mongo;
+import com.mongodb.MongoException;
+import com.mongodb.util.JSON;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
 import org.junit.AfterClass;
@@ -40,18 +45,9 @@ import org.junit.Test;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpSession;
 
-import com.imaginea.mongodb.utils.ConfigMongoInstanceProvider;
-import com.imaginea.mongodb.utils.MongoInstanceProvider;
-import com.imaginea.mongodb.exceptions.ApplicationException;
-import com.imaginea.mongodb.exceptions.DatabaseException;
-import com.imaginea.mongodb.exceptions.ErrorCodes;
-
-import com.mongodb.BasicDBList;
-import com.mongodb.BasicDBObject;
-import com.mongodb.DBObject;
-import com.mongodb.Mongo;
-import com.mongodb.MongoException;
-import com.mongodb.util.JSON;
+import javax.servlet.http.HttpSession;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Tests the database request dispatcher resource that handles the GET and POST
@@ -212,25 +208,25 @@ public class DatabaseControllerTest extends TestingTemplate {
 
 						String resp = testDbResource.postDbRequest(dbName, "PUT", testDbInfo, request);
 
-						List<String> dbNames = mongoInstance.getDatabaseNames();
 						if (dbName == null) {
-							DBObject response = (BasicDBObject) JSON.parse(resp);
-							DBObject error = (BasicDBObject) response.get("response");
-							String code = (String) ((BasicDBObject) error.get("error")).get("code");
-							assertEquals(ErrorCodes.DB_NAME_EMPTY, code);
+                            DBObject response = (BasicDBObject) JSON.parse(resp);
+                            DBObject error = (BasicDBObject) response.get("response");
+                            String code = (String) ((BasicDBObject) error.get("error")).get("code");
+                            assertEquals(ErrorCodes.DB_NAME_EMPTY, code);
 
-						} else if (dbName.equals("")) {
-							DBObject response = (BasicDBObject) JSON.parse(resp);
-							DBObject error = (BasicDBObject) response.get("response");
-							String code = (String) ((BasicDBObject) error.get("error")).get("code");
-							assertEquals(ErrorCodes.DB_NAME_EMPTY, code);
-						} else if (dbName.equals("admin")) {
-							DBObject response = (BasicDBObject) JSON.parse(resp);
-							DBObject error = (BasicDBObject) response.get("response");
-							String code = (String) ((BasicDBObject) error.get("error")).get("code");
-							assertEquals(ErrorCodes.DB_ALREADY_EXISTS, code);
-						} else {
-							assert (dbNames.contains(dbName));
+                        } else if (dbName.equals("")) {
+                            DBObject response = (BasicDBObject) JSON.parse(resp);
+                            DBObject error = (BasicDBObject) response.get("response");
+                            String code = (String) ((BasicDBObject) error.get("error")).get("code");
+                            assertEquals(ErrorCodes.DB_NAME_EMPTY, code);
+                        } else if (dbName.equals("admin")) {
+                            DBObject response = (BasicDBObject) JSON.parse(resp);
+                            DBObject error = (BasicDBObject) response.get("response");
+                            String code = (String) ((BasicDBObject) error.get("error")).get("code");
+                            assertEquals(ErrorCodes.DB_ALREADY_EXISTS, code);
+                        } else {
+                            List<String> dbNames = mongoInstance.getDatabaseNames();
+                            assert (dbNames.contains(dbName));
 							mongoInstance.dropDatabase(dbName);
 						}
 

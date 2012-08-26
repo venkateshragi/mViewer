@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -31,13 +32,13 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public String authenticate(ConnectionDetails connectionDetails) throws ApplicationException {
+    public String authenticate(ConnectionDetails connectionDetails, Set<String> existingConnectionIdsInSession) throws ApplicationException {
         sanitizeConnectionDetails(connectionDetails);
         String connectionDetailsHashCode = String.valueOf(connectionDetails.hashCode());
         Collection<MongoConnectionDetails> mongoConnectionDetailsList = allConnectionDetails.get(connectionDetailsHashCode);
-        if(mongoConnectionDetailsList != null) {
+        if(existingConnectionIdsInSession != null && mongoConnectionDetailsList != null) {
             for(MongoConnectionDetails mongoConnectionDetails : mongoConnectionDetailsList) {
-                if(connectionDetails.equals(mongoConnectionDetails.getConnectionDetails())) {
+                if(existingConnectionIdsInSession.contains(mongoConnectionDetails.getConnectionId()) && connectionDetails.equals(mongoConnectionDetails.getConnectionDetails())) {
                     return mongoConnectionDetails.getConnectionId();
                 }
             }
@@ -81,50 +82,50 @@ public class AuthServiceImpl implements AuthService {
     public MongoConnectionDetails getMongoConnectionDetails(String connectionId) throws ApplicationException {
         String[] split = connectionId.split("_");
         if(split.length != 2) {
-            throw new ApplicationException(null,"Invalid Connection Id");
+            throw new ApplicationException(ErrorCodes.INVALID_CONNECTION, "Invalid Connection");
         }
         String connectionDetailsHashCode = String.valueOf(split[1]);
         Collection<MongoConnectionDetails> mongoConnectionDetailsList = allConnectionDetails.get(connectionDetailsHashCode);
         if(mongoConnectionDetailsList == null) {
-            throw new ApplicationException(null,"Invalid Connection Id");
+            throw new ApplicationException(ErrorCodes.INVALID_CONNECTION, "Invalid Connection");
         }
         for(MongoConnectionDetails mongoConnectionDetails : mongoConnectionDetailsList) {
             if(connectionId.equals(mongoConnectionDetails.getConnectionId())) {
                 return mongoConnectionDetails;
             }
         }
-        throw new ApplicationException(null,"Invalid Connection Id");
+        throw new ApplicationException(ErrorCodes.INVALID_CONNECTION, "Invalid Connection");
     }
 
     @Override
     public Mongo getMongoInstance(String connectionId) throws ApplicationException {
         String[] split = connectionId.split("_");
         if(split.length != 2) {
-            throw new ApplicationException(null,"Invalid Connection Id");
+            throw new ApplicationException(ErrorCodes.INVALID_CONNECTION, "Invalid Connection");
         }
         String connectionDetailsHashCode = String.valueOf(split[1]);
         Collection<MongoConnectionDetails> mongoConnectionDetailsList = allConnectionDetails.get(connectionDetailsHashCode);
         if(mongoConnectionDetailsList == null) {
-            throw new ApplicationException(null,"Invalid Connection Id");
+            throw new ApplicationException(ErrorCodes.INVALID_CONNECTION, "Invalid Connection");
         }
         for(MongoConnectionDetails mongoConnectionDetails : mongoConnectionDetailsList) {
             if(connectionId.equals(mongoConnectionDetails.getConnectionId())) {
                 return mongoConnectionDetails.getMongo();
             }
         }
-        throw new ApplicationException(null,"Invalid Connection Id");
+        throw new ApplicationException(ErrorCodes.INVALID_CONNECTION, "Invalid Connection");
     }
 
     @Override
     public void disconnectConnection(String connectionId) throws ApplicationException {
         String[] split = connectionId.split("_");
         if(split.length != 2) {
-            throw new ApplicationException(null,"Invalid Connection Id");
+            throw new ApplicationException(ErrorCodes.INVALID_CONNECTION, "Invalid Connection");
         }
         String connectionDetailsHashCode = String.valueOf(split[1]);
         Collection<MongoConnectionDetails> mongoConnectionDetailsList = allConnectionDetails.get(connectionDetailsHashCode);
         if(mongoConnectionDetailsList == null) {
-            throw new ApplicationException(null,"Invalid Connection Id");
+            throw new ApplicationException(ErrorCodes.INVALID_CONNECTION, "Invalid Connection");
         }
         Iterator<MongoConnectionDetails> mongoConnectionDetailsIterator = mongoConnectionDetailsList.iterator();
         while (mongoConnectionDetailsIterator.hasNext()) {
@@ -134,28 +135,7 @@ public class AuthServiceImpl implements AuthService {
                 return;
             }
         }
-        throw new ApplicationException(null,"Invalid Connection Id");
-    }
-
-    @Override
-    public boolean doesConnectionExists(String connectionId) {
-        String[] split = connectionId.split("_");
-        if(split.length != 2) {
-            return false;
-        }
-        String connectionDetailsHashCode = String.valueOf(split[1]);
-        Collection<MongoConnectionDetails> mongoConnectionDetailsList = allConnectionDetails.get(connectionDetailsHashCode);
-        if(mongoConnectionDetailsList == null) {
-            return false;
-        }
-        Iterator<MongoConnectionDetails> mongoConnectionDetailsIterator = mongoConnectionDetailsList.iterator();
-        while (mongoConnectionDetailsIterator.hasNext()) {
-            MongoConnectionDetails mongoConnectionDetails = mongoConnectionDetailsIterator.next();
-            if(connectionId.equals(mongoConnectionDetails.getConnectionId())) {
-                return true;
-            }
-        }
-        return false;
+        throw new ApplicationException(ErrorCodes.INVALID_CONNECTION, "Invalid Connection");
     }
 
     private void sanitizeConnectionDetails(ConnectionDetails connectionDetails) {

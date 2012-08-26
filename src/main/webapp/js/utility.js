@@ -100,15 +100,23 @@ YUI.add('utility', function (Y) {
 			methodMaker(currVariable);
 		}
 
-		exports.connectionId = function() {
-            var fullUrl = window.location.search;
-            return fullUrl.substring(fullUrl.indexOf("=") + 1);
-		};
+        exports.connectionId = function () {
+            var query = window.location.search.substring(1);
+            var vars = query.split("&");
+            var params = new Array()
+            for (var i = 0; i < vars.length; i++) {
+                var pair = vars[i].split("=");
+                params[pair[0]] = pair[1]
+            }
+            return params["connectionId"];
+        };
+
 		exports.publish = function(eventName, eventArgs) {
 			if (gRegistry[eventName]) {
 				deliverEvent(eventName, eventArgs);
 			}
 		};
+
 		exports.subscribe = function(callback, eventArgs) {
 			var i = 0, eventNames;
 			// if it is not a number assume it is an array
@@ -251,7 +259,7 @@ YUI.add('utility', function (Y) {
 		"INVALID_USERNAME": "You have entered an invalid username and password combination ! To access you need to add user in admin database of mongodb.",
         "NEED_AUTHORISATION": "mongod is running in secure mode. Please enter username and password.",
 		"INVALID_SESSION": "Your session has timed out ! Please login again.",
-        "SUCCESFULLY_LOGGED_OUT": "You have been Successfully disconnected.",
+        "INVALID_CONNECTION":"You are currently not connected to Mongo DB ! Please Connect.",
 		"GET_DB_LIST_EXCEPTION": "Could not load the DB list ! Please check if mongo is still running and then refresh the page.",
 		"GET_COLLECTION_LIST_EXCEPTION": "Please check if mongod is still running and then refresh the page.",
 		"DB_DELETION_EXCEPTION": "Please check if mongo is running and then refresh the page and try again.",

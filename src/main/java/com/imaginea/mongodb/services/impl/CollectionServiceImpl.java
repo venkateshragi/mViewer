@@ -147,7 +147,7 @@ public class CollectionServiceImpl implements CollectionService {
             throw new CollectionException(ErrorCodes.COLLECTION_NAME_EMPTY, "Collection Name Empty");
         }
         try {
-            if (!mongoInstance.getDatabaseNames().contains(dbName)) {
+            if (!databaseService.getDbList().contains(dbName)) {
                 throw new DatabaseException(ErrorCodes.DB_DOES_NOT_EXISTS, "Db with name [" + dbName + "] doesn't exist.");
             }
             if (mongoInstance.getDB(dbName).getCollectionNames().contains(collectionName)) {
@@ -199,7 +199,7 @@ public class CollectionServiceImpl implements CollectionService {
             throw new CollectionException(ErrorCodes.COLLECTION_NAME_EMPTY, "Collection Name Empty");
         }
         try {
-            if (!mongoInstance.getDatabaseNames().contains(dbName)) {
+            if (!databaseService.getDbList().contains(dbName)) {
                 throw new DatabaseException(ErrorCodes.DB_DOES_NOT_EXISTS, "DB with name [" + dbName + "]DOES_NOT_EXIST");
             }
             if (!mongoInstance.getDB(dbName).getCollectionNames().contains(collectionName)) {
@@ -248,7 +248,7 @@ public class CollectionServiceImpl implements CollectionService {
         JSONArray collStats = new JSONArray();
 
         try {
-            if (!mongoInstance.getDatabaseNames().contains(dbName)) {
+            if (!databaseService.getDbList().contains(dbName)) {
                 throw new DatabaseException(ErrorCodes.DB_DOES_NOT_EXISTS, "DB with name [" + dbName + "]DOES_NOT_EXIST");
             }
             if (!mongoInstance.getDB(dbName).getCollectionNames().contains(collectionName)) {

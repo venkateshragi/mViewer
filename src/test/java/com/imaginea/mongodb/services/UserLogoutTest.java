@@ -37,6 +37,7 @@ import org.apache.log4j.PropertyConfigurator;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.springframework.mock.web.MockHttpServletRequest;
 
 /**
  * Tests the GET request made by user to disconnect from the application. Here we
@@ -94,7 +95,7 @@ public class UserLogoutTest extends BaseController {
 	@Test
 	public void testUserLoginRequest() {
 
-		logoutController.doGet(testdbInfo);
+		logoutController.doGet(testdbInfo,new MockHttpServletRequest());
 		assertNotNull(LoginController.mongoConfigToInstanceMapping.get(testdbInfo));
 		Integer value = 0;
 		assertEquals(value, LoginController.mongoConfigToUsersMapping.get(testdbInfo));

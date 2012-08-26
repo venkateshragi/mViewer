@@ -176,7 +176,7 @@ public class DocumentServiceImpl implements DocumentService {
 
         String result = null;
         try {
-            if (!mongoInstance.getDatabaseNames().contains(dbName)) {
+            if (!databaseService.getDbList().contains(dbName)) {
                 throw new DatabaseException(ErrorCodes.DB_DOES_NOT_EXISTS, "DB [" + dbName + "] DOES NOT EXIST");
             }
 
@@ -230,7 +230,7 @@ public class DocumentServiceImpl implements DocumentService {
         String result = null;
         DBObject documentData = null;
         try {
-            if (!mongoInstance.getDatabaseNames().contains(dbName)) {
+            if (!databaseService.getDbList().contains(dbName)) {
                 throw new DatabaseException(ErrorCodes.DB_DOES_NOT_EXISTS, "DB [" + dbName + "] DOES NOT EXIST");
             }
 
@@ -315,7 +315,7 @@ public class DocumentServiceImpl implements DocumentService {
         String result = null;
         DBObject documentData = null;
         try {
-            if (!mongoInstance.getDatabaseNames().contains(dbName)) {
+            if (!databaseService.getDbList().contains(dbName)) {
                 throw new DatabaseException(ErrorCodes.DB_DOES_NOT_EXISTS, "DB [" + dbName + "] DOES NOT EXIST");
             }
 

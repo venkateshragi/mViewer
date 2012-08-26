@@ -26,6 +26,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -35,7 +36,9 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Authenticates User to Mongo Db by checking the user in <system.users>
@@ -94,9 +97,16 @@ public class LoginController extends BaseController {
 					ApplicationException e = new ApplicationException(ErrorCodes.MISSING_LOGIN_FIELDS, "Missing Login Fields");
 					return formErrorResponse(logger, e);
 				}
-                ConnectionDetails connectionDetails = new ConnectionDetails(host,Integer.parseInt(mongoPort),user,password,dbName);
-                String connectionId = authService.authenticate(connectionDetails);
+                HttpSession session = request.getSession();
+                Set<String> existingConnectionIdsInSession = (Set<String>) session.getAttribute("existingConnectionIdsInSession");
 
+                ConnectionDetails connectionDetails = new ConnectionDetails(host,Integer.parseInt(mongoPort),user,password,dbName);
+                String connectionId = authService.authenticate(connectionDetails,existingConnectionIdsInSession);
+                if(existingConnectionIdsInSession == null) {
+                    existingConnectionIdsInSession = new HashSet<String>();
+                    session.setAttribute("existingConnectionIdsInSession",existingConnectionIdsInSession);
+                }
+                existingConnectionIdsInSession.add(connectionId);
                 JSONObject tempResult = new JSONObject();
                 JSONObject jsonResponse = new JSONObject();
                 try {

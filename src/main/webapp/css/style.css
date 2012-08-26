@@ -23,7 +23,7 @@ div#logo {
 .loginScreen {
     width: 400px;
     height: 350px;
-    margin-top: 20%;
+    margin-top: 10%;
 }
 
 .loginFieldSet {
@@ -70,6 +70,29 @@ div.loginFormContents input {
 #errorMsg {
 	padding: 10px;
 	display: none;
+}
+
+#infoMsg {
+	padding: 10px;
+	display: none;
+}
+
+.errorMsg {
+	border-style: solid;
+	border-width: 1px;
+	padding: 10px;
+	font-weight: bold;
+	background-color: #FFEBE8;
+	border-color: #DD3C10;
+}
+
+.infoMsg {
+	border-style: solid;
+	border-width: 1px;
+	padding: 10px;
+	font-weight: bold;
+	background-color: #edfffc;
+	border-color: #4bd8ff;
 }
 
 .notify {

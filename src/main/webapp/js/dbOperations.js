@@ -134,11 +134,12 @@ YUI({
      * Gets the user information from the URL and sets it
      */
     function setUserInfo(params){
+        var username = params.username ? params.username : "Guest";
+        var hostVal = params.host + ":" + params.port;
     	Y.one("#host").set("value", params.host);
         Y.one("#port").set("value", params.port);
-        Y.one("#username").set("value", params.username);
-    	Y.one('#user').set("innerHTML", params.username);
-        var hostVal = params.host + ":" + params.port;
+        Y.one("#username").set("value", username);
+    	Y.one('#user').set("innerHTML", username);
         Y.one('#hostname').set("innerHTML", hostVal);
     }
     /**

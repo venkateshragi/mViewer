@@ -17,11 +17,15 @@ package com.imaginea.mongodb.controllers;
 
 import org.apache.log4j.Logger;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
+import java.util.Set;
 
 /**
  * Listens at a disconnect Request made by the user and destroys user id from the
@@ -53,11 +57,16 @@ public class LogoutController extends BaseController {
 	 */
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
-	public String doGet(@QueryParam("connectionId") final String connectionId) {
+	public String doGet(@QueryParam("connectionId") final String connectionId,@Context final HttpServletRequest request) {
 		String response = ErrorTemplate.execute(logger, new ResponseCallback() {
 			public Object execute() throws Exception {
                 authService.disconnectConnection(connectionId);
-				String status = "User Logged Out";
+                HttpSession session = request.getSession();
+                Set<String> existingConnectionIdsInSession = (Set<String>) session.getAttribute("existingConnectionIdsInSession");
+                if(existingConnectionIdsInSession != null) {
+                    existingConnectionIdsInSession.remove(connectionId);
+                }
+                String status = "User Logged Out";
 				return status;
 			}
 		});

@@ -119,7 +119,7 @@ YUI({
 			errorDiv.set("innerHTML", msg || "Error!");
 			errorDiv.setStyle("display", "inline");
 		}
-        if (code[1] === "SUCCESFULLY_LOGGED_OUT") {
+        if (code[1] === "INVALID_CONNECTION") {
             var errorDiv = Y.one("#errorMsg");
             var msg = "[0]".format(MV.errorCodeMap[code[1]])
             errorDiv.set("innerHTML", msg || "Error!");

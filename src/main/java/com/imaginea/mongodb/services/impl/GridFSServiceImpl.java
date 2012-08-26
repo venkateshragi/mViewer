@@ -22,6 +22,7 @@ import com.imaginea.mongodb.exceptions.DocumentException;
 import com.imaginea.mongodb.exceptions.ErrorCodes;
 import com.imaginea.mongodb.exceptions.ValidationException;
 import com.imaginea.mongodb.services.AuthService;
+import com.imaginea.mongodb.services.DatabaseService;
 import com.imaginea.mongodb.services.GridFSService;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBCollection;
@@ -61,6 +62,8 @@ public class GridFSServiceImpl implements GridFSService {
      */
     private Mongo mongoInstance;
 
+    private DatabaseService databaseService;
+
     private static final AuthService AUTH_SERVICE = AuthServiceImpl.getInstance();
 
     /**
@@ -73,6 +76,7 @@ public class GridFSServiceImpl implements GridFSService {
      */
     public GridFSServiceImpl(String connectionId) throws ApplicationException {
         mongoInstance = AUTH_SERVICE.getMongoInstance(connectionId);
+        databaseService = new DatabaseServiceImpl(connectionId);
     }
 
     /**
@@ -128,7 +132,7 @@ public class GridFSServiceImpl implements GridFSService {
 
         JSONObject result = new JSONObject();
         try {
-            if (!mongoInstance.getDatabaseNames().contains(dbName)) {
+            if (!databaseService.getDbList().contains(dbName)) {
                 throw new DatabaseException(ErrorCodes.DB_DOES_NOT_EXISTS,
                     "Database with dbName [ " + dbName + "] does not exist");
             }
@@ -180,7 +184,7 @@ public class GridFSServiceImpl implements GridFSService {
         }
         File tempFile = null;
         try {
-            if (!mongoInstance.getDatabaseNames().contains(dbName)) {
+            if (!databaseService.getDbList().contains(dbName)) {
                 throw new DatabaseException(ErrorCodes.DB_DOES_NOT_EXISTS,
 
                     "Database with dbName [ " + dbName + "] does not exist");
@@ -231,7 +235,7 @@ public class GridFSServiceImpl implements GridFSService {
         JSONArray result = new JSONArray();
         FormDataContentDisposition fileData = formData.getFormDataContentDisposition();
         try {
-            if (!mongoInstance.getDatabaseNames().contains(dbName)) {
+            if (!databaseService.getDbList().contains(dbName)) {
                 throw new DatabaseException(ErrorCodes.DB_DOES_NOT_EXISTS, "DB [" + dbName + "] DOES NOT EXIST");
             }
 
@@ -281,7 +285,7 @@ public class GridFSServiceImpl implements GridFSService {
         String result = null;
         GridFSDBFile gridFSDBFile = null;
         try {
-            if (!mongoInstance.getDatabaseNames().contains(dbName)) {
+            if (!databaseService.getDbList().contains(dbName)) {
                 throw new DatabaseException(ErrorCodes.DB_DOES_NOT_EXISTS, "DB [" + dbName + "] DOES NOT EXIST");
             }
             if (_id == null) {
@@ -331,7 +335,7 @@ public class GridFSServiceImpl implements GridFSService {
 
         String result = null;
         try {
-            if (!mongoInstance.getDatabaseNames().contains(dbName)) {
+            if (!databaseService.getDbList().contains(dbName)) {
                 throw new DatabaseException(ErrorCodes.DB_DOES_NOT_EXISTS, "DB [" + dbName + "] DOES NOT EXIST");
             }
 
@@ -370,7 +374,7 @@ public class GridFSServiceImpl implements GridFSService {
 
         JSONObject result = new JSONObject();
         try {
-            if (!mongoInstance.getDatabaseNames().contains(dbName)) {
+            if (!databaseService.getDbList().contains(dbName)) {
                 throw new DatabaseException(ErrorCodes.DB_DOES_NOT_EXISTS, "DB [" + dbName + "] DOES NOT EXIST");
             }
 
