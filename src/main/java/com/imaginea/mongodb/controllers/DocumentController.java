@@ -81,7 +81,7 @@ public class DocumentController extends BaseController {
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public String getQueriedDocsList(@PathParam("dbName") final String dbName, @PathParam("collectionName") final String collectionName, @QueryParam("query") final String query,
+    public String executeQuery(@PathParam("dbName") final String dbName, @PathParam("collectionName") final String collectionName, @QueryParam("query") final String query,
                                      @QueryParam("connectionId") final String connectionId, @QueryParam("fields") String keys, @QueryParam("limit") final String limit, @QueryParam("skip") final String skip,
                                      @Context final HttpServletRequest request) throws JSONException {
 
@@ -96,15 +96,20 @@ public class DocumentController extends BaseController {
 
                 DocumentService documentService = new DocumentServiceImpl(connectionId);
                 // Get query
-                DBObject queryObj = (DBObject) JSON.parse(query);
-                StringTokenizer strtok = new StringTokenizer(fields, ",");
-                DBObject keyObj = new BasicDBObject();
-                while (strtok.hasMoreElements()) {
-                    keyObj.put(strtok.nextToken(), 1);
+                int startIndex = query.indexOf("("), endIndex = query.lastIndexOf(")");
+                String cmdStr = query.substring(0, startIndex);
+                String tokens[] = cmdStr.split("\\.");
+                String collection = null, command = null;
+                if (tokens.length == 3) {
+                    collection = tokens[1];
+                    command = tokens[2];
+                } else {
+                    command = tokens[1];
                 }
+                String jsonStr = query.substring(startIndex + 1, endIndex);
                 int docsLimit = Integer.parseInt(limit);
                 int docsSkip = Integer.parseInt(skip);
-                JSONObject result = documentService.getQueriedDocsList(dbName, collectionName, queryObj, keyObj, docsLimit, docsSkip);
+                JSONObject result = documentService.getQueriedDocsList(dbName, collection, command, jsonStr, fields, docsLimit, docsSkip);
                 return result;
             }
         });
@@ -137,7 +142,7 @@ public class DocumentController extends BaseController {
                 Mongo mongoInstance = authService.getMongoInstance(connectionId);
                 long count = mongoInstance.getDB(dbName).getCollection(collectionName).count();
                 DBCursor cursor = mongoInstance.getDB(dbName).getCollection(collectionName).find();
-                if(!allKeys)
+                if (!allKeys)
                     cursor.limit(10);
                 DBObject doc = new BasicDBObject();
                 Set<String> completeSet = new HashSet<String>();

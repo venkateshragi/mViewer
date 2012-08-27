@@ -150,14 +150,14 @@ YUI.add('query-executor', function (Y) {
 			selectTemplate = [
 				"<a id='selectAll' class='navigationRight' href='javascript:void(0)'>Select All</a>",
 				"<label> / </label>",
-				"<a id='unselectAll' href='javascript:void(0)'>Unselect All</a>",
-
+				"<a id='unselectAll' href='javascript:void(0)'>Unselect All</a>"
 			].join('\n');
 			checkList = "<label for='fields' ></label><ul id='fields' class='checklist'>";
 			checkList += formatKeys(keys);
 			checkList += "</ul>";
 		}
-		return upperPartTemplate + checkList + lowerPartTemplate + selectTemplate + paginatorTemplate.format(count < 25 ? count : 25, count);
+        return upperPartTemplate.format(MV.StateManager.currentColl()) + checkList + lowerPartTemplate +
+            selectTemplate + paginatorTemplate.format(count < 25 ? count : 25, count);
 	};
 
 	function formatKeys(keys) {
@@ -168,11 +168,11 @@ YUI.add('query-executor', function (Y) {
 		return checkList;
 	}
 
-	var upperPartTemplate = [
-		"<textarea id='queryBox' name='queryBox' class='queryBox'>",
-		"{\r\r}",
-		"</textarea>"
-	].join('\n');
+    var upperPartTemplate = [
+        "<textarea id='queryBox' name='queryBox' class='queryBox'>",
+        "db.[0].find({\r\r})",
+        "</textarea>"
+    ].join('\n');
 
 	var checkListTemplate = "<li><label for='[0]'><input id='[1]' name='[2]' type='checkbox' checked=true />[3]</label></li>";
 
@@ -287,10 +287,8 @@ YUI.add('query-executor', function (Y) {
 		query = query.replace(/'/g, '"');
 		query = query.replace(/\r/g, '');
 		query = query.replace(/\n/g, '');
-		query = query.replace(/\s+/g, '');
 
 		try {
-			parsedQuery = Y.JSON.parse(query);
 			for (index = 0; index < fields.size(); index++) {
 				item = fields.item(index);
 				if (item.get("checked")) {
