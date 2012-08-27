@@ -1,5 +1,8 @@
 package com.imaginea.mongodb.domain;
 
+import java.util.HashSet;
+import java.util.Set;
+
 /**
  * @author Uday Shankar
  */
@@ -8,14 +11,17 @@ public class ConnectionDetails {
     private int hostPort;
     private String username;
     private String password;
-    private String dbName;
+    private String dbNames;//Comma Seperated Values
+    private Set<String> authenticatedDbNames = new HashSet<String>();
+    private boolean authMode;
+    private boolean adminLogin;
 
-    public ConnectionDetails(String hostIp, int hostPort, String username, String password, String dbName) {
+    public ConnectionDetails(String hostIp, int hostPort, String username, String password, String dbNames) {
         this.hostIp = hostIp;
         this.hostPort = hostPort;
         this.username = username;
         this.password = password;
-        this.dbName = dbName;
+        this.dbNames = dbNames;
     }
 
     public String getHostIp() {
@@ -50,12 +56,32 @@ public class ConnectionDetails {
         this.password = password;
     }
 
-    public String getDbName() {
-        return dbName;
+    public String getDbNames() {
+        return dbNames;
     }
 
-    public void setDbName(String dbName) {
-        this.dbName = dbName;
+    public void setDbNames(String dbNames) {
+        this.dbNames = dbNames;
+    }
+
+    public Set<String> getAuthenticatedDbNames() {
+        return authenticatedDbNames;
+    }
+
+    public void addToAuthenticatedDbNames(String dbName) {
+        authenticatedDbNames.add(dbName);
+    }
+
+    public boolean isAuthMode() {
+        return authMode;
+    }
+
+    public void setAuthMode(boolean authMode) {
+        this.authMode = authMode;
+    }
+
+    public boolean isAdminLogin() {
+        return authenticatedDbNames.contains("admin");
     }
 
     @Override
@@ -66,7 +92,7 @@ public class ConnectionDetails {
         ConnectionDetails that = (ConnectionDetails) o;
 
         if (hostPort != that.hostPort) return false;
-        if (dbName != null ? !dbName.equals(that.dbName) : that.dbName != null) return false;
+        if (dbNames != null ? !dbNames.equals(that.dbNames) : that.dbNames != null) return false;
         if (hostIp != null ? !hostIp.equals(that.hostIp) : that.hostIp != null) return false;
         if (password != null ? !password.equals(that.password) : that.password != null) return false;
         if (username != null ? !username.equals(that.username) : that.username != null) return false;
@@ -80,7 +106,7 @@ public class ConnectionDetails {
         result = 31 * result + hostPort;
         result = 31 * result + (username != null ? username.hashCode() : 0);
         result = 31 * result + (password != null ? password.hashCode() : 0);
-        result = 31 * result + (dbName != null ? dbName.hashCode() : 0);
+        result = 31 * result + (dbNames != null ? dbNames.hashCode() : 0);
         if(result == Integer.MIN_VALUE) {
             return Integer.MAX_VALUE;
         }

@@ -45,6 +45,9 @@ public class AuthServiceImpl implements AuthService {
         }
 
         Mongo mongo = getMongoAndAuthenticate(connectionDetails);
+        boolean authMode = checkAuthMode(connectionDetails);
+        connectionDetails.setAuthMode(authMode);
+
         String connectionId = SUCCESSFUL_CONNECTIONS_COUNT.incrementAndGet() + "_" + connectionDetailsHashCode;
         if(mongoConnectionDetailsList == null) {
             mongoConnectionDetailsList = new ArrayList<MongoConnectionDetails>(1);
@@ -55,6 +58,17 @@ public class AuthServiceImpl implements AuthService {
         return connectionId;
     }
 
+    private boolean checkAuthMode(ConnectionDetails connectionDetails) {
+        Mongo mongo = null;
+        try {
+            mongo = new Mongo(connectionDetails.getHostIp(), connectionDetails.getHostPort());
+            mongo.getDatabaseNames();
+            return false;
+        } catch (Exception e) {
+            return true;
+        }
+    }
+
     private Mongo getMongoAndAuthenticate(ConnectionDetails connectionDetails) throws ApplicationException {
         Mongo mongo;
         try {
@@ -62,18 +76,28 @@ public class AuthServiceImpl implements AuthService {
         } catch (UnknownHostException e) {
             throw new ApplicationException(ErrorCodes.HOST_UNKNOWN,"Unknown Host");
         }
-        DB db = mongo.getDB(connectionDetails.getDbName());
-        try {
-            // Hack. Checking server connectivity status by fetching collection names on selected db
-            db.getCollectionNames();//this line will throw exception in two cases.1)On Invalid mongo host Address,2)Invalid authorization to fetch collection names
-        } catch (MongoException me) {
-            String username = connectionDetails.getUsername();
-            String password = connectionDetails.getPassword();
-            boolean loginStatus = db.authenticate(username, password.toCharArray());//login using given username and password.This line will throw exception if invalid mongo host address
-            if (!loginStatus) {
-                throw  new ApplicationException(("".equals(username) && "".equals(password)) ?
-                        ErrorCodes.NEED_AUTHORISATION : ErrorCodes.INVALID_USERNAME, "Invalid UserName or Password");
+        String dbNames = connectionDetails.getDbNames();
+        String[] dbNamesList = dbNames.split(",");
+        String username = connectionDetails.getUsername();
+        String password = connectionDetails.getPassword();
+        for(String dbName : dbNamesList) {
+            dbName = dbName.trim();
+            DB db = mongo.getDB(dbName);
+            boolean loginStatus=false;
+            try {
+                // Hack. Checking server connectivity status by fetching collection names on selected db
+                db.getCollectionNames();//this line will throw exception in two cases.1)On Invalid mongo host Address,2)Invalid authorization to fetch collection names
+                loginStatus = true;
+            } catch (MongoException me) {
+                loginStatus = db.authenticate(username, password.toCharArray());//login using given username and password.This line will throw exception if invalid mongo host address
             }
+            if(loginStatus) {
+                connectionDetails.addToAuthenticatedDbNames(dbName);
+            }
+        }
+        if(connectionDetails.getAuthenticatedDbNames().isEmpty()) {
+            throw  new ApplicationException(("".equals(username) && "".equals(password)) ?
+                                        ErrorCodes.NEED_AUTHORISATION : ErrorCodes.INVALID_USERNAME, "Invalid UserName or Password");
         }
         return mongo;
     }
@@ -142,9 +166,9 @@ public class AuthServiceImpl implements AuthService {
         if("localhost".equals(connectionDetails.getHostIp())) {
             connectionDetails.setHostIp("127.0.0.1");
         }
-        String dbName = connectionDetails.getDbName();
-        if(dbName == null || dbName.isEmpty()) {
-            connectionDetails.setDbName("admin");
+        String dbNames = connectionDetails.getDbNames();
+        if(dbNames == null || dbNames.isEmpty()) {
+            connectionDetails.setDbNames("admin");
         }
     }
 

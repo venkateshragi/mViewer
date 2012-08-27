@@ -72,11 +72,6 @@ div.loginFormContents input {
 	display: none;
 }
 
-#infoMsg {
-	padding: 10px;
-	display: none;
-}
-
 .errorMsg {
 	border-style: solid;
 	border-width: 1px;

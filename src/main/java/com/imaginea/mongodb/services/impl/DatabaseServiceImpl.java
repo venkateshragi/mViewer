@@ -79,11 +79,9 @@ public class DatabaseServiceImpl implements DatabaseService {
 
     public List<String> getDbList() throws DatabaseException {
         try {
-            String dbName = connectionDetails.getDbName();
-            if(dbName != "admin") {
-                ArrayList<String> dbList = new ArrayList<String>(1);
-                dbList.add(dbName);
-                return dbList;
+            Set<String> authenticatedDbNames = connectionDetails.getAuthenticatedDbNames();
+            if(!connectionDetails.isAdminLogin()) {
+                return new ArrayList<String>(authenticatedDbNames);
             }
             return mongoInstance.getDatabaseNames();
         } catch (MongoException m) {
@@ -118,6 +116,7 @@ public class DatabaseServiceImpl implements DatabaseService {
             }
 
             mongoInstance.getDB(dbName).getCollectionNames();
+            connectionDetails.addToAuthenticatedDbNames(dbName);
         } catch (MongoException e) {
 
             throw new DatabaseException("DB_CREATION_EXCEPTION", e.getMessage());

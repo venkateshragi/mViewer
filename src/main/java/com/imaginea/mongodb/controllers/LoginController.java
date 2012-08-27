@@ -89,7 +89,7 @@ public class LoginController extends BaseController {
 	@POST
 	@Produces(MediaType.APPLICATION_JSON)
 	public String authenticateUser(final @FormParam("username") String user, @FormParam("password") final String password,final @FormParam("host") String host, @FormParam("port") final String mongoPort,
-                                   @FormParam("dbName") final String dbName,@Context final HttpServletRequest request) {
+                                   @FormParam("databases") final String databases,@Context final HttpServletRequest request) {
 
 		String response = ErrorTemplate.execute(logger, new ResponseCallback() {
 			public Object execute() throws Exception {
@@ -100,7 +100,7 @@ public class LoginController extends BaseController {
                 HttpSession session = request.getSession();
                 Set<String> existingConnectionIdsInSession = (Set<String>) session.getAttribute("existingConnectionIdsInSession");
 
-                ConnectionDetails connectionDetails = new ConnectionDetails(host,Integer.parseInt(mongoPort),user,password,dbName);
+                ConnectionDetails connectionDetails = new ConnectionDetails(host,Integer.parseInt(mongoPort),user,password,databases);
                 String connectionId = authService.authenticate(connectionDetails,existingConnectionIdsInSession);
                 if(existingConnectionIdsInSession == null) {
                     existingConnectionIdsInSession = new HashSet<String>();
@@ -136,6 +136,8 @@ public class LoginController extends BaseController {
                     jsonResponse.put("host", connectionDetails.getHostIp());
                     jsonResponse.put("port", connectionDetails.getHostPort());
                     jsonResponse.put("dbNames", new DatabaseServiceImpl(connectionId).getDbList());
+                    jsonResponse.put("authMode",connectionDetails.isAuthMode());
+                    jsonResponse.put("hasAdminLoggedIn",connectionDetails.isAdminLogin());
                 } catch (JSONException e) {
                     logger.error(e);
                 }
