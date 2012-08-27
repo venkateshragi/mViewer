@@ -156,6 +156,11 @@ YUI({
             var result = parsedResponse.response.result;
             if (result !== undefined) {
                 setUserInfo(result);
+                if (result.hasAdminLoggedIn || !result.authMode) {
+                    //Adding click handler for new DB button that calls createDB()
+                    document.getElementById('createDB').style.display = 'inline-block';
+                    Y.on("click", createDB, "#createDB");
+                }
                 var info, index, dbNames = "";
 	            var dbTemplate = '' +
 			            '<li class="yui3-menuitem" label=[0]> \
@@ -254,7 +259,4 @@ YUI({
 
     // Make a request to load Database names when the page loads
     Y.on("load", requestConnectionDetails);
-
-    //Adding click handler for new DB button that calls createDB()
-    Y.on("click", createDB, "#createDB");
 });

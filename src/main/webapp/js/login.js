@@ -26,7 +26,7 @@ YUI({
             password = Y.one("#password").get("value").trim(),
             port = Y.one("#port").get("value").trim(),
             host = Y.one("#host").get("value").trim(),
-            dbName = Y.one("#dbName").get("value").trim();
+            databases = Y.one("#databases").get("value").trim();
 
         var resetBGColor = function() {
             Y.all("input").setStyle("background", "#FFFFFF");
@@ -76,7 +76,7 @@ YUI({
             }
         };
         var request = Y.io(MV.URLMap.login(), {
-            data: "username=" + username + "&password=" + password + "&port=" + port + "&host=" + host + "&dbName=" + dbName,
+            data: "username=" + username + "&password=" + password + "&port=" + port + "&host=" + host + "&databases=" + databases,
             method: "POST",
             on: {
                 success: function(ioId, responseObject) {
