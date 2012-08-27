@@ -77,4 +77,8 @@ public interface ErrorCodes {
 	String INVALID_CONNECTION = "INVALID_CONNECTION";
     String UPLOAD_FILE_EXCEPTION = "UPLOAD_FILE_EXCEPTION";
     String UPDATE_OBJECT_ID_EXCEPTION = "UPDATE_OBJECT_ID_EXCEPTION";
+
+    //Command
+    String COMMAND_NOT_SUPPORTED = "Command is not yet supported";
+    String COMMAND_ARGUMENTS_NOT_SUFFICIENT= "Command arguments are not sufficient";
 }
