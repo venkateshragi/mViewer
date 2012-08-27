@@ -16,26 +16,16 @@
 
 package com.imaginea.mongodb.services.impl;
 
-import com.imaginea.mongodb.exceptions.ApplicationException;
-import com.imaginea.mongodb.exceptions.CollectionException;
-import com.imaginea.mongodb.exceptions.DatabaseException;
-import com.imaginea.mongodb.exceptions.DocumentException;
-import com.imaginea.mongodb.exceptions.ErrorCodes;
-import com.imaginea.mongodb.exceptions.ValidationException;
+import com.imaginea.mongodb.exceptions.*;
 import com.imaginea.mongodb.services.AuthService;
 import com.imaginea.mongodb.services.DatabaseService;
 import com.imaginea.mongodb.services.DocumentService;
-import com.mongodb.BasicDBObject;
-import com.mongodb.DBCollection;
-import com.mongodb.DBCursor;
-import com.mongodb.DBObject;
-import com.mongodb.Mongo;
-import com.mongodb.MongoException;
+import com.imaginea.mongodb.utils.QueryExecutor;
+import com.mongodb.*;
 import com.mongodb.util.JSON;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -75,8 +65,8 @@ public class DocumentServiceImpl implements DocumentService {
      *
      * @param dbName         Name of Database
      * @param collectionName Name of Collection from which to get all Documents
-     * @param query          query to be performed. In case of empty query {} return all
-     *                       docs.
+     * @param command        Name of the Command to be executed
+     * @param queryStr          query to be performed. In case of empty query {} return all
      * @param keys           Keys to be present in the resulted docs.
      * @param limit          Number of docs to show.
      * @param skip           Docs to skip from the front.
@@ -88,22 +78,14 @@ public class DocumentServiceImpl implements DocumentService {
      * @throws DocumentException   exception while performing get doc list
      */
 
-    public JSONObject getQueriedDocsList(String dbName, String collectionName, DBObject query, DBObject keys, int limit, int skip) throws DatabaseException, CollectionException,
-        DocumentException, ValidationException {
+    public JSONObject getQueriedDocsList(String dbName, String collectionName, String command, String queryStr, String keys, int limit, int skip) throws ApplicationException, CollectionException,
+            DocumentException, ValidationException, JSONException {
 
         if (dbName == null) {
             throw new DatabaseException(ErrorCodes.DB_NAME_EMPTY, "Database name is null");
-
         }
         if (dbName.equals("")) {
             throw new DatabaseException(ErrorCodes.DB_NAME_EMPTY, "Database Name Empty");
-        }
-
-        if (collectionName == null) {
-            throw new CollectionException(ErrorCodes.COLLECTION_NAME_EMPTY, "Collection name is null");
-        }
-        if (collectionName.equals("")) {
-            throw new CollectionException(ErrorCodes.COLLECTION_NAME_EMPTY, "Collection Name Empty");
         }
 
         JSONObject result = new JSONObject();
@@ -112,32 +94,25 @@ public class DocumentServiceImpl implements DocumentService {
             if (!databaseNames.contains(dbName)) {
                 throw new DatabaseException(ErrorCodes.DB_DOES_NOT_EXISTS, "DB with name [" + dbName + "]DOES_NOT_EXIST");
             }
-
-            if (!mongoInstance.getDB(dbName).getCollectionNames().contains(collectionName)) {
-                throw new CollectionException(ErrorCodes.COLLECTION_DOES_NOT_EXIST, "Collection with name [" + collectionName + "] DOES NOT EXIST in Database [" + dbName + "]");
-            }
-            if (keys.keySet().isEmpty()) {
-                keys.put("_id", 1); // For empty keys return all _id of all docs
-            }
-
-            // Return Queried Documents
-            DBCursor cursor = mongoInstance.getDB(dbName).getCollection(collectionName).find(query, keys);
-            cursor.limit(limit);
-            cursor.skip(skip);
-
-            ArrayList<DBObject> dataList = new ArrayList<DBObject>();
-            if (cursor.hasNext()) {
-                while (cursor.hasNext()) {
-                    dataList.add(cursor.next());
+            DB db = mongoInstance.getDB(dbName);
+            if (command.equals("runCommand")) {
+                result = QueryExecutor.executeCommand(db, queryStr);
+            } else {
+                if (collectionName == null) {
+                    throw new CollectionException(ErrorCodes.COLLECTION_NAME_EMPTY, "Collection name is null");
                 }
+                if (collectionName.equals("")) {
+                    throw new CollectionException(ErrorCodes.COLLECTION_NAME_EMPTY, "Collection Name Empty");
+                }
+                if (!db.getCollectionNames().contains(collectionName)) {
+                    throw new CollectionException(ErrorCodes.COLLECTION_DOES_NOT_EXIST, "Collection with name [" + collectionName + "] DOES NOT EXIST in Database [" + dbName + "]");
+                }
+
+                DBCollection dbCollection = db.getCollection(collectionName);
+                result = QueryExecutor.executeQuery(db, dbCollection, command, queryStr, keys, limit, skip);
             }
-            long count = mongoInstance.getDB(dbName).getCollection(collectionName).count(query);
-            result.put("documents", dataList);
-            result.put("count", count);
         } catch (MongoException e) {
             throw new DocumentException(ErrorCodes.GET_DOCUMENT_LIST_EXCEPTION, e.getMessage());
-        } catch (JSONException e) {
-            throw new DocumentException(ErrorCodes.JSON_EXCEPTION, e.getMessage());
         }
         return result;
     }
