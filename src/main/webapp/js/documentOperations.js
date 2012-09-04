@@ -29,7 +29,7 @@ YUI({
 	tabView.addTab(new YAHOO.widget.Tab({
 		label: 'Tree Table',
 		content: ' <div id="treeTable"></div><div id="table-pagination"></div> '
-	}));	
+	}));
 	var actionMap = {
 		save: "save",
 		edit: "edit"
@@ -49,7 +49,7 @@ YUI({
 	 * @param {object} e It is an event object
 	 *
 	 */
-	var showTabView = function(response) {		
+	var showTabView = function(response) {
 		MV.deleteDocEvent.unsubscribeAll();
 		MV.deleteDocEvent.subscribe(deleteDoc);
 
@@ -65,7 +65,7 @@ YUI({
 			treeble.subscribe("rowMouseoverEvent", treeble.onEventHighlightRow);
 			treeble.subscribe("rowMouseoutEvent", treeble.onEventUnhighlightRow);
 			writeOnJSONTab(response.results[0].documents);
-			sm.publish(sm.events.queryFired);						
+			sm.publish(sm.events.queryFired);
 			MV.hideLoadingPanel();
 			Y.log("Loaded data tabs.", "info");
 		} catch(error) {
@@ -342,12 +342,12 @@ YUI({
 		var index = getButtonIndex(targetNode);
 		var textArea = Y.one('#doc' + index).one("pre").one("textarea");
 		var doc = textArea.get("value");
-		doc = doc.replace(/'/g, '"');
 		try {
 			var parsedDoc = Y.JSON.parse(doc);
 			sendUpdateDocRequest(Y.JSON.stringify(parsedDoc), idMap[index].docId, eventObject);
 		} catch (e) {
-			MV.showAlertMessage("The document entered is not in the correct JSON format", MV.warnIcon);
+            var message = e.message.substr(e.message.indexOf(":") + 1);
+			MV.showAlertMessage("Invalid Document format: " + message, MV.warnIcon);
 			textArea.focus();
 		}
 	}
