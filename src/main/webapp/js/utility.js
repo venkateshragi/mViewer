@@ -49,10 +49,12 @@ YUI.add('utility', function (Y) {
 	MV.header = Y.one("#mainBodyHeader");
 	MV.warnIcon = "warnIcon";
 	MV.infoIcon = "infoIcon";
+    MV.users="system.users";
+    MV.indexes = "system.indexes";
 
 	MV.openFileEvent = new YAHOO.util.CustomEvent("OpenFile");
 	MV.deleteFileEvent = new YAHOO.util.CustomEvent("DeleteFile");
-	MV.deleteDocEvent = new YAHOO.util.CustomEvent("DeleteDoc");
+    MV.deleteDocEvent = new YAHOO.util.CustomEvent("DeleteDoc");
 
 	MV.StateManager = (function() {
 		var self = this;
@@ -183,7 +185,25 @@ YUI.add('utility', function (Y) {
 		collStatistics: function () {
 			return "services/stats/db/[0]/collection/[1]?connectionId=[2]&ts=[3]".format(sm.currentDB(), sm.currentColl(), sm.connectionId(), sm.now());
 		},
-		getDocKeys: function () {
+        adduser: function(){
+            return "services/[0]/usersIndexes/addUser?connectionId=[1]&ts=[3]".format(sm.currentDB(),sm.connectionId(),sm.now());
+        },
+        removeUser: function(){
+            return "services/[0]/usersIndexes/removeUser?connectionId=[1]&ts=[3]".format(sm.currentDB(),sm.connectionId(),sm.now());
+        },
+        removeAllUsers: function(){
+            return "services/[0]/usersIndexes/removeAllUsers?connectionId=[1]&ts=[3]".format(sm.currentDB(),sm.connectionId(),sm.now());
+        },
+        addIndex: function(){
+            return "services/[0]/usersIndexes/addIndex?connectionId=[1]&ts=[3]".format(sm.currentDB(),sm.connectionId(),sm.now());
+        },
+        dropIndex: function(){
+            return "services/[0]/usersIndexes/dropIndex?connectionId=[1]&ts=[3]".format(sm.currentDB(),sm.connectionId(),sm.now());
+        },
+        dropAllIndexes:function(){
+            return "services/[0]/usersIndexes/dropAllIndexes?connectionId=[1]&ts=[3]".format(sm.currentDB(),sm.connectionId(),sm.now());
+        },
+        getDocKeys: function () {
 			return "services/[0]/[1]/document/keys?connectionId=[2]&ts=[3]".format(sm.currentDB(), sm.currentColl(), sm.connectionId(), sm.now());
 		},
 		getDocs: function (params) {
@@ -288,7 +308,11 @@ YUI.add('utility', function (Y) {
 		"IO_EXCEPTION": "An IO Exception Occured ! Please Refresh the page.",
 		"ERROR_PARSING_POLLING_INTERVAL": "An error occured while initiating graph ! Please chcek if polling interval is passed.",
 		"LOGGING_LEVEL_UNDEFINED": "The Logging level that you are trying to change to is undefined for log4j logger. Please select from the given options only.",
-		"DELETING_FROM_CAPPED_COLLECTION": "Deleting from a Capped Collection is not allowed by database. Drop the whole Collection instead."
+		"DELETING_FROM_CAPPED_COLLECTION": "Deleting from a Capped Collection is not allowed by database. Drop the whole Collection instead.",
+        "USERNAME_IS_EMPTY": "Username is empty",
+        "PASSWORD_IS_EMPTY" :"Password is empty",
+        "KEYS_EMPTY":"Index keys is empty",
+        "INDEX_EMPTY":"Index name is empty"
 	};
 }, '3.3.0', {
 	requires: ["node"]

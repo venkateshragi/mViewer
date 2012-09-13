@@ -35,7 +35,8 @@ YUI({
 		Y.one("#currentBucket").set("value", event.currentTarget.getAttribute("label"));
 		MV.toggleClass(event.currentTarget, Y.all("#collNames li"));
 		MV.toggleClass(event.currentTarget, Y.all("#bucketNames li"));
-		MV.loadQueryBox(MV.URLMap.getFilesCount(), MV.URLMap.getFiles(), showTabView, showError);
+        MV.toggleClass(event.currentTarget, Y.all("#systemCollections li"));
+		MV.loadQueryBox(MV.URLMap.getFilesCount(), MV.URLMap.getFiles(), sm.currentBucket(), showTabView, showError);
 	};
 
 	var showError = function(request, response) {

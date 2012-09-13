@@ -102,11 +102,14 @@ public class CollectionServiceImpl implements CollectionService {
 
             while (it.hasNext()) {
                 String coll = it.next();
-                if (!coll.contains("system.")) {
                     collList.add(coll);
-                }
             }
-
+            //For a newly added database there will be no system.users, So we are manually creating the system.users
+            if(collList.contains("system.indexes")&&!collList.contains("system.users")) {
+                DBObject options = new BasicDBObject();
+                mongoInstance.getDB(dbName).createCollection("system.users",options);
+                collList.add("system.users");
+            }
         } catch (MongoException m) {
             throw new CollectionException(ErrorCodes.GET_COLLECTION_LIST_EXCEPTION, m.getMessage());
         }

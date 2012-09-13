@@ -103,6 +103,9 @@ public class DocumentController extends BaseController {
                 if (tokens.length == 3) {
                     collection = tokens[1];
                     command = tokens[2];
+                } else if(tokens.length == 4) {
+                    collection = tokens[1] + '.' + tokens[2];
+                    command = tokens[3];
                 } else {
                     command = tokens[1];
                 }
