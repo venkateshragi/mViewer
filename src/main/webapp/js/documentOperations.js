@@ -41,7 +41,8 @@ YUI({
 		Y.one("#currentColl").set("value", event.currentTarget.getAttribute("label"));
 		MV.toggleClass(event.currentTarget, Y.all("#collNames li"));
 		MV.toggleClass(event.currentTarget, Y.all("#bucketNames li"));
-		MV.loadQueryBox(MV.URLMap.getDocKeys(), MV.URLMap.getDocs(), showTabView, showError);
+        MV.toggleClass(event.currentTarget, Y.all("#systemCollections li"));
+		MV.loadQueryBox(MV.URLMap.getDocKeys(), MV.URLMap.getDocs(), sm.currentColl(), showTabView, showError);
 	};
 
 	/**
@@ -106,7 +107,7 @@ YUI({
 			jsonView += trTemplate.format(i, i, Y.JSON.stringify(response[i], null, 4), i, i, i, i);
 		}
 		if (i === 0) {
-			jsonView = jsonView + "No documents to be displayed";
+            jsonView = jsonView + "No documents to be displayed";
 		}
 		jsonView = jsonView + "</tbody></table></div>";
 		tabView.getTab(0).setAttributes({
@@ -293,33 +294,33 @@ YUI({
 			var index = getButtonIndex(targetNode);
 			var doc = Y.one('#doc' + index).one("pre").one("textarea").get("value");
 			var parsedDoc = Y.JSON.parse(doc);
-			var docId = Y.JSON.stringify(parsedDoc._id);
-			var request = Y.io(MV.URLMap.deleteDoc(),
-				// configuration for dropping the document
-			{
-				method: "POST",
-				data: "_id=" + docId,
-				on: {
-					success: function(ioId, responseObj) {
-						var parsedResponse = Y.JSON.parse(responseObj.responseText);
-						var response = parsedResponse.response.result;
-						if (response !== undefined) {
-							MV.showAlertMessage("Document deleted successfully.", MV.infoIcon);
-							Y.log("Document with _id= [0] deleted. Response: [1]".format(docId, response), "info");
-							Y.one('#execQueryButton').simulate('click');
-						} else {
-							var error = parsedResponse.response.error;
-							MV.showAlertMessage("Could not delete the document with _id [0]. [1]".format(docId, MV.errorCodeMap[error.code]), MV.warnIcon);
-							Y.log("Could not delete the document with _id =  [0], Error message: [1], Error Code: [2]".format(docId, error.message, error.code), "error");
-						}
-					},
-					failure: function(ioId, responseObj) {
-						Y.log("Could not delete the document .Status text: ".format(Y.one("#currentColl").get("value"), responseObj.statusText), "error");
-						MV.showAlertMessage("Could not drop the document! Please check if your app server is running and try again. Status Text: [1]".format(responseObj.statusText), MV.warnIcon);
-					}
-				}
-			});
-			this.hide();
+            var docId = Y.JSON.stringify(parsedDoc._id);
+            var request = Y.io(MV.URLMap.deleteDoc(),
+                    // configuration for dropping the document
+                    {
+                        method: "POST",
+                        data: "_id=" + docId,
+                        on: {
+                            success: function(ioId, responseObj) {
+                                var parsedResponse = Y.JSON.parse(responseObj.responseText);
+                                var response = parsedResponse.response.result;
+                                if (response !== undefined) {
+                                    MV.showAlertMessage("Document deleted successfully.", MV.infoIcon);
+                                    Y.log("Document with _id= [0] deleted. Response: [1]".format(docId, response), "info");
+                                    Y.one('#execQueryButton').simulate('click');
+                                } else {
+                                    var error = parsedResponse.response.error;
+                                    MV.showAlertMessage("Could not delete the document with _id [0]. [1]".format(docId, MV.errorCodeMap[error.code]), MV.warnIcon);
+                                    Y.log("Could not delete the document with _id =  [0], Error message: [1], Error Code: [2]".format(docId, error.message, error.code), "error");
+                                }
+                            },
+                            failure: function(ioId, responseObj) {
+                                Y.log("Could not delete the document .Status text: ".format(Y.one("#currentColl").get("value"), responseObj.statusText), "error");
+                                MV.showAlertMessage("Could not drop the document! Please check if your app server is running and try again. Status Text: [1]".format(responseObj.statusText), MV.warnIcon);
+                            }
+                        }
+                    });
+            this.hide();
 		};
 		if (args[0].eventObj.currentTarget.hasClass('deletebtn') || args[0].eventObj.currentTarget.hasClass('delete-icon')) {
 			MV.showYesNoDialog("Do you really want to drop the document ?", sendDeleteDocRequest, function() {
@@ -365,34 +366,34 @@ YUI({
 		toggleSaveEdit(targetNode, index, actionMap.save);
 	}
 
-	/**
-	 * The function is an event handler for the edit button click
-	 * @param eventObject The event Object
-	 */
+        /**
+         * The function is an event handler for the edit button click
+         * @param eventObject The event Object
+         */
 
-	function editDoc(eventObject) {
-		if (!allKeysSelected()) {
-			MV.showYesNoDialog("To edit a document you need check all keys in query box. Click YES to do so, NO to cancel", function() {
-				Y.one('#selectAll').simulate('click');
-				Y.one('#execQueryButton').simulate('click');
-				this.hide();
-			}, function() {
-				this.hide();
-			});
-		} else {
-			var targetNode = eventObject.currentTarget;
-			var index = getButtonIndex(targetNode);
-			var textArea = Y.one('#doc' + index).one("pre").one("textarea");
-			var doc = textArea.get("value");
-			var parsedDoc = Y.JSON.parse(doc);
-			var docId = Y.JSON.stringify(parsedDoc._id);
-			idMap[index] = {};
-			idMap[index].docId = docId;
-			idMap[index].originalDoc = doc;
-			toggleSaveEdit(targetNode, index, actionMap.edit);
-			textArea.focus();
-		}
-	}
+        function editDoc(eventObject) {
+             if (!allKeysSelected()) {
+                MV.showYesNoDialog("To edit a document you need check all keys in query box. Click YES to do so, NO to cancel", function () {
+                    Y.one('#selectAll').simulate('click');
+                    Y.one('#execQueryButton').simulate('click');
+                    this.hide();
+                }, function () {
+                    this.hide();
+                });
+            } else {
+                var targetNode = eventObject.currentTarget;
+                var index = getButtonIndex(targetNode);
+                var textArea = Y.one('#doc' + index).one("pre").one("textarea");
+                var doc = textArea.get("value");
+                var parsedDoc = Y.JSON.parse(doc);
+                var docId = Y.JSON.stringify(parsedDoc._id);
+                idMap[index] = {};
+                idMap[index].docId = docId;
+                idMap[index].originalDoc = doc;
+                toggleSaveEdit(targetNode, index, actionMap.edit);
+                textArea.focus();
+            }
+        }
 
 	Y.delegate("click", initQueryBox, "#collNames", "a.collectionLabel");
 });

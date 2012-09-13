@@ -64,6 +64,7 @@
 <script type="text/javascript" src="lib/yui2/build/menu/menu-min.js"></script>
 <script type="text/javascript"
 	src="lib/yui2/build/container/container_core.js"></script>
+<script type="text/javascript" src="lib/yui2/build/dragdrop/dragdrop-min.js"></script>
 
     <!-- jQuery files-->
 <script src="lib/jQuery/jquery-1.7.2.js"></script>
@@ -105,6 +106,7 @@
 <script type="text/javascript" src="js/fileOperations.js"></script>
 <script type="text/javascript" src="js/headerOperations.js"></script>
 <script type="text/javascript" src="js/console.js"></script>
+<script type="text/javascript" src="js/systemCollectionOperations.js"></script>
 
 <!--scripts used for better navigation -->
 <script type="text/javascript" src="js/navigator.js"></script>
@@ -234,6 +236,18 @@
                     </div>
                 </div>
 
+                <div id="systemCollectionsBuffer" class="buffer navigable collectionBuffer">
+                    <div class="list-head">
+                        <label class="collections">Users & Indexes</label>
+                    </div>
+                    <div id="systemCollections" class="yui3-menu yui3-splitbuttonnav">
+                        <div class="yui3-menu-content" style="border:none">
+                            <ul class="lists">
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
 			  <div id="dbContextMenu"></div>
 			  <div id="collContextMenu"></div>
 			</div>
@@ -311,13 +325,39 @@
 		<div class="hd">Please enter Document</div>
 		<div class="bd">
 			<form method="POST">
-				<label class="dialogLabel" for="document">JSON format: </label>
+				<label class="dialogLabel">JSON format: </label>
                 <br/>
 				<textarea rows='5' style="display:block; width:100%" name="document">{}</textarea>
 				<div class="clear"></div>
 			</form>
 		</div>
 	</div>
+
+    <div id="addUserDialog" class="yui-pe-content">
+        <div class="hd">Please enter user credentials</div>
+        <div class="bd">
+            <form method="POST">
+                <label class="dialogLabel" for="addUser_user_name">Username:</label><input type="text" name="addUser_user_name" id="addUser_user_name" />
+                <div class="clear"></div>
+                <label class="dialogLabel" for="addUser_password">Password:</label><input type="password" name="addUser_password" id="addUser_password" />
+                <div class="clear"></div>
+                <label class="dialogLabel" for="addUser_readonly">Read only: <input type="checkbox" name="addUser_readonly" id="addUser_readonly" /></label>
+            </form>
+        </div>
+    </div>
+
+    <div id="addIndexDialog" class="yui-pe-content">
+        <div class="hd">Please enter Index</div>
+        <div class="bd">
+            <form method="POST">
+                <label class="dialogLabel" for="index_colname">Collection Name:</label><input name="index_colname" id="index_colname"/>
+                <div class="clear"></div>
+                <label class="dialogLabel" for="index_keys">Keys(JSON format):</label><input type="text" name="index_keys" id="index_keys" value="{}" />
+            </form>
+        </div>
+    </div>
+
+
     <div id="addFileDialog" class="yui-pe-content">
         <div class="hd">Select the files to be added</div>
         <div class="bd">

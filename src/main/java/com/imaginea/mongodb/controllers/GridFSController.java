@@ -98,7 +98,9 @@ public class GridFSController extends BaseController {
         String response = new ResponseTemplate().execute(logger, connectionId, request, new ResponseCallback() {
             public Object execute() throws Exception {
                 GridFSService gridFSService = new GridFSServiceImpl(connectionId);
-                JSONObject result =  gridFSService.getFileList(dbName, bucketName, query, keys, skip, limit);
+                int startIndex = query.indexOf("("), endIndex = query.lastIndexOf(")");
+                String jsonStr = query.substring(startIndex + 1, endIndex);
+                JSONObject result =  gridFSService.getFileList(dbName, bucketName, jsonStr, keys, skip, limit);
                 return result;
             }
         });

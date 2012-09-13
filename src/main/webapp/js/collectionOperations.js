@@ -23,13 +23,14 @@ YUI({
 	var MV = YUI.com.imaginea.mongoV,
 			sm = MV.StateManager,
 			collDiv = Y.one("#collNames ul.lists"),
+            systemCollDiv = Y.one("#systemCollections ul.lists"),
 			gridFSDiv = Y.one("#bucketNames ul.lists");
 	collDiv.delegate('click', handleCollectionClickEvent, 'a.onclick');
 	gridFSDiv.delegate('click', handleBucketClickEvent, 'a.onclick');
 
 	/**
 	 * Click event handler on the database name. It sets the current DB and
-	 * sends he request to get the list of collections 
+	 * sends he request to get the list of collections
 	 * @param e The event Object
 	 */
 	function requestCollNames(e) {
@@ -37,6 +38,8 @@ YUI({
 		Y.one("#currentColl").set("value", "");
 		Y.one("#collNames").unplug(Y.Plugin.NodeMenuNav);
 		Y.one("#bucketNames").unplug(Y.Plugin.NodeMenuNav);
+        Y.one("#systemCollections").unplug(Y.Plugin.NodeMenuNav);
+
 		MV.createDatatable(MV.URLMap.dbStatistics(), Y.one("#currentDB").get("value"));
 		MV.toggleClass(e.currentTarget, Y.all("#dbNames li"));
 		MV.hideQueryForm();
@@ -61,7 +64,7 @@ YUI({
 	 */
 	function displayCollectionNames(oId, responseObject) {
 		Y.log("Response Recieved of get collection request", "info");
-		var parsedResponse, parsedResult, info, index, error, collections = "", gridFSBuckets = "";
+		var parsedResponse, parsedResult, info, index, error, collections = "", gridFSBuckets = "", systemCollections = "";
 		try {
 			parsedResponse = Y.JSON.parse(responseObject.responseText);
 			parsedResult = parsedResponse.response.result;
@@ -110,35 +113,84 @@ YUI({
 						</div>\
 					</div>\
 		            </li>';
+            var usersTemplate = '' +
+                '<li class="yui3-menuitem" label="[0]"> \
+                        <span class="yui3-menu-label"> \
+                            <a id=[1] label="[2]" href="javascript:void(0)" class="collectionLabel navigable">[3]</a> \
+                            <a href="#[4]" class="yui3-menu-toggle"></a>\
+                        </span>\
+                        <div id="[5]" class="yui3-menu menu-width">\
+                            <div class="yui3-menu-content">\
+                                <ul>\
+                                    <li class="yui3-menuitem">\
+                                        <a index="1" class="yui3-menuitem-content onclick">Add User</a>\
+                                    </li>\
+                                    <li class="yui3-menuitem">\
+                                        <a index="2" class="yui3-menuitem-content onclick">Drop Users</a>\
+                                    </li>\
+                                </ul>\
+                            </div>\
+                        </div>\
+                        </li>';
+            var indexesTemplate = '' +
+                '<li class="yui3-menuitem" label="[0]"> \
+                        <span class="yui3-menu-label"> \
+                            <a id=[1] label="[2]" href="javascript:void(0)" class="collectionLabel navigable">[3]</a> \
+                            <a href="#[4]" class="yui3-menu-toggle"></a>\
+                        </span>\
+                        <div id="[5]" class="yui3-menu menu-width">\
+                            <div class="yui3-menu-content">\
+                                <ul>\
+                                    <li class="yui3-menuitem">\
+                                        <a index="1" class="yui3-menuitem-content onclick">Add Index</a>\
+                                    </li>\
+                                    <li class="yui3-menuitem">\
+                                        <a index="2" class="yui3-menuitem-content onclick">Drop Indexes</a>\
+                                    </li>\
+                                </ul>\
+                            </div>\
+                        </div>\
+                        </li>';
 
-			var hasCollections = false, hasFiles = false;
+			var hasCollections = false, hasFiles = false,hasUsersAndIndexes= false;
 			if (parsedResult) {
 				for (index = 0; index < parsedResult.length; index++) {
 					var collectionName = parsedResult[index];
 					var formattedName = collectionName.length > 20 ? collectionName.substring(0, 20) + "..." : collectionName;
-					var pos = collectionName.lastIndexOf(".files");
 					var id;
-					if (pos > 0) {
-						collectionName = collectionName.substring(0, pos);
-						formattedName = collectionName.length > 20 ? collectionName.substring(0, 20) + "..." : collectionName;						
-						id = collectionName.replace(/ /g, '_');
-						id = id.replace('.', '_');
-						gridFSBuckets += bucketTemplate.format(collectionName, id, formattedName, collectionName, id + "_subMenu", id + "_subMenu");
-						hasFiles = true;
-					}
-					// Issue 17 https://github.com/Imaginea/mViewer/issues/17
-					if (pos < 0 && collectionName.search(".chunks") < 0) {
-						id = collectionName.replace(/ /g, '_');
-						collections += collTemplate.format(collectionName, id, collectionName, formattedName, id + "_subMenu", id + "_subMenu");
-						hasCollections = true;
-					}
-				}
+                    if (collectionName == 'system.users') {
+
+                        id = collectionName.replace(/ /g, '_').replace('.', '_');
+                        systemCollections += usersTemplate.format(collectionName, id, collectionName, formattedName, id + "_subMenu", id + "_subMenu");
+                        hasUsersAndIndexes = true;
+                    } else if (collectionName == 'system.indexes') {
+                        id = collectionName.replace(/ /g, '_').replace('.', '_');
+                        systemCollections += indexesTemplate.format(collectionName, id, collectionName, formattedName, id + "_subMenu", id + "_subMenu");
+                        hasUsersAndIndexes = true;
+                    } else {
+                        var pos = collectionName.lastIndexOf(".files");
+                        if (pos > 0) {
+                            collectionName = collectionName.substring(0, pos);
+                            formattedName = collectionName.length > 20 ? collectionName.substring(0, 20) + "..." : collectionName;
+                            id = collectionName.replace(/ /g, '_').replace('.', '_');
+                            gridFSBuckets += bucketTemplate.format(collectionName, id, formattedName, collectionName, id + "_subMenu", id + "_subMenu");
+                            hasFiles = true;
+                        }
+                        // Issue 17 https://github.com/Imaginea/mViewer/issues/17
+                        if (pos < 0 && collectionName.search(".chunks") < 0) {
+                            id = collectionName.replace(/ /g, '_');
+                            collections += collTemplate.format(collectionName, id, collectionName, formattedName, id + "_subMenu", id + "_subMenu");
+                            hasCollections = true;
+                        }
+                    }
+                }
 
 				if (!hasFiles) gridFSBuckets = "&nbsp&nbsp No Files present.";
 				if (!hasCollections)	collections = "&nbsp&nbsp No Collections present.";
-
+                if(!hasUsersAndIndexes) systemCollections ="&nbsp&nbsp No Users & Indexes present.";
 				collDiv.set("innerHTML", collections);
 				gridFSDiv.set("innerHTML", gridFSBuckets);
+                systemCollDiv.set("innerHTML", systemCollections);
 
 				var menu1 = Y.one("#collNames");
 				menu1.plug(Y.Plugin.NodeMenuNav, { autoSubmenuDisplay: false, mouseOutHideDelay: 0 });
@@ -146,6 +198,9 @@ YUI({
 				var menu2 = Y.one("#bucketNames");
 				menu2.plug(Y.Plugin.NodeMenuNav, { autoSubmenuDisplay: false, mouseOutHideDelay: 0 });
 				menu2.set("style.display", "block");
+                var menu3 = Y.one("#systemCollections");
+                menu3.plug(Y.Plugin.NodeMenuNav, { autoSubmenuDisplay: false, mouseOutHideDelay: 0 });
+                menu3.set("style.display", "block");
 				sm.publish(sm.events.collectionsChanged);
 				MV.hideLoadingPanel();
 				Y.log("Collection Names succesfully loaded", "info");
@@ -172,6 +227,7 @@ YUI({
 		Y.one("#currentColl").set("value", label);
 		MV.toggleClass(sm.currentCollAsNode(), Y.all("#collNames li"));
 		MV.toggleClass(sm.currentCollAsNode(), Y.all("#bucketNames li"));
+        MV.toggleClass(sm.currentCollAsNode(), Y.all("#systemCollections li"));
 		switch (index) {
 			case 1:
 				// Add Document
@@ -206,6 +262,7 @@ YUI({
 		Y.one("#currentBucket").set("value", label);
 		MV.toggleClass(sm.currentBucketAsNode(), Y.all("#collNames li"));
 		MV.toggleClass(sm.currentBucketAsNode(), Y.all("#bucketNames li"));
+        MV.toggleClass(sm.currentCollAsNode(), Y.all("#systemCollections li"));
 		switch (index) {
 			case 1:
 				// Add File
@@ -317,7 +374,7 @@ YUI({
 		}
 	}
 
-	/**
+        /**
 	 *  A function handler to use for unsuccessful get Collection request.
 	 *  This function is called whenever sending request for getting collection list fails.
 	 *  @param oId the event Id object

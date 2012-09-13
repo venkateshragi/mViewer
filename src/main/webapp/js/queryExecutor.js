@@ -1,12 +1,13 @@
 YUI.add('query-executor', function (Y) {
 	YUI.namespace('com.imaginea.mongoV');
 	var MV = YUI.com.imaginea.mongoV;
-	var successHandler, failureHandler;
+	var successHandler, failureHandler, currentSelection;
 
-	MV.loadQueryBox = function(keysUrl, dataUrl, sHandler, fHandler) {
+	MV.loadQueryBox = function(keysUrl, dataUrl, selectedCollection, sHandler, fHandler) {
 
 		successHandler = sHandler;
 		failureHandler = fHandler;
+        currentSelection = selectedCollection;
 		/**
 		 * Create XHR data source to fetch the documents/files.
 		 * This dataSource will be used to populate JSON/Treeble views
@@ -156,7 +157,7 @@ YUI.add('query-executor', function (Y) {
 			checkList += formatKeys(keys);
 			checkList += "</ul>";
 		}
-        return upperPartTemplate.format(MV.StateManager.currentColl()) + checkList + lowerPartTemplate +
+        return upperPartTemplate.format(currentSelection) + checkList + lowerPartTemplate +
             selectTemplate + paginatorTemplate.format(count < 25 ? count : 25, count);
 	};
 
