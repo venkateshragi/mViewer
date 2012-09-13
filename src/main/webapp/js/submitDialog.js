@@ -34,31 +34,37 @@ YUI.add('submit-dialog', function (Y) {
             Y.log("Submit handler for add collection called", "info");
             var newCollInfo = this.getData();
             if (newCollInfo.name === "") {
-                MV.showAlertMessage("Please enter the name.", MV.warnIcon);
+                MV.showAlertMessage("Enter the collection name!", MV.warnIcon);
+                return false;
             } else {
                 Y.one("#newName").set("value", newCollInfo.name);
                 Y.one("#" + form + " .bd form").setAttribute("action", MV.URLMap.insertColl());
             }
+            return true;
         }
 
         function addGridFS() {
             Y.log("Submit handler for adding gridFS bucket called", "info");
             var newCollInfo = this.getData();
             if (newCollInfo.name === "") {
-                MV.showAlertMessage("Please enter the bucket name.", MV.warnIcon);
+                MV.showAlertMessage("Enter the bucket name!", MV.warnIcon);
+                return false;
             } else {
                 Y.one("#" + form + " .bd form").setAttribute("action", MV.URLMap.addGridFS(newCollInfo.name));
             }
+            return true;
         }
 
         function addDB() {
             var newDBInfo = this.getData();
             if (newDBInfo.name === "") {
-                MV.showAlertMessage("Please enter the name.", MV.warnIcon);
+                MV.showAlertMessage("Enter the database name!", MV.warnIcon);
+                return false;
             } else {
                 Y.one("#newName").set("value", newDBInfo.name);
                 Y.one("#" + form + " .bd form").setAttribute("action", MV.URLMap.insertDB());
             }
+            return true;
         }
 
         function addDocument() {
@@ -67,9 +73,11 @@ YUI.add('submit-dialog', function (Y) {
                 Y.JSON.parse(newDoc);
                 Y.one("#" + form + " .bd form").setAttribute("action", MV.URLMap.insertDoc());
             } catch (e) {
-                MV.showAlertMessage("Please enter the new document in JSON format", MV.warnIcon);
+                MV.showAlertMessage("Enter the document in valid JSON format", MV.warnIcon);
                 Y.log("New Document format not JSON", "error");
+                return false;
             }
+            return true;
         }
 
         function addUser() {
@@ -77,12 +85,15 @@ YUI.add('submit-dialog', function (Y) {
             var password = this.getData().addUser_password;
 
             if (userName == "") {
-                MV.showAlertMessage("Please enter the username.", MV.warnIcon);
+                MV.showAlertMessage("Enter the username!", MV.warnIcon);
+                return false;
             } else if (password == "") {
-                MV.showAlertMessage("Plese enter the password.", MV.warnIcon);
+                MV.showAlertMessage("Enter the password!", MV.warnIcon);
+                return false;
             } else {
                 Y.one("#" + form + " .bd form").setAttribute("action", MV.URLMap.adduser());
             }
+            return true;
         }
 
         function addIndex() {
@@ -93,8 +104,9 @@ YUI.add('submit-dialog', function (Y) {
             } catch (e) {
                 MV.showAlertMessage("Please enter the new index in JSON format", MV.warnIcon);
                 Y.log("New Index format not JSON", "error");
+                return false;
             }
-
+            return true;
         }
 
         var sumbitHandlerMap = {
@@ -122,8 +134,10 @@ YUI.add('submit-dialog', function (Y) {
                     {
                         text:"Submit",
                         handler:function () {
-                            (sumbitHandlerMap[form + "SubmitHandler"]).call(this);
-                            this.submit();
+                            var doSubmit = (sumbitHandlerMap[form + "SubmitHandler"]).call(this);
+                            if (doSubmit) {
+                                this.submit();
+                            }
                         },
                         isDefault:true
                     },

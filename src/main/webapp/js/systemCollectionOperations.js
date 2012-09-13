@@ -388,24 +388,22 @@ YUI({
                 var username = parsedDoc.user;
                 var readOnlyValue = parsedDoc["readOnly"];
 
-                //Set the values of the dialog box as per the user values
-                Y.one("#addUser_user_name").setAttribute("value", username);
-                Y.one("#addUser_user_name").setAttribute("readonly", "readonly");
-                if (readOnlyValue == false) {
-                    Y.one("#addUser_readonly").removeAttribute("checked");
-                } else {
-                    Y.one("#addUser_readonly").setAttribute("checked", readOnlyValue);
-                }
-
-                //set the style for the username to make an impression as a readonly field
-                Y.one("#addUser_user_name").setStyle('backgroundColor', '#E5E5E5');
-
-                var showError = function (responseObject) {
+                var showError = function(responseObject) {
                     MV.showAlertMessage("Adding user failed! Please check if your app server is running and then refresh the page.", MV.warnIcon);
                     Y.log("Editing user failed. Response Status: [0]".format(responseObject.statusText), "error");
                 };
                 MV.showSubmitDialog("addUserDialog", addUser, showError);
-                setTimeout(function () {
+                setTimeout(function() {
+                    //Set the values of the dialog box as per the user values
+                    Y.one("#addUser_user_name").set("value", username);
+                    Y.one("#addUser_user_name").setAttribute("readonly", "readonly");
+                    if (readOnlyValue == false) {
+                        Y.one("#addUser_readonly").removeAttribute("checked");
+                    } else {
+                        Y.one("#addUser_readonly").setAttribute("checked", readOnlyValue);
+                    }
+                    //set the style for the username to make an impression as a readonly field
+                    Y.one("#addUser_user_name").setStyle('backgroundColor', '#E5E5E5');
                     Y.one("#addUser_password").focus();
                 }, 300);
             }
