@@ -170,20 +170,20 @@
 		<div class="header">
 			<a href="" class="logo gen-float"></a>
 			<ul class="nav-cont gen-float">
-				<li><a id="home" class="navigable sel">Home</a>
+                <li><a id="serverStats" class="navigable">Server Statistics</a>
 				</li>
-				<li><a id="serverStats" class="navigable">Server Statistics</a>
-				</li>
-				<li><a id="graphs" class="navigable">Mongo Graphs</a>
-				</li>
-				<li><a id="help" class="navigable">Help</a>
-				</li>
-				<li><a id="troubleshoot" class="navigable">TroubleShoot</a>
-				</li>
-
+                <li><a id="graphs" class="navigable">Mongo Graphs</a>
+                </li>
 			</ul>
 			<ul class="user-menu nav-cont">
-				<li><a id="disconnect" class="disconnect navigable">Disconnect</a>
+
+                <li><a id="help" class="navigable" style="font-size: 11px;">Help</a>
+                </li>
+                <label style="color: white; ">|</label>
+                <li><a id="troubleshoot" class="navigable" style="font-size: 11px;">TroubleShoot</a>
+                </li>
+                <label style="color: white;">|</label>
+				<li><a id="disconnect" class="disconnect navigable" style="font-size: 11px;">Logout</a>
 				</li>
 			</ul>
 		</div>
@@ -201,7 +201,7 @@
 			<div class="left-cont gen-float">
               <div id="dbBuffer" class="buffer navigable dbBuffer">
 				<div class="list-head">
-				  <label class="db">Databases <button id="createDB" class="bttn" style="display: none">New</button></label>
+				  <label class="db">Databases <button id="createDB" title="Add new DB"></button></label>
 				</div>
                   <div id="dbNames" class="yui3-menu yui3-splitbuttonnav">
                       <div class="yui3-menu-content" style="border:none">
@@ -267,7 +267,7 @@
 					  <h3>Pramati Technologies</h3>
 					  <br>
 					  <br>
-					  <p><h2>Please click on the database name to start working</h2></p>
+					  <p><h2>Pick your database  and see what it can do for you!!</h2></p>
 					</center>
 				  </div>
                 </div>

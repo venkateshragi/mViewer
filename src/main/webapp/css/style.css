@@ -154,6 +154,7 @@ a.logo {
 
 ul.nav-cont {
 	list-style-type: none;
+    margin-left: 40px;
 }
 
 ul.nav-cont li {
@@ -163,10 +164,9 @@ ul.nav-cont li {
 ul.nav-cont li a {
 	background: #161616;
 	color: #bfbfbf;
-	text-transform: uppercase;
 	padding: 22px 15px;
 	font-weight: bold;
-	font-size: 12px;
+	font-size: 13px;
 	height: 30px;
 	line-height: 60px;
 	cursor: pointer;
@@ -405,10 +405,15 @@ ul.user-menu li label.disconnect {
 	padding-left: 22px;
 }
 
-#createDB{
+#createDB {
+    float: right;
     margin-top: -4px;
 	margin-left:4px;
 	font-size:11px;
+    background-image: url("../images/addNew.png");
+    background-repeat: no-repeat;
+    background-position: center;
+    padding-left: 10px;
 }
 
 .collections {
@@ -436,21 +441,16 @@ textarea {
 
 .form-cont {
 	padding: 10px 10px;
+    display: block;
 }
-
-/*.form-cont textarea,.form-cont select {
-	border: 1px solid #B7DCEA;
-	border-top: 1px solid #93BAC7;
-}*/
 
 .bttn {
 	background: #3472ab;
 	padding: 4px;
 	color: #FFFFFF;
 	text-shadow: 0.1em 0.1em 0.05em #999;
-	-moz-border-radius: 5px;
-	-webkit-border-radius: 5px;
 	border: none;
+    border-radius: 6px;
 	font-weight: bold;
 	margin-top: 2px;
 	cursor: pointer;
@@ -525,9 +525,9 @@ table tr td {
 	float: right;
 	border: 1px solid #ccc;
 	list-style: none;
-	height: 90px;
+	height: 150px;
 	overflow: auto;
-	width: 220px;
+	width: 190px;
 	display: inline;
 }
 
@@ -553,13 +553,86 @@ table tr td {
 }
 
 .queryBox {
-    width : 420px;
-    height : 90px;
+    width: 330px;
+    height: 150px;
+}
+
+.queryBoxlabels {
+    padding-bottom: 5px;
+}
+
+.docDiv{
+    display:inline-block;
+    width:99%;
+    position: relative;
+}
+
+.textAreaDiv{
+    display: inline;
+    float: left;
+    width: 98%;
+    padding: 10px;
+}
+.editbtnDiv{
+   display: inline;
+    float: left;
+    position: absolute;
+    left: 85%;
+    top: 15%;
+}
+.editbtnDivFiles{
+    display: inline;
+    float: left;
+    position: absolute;
+    left: 74%;
+    top: 5%;
+}
+#mainBodyHeader{
+    margin-top:10px;
+}
+
+#queryBoxDiv {
+    display: inline;
+    float: left;
+}
+
+#checkListDiv {
+    display: inline;
+    float: left;
+    padding-left: 3%;
+}
+
+#parametersDiv {
+    display: inline;
+    float: left;
+    padding-left: 2%;
 }
 
 #skip {
-  margin-right: 55px;
-  width: 38px;
+    margin-right: 22px;
+    margin-top: 5px;
+    margin-bottom: 8px;
+    width: 85px;
+}
+
+#limit {
+    width: 90px;
+    height: 21px;
+    margin-top: 3px;
+    margin-bottom: 10px;
+}
+
+#sort {
+    width: 90px;
+    margin-top: 5px;
+}
+
+#paginator {
+    float: right;
+    margin-top: 5px;
+    z-index: 1000;
+    position: absolute;
+    right:115px;
 }
 
 #first, #prev {
@@ -580,10 +653,14 @@ table tr td {
 }
 
 #execQueryButton {
-	margin-left: 120px;
+	margin-left: 0px;
+    padding-left: 6px;
+    padding-right:6px;
 }
 textarea{
 	overflow:auto;
+    width: 98%;
+
 	}
 textarea .disabled {
 	background: #ECECEC;

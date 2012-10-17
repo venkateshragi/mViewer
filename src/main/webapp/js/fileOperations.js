@@ -82,21 +82,19 @@ YUI({
 	 */
 	function writeOnJSONTab(response) {
 		var jsonView = "<div class='buffer jsonBuffer navigable navigateTable' id='jsonBuffer'>";
-		var i;
-		var trTemplate = ["<tr id='file[0]'>",
-			"  <td>",
-			"      <pre> <textarea id='ta[1]' class='disabled non-navigable' disabled='disabled' cols='75'>[2]</textarea></pre>",
-			"  </td>",
-			"  <td>",
-			"  <button id='open[3]'class='bttn openbtn non-navigable'>open</button>",
-			"   <button id='download[4]'class='bttn downloadbtn non-navigable'>download</button>",
-			"   <button id='delete[5]'class='bttn deletebtn non-navigable'>delete</button>",
-			"   <br/>",
-			"  </td>",
-			"</tr>"].join('\n');
+
+        var trTemplate = ["<div id='file[0]' class='docDiv'>",
+            "<div class='textAreaDiv'><pre> <textarea id='ta[1]' class='disabled non-navigable' disabled='disabled' cols='75'>[2]</textarea></pre></div>",
+            "<div class='editbtnDivFiles'>",
+            "  <button id='open[3]'class='bttn openbtn non-navigable'>open</button>",
+            "  <button id='download[4]'class='bttn downloadbtn non-navigable'>download</button>",
+            "  <button id='delete[5]'class='bttn deletebtn non-navigable'>delete</button>",
+            "</div>" ,
+            "</div>"
+        ].join('\n');
 		jsonView += "<table class='jsonTable'><tbody>";
 
-		for (i = 0; i < response.length; i++) {
+		for (var i = 0; i < response.length; i++) {
 			jsonView += trTemplate.format(i, i, Y.JSON.stringify(response[i], null, 4), i, i, i);
 		}
 		if (i === 0) {
