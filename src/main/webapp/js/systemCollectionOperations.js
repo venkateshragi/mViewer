@@ -99,31 +99,28 @@ YUI({
          */
         function writeOnJSONTab(response) {
             var jsonView = "<div class='buffer jsonBuffer navigable navigateTable' id='jsonBuffer'>";
-            var i;
-            var trTemplate = ["<tr id='doc[0]'>",
-                "  <td>",
-                "      <pre> <textarea id='ta[1]' class='disabled non-navigable' disabled='disabled' cols='74'>[2]</textarea></pre>",
-                "  </td>",
-                "  <td>",
+            var trTemplate=["<div id='doc[0]'class='docDiv'>",
+                "<div class='textAreaDiv'><pre> <textarea id='ta[1]' class='disabled non-navigable' disabled='disabled' cols='74'>[2]</textarea></pre></div>",
+                "<div class='editbtnDiv'>",
                 "  <button id='edit[3]'class='bttn editbtn non-navigable'>edit</button>",
                 "   <button id='delete[4]'class='bttn deletebtn non-navigable'>delete</button>",
                 "   <button id='save[5]'class='bttn savebtn non-navigable invisible'>save</button>",
                 "   <button id='cancel[6]'class='bttn cancelbtn non-navigable invisible'>cancel</button>",
-                "   <br/>",
-                "  </td>",
-                "</tr>"].join('\n');
-            var trTemplateNoEditAndDel = ["<tr id='doc[0]'>",
-                "<td>",
-                "  <pre> <textarea id='ta[1]' class='disabled non-navigable' disabled='disabled' cols='74'>[2]</textarea></pre> ",
-                "</td>",
-                "<td>",
-                "_id index is special and cannot be modified",
-                "</td>",
-                "</tr>"].join('\n');
+                "</div>" ,
+                "</div>"
+            ].join('\n');
+
+            var trTemplateNoEditAndDel=["<div id='doc[0]' style='display: inline-block;width:99%;position: relative;'>",
+                "<div style='display: inline; float: left; width: 98%;padding: 10px;'><pre> <textarea id='ta[1]' class='disabled non-navigable' disabled='disabled' cols='74' style='width: 99%'>[2]</textarea></pre></div>",
+                "<div style='display: inline; float: left;left:85%;position: absolute;top: 15%;'>",
+                "",
+                "</div>",
+                "</div>"
+            ].join('\n');
 
             jsonView += "<table class='jsonTable'><tbody>";
 
-            for (i = 0; i < response.length; i++) {
+            for (var i = 0; i < response.length; i++) {
                 if (response[i].name == "_id_") {
                     jsonView += trTemplateNoEditAndDel.format(i, i, Y.JSON.stringify(response[i], null, 4));
                 }

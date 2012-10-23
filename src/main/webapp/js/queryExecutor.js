@@ -84,7 +84,8 @@ YUI.add('query-executor', function (Y) {
 				MV.header.set("innerHTML", "");
 				MV.mainBody.empty(true);
 				queryForm.set("innerHTML", getForm(keys, count));
-				initListeners(Y);
+                MV.mainBody.set("innerHTML", paginatorTemplate.format(count < 25 ? count : 25, count));
+				initListeners();
 				Y.log("QueryBox loaded", "info");
 			} else {
 				error = parsedResponse.response.error;
@@ -117,34 +118,6 @@ YUI.add('query-executor', function (Y) {
 		}
 	}
 
-	function initListeners() {
-		Y.on("click", executeQuery, "#execQueryButton");
-		Y.on("click", handleSelect, "#selectAll");
-		Y.on("click", handleSelect, "#unselectAll");
-		Y.on("click", handlePagination, "#first");
-		Y.on("click", handlePagination, "#prev");
-		Y.on("click", handlePagination, "#next");
-		Y.on("click", handlePagination, "#last");
-		Y.on("keyup", function(eventObject) {
-			// insert a ctrl + enter listener for query evaluation
-			if (eventObject.ctrlKey && eventObject.keyCode === 13) {
-				Y.one('#execQueryButton').simulate('click');
-			}
-		}, "#queryBox");
-		Y.on("keyup", function(eventObject) {
-			// insert a ctrl + enter listener for query evaluation on skip field
-			if (eventObject.ctrlKey && eventObject.keyCode === 13) {
-				Y.one('#execQueryButton').simulate('click');
-			}
-		}, "#skip");
-		Y.on("keyup", function(eventObject) {
-			// insert a ctrl + enter listener for query evaluation on limit field
-			if (eventObject.ctrlKey && eventObject.keyCode === 13) {
-				Y.one('#execQueryButton').simulate('click');
-			}
-		}, "#limit");
-	}
-
 	var getForm = function(keys, count) {
 		var checkList = "", selectTemplate = "";
 		if (keys !== undefined) {
@@ -153,12 +126,13 @@ YUI.add('query-executor', function (Y) {
 				"<label> / </label>",
 				"<a id='unselectAll' href='javascript:void(0)'>Unselect All</a>"
 			].join('\n');
-			checkList = "<label for='fields' ></label><ul id='fields' class='checklist'>";
+			checkList = "<div id='checkListDiv'><div class='queryBoxlabels'><label for='fields' >Attributes</label>"+selectTemplate+"</div><div><ul id='fields' class='checklist'>";
 			checkList += formatKeys(keys);
 			checkList += "</ul>";
+            checkList +="</div>";
+            checkList +="</div>";
 		}
-        return upperPartTemplate.format(currentSelection) + checkList + lowerPartTemplate +
-            selectTemplate + paginatorTemplate.format(count < 25 ? count : 25, count);
+        return upperPartTemplate.format(currentSelection) + checkList + lowerPartTemplate;
 	};
 
 	function formatKeys(keys) {
@@ -170,28 +144,39 @@ YUI.add('query-executor', function (Y) {
 	}
 
     var upperPartTemplate = [
+        "<div id='queryBoxDiv'>",
+        "<div class='queryBoxlabels'>",
+        "<label>Define Query</label>",
+        "</div>",
+        "<div>",
         "<textarea id='queryBox' name='queryBox' class='queryBox'>",
         "db.[0].find({\r\r})",
-        "</textarea>"
+        "</textarea>",
+        "</div>",
+        "</div>"
+
     ].join('\n');
 
 	var checkListTemplate = "<li><label for='[0]'><input id='[1]' name='[2]' type='checkbox' checked=true />[3]</label></li>";
 
 	var lowerPartTemplate = [
-		"<br/>",
-		"<label for='skip'> Skip: </label><input id='skip' type='text' name='skip' value='0'/>",
-		"<label for='limit'> Limit: </label><span><select id='limit' name='limit'><option value='10'>10</option><option value='25'>25</option><option value='50'>50</option></select></span>",
-		"<button id='execQueryButton' class='bttn'>Execute Query</button>"
+		"<div id='parametersDiv'>",
+		"<label for='skip'> Skip(No. of records) </label><br/><input id='skip' type='text' name='skip' value='0'/><br/>",
+		"<label for='limit'> Max page size: </label><br/><span><select id='limit' name='limit'><option value='10'>10</option><option value='25'>25</option><option value='50'>50</option></select></span><br/>  ",
+        "<label for='sort'> Sort by fields </label><br/><input id='sort' type='text' name='sort' value='{\"_id:1\"}'/><br/><br/>",
+		"<button id='execQueryButton' class='bttn'>Execute Query</button>",
+        "</div>"
 	].join('\n');
 
 	var paginatorTemplate = [
-		"</br></br>",
+		"<div id='paginator'>",
 		"<a id='first' href='javascript:void(0)'>&laquo; First</a>",
 		"<a id='prev'  href='javascript:void(0)'>&lsaquo; Previous</a>",
+        "<label>Showing</label>","<label id='startLabel'> 1 </label>","<label> - </label>",
+        "<label id='endLabel'> [0] </label>", "<label> of </label>","<label id='countLabel'> [1] </label>",
 		"<a id='next' href='javascript:void(0)'>Next &rsaquo;</a>",
 		"<a id='last' href='javascript:void(0)'>Last &raquo;</a>",
-		"<label>Showing</label>","<label id='startLabel'> 1 </label>","<label> - </label>",
-		"<label id='endLabel'> [0] </label>", "<label> of </label>","<label id='countLabel'> [1] </label>"
+        "</div>"
 	].join('\n');
 
 
@@ -201,6 +186,34 @@ YUI.add('query-executor', function (Y) {
 		queryForm.set("innerHTML", "");
 		document.getElementById('queryExecutor').style.display = 'none';
 	};
+
+    function initListeners() {
+        Y.on("click", executeQuery, "#execQueryButton");
+        Y.on("click", handleSelect, "#selectAll");
+        Y.on("click", handleSelect, "#unselectAll");
+        Y.on("click", handlePagination, "#first");
+        Y.on("click", handlePagination, "#prev");
+        Y.on("click", handlePagination, "#next");
+        Y.on("click", handlePagination, "#last");
+        Y.on("keyup", function(eventObject) {
+            // insert a ctrl + enter listener for query evaluation
+            if (eventObject.ctrlKey && eventObject.keyCode === 13) {
+                Y.one('#execQueryButton').simulate('click');
+            }
+        }, "#queryBox");
+        Y.on("keyup", function(eventObject) {
+            // insert a ctrl + enter listener for query evaluation on skip field
+            if (eventObject.ctrlKey && eventObject.keyCode === 13) {
+                Y.one('#execQueryButton').simulate('click');
+            }
+        }, "#skip");
+        Y.on("keyup", function(eventObject) {
+            // insert a ctrl + enter listener for query evaluation on limit field
+            if (eventObject.ctrlKey && eventObject.keyCode === 13) {
+                Y.one('#execQueryButton').simulate('click');
+            }
+        }, "#limit");
+    }
 
 	function handleSelect(event) {
 		var id = event.currentTarget.get("id");
@@ -251,7 +264,6 @@ YUI.add('query-executor', function (Y) {
 		start.set('text', count != 0 ? skip + 1 : 0);
 		end.set('text', count < skip + limit ? count : skip + limit);
 		countLabel.set('text', count);
-
 	}
 
 	function enableAnchor(obj) {
@@ -302,7 +314,6 @@ YUI.add('query-executor', function (Y) {
 			MV.showAlertMessage("Failed:Could not parse query. [0]".format(error), MV.warnIcon);
 		}
 	}
-
 }, '3.3.0', {
 	requires : ["json-parse", "node-event-simulate"]
 });
