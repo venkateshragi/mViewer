@@ -94,7 +94,7 @@ public class BaseController {
         try {
             error.put("message", e.getMessage());
             error.put("code", e.getErrorCode());
-            logger.error(error);
+            logger.error(error, e);
 
             JSONObject tempResponse = new JSONObject();
             tempResponse.put("error", error);
@@ -166,7 +166,7 @@ public class BaseController {
             } catch (ApplicationException e) {
                 response = formErrorResponse(logger, e);
             } catch (Exception m) {
-                ApplicationException e = new ApplicationException(ErrorCodes.ANY_OTHER_EXCEPTION, m.getMessage(), m.getCause());
+                ApplicationException e = new ApplicationException(ErrorCodes.ANY_OTHER_EXCEPTION, m.getMessage(), m);
                 response = formErrorResponse(logger, e);
             }
             return response;

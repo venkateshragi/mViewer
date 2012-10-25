@@ -43,7 +43,7 @@ public class QueryExecutor {
         if (command.equals("group")) {
             return executeGroup(dbCollection, queryStr);
         }
-        if (command.equals("mapreduce")) {
+        if (command.equals("mapReduce")) {
             return executeMapReduce(dbCollection, queryStr, limit);
         }
         if(command.equals("insert")){

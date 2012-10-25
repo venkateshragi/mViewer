@@ -106,7 +106,7 @@
 		</copy>
 		<mkdir dir="${app.dir}/js" />
 		<copy toDir="${app.dir}/js">
-			<fileset dir="/js">
+			<fileset dir="${js.src.dir}">
 			</fileset>
 		</copy>
 		<mkdir dir="${app.dir}/WEB-INF" />
