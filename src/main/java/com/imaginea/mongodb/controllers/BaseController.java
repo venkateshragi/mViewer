@@ -21,6 +21,7 @@ import com.imaginea.mongodb.services.impl.AuthServiceImpl;
 import com.imaginea.mongodb.utils.ApplicationUtils;
 import com.mongodb.MongoException;
 import com.mongodb.MongoInternalException;
+import com.mongodb.util.JSONParseException;
 import org.apache.log4j.Logger;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -80,7 +81,6 @@ public class BaseController {
      * @return JSON Error response.
      */
     protected static String formErrorResponse(Logger logger, ApplicationException e) {
-
         String response = null;
         JSONObject jsonErrorResponse = new JSONObject();
         JSONObject error = new JSONObject();
@@ -131,6 +131,9 @@ public class BaseController {
                 } else if (dispatcherResponse instanceof String) {
                     response = dispatcherResponse.toString();
                 }
+            } catch (JSONParseException m) {
+                ApplicationException e = new ApplicationException(ErrorCodes.JSON_EXCEPTION, "Invalid JSON Object", m.getCause());
+                response = formErrorResponse(logger, e);
             } catch (NumberFormatException m) {
                 ApplicationException e = new ApplicationException(ErrorCodes.ERROR_PARSING_PORT, "Invalid Port", m.getCause());
                 response = formErrorResponse(logger, e);
