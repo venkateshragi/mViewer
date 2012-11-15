@@ -42,7 +42,7 @@ YUI({
 		MV.toggleClass(event.currentTarget, Y.all("#collNames li"));
 		MV.toggleClass(event.currentTarget, Y.all("#bucketNames li"));
         MV.toggleClass(event.currentTarget, Y.all("#systemCollections li"));
-		MV.loadQueryBox(MV.URLMap.getDocKeys(), MV.URLMap.getDocs(), sm.currentColl(), showTabView, showError);
+		MV.loadQueryBox(MV.URLMap.getDocKeys(), MV.URLMap.getDocs(), sm.currentColl(), showTabView);
 	};
 
 	/**
@@ -58,14 +58,18 @@ YUI({
 			Y.log("Preparing the data tabs...", "info");
 			MV.header.set("innerHTML", "Contents of Collection : " + Y.one("#currentColl").get("value"));
 			tabView.appendTo(MV.mainBody.get('id'));
-			var treebleData = MV.getTreebleDataForDocs(response.results[0]);
+			var treebleData = MV.getTreebleDataForDocs(response);
 			var treeble = MV.getTreeble(treebleData, "document");
 			// Remove download column for document operations
 			treeble.removeColumn(treeble.getColumn("download_column"));
+            if(!response.editable) {
+                // Remove delete column if not editable
+                treeble.removeColumn(treeble.getColumn("delete_column"));
+            }
 			treeble.load();
 			treeble.subscribe("rowMouseoverEvent", treeble.onEventHighlightRow);
 			treeble.subscribe("rowMouseoutEvent", treeble.onEventUnhighlightRow);
-			writeOnJSONTab(response.results[0].documents);
+			populateJSONTab(response);
 			sm.publish(sm.events.queryFired);
 			MV.hideLoadingPanel();
 			Y.log("Loaded data tabs.", "info");
@@ -76,33 +80,32 @@ YUI({
 		}
 	};
 
-	var showError = function(request, response) {
-		MV.hideLoadingPanel();
-		MV.showAlertMessage("Documents could not be loaded. [0]".format(response.responseText), MV.warnIcon);
-		Y.log("Documents could not be loaded. Response: [0]".format(response.responseText), "error");
-	};
-
 	/**
 	 * The function creates the json view and adds the edit,delete,save and cancel buttons for each document
 	 * @param response The response Object containing all the documents
 	 */
-	function writeOnJSONTab(response) {
-		var jsonView = "<div class='buffer jsonBuffer navigable navigateTable' id='jsonBuffer'>";
-        var trTemplate = ["<div class='docDiv' id='doc[0]'>",
-            "<div class='textAreaDiv'><pre> <textarea id='ta[1]' class='disabled non-navigable' disabled='disabled' cols='74'>[2]</textarea></pre></div>",
-            "<div class='editbtnDiv'>",
-            "  <button id='edit[3]'class='bttn editbtn non-navigable'>edit</button>",
-            "   <button id='delete[4]'class='bttn deletebtn non-navigable'>delete</button>",
-            "   <button id='save[5]'class='bttn savebtn non-navigable invisible'>save</button>",
-            "   <button id='cancel[6]'class='bttn cancelbtn non-navigable invisible'>cancel</button>",
-            "</div>" ,
+	function populateJSONTab(response) {
+        var jsonView = "<div class='buffer jsonBuffer navigable navigateTable' id='jsonBuffer'>";
+        var trTemplate = [
+            "<div class='docDiv' id='doc[0]'>",
+            "<div class='textAreaDiv'><pre><textarea id='ta[1]' class='non-navigable' disabled='disabled' cols='74'>[2]</textarea></pre></div>",
             "</div>"
-        ].join('\n');
+        ];
 
+        if (response.editable) {
+            trTemplate.splice(2, 0, "<div class='actionsDiv'>",
+                "<button id='edit[3]'class='bttn editbtn non-navigable'>edit</button>",
+                "<button id='delete[4]'class='bttn deletebtn non-navigable'>delete</button>",
+                "<button id='save[5]'class='bttn savebtn non-navigable invisible'>save</button>",
+                "<button id='cancel[6]'class='bttn cancelbtn non-navigable invisible'>cancel</button>",
+                "</div>")
+        }
+        trTemplate = trTemplate.join('\n');
         jsonView += "<table class='jsonTable'><tbody>";
 
-		for (var i = 0; i < response.length; i++) {
-			jsonView += trTemplate.format(i, i, Y.JSON.stringify(response[i], null, 4), i, i, i, i);
+        var documents = response.documents;
+		for (var i = 0; i < documents.length; i++) {
+			jsonView += trTemplate.format(i, i, Y.JSON.stringify(documents[i], null, 4), i, i, i, i);
 		}
 		if (i === 0) {
             jsonView = jsonView + "No documents to be displayed";
@@ -111,7 +114,7 @@ YUI({
 		tabView.getTab(0).setAttributes({
 			content: jsonView
 		}, false);
-		for (i = 0; i < response.length; i++) {
+		for (i = 0; i < documents.length; i++) {
 			Y.on("click", editDoc, "#edit" + i);
 			Y.on("click", function(e) {
 				MV.deleteDocEvent.fire({eventObj : e});
@@ -119,7 +122,7 @@ YUI({
 			Y.on("click", saveDoc, "#save" + i);
 			Y.on("click", cancelSave, "#cancel" + i);
 		}
-		for (i = 0; i < response.length; i++) {
+		for (i = 0; i < documents.length; i++) {
 			fitToContent(500, document.getElementById("ta" + i));
 		}
 		var trSelectionClass = 'selected';
@@ -189,14 +192,6 @@ YUI({
 		}
 	}
 
-	/**
-	 * The function is the success handler for the request document call.
-	 * It calls function to write on the JSON tab and to create the treeble structure
-	 * from the response data
-	 * @param {Object} request The request Object
-	 * @param {Object} responseObject The response object containing the response of the get documents request
-	 *
-	 */
 	function getButtonIndex(targetNode) {
 		var btnID = targetNode.get("id");
 		var match = btnID.match(/\d+/);

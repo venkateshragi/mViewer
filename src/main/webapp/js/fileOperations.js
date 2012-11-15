@@ -36,13 +36,7 @@ YUI({
 		MV.toggleClass(event.currentTarget, Y.all("#collNames li"));
 		MV.toggleClass(event.currentTarget, Y.all("#bucketNames li"));
         MV.toggleClass(event.currentTarget, Y.all("#systemCollections li"));
-		MV.loadQueryBox(MV.URLMap.getFilesCount(), MV.URLMap.getFiles(), sm.currentBucket(), showTabView, showError);
-	};
-
-	var showError = function(request, response) {
-		MV.hideLoadingPanel();
-		MV.showAlertMessage("Files could not be loaded. [0]".format(response.responseText), MV.warnIcon);
-		Y.log("Files could not be loaded. Response: [0]".format(response.responseText), "error");
+		MV.loadQueryBox(MV.URLMap.getFilesCount(), MV.URLMap.getFiles(), sm.currentBucket(), showTabView);
 	};
 
 	/**
@@ -60,12 +54,12 @@ YUI({
 			Y.log("Preparing the data tabs...", "info");
 			MV.header.set("innerHTML", "Contents of GridFS Bucket : " + Y.one("#currentBucket").get("value"));
 			tabView.appendTo(MV.mainBody.get('id'));
-			var treebleData = MV.getTreebleDataForFiles(response.results[0]);
+			var treebleData = MV.getTreebleDataForFiles(response);
 			var treeble = MV.getTreeble(treebleData, "file");
 			treeble.load();
 			treeble.subscribe("rowMouseoverEvent", treeble.onEventHighlightRow);
 			treeble.subscribe("rowMouseoutEvent", treeble.onEventUnhighlightRow);
-			writeOnJSONTab(response.results[0].documents);
+			populateJSONTab(response);
 			sm.publish(sm.events.queryFired);
 			MV.hideLoadingPanel();
 			Y.log("Loaded data tabs.", "info");
@@ -80,12 +74,12 @@ YUI({
 	 * The function creates the json view and adds the edit,delete,save and cancel buttons for each file
 	 * @param response The response Object containing all the files
 	 */
-	function writeOnJSONTab(response) {
+	function populateJSONTab(response) {
 		var jsonView = "<div class='buffer jsonBuffer navigable navigateTable' id='jsonBuffer'>";
 
         var trTemplate = ["<div id='file[0]' class='docDiv'>",
             "<div class='textAreaDiv'><pre> <textarea id='ta[1]' class='disabled non-navigable' disabled='disabled' cols='75'>[2]</textarea></pre></div>",
-            "<div class='editbtnDivFiles'>",
+            "<div class='actionsDiv'>",
             "  <button id='open[3]'class='bttn openbtn non-navigable'>open</button>",
             "  <button id='download[4]'class='bttn downloadbtn non-navigable'>download</button>",
             "  <button id='delete[5]'class='bttn deletebtn non-navigable'>delete</button>",
@@ -94,8 +88,9 @@ YUI({
         ].join('\n');
 		jsonView += "<table class='jsonTable'><tbody>";
 
-		for (var i = 0; i < response.length; i++) {
-			jsonView += trTemplate.format(i, i, Y.JSON.stringify(response[i], null, 4), i, i, i);
+        var documents = response.documents;
+		for (var i = 0; i < documents.length; i++) {
+			jsonView += trTemplate.format(i, i, Y.JSON.stringify(documents[i], null, 4), i, i, i);
 		}
 		if (i === 0) {
 			jsonView = jsonView + "No files to be displayed";
@@ -104,7 +99,7 @@ YUI({
 		tabView.getTab(0).setAttributes({
 			content: jsonView
 		}, false);
-		for (i = 0; i < response.length; i++) {
+		for (i = 0; i < documents.length; i++) {
 			Y.on("click", function(e) {
 				MV.openFileEvent.fire({eventObj : e, isDownload: false});
 			}, "#open" + i);
@@ -115,7 +110,7 @@ YUI({
 				MV.deleteFileEvent.fire({eventObj : e});
 			}, "#delete" + i);
 		}
-		for (i = 0; i < response.length; i++) {
+		for (i = 0; i < documents.length; i++) {
 			fitToContent(500, document.getElementById("ta" + i));
 		}
 		var trSelectionClass = 'selected';

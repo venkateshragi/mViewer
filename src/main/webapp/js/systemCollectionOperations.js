@@ -46,7 +46,7 @@ YUI({
             MV.toggleClass(event.currentTarget, Y.all("#collNames li"));
             MV.toggleClass(event.currentTarget, Y.all("#bucketNames li"));
             MV.toggleClass(event.currentTarget, Y.all("#systemCollections li"));
-            MV.loadQueryBox(MV.URLMap.getDocKeys(), MV.URLMap.getDocs(), sm.currentColl(), showTabView, showError);
+            MV.loadQueryBox(MV.URLMap.getDocKeys(), MV.URLMap.getDocs(), sm.currentColl(), showTabView);
         };
 
         /**
@@ -62,7 +62,7 @@ YUI({
                 Y.log("Preparing the data tabs...", "info");
                 MV.header.set("innerHTML", "Contents of Collection : " + Y.one("#currentColl").get("value"));
                 tabView.appendTo(MV.mainBody.get('id'));
-                var treebleData = MV.getTreebleDataForDocs(response.results[0]);
+                var treebleData = MV.getTreebleDataForDocs(response);
                 var treeble = MV.getTreeble(treebleData, "document");
                 // Remove download column for document operations
                 treeble.removeColumn(treeble.getColumn("download_column"));
@@ -71,7 +71,7 @@ YUI({
                 treeble.subscribe("rowMouseoutEvent", treeble.onEventUnhighlightRow);
 
                 //If we are showing indexes then no need to show edit
-                writeOnJSONTab(response.results[0].documents);
+                populateJSONTab(response);
                 if (sm.currentColl() == MV.indexes) {
                     $('.editbtn').each(function () {
                         $(this).css('visibility', 'hidden');
@@ -87,63 +87,55 @@ YUI({
             }
         };
 
-        var showError = function (request, response) {
-            MV.hideLoadingPanel();
-            MV.showAlertMessage("Documents could not be loaded. [0]".format(response.responseText), MV.warnIcon);
-            Y.log("Documents could not be loaded. Response: [0]".format(response.responseText), "error");
-        };
-
         /**
          * The function creates the json view and adds the edit,delete,save and cancel buttons for each document
          * @param response The response Object containing all the documents
          */
-        function writeOnJSONTab(response) {
+        function populateJSONTab(response) {
             var jsonView = "<div class='buffer jsonBuffer navigable navigateTable' id='jsonBuffer'>";
-            var trTemplate=["<div id='doc[0]'class='docDiv'>",
-                "<div class='textAreaDiv'><pre> <textarea id='ta[1]' class='disabled non-navigable' disabled='disabled' cols='74'>[2]</textarea></pre></div>",
-                "<div class='editbtnDiv'>",
-                "  <button id='edit[3]'class='bttn editbtn non-navigable'>edit</button>",
-                "   <button id='delete[4]'class='bttn deletebtn non-navigable'>delete</button>",
-                "   <button id='save[5]'class='bttn savebtn non-navigable invisible'>save</button>",
-                "   <button id='cancel[6]'class='bttn cancelbtn non-navigable invisible'>cancel</button>",
+            var template=[
+                "<div id='doc[0]'class='docDiv'>",
+                "<div class='textAreaDiv'><pre><textarea id='ta[1]' class='disabled non-navigable' disabled='disabled' cols='74'>[2]</textarea></pre></div>",
+                "<div class='actionsDiv'>",
+                "<button id='edit[3]'class='bttn editbtn non-navigable'>edit</button>",
+                "<button id='delete[4]'class='bttn deletebtn non-navigable'>delete</button>",
+                "<button id='save[5]'class='bttn savebtn non-navigable invisible'>save</button>",
+                "<button id='cancel[6]'class='bttn cancelbtn non-navigable invisible'>cancel</button>",
                 "</div>" ,
                 "</div>"
             ].join('\n');
 
-            var trTemplateNoEditAndDel=["<div id='doc[0]' style='display: inline-block;width:99%;position: relative;'>",
+            var nonEditableTemplate=[
+                "<div id='doc[0]' style='display: inline-block;width:99%;position: relative;'>",
                 "<div style='display: inline; float: left; width: 98%;padding: 10px;'><pre> <textarea id='ta[1]' class='disabled non-navigable' disabled='disabled' cols='74' style='width: 99%'>[2]</textarea></pre></div>",
                 "<div style='display: inline; float: left;left:85%;position: absolute;top: 15%;'>",
-                "",
                 "</div>",
                 "</div>"
             ].join('\n');
 
             jsonView += "<table class='jsonTable'><tbody>";
 
-            for (var i = 0; i < response.length; i++) {
-                if (response[i].name == "_id_") {
-                    jsonView += trTemplateNoEditAndDel.format(i, i, Y.JSON.stringify(response[i], null, 4));
+            var documents = response.documents;
+            for (var i = 0; i < documents.length; i++) {
+                if (documents[i].name == "_id_") {
+                    jsonView += nonEditableTemplate.format(i, i, Y.JSON.stringify(documents[i], null, 4));
+                } else {
+                    jsonView += template.format(i, i, Y.JSON.stringify(documents[i], null, 4), i, i, i, i);
                 }
-                else {
-                    jsonView += trTemplate.format(i, i, Y.JSON.stringify(response[i], null, 4), i, i, i, i);
-                }
-
             }
             if (i === 0) {
                 if (sm.currentColl() == MV.users) {
                     jsonView = jsonView + "No users to be displayed";
-                }
-                else {
+                } else {
                     jsonView = jsonView + "No indexes to be displayed";
                 }
             }
-
 
             jsonView = jsonView + "</tbody></table></div>";
             tabView.getTab(0).setAttributes({
                 content:jsonView
             }, false);
-            for (i = 0; i < response.length; i++) {
+            for (i = 0; i < documents.length; i++) {
                 Y.on("click", editUser, "#edit" + i);
                 Y.on("click", function (e) {
                     MV.deleteDocEvent.fire({eventObj:e});
@@ -151,7 +143,7 @@ YUI({
                 Y.on("click", saveDoc, "#save" + i);
                 Y.on("click", cancelSave, "#cancel" + i);
             }
-            for (i = 0; i < response.length; i++) {
+            for (i = 0; i < documents.length; i++) {
                 fitToContent(500, document.getElementById("ta" + i));
             }
             var trSelectionClass = 'selected';
@@ -205,7 +197,6 @@ YUI({
          * @param maxHeight The maximum height if the text area
          * @param text The text of the text area
          */
-
         function fitToContent(maxHeight, text) {
             if (text) {
                 var adjustedHeight = text.clientHeight;
@@ -221,14 +212,6 @@ YUI({
             }
         }
 
-        /**
-         * The function is the success handler for the request document call.
-         * It calls function to write on the JSON tab and to create the treeble structure
-         * from the response data
-         * @param {Object} request The request Object
-         * @param {Object} responseObject The response object containing the response of the get documents request
-         *
-         */
         function getButtonIndex(targetNode) {
             var btnID = targetNode.get("id");
             var match = btnID.match(/\d+/);
