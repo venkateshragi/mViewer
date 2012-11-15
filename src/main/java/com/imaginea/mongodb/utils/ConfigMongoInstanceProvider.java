@@ -16,16 +16,17 @@
 
 package com.imaginea.mongodb.utils;
 
+import com.imaginea.mongodb.exceptions.MongoHostUnknownException;
+import com.mongodb.Mongo;
+import com.mongodb.MongoException;
+import com.mongodb.MongoInternalException;
+
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.UnknownHostException;
 import java.util.Properties;
-import com.imaginea.mongodb.exceptions.MongoHostUnknownException;
-import com.mongodb.Mongo;
-import com.mongodb.MongoException;
-import com.mongodb.MongoInternalException;
 
 /**
  * Provides an Implementation for MongoInstanceProvider that provides instance

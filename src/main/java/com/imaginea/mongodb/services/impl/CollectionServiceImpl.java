@@ -15,19 +15,11 @@
  */
 package com.imaginea.mongodb.services.impl;
 
-import com.imaginea.mongodb.exceptions.ApplicationException;
-import com.imaginea.mongodb.exceptions.CollectionException;
-import com.imaginea.mongodb.exceptions.DatabaseException;
-import com.imaginea.mongodb.exceptions.ErrorCodes;
-import com.imaginea.mongodb.exceptions.ValidationException;
+import com.imaginea.mongodb.exceptions.*;
 import com.imaginea.mongodb.services.AuthService;
 import com.imaginea.mongodb.services.CollectionService;
 import com.imaginea.mongodb.services.DatabaseService;
-import com.mongodb.BasicDBObject;
-import com.mongodb.CommandResult;
-import com.mongodb.DBObject;
-import com.mongodb.Mongo;
-import com.mongodb.MongoException;
+import com.mongodb.*;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;

@@ -24,8 +24,6 @@
  */
 package com.imaginea.mongodb.services;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 import com.imaginea.mongodb.controllers.BaseController;
 import com.imaginea.mongodb.controllers.LoginController;
 import com.imaginea.mongodb.controllers.LogoutController;
@@ -38,6 +36,9 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.mock.web.MockHttpServletRequest;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 /**
  * Tests the GET request made by user to disconnect from the application. Here we

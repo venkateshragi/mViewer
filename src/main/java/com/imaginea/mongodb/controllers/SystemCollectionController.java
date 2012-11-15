@@ -33,10 +33,9 @@ package com.imaginea.mongodb.controllers;
 
 import com.imaginea.mongodb.services.SystemCollectionService;
 import com.imaginea.mongodb.services.impl.SystemCollectionServiceImpl;
+import com.imaginea.mongodb.utils.JSON;
 import com.mongodb.DBObject;
-import com.mongodb.util.JSON;
 import org.apache.log4j.Logger;
-
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.*;

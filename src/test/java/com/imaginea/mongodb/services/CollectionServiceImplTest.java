@@ -25,7 +25,6 @@
 
 package com.imaginea.mongodb.services;
 
-import static org.junit.Assert.assertEquals;
 import com.imaginea.mongodb.controllers.LoginController;
 import com.imaginea.mongodb.controllers.TestingTemplate;
 import com.imaginea.mongodb.exceptions.ApplicationException;
@@ -48,6 +47,8 @@ import org.junit.Test;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+
+import static org.junit.Assert.assertEquals;
 
 /**
  * Test all the Service functions on collections inside Databases present in

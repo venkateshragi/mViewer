@@ -25,9 +25,6 @@
 
 package com.imaginea.mongodb.services;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 import com.imaginea.mongodb.controllers.LoginController;
 import com.imaginea.mongodb.controllers.TestingTemplate;
 import com.imaginea.mongodb.exceptions.ApplicationException;
@@ -47,6 +44,8 @@ import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static org.junit.Assert.*;
 
 /**
  * Test service functions for performing operations like create/drop on

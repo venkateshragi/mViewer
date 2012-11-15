@@ -20,9 +20,9 @@ import com.imaginea.mongodb.exceptions.*;
 import com.imaginea.mongodb.services.AuthService;
 import com.imaginea.mongodb.services.DatabaseService;
 import com.imaginea.mongodb.services.DocumentService;
+import com.imaginea.mongodb.utils.JSON;
 import com.imaginea.mongodb.utils.QueryExecutor;
 import com.mongodb.*;
-import com.mongodb.util.JSON;
 import org.json.JSONException;
 import org.json.JSONObject;
 

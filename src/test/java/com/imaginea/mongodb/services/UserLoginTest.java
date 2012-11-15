@@ -25,7 +25,6 @@
 
 package com.imaginea.mongodb.services;
 
-import static org.junit.Assert.assertNotNull;
 import com.imaginea.mongodb.controllers.BaseController;
 import com.imaginea.mongodb.controllers.LoginController;
 import com.imaginea.mongodb.exceptions.ApplicationException;
@@ -43,6 +42,8 @@ import org.junit.Test;
 import org.springframework.mock.web.MockHttpServletRequest;
 
 import javax.servlet.http.HttpServletRequest;
+
+import static org.junit.Assert.assertNotNull;
 
 /**
  * Tests the LoginController Resource functionality. Here we will try to register a

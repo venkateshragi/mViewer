@@ -15,14 +15,7 @@
  */
 package com.imaginea.mongodb.controllers;
 
-import com.imaginea.mongodb.exceptions.ApplicationException;
-import com.imaginea.mongodb.exceptions.CollectionException;
-import com.imaginea.mongodb.exceptions.DatabaseException;
-import com.imaginea.mongodb.exceptions.DocumentException;
-import com.imaginea.mongodb.exceptions.ErrorCodes;
-import com.imaginea.mongodb.exceptions.InvalidHTTPRequestException;
-import com.imaginea.mongodb.exceptions.MongoHostUnknownException;
-import com.imaginea.mongodb.exceptions.ValidationException;
+import com.imaginea.mongodb.exceptions.*;
 import com.imaginea.mongodb.services.AuthService;
 import com.imaginea.mongodb.services.impl.AuthServiceImpl;
 import com.imaginea.mongodb.utils.ApplicationUtils;

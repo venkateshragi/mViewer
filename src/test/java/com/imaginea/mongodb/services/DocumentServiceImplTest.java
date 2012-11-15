@@ -24,23 +24,15 @@
  */
 package com.imaginea.mongodb.services;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 import com.imaginea.mongodb.controllers.LoginController;
 import com.imaginea.mongodb.controllers.TestingTemplate;
 import com.imaginea.mongodb.exceptions.ApplicationException;
 import com.imaginea.mongodb.exceptions.ErrorCodes;
 import com.imaginea.mongodb.services.impl.DocumentServiceImpl;
 import com.imaginea.mongodb.utils.ConfigMongoInstanceProvider;
+import com.imaginea.mongodb.utils.JSON;
 import com.imaginea.mongodb.utils.MongoInstanceProvider;
-import com.mongodb.BasicDBObject;
-import com.mongodb.DBCollection;
-import com.mongodb.DBCursor;
-import com.mongodb.DBObject;
-import com.mongodb.Mongo;
-import com.mongodb.MongoException;
-import com.mongodb.util.JSON;
+import com.mongodb.*;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
 import org.json.JSONObject;
@@ -50,6 +42,8 @@ import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static org.junit.Assert.*;
 
 /**
  * Test all the service functions like create/update/delete documents in

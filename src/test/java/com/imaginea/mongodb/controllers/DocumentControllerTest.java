@@ -25,13 +25,13 @@
 
 package com.imaginea.mongodb.controllers;
 
-import static org.junit.Assert.*;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.servlet.http.HttpSession;
-
+import com.imaginea.mongodb.exceptions.ApplicationException;
+import com.imaginea.mongodb.exceptions.DocumentException;
+import com.imaginea.mongodb.exceptions.ErrorCodes;
+import com.imaginea.mongodb.utils.ConfigMongoInstanceProvider;
+import com.imaginea.mongodb.utils.JSON;
+import com.imaginea.mongodb.utils.MongoInstanceProvider;
+import com.mongodb.*;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
 import org.json.JSONException;
@@ -41,19 +41,11 @@ import org.junit.Test;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpSession;
 
-import com.imaginea.mongodb.utils.ConfigMongoInstanceProvider;
-import com.imaginea.mongodb.utils.MongoInstanceProvider;
-import com.imaginea.mongodb.exceptions.ApplicationException;
-import com.imaginea.mongodb.exceptions.DocumentException;
-import com.imaginea.mongodb.exceptions.ErrorCodes;
+import javax.servlet.http.HttpSession;
+import java.util.ArrayList;
+import java.util.List;
 
-import com.mongodb.BasicDBList;
-import com.mongodb.BasicDBObject;
-import com.mongodb.DBCursor;
-import com.mongodb.DBObject;
-import com.mongodb.Mongo;
-import com.mongodb.MongoException;
-import com.mongodb.util.JSON;
+import static org.junit.Assert.assertEquals;
 
 /**
  * Tests the document request dispatcher resource that handles the GET and POST
