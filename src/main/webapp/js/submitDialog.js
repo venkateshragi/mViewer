@@ -125,6 +125,7 @@ YUI.add('submit-dialog', function (Y) {
                 fixedcenter:true,
                 visible:false,
                 draggable:true,
+                zIndex:2000,
                 effect:{
                     effect:YAHOO.widget.ContainerEffect.SLIDE,
                     duration:0.25
