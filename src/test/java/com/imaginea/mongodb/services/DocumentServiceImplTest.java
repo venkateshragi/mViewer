@@ -140,7 +140,7 @@ public class DocumentServiceImplTest extends TestingTemplate {
 								DBObject keys = new BasicDBObject();
 								keys.put("p", 1);
 
-								JSONObject result = testDocService.getQueriedDocsList(dbName, collectionName, "find", null, "p", 0, 0);
+								JSONObject result = testDocService.getQueriedDocsList(dbName, collectionName, "find", null, "p", "", 0, 0);
 
                                 ArrayList<DBObject> documentList = (ArrayList<DBObject>) result.get("documents");
 								boolean flag = false;

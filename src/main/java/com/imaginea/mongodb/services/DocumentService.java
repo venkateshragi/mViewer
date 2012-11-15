@@ -49,7 +49,7 @@ public interface DocumentService {
      * @throws DocumentException   exception while performing get doc list
      */
 
-    public JSONObject getQueriedDocsList(String dbName, String collectionName, String command, String queryStr, String keys, int limit, int skip) throws ApplicationException, CollectionException,
+    public JSONObject getQueriedDocsList(String dbName, String collectionName, String command, String queryStr, String keys, String sortBy, int limit, int skip) throws ApplicationException, CollectionException,
             DocumentException, ValidationException, JSONException;
 
     /**

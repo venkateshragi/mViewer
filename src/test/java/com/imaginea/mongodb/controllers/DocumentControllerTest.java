@@ -163,7 +163,7 @@ public class DocumentControllerTest extends BaseController {
 
 								String fields = "test,_id";
 
-								String docList = testDocResource.executeQuery(dbName, collName, null, testDbInfo, fields, "100", "0", request);
+								String docList = testDocResource.executeQuery(dbName, collName, null, testDbInfo, fields, "100", "0", "", request);
 
 								DBObject response = (BasicDBObject) JSON.parse(docList);
 

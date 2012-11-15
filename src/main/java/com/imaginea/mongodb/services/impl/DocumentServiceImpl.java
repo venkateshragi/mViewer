@@ -78,7 +78,7 @@ public class DocumentServiceImpl implements DocumentService {
      * @throws DocumentException   exception while performing get doc list
      */
 
-    public JSONObject getQueriedDocsList(String dbName, String collectionName, String command, String queryStr, String keys, int limit, int skip) throws ApplicationException, CollectionException,
+    public JSONObject getQueriedDocsList(String dbName, String collectionName, String command, String queryStr, String keys, String sortBy, int limit, int skip) throws ApplicationException, CollectionException,
             DocumentException, ValidationException, JSONException {
 
         if (dbName == null) {
@@ -109,7 +109,7 @@ public class DocumentServiceImpl implements DocumentService {
                 }
 
                 DBCollection dbCollection = db.getCollection(collectionName);
-                result = QueryExecutor.executeQuery(db, dbCollection, command, queryStr, keys, limit, skip);
+                result = QueryExecutor.executeQuery(db, dbCollection, command, queryStr, keys, sortBy, limit, skip);
             }
         } catch (MongoException e) {
             throw new DocumentException(ErrorCodes.GET_DOCUMENT_LIST_EXCEPTION, e.getMessage());
