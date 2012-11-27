@@ -29,6 +29,7 @@ YUI({
             if (menuOpt === "home") {
                 window.location = "home.html?connectionId=" + MV.StateManager.connectionId();
             } else if (menuOpt === "serverStats") {
+                MV.hideQueryForm();
                 showServerStats();
                 MV.header.addClass('tab-cont');
                 MV.header.set("innerHTML", "Server Statistics");
