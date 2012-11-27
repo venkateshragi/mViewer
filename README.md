@@ -54,7 +54,8 @@ Detailed documentation on mViewer features & usage can be found at http://imagin
          - Download https://github.com/downloads/Imaginea/mViewer/settings.jar and use import settings option to apply it.
          - Make sure to format the code using ctr + alt + l before committing code.
          - When committing code, if see a popup regarding different line separators used in project, 
-           then click 'Leave unchanged'.          
+           then click 'Leave unchanged'.        
+       c) Configure a Tomcat Server locally in intellij to run/debug mViewer.
     4) You can send a pull request to mViewer master branch with your features/enhancements/fixes.
           
 
