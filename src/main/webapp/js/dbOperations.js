@@ -15,7 +15,7 @@
  */
 YUI({
     filter: 'raw'
-}).use("loading-panel", "alert-dialog", "utility", "submit-dialog", "yes-no-dialog", "io-base", "node", "node-menunav", "json-parse", "event-delegate", "node-event-simulate", "stylize", "custom-datatable", function(Y) {
+}).use("loading-panel", "alert-dialog", "utility", "submit-dialog", "yes-no-dialog", "io-base", "node", "node-menunav", "json-parse", "event-delegate", "node-event-simulate", "custom-datatable", function(Y) {
         // TODO: make loading panel module
         var dbDiv = Y.one('#dbNames ul.lists');
         dbDiv.delegate('click', handleClickEvent, 'a.onclick');
@@ -90,7 +90,7 @@ YUI({
             var label = $(event.currentTarget._node).closest("ul").closest("li")[0].attributes["label"].value;
             var index = parseInt(event.currentTarget._node.attributes["index"].value);
             Y.one("#currentDB").set("value", label);
-            MV.toggleClass(Y.one("#" + Y.one("#currentDB").get("value")), Y.all("#dbNames li"));
+            MV.selectDatabase(Y.one("#" + Y.one("#currentDB").get("value")));
             switch (index) {
                 case 1:
                     // add collection

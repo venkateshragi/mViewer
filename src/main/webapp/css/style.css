@@ -13,10 +13,6 @@ body {
     font-size: 12px;
 }
 
-div#logo {
-    overflow: hidden;
-}
-
 /*Login Screen*/
 
 .loginScreen {
@@ -108,10 +104,6 @@ div.loginFormContents input {
     line-height: 25px;
 }
 
-.userLabel {
-    padding-left: 20px;
-}
-
 .gen-float {
     float: left;
 }
@@ -136,31 +128,50 @@ a:hover {
     width: 900px;
 }
 
-.header {
+.nav-bar {
     background: #161616;
     width: 100%;
     height: 60px;
     padding: 0 10px;
 }
 
-a.logo {
-    background: url("../images/logo.png") no-repeat;
-    width: 119px;
-    height: 19px;
-    margin-top: 20px;
-    margin-right: 50px;
+.nav-link-home {
+    float: left;
+    width: 220px;
+    height: 60px;
+    text-align: center;
+    cursor: pointer;
 }
 
-ul.nav-cont {
+a.logo {
+    background: url("../images/logo.png") no-repeat;
+    width: 100%;
+    height: 20px;
+    margin: 10px 10px 0px 60px;
+}
+
+.hostname {
+    color: #FFF !important;
+    font-size: 10px;
+    font-style: italic;
+    display: block;
+    cursor: pointer;
+}
+
+.hostname:hover {
+    text-decoration: none;
+}
+
+ul.nav-link-top {
     list-style-type: none;
     margin-left: 40px;
 }
 
-ul.nav-cont li {
+ul.nav-link-top li {
     display: inline;
 }
 
-ul.nav-cont li a {
+ul.nav-link-top li a {
     background: #161616;
     color: #F7F7F7;
     padding: 22px 15px;
@@ -171,8 +182,8 @@ ul.nav-cont li a {
     cursor: pointer;
 }
 
-ul.nav-cont li a.sel, ul.nav-cont li a:hover, .user-menu .disconnect:hover, ul.lists li.simulatedHover, ul.lists a.simulatedHover, ul.lists li.sel.simulatedHover,
-ul.lists li:hover, ul.lists li.sel:hover, .floatingFooter {
+ul.nav-link-top li a.sel, ul.nav-link-top li a:hover, ul.lists li.simulatedHover, ul.lists a.simulatedHover, ul.lists li.sel.simulatedHover,
+ul.lists li:hover, ul.lists li.sel:hover, .floatingFooter, .nav-link-home:hover {
     text-decoration: none;
     background: rgb(208, 228, 247); /* Old browsers */
     background: -moz-linear-gradient(top, rgba(208, 228, 247, 1) 0%, rgba(115, 177, 231, 1) 24%, rgba(10, 119, 213, 1) 50%, rgba(83, 159, 225, 1) 79%, rgba(135, 188, 234, 1) 100%); /* FF3.6+ */
@@ -266,7 +277,7 @@ ul.lists li .op_icon {
 }
 
 ul.lists li.sel {
-    background: #D0D9DB;
+    background: #D0E4F7;
 }
 
 ul.lists li:hover {
@@ -279,15 +290,15 @@ ul.lists {
     overflow: hidden;
 }
 
-ul.user-menu {
+ul.nav-link-right {
     float: right;
 }
 
-ul.user-menu li {
+ul.nav-link-right li {
     display: inline;
 }
 
-ul.user-menu li label {
+ul.nav-link-right li label {
     color: #979797;
     float: left;
     font-weight: bold;
@@ -296,7 +307,7 @@ ul.user-menu li label {
     margin-top: 25px;
 }
 
-ul.user-menu li label.disconnect {
+ul.nav-link-right li label.disconnect {
     color: #ccc !important;
     cursor: pointer
 }
@@ -310,7 +321,7 @@ ul.user-menu li label.disconnect {
 }
 
 .title-head {
-    background: #B5E3F2;
+    background: #D0E4F7;
     height: 30px;
     padding: 0 10px;
     position: relative;
@@ -353,6 +364,8 @@ ul.user-menu li label.disconnect {
 }
 
 .title-head span.infoMsg {
+    border-radius: 6px;
+    height: 17px;
     font-weight: bold !important;
     color: #331A00;
     padding: 5px;
@@ -468,7 +481,7 @@ textarea {
 .tab-cont {
     font-size: 14px;
     font-weight: bolder;
-    background: #e5e5e5;
+    border-bottom: 1px solid;
     padding: 10px;
 }
 
@@ -581,10 +594,6 @@ table tr td {
     position: absolute;
     right: 20px;
     top: 20px;
-}
-
-#mainBodyHeader {
-    margin-top: 10px;
 }
 
 #queryBoxDiv {
@@ -907,9 +916,7 @@ div.dbBuffer {
 }
 
 div.collectionBuffer {
-    height: "*";
     min-height: 50px
-
 }
 
 fieldset.bufferFieldSet {
@@ -930,4 +937,12 @@ div.generalInfo {
 
 .yui3-skin-sam .yui3-datatable caption {
     padding: 0 !important;
+}
+
+.yui-skin-sam .yui-navset .yui-nav a {
+    background: #3472AB !important;
+}
+
+.yui-skin-sam .yui-navset .yui-nav a:hover {
+    background: #1874CD !important;
 }

@@ -15,17 +15,17 @@
  */
 YUI({
     filter: 'raw'
-}).use("alert-dialog", "utility", "treeble-paginator", "node", "event-delegate", "stylize", "custom-datatable", function(Y) {
+}).use("alert-dialog", "utility", "treeble-paginator", "node", "event-delegate", "custom-datatable", function(Y) {
         YUI.namespace('com.imaginea.mongoV');
         var MV = YUI.com.imaginea.mongoV;
 
-        Y.delegate("click", handleHeaderOption, ".user-menu", "li a");
-        Y.delegate("click", handleHeaderOption, ".nav-cont", "li a");
+        Y.delegate("click", handleHeaderOption, ".nav-link-right", "li a");
+        Y.delegate("click", handleHeaderOption, ".nav-link-top", "li a");
         Y.on("click", disconnect, "#disconnect");
 
         function handleHeaderOption(eventObject) {
             var menuOpt = eventObject.currentTarget.get("id");
-            MV.toggleClass(eventObject.currentTarget, Y.all(".nav-cont li a"));
+            MV.selectHeader(eventObject.currentTarget);
             if (menuOpt === "home") {
                 window.location = "home.html?connectionId=" + MV.StateManager.connectionId();
             } else if (menuOpt === "serverStats") {

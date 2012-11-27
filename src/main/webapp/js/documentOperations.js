@@ -15,7 +15,7 @@
  */
 YUI({
     filter: 'raw'
-}).use("loading-panel", "yes-no-dialog", "alert-dialog", "io-base", "json-parse", "node-event-simulate", "node", "event-delegate", "stylize", "json-stringify", "utility", "treeble-paginator", "event-key", "event-focus", "node-focusmanager", function(Y) {
+}).use("loading-panel", "yes-no-dialog", "alert-dialog", "io-base", "json-parse", "node-event-simulate", "node", "event-delegate", "json-stringify", "utility", "treeble-paginator", "event-key", "event-focus", "node-focusmanager", function(Y) {
         YUI.namespace('com.imaginea.mongoV');
         var MV = YUI.com.imaginea.mongoV,
             sm = MV.StateManager;
@@ -39,9 +39,7 @@ YUI({
 
         var initQueryBox = function(event) {
             Y.one("#currentColl").set("value", event.currentTarget.getAttribute("label"));
-            MV.toggleClass(event.currentTarget, Y.all("#collNames li"));
-            MV.toggleClass(event.currentTarget, Y.all("#bucketNames li"));
-            MV.toggleClass(event.currentTarget, Y.all("#systemCollections li"));
+            MV.selectDBItem(event.currentTarget);
             MV.loadQueryBox(MV.URLMap.getDocKeys(), MV.URLMap.getDocs(), sm.currentColl(), showTabView);
         };
 

@@ -95,7 +95,6 @@
     <script type="text/javascript" src="js/utility.js"></script>
     <script type="text/javascript" src="js/alertDialog.js"></script>
     <script type="text/javascript" src="js/dataTable.js"></script>
-    <script type="text/javascript" src="js/styling.js"></script>
     <script type="text/javascript" src="js/uploadDialog.js"></script>
     <script type="text/javascript" src="js/submitDialog.js"></script>
     <script type="text/javascript" src="js/simpleDialog.js"></script>
@@ -175,16 +174,19 @@
 </head>
 <body bgcolor="#EEEEEE" class="yui3-skin-sam yui-skin-sam">
 <div class="wrapper">
-    <div class="header">
+    <div class="nav-link-home">
         <a href="" class="logo gen-float"></a>
-        <ul class="nav-cont gen-float">
+        <a href="" class="hostname">Host: <span id="hostname"></span></a>
+        <a href="" class="hostname">User: <span id="user"></span></a>
+    </div>
+    <div class="nav-bar">
+        <ul class="nav-link-top gen-float">
             <li><a id="serverStats" class="navigable">Server Statistics</a>
             </li>
             <li><a id="graphs" class="navigable">Mongo Graphs</a>
             </li>
         </ul>
-        <ul class="user-menu nav-cont">
-
+        <ul class="nav-link-top nav-link-right">
             <li><a id="help" class="navigable" style="font-size: 11px;">Help</a>
             </li>
             <label style="color: white; ">|</label>
@@ -197,13 +199,11 @@
     </div>
     <div class="body-cont gen-float">
         <div class="title-head">
-            <label>Host: <span id="hostname"></span></label>
-            <label class="userLabel">User: <span id="user"></span></label>
-                <span id="infoMsg" style="border-radius:6px" class="infoMsg">
+                <span id="infoMsg" class="infoMsg">
                     <span id="infoIcon"></span>
                     <span id="infoText" class="infoText"></span>
                 </span>
-            <button id="console" class="bttn navigable">Show Console</button>
+           <!-- <button id="console" class="bttn navigable">Show Console</button>-->
         </div>
         <div class="generalInfo" style="display:none"> &nbsp;</div>
         <div class="left-cont gen-float">
