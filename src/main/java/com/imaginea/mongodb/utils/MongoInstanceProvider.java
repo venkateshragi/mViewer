@@ -22,16 +22,15 @@ import com.mongodb.Mongo;
  * mongo instance. For hibernate fans, this is like CurrentSessionContext.
  *
  * @author Rachit Mittal
- *
  */
 public interface MongoInstanceProvider {
 
-	/**
-	 * Returns the current mongo instance, the meaning of current depends on the
-	 * actual implementation class
-	 *
-	 * @return a Mongo Instance
-	 */
-	public Mongo getMongoInstance();
+    /**
+     * Returns the current mongo instance, the meaning of current depends on the
+     * actual implementation class
+     *
+     * @return a Mongo Instance
+     */
+    public Mongo getMongoInstance();
 
 }

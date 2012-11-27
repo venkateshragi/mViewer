@@ -251,15 +251,15 @@ YUI.add('query-executor', function(Y) {
                 disableAnchor(first);
             else
                 enableAnchor(first);
-            if (skip + limit <= limit  || !showPaginated)
+            if (skip + limit <= limit || !showPaginated)
                 disableAnchor(prev);
             else
                 enableAnchor(prev);
-            if (skip >= count - limit  || !showPaginated)
+            if (skip >= count - limit || !showPaginated)
                 disableAnchor(next);
             else
                 enableAnchor(next);
-            if (skip + limit >= count  || !showPaginated)
+            if (skip + limit >= count || !showPaginated)
                 disableAnchor(last);
             else
                 enableAnchor(last);

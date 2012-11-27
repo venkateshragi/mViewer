@@ -52,16 +52,16 @@ public class BaseController {
     /**
      * Validates connectionId with the connectionId Array present in session.
      *
-     * @param connectionId  Mongo Db config information provided to user at time of login.
-     * @param logger  Logger to write error message to
-     * @param request Request made by client containing session attributes.
+     * @param connectionId Mongo Db config information provided to user at time of login.
+     * @param logger       Logger to write error message to
+     * @param request      Request made by client containing session attributes.
      * @return null if connectionId is valid else error object.
      */
     protected static String validateConnectionId(String connectionId, Logger logger, HttpServletRequest request) {
 
         HttpSession session = request.getSession();
         Set<String> existingConnectionIdsInSession = (Set<String>) session.getAttribute("existingConnectionIdsInSession");
-        if(existingConnectionIdsInSession == null) {
+        if (existingConnectionIdsInSession == null) {
             InvalidHTTPRequestException e = new InvalidHTTPRequestException(ErrorCodes.INVALID_SESSION, "Invalid Session");
             return formErrorResponse(logger, e);
         }

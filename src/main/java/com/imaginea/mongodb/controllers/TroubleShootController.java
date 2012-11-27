@@ -37,67 +37,64 @@ import java.util.Map;
  */
 
 public class TroubleShootController extends HttpServlet {
-	private static final long serialVersionUID = 1L;
-	private static final Map<String, Level> logLevels = new HashMap<String, Level>();
+    private static final long serialVersionUID = 1L;
+    private static final Map<String, Level> logLevels = new HashMap<String, Level>();
 
-	public TroubleShootController() {
-		super();
-		logLevels.put("Fatal", Level.FATAL);
-		logLevels.put("Error", Level.ERROR);
-		logLevels.put("Warn", Level.WARN);
-		logLevels.put("Info", Level.INFO);
-		logLevels.put("Debug", Level.DEBUG);
+    public TroubleShootController() {
+        super();
+        logLevels.put("Fatal", Level.FATAL);
+        logLevels.put("Error", Level.ERROR);
+        logLevels.put("Warn", Level.WARN);
+        logLevels.put("Info", Level.INFO);
+        logLevels.put("Debug", Level.DEBUG);
 
-	}
+    }
 
-	/**
-	 * Handles a GET Request at path mViewer/admin for changing the logger level
-	 *
-	 * @param request
-	 *            Request made by user
-	 * @param response
-	 *
-	 * @exception ServletException
-	 *                ,IOException,IllegalArgumentException
-	 */
-	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException, IllegalArgumentException {
+    /**
+     * Handles a GET Request at path mViewer/admin for changing the logger level
+     *
+     * @param request  Request made by user
+     * @param response
+     * @throws ServletException ,IOException,IllegalArgumentException
+     */
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException, IllegalArgumentException {
 
-		response.setContentType("application/x-json");
-		PrintWriter out = response.getWriter();
-		JSONObject respObj = new JSONObject();
+        response.setContentType("application/x-json");
+        PrintWriter out = response.getWriter();
+        JSONObject respObj = new JSONObject();
 
-		String loggerLevel = request.getParameter("level");
+        String loggerLevel = request.getParameter("level");
 
-		try {
+        try {
 
-			if (!logLevels.containsKey(loggerLevel)) {
-				JSONObject error = new JSONObject();
-				error.put("code", ErrorCodes.LOGGING_LEVEL_UNDEFINED);
-				error.put("message", "Undefined Logging level");
-				JSONObject temp = new JSONObject();
-				temp.put("error", error);
-				respObj.put("response", temp);
+            if (!logLevels.containsKey(loggerLevel)) {
+                JSONObject error = new JSONObject();
+                error.put("code", ErrorCodes.LOGGING_LEVEL_UNDEFINED);
+                error.put("message", "Undefined Logging level");
+                JSONObject temp = new JSONObject();
+                temp.put("error", error);
+                respObj.put("response", temp);
 
-			} else {
+            } else {
 
-				Level newLevel = logLevels.get(loggerLevel);
+                Level newLevel = logLevels.get(loggerLevel);
 
-				Logger rootLogger = LogManager.getRootLogger(); // To get the
-																// Root Logger
+                Logger rootLogger = LogManager.getRootLogger(); // To get the
+                // Root Logger
 
-				String oldLevel = rootLogger.getEffectiveLevel().toString();
-				rootLogger.setLevel(newLevel);
+                String oldLevel = rootLogger.getEffectiveLevel().toString();
+                rootLogger.setLevel(newLevel);
 
-				JSONObject temp = new JSONObject();
-				temp.put("result", "Logger Level Changed from " + oldLevel + " to " + rootLogger.getLevel());
-				respObj.put("response", temp);
-			}
-			out.write(respObj.toString());
-			out.close();
-		} catch (JSONException e) {
-			throw new ServletException("Error forming JSON Object in Servlet", e.getCause());
-		}
+                JSONObject temp = new JSONObject();
+                temp.put("result", "Logger Level Changed from " + oldLevel + " to " + rootLogger.getLevel());
+                respObj.put("response", temp);
+            }
+            out.write(respObj.toString());
+            out.close();
+        } catch (JSONException e) {
+            throw new ServletException("Error forming JSON Object in Servlet", e.getCause());
+        }
 
-	}
+    }
 
 }

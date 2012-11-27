@@ -36,7 +36,7 @@ public interface DocumentService {
      * @param dbName         Name of Database
      * @param collectionName Name of Collection from which to get all Documents
      * @param command        Name of the Command to be executed
-     * @param queryStr          query to be performed. In case of empty query {} return all
+     * @param queryStr       query to be performed. In case of empty query {} return all
      *                       docs.
      * @param keys           Keys to be present in the resulted docs.
      * @param limit          Number of docs to show.
@@ -76,7 +76,7 @@ public interface DocumentService {
      *
      * @param dbName         Name of Database
      * @param collectionName Name of Collection from which to get all Documents
-     * @param _id             Id of Document to be updated
+     * @param _id            Id of Document to be updated
      * @param newData        new Document value.
      * @return Update status
      * @throws DatabaseException   throw super type of UndefinedDatabaseException

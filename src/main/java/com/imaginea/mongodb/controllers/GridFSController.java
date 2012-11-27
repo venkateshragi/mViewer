@@ -63,7 +63,7 @@ public class GridFSController extends BaseController {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/count")
     public String getCount(@PathParam("dbName") final String dbName, @PathParam("bucketName") final String bucketName,
-                                    @QueryParam("connectionId") final String connectionId, @Context final HttpServletRequest request) {
+                           @QueryParam("connectionId") final String connectionId, @Context final HttpServletRequest request) {
         String response = new ResponseTemplate().execute(logger, connectionId, request, new ResponseCallback() {
             public Object execute() throws Exception {
                 GridFSService gridFSService = new GridFSServiceImpl(connectionId);
@@ -77,10 +77,10 @@ public class GridFSController extends BaseController {
     /**
      * Request handler for getting the list of files stored in GridFS of specified database.
      *
-     * @param dbName     Name of Database
-     * @param bucketName Name of GridFS Bucket
-     * @param connectionId     Mongo Db Configuration provided by user to connect to.
-     * @param request    Get the HTTP request context to extract session parameters
+     * @param dbName       Name of Database
+     * @param bucketName   Name of GridFS Bucket
+     * @param connectionId Mongo Db Configuration provided by user to connect to.
+     * @param request      Get the HTTP request context to extract session parameters
      * @returns JSON representation of list of all files as a String.
      */
     @GET
@@ -94,7 +94,7 @@ public class GridFSController extends BaseController {
                 GridFSService gridFSService = new GridFSServiceImpl(connectionId);
                 int startIndex = query.indexOf("("), endIndex = query.lastIndexOf(")");
                 String jsonStr = query.substring(startIndex + 1, endIndex);
-                JSONObject result =  gridFSService.getFileList(dbName, bucketName, jsonStr, keys, skip, limit);
+                JSONObject result = gridFSService.getFileList(dbName, bucketName, jsonStr, keys, skip, limit);
                 return result;
             }
         });
@@ -108,7 +108,7 @@ public class GridFSController extends BaseController {
      * @param bucketName     Name of GridFS Bucket
      * @param id             ObjectId of the file to be retrieved
      * @param download       is download request
-     * @param connectionId         Mongo Db Configuration provided by user to connect to.
+     * @param connectionId   Mongo Db Configuration provided by user to connect to.
      * @param servletRequest Get the HTTP request context to extract session parameters
      * @returns Requested multipartfile for viewing or download based on 'download' param.
      */
@@ -142,7 +142,7 @@ public class GridFSController extends BaseController {
      * @param fileDialogData formDataBodyPart representing the containing form
      * @param formData       formDataBodyPart of the uploaded file
      * @param inputStream    inputStream of the uploaded file
-     * @param connectionId         Mongo Db Configuration provided by user to connect to.
+     * @param connectionId   Mongo Db Configuration provided by user to connect to.
      * @param request        HTTP request context to extract session parameters
      * @returns Success message with additional file details such as name, size,
      * download url & deletion url as JSON Array string.
@@ -169,11 +169,11 @@ public class GridFSController extends BaseController {
     /**
      * Request handler for dropping a file from GridFS.
      *
-     * @param dbName     Name of Database
-     * @param bucketName Name of GridFS Bucket
-     * @param _id        Object id of file to be deleted
-     * @param connectionId     Mongo Db Configuration provided by user to connect to.
-     * @param request    Get the HTTP request context to extract session parameters
+     * @param dbName       Name of Database
+     * @param bucketName   Name of GridFS Bucket
+     * @param _id          Object id of file to be deleted
+     * @param connectionId Mongo Db Configuration provided by user to connect to.
+     * @param request      Get the HTTP request context to extract session parameters
      * @returns Status message.
      */
     @GET
@@ -202,10 +202,10 @@ public class GridFSController extends BaseController {
     /**
      * Request handler for dropping all files from a GridFS bucket.
      *
-     * @param dbName     Name of Database
-     * @param bucketName Name of GridFS Bucket
-     * @param connectionId     Mongo Db Configuration provided by user to connect to.
-     * @param request    Get the HTTP request context to extract session parameters
+     * @param dbName       Name of Database
+     * @param bucketName   Name of GridFS Bucket
+     * @param connectionId Mongo Db Configuration provided by user to connect to.
+     * @param request      Get the HTTP request context to extract session parameters
      * @return String with Status of operation performed.
      */
     @GET

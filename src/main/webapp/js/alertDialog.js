@@ -17,23 +17,23 @@
  * @module alert-dialog
  * The module provides function <tt>showAlertMessage</tt> to show a simple information message.
  */
-YUI.add('alert-dialog', function (Y) {
-	var MV = YUI.com.imaginea.mongoV, timeoutId;
+YUI.add('alert-dialog', function(Y) {
+    var MV = YUI.com.imaginea.mongoV, timeoutId;
 
-	MV.showAlertMessage = function (msg, icon, errorCode) {
-		msg = errorCode != undefined ? msg.format(MV.errorCodeMap[errorCode]) : msg;
-		if (errorCode === "INVALID_SESSION") {
-			window.location = "index.html?code=INVALID_SESSION";
-		} else if(errorCode === "INVALID_CONNECTION") {
+    MV.showAlertMessage = function(msg, icon, errorCode) {
+        msg = errorCode != undefined ? msg.format(MV.errorCodeMap[errorCode]) : msg;
+        if (errorCode === "INVALID_SESSION") {
+            window.location = "index.html?code=INVALID_SESSION";
+        } else if (errorCode === "INVALID_CONNECTION") {
             window.location = "index.html?code=INVALID_CONNECTION"
-        } else{
-			document.getElementById('infoMsg').style.display = 'inline-block';
-			clearTimeout(timeoutId);
-			Y.one('#infoIcon').set("className", icon);
-			Y.one('#infoText').set("innerHTML", msg);
-			timeoutId = setTimeout("document.getElementById('infoMsg').style.display='none'", 12000);
-		}
-	};
+        } else {
+            document.getElementById('infoMsg').style.display = 'inline-block';
+            clearTimeout(timeoutId);
+            Y.one('#infoIcon').set("className", icon);
+            Y.one('#infoText').set("innerHTML", msg);
+            timeoutId = setTimeout("document.getElementById('infoMsg').style.display='none'", 12000);
+        }
+    };
 }, '3.3.0', {
-	requires: ["node"]
+    requires: ["node"]
 });

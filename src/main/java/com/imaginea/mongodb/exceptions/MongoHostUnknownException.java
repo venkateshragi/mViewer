@@ -30,7 +30,6 @@ package com.imaginea.mongodb.exceptions;
  * introduced.
  *
  * @author Rachit Mittal
- *
  */
 
 public class MongoHostUnknownException extends ApplicationException {
@@ -40,9 +39,7 @@ public class MongoHostUnknownException extends ApplicationException {
     /**
      * Creates a new MongoNotFoundException with errorcode and message.
      *
-     *
-     * @param message
-     *            : A description about the Error.
+     * @param message : A description about the Error.
      */
     public MongoHostUnknownException(String message) {
         super(ErrorCodes.HOST_UNKNOWN, message);
@@ -52,18 +49,13 @@ public class MongoHostUnknownException extends ApplicationException {
      * Creates a new MongoHostUnknownException along with cause of caught
      * Exception to be appended.
      *
-     *
-     * @param message
-     *            : A description about the Error.
-     *
-     * @param cause
-     *            : Cause of the previous Exception. This is appended in the new
-     *            MongoHostUnknownException formed here.
+     * @param message : A description about the Error.
+     * @param cause   : Cause of the previous Exception. This is appended in the new
+     *                MongoHostUnknownException formed here.
      */
     public MongoHostUnknownException(String message, Throwable cause) {
         super(ErrorCodes.HOST_UNKNOWN, message, cause);
     }
-
 
 
 }

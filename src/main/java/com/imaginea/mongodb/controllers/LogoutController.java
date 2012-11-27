@@ -40,36 +40,34 @@ import java.util.Set;
 @Path("/disconnect")
 public class LogoutController extends BaseController {
 
-	private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-	/**
-	 * Define Logger for this class
-	 */
-	private static Logger logger = Logger.getLogger(LogoutController.class);
+    /**
+     * Define Logger for this class
+     */
+    private static Logger logger = Logger.getLogger(LogoutController.class);
 
-	/**
-	 * Listens to a disconnect reuest made by user to end his session from mViewer.
-	 *
-	 * @param connectionId
-	 *            Mongo Db Configuration provided by user to connect to.
-	 * @return Logout status
-	 *
-	 */
-	@GET
-	@Produces(MediaType.APPLICATION_JSON)
-	public String doGet(@QueryParam("connectionId") final String connectionId,@Context final HttpServletRequest request) {
-		String response = ErrorTemplate.execute(logger, new ResponseCallback() {
-			public Object execute() throws Exception {
+    /**
+     * Listens to a disconnect reuest made by user to end his session from mViewer.
+     *
+     * @param connectionId Mongo Db Configuration provided by user to connect to.
+     * @return Logout status
+     */
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    public String doGet(@QueryParam("connectionId") final String connectionId, @Context final HttpServletRequest request) {
+        String response = ErrorTemplate.execute(logger, new ResponseCallback() {
+            public Object execute() throws Exception {
                 authService.disconnectConnection(connectionId);
                 HttpSession session = request.getSession();
                 Set<String> existingConnectionIdsInSession = (Set<String>) session.getAttribute("existingConnectionIdsInSession");
-                if(existingConnectionIdsInSession != null) {
+                if (existingConnectionIdsInSession != null) {
                     existingConnectionIdsInSession.remove(connectionId);
                 }
                 String status = "User Logged Out";
-				return status;
-			}
-		});
-		return response;
-	}
+                return status;
+            }
+        });
+        return response;
+    }
 }

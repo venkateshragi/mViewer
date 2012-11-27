@@ -32,9 +32,9 @@ public class AuthServiceImpl implements AuthService {
         sanitizeConnectionDetails(connectionDetails);
         String connectionDetailsHashCode = String.valueOf(connectionDetails.hashCode());
         Collection<MongoConnectionDetails> mongoConnectionDetailsList = allConnectionDetails.get(connectionDetailsHashCode);
-        if(existingConnectionIdsInSession != null && mongoConnectionDetailsList != null) {
-            for(MongoConnectionDetails mongoConnectionDetails : mongoConnectionDetailsList) {
-                if(existingConnectionIdsInSession.contains(mongoConnectionDetails.getConnectionId()) && connectionDetails.equals(mongoConnectionDetails.getConnectionDetails())) {
+        if (existingConnectionIdsInSession != null && mongoConnectionDetailsList != null) {
+            for (MongoConnectionDetails mongoConnectionDetails : mongoConnectionDetailsList) {
+                if (existingConnectionIdsInSession.contains(mongoConnectionDetails.getConnectionId()) && connectionDetails.equals(mongoConnectionDetails.getConnectionDetails())) {
                     return mongoConnectionDetails.getConnectionId();
                 }
             }
@@ -45,9 +45,9 @@ public class AuthServiceImpl implements AuthService {
         connectionDetails.setAuthMode(authMode);
 
         String connectionId = SUCCESSFUL_CONNECTIONS_COUNT.incrementAndGet() + "_" + connectionDetailsHashCode;
-        if(mongoConnectionDetailsList == null) {
+        if (mongoConnectionDetailsList == null) {
             mongoConnectionDetailsList = new ArrayList<MongoConnectionDetails>(1);
-            allConnectionDetails.put(connectionDetailsHashCode,mongoConnectionDetailsList);
+            allConnectionDetails.put(connectionDetailsHashCode, mongoConnectionDetailsList);
         }
         mongoConnectionDetailsList.add(new MongoConnectionDetails(connectionDetails, mongo, connectionId));
 
@@ -70,16 +70,16 @@ public class AuthServiceImpl implements AuthService {
         try {
             mongo = new Mongo(connectionDetails.getHostIp(), connectionDetails.getHostPort());
         } catch (UnknownHostException e) {
-            throw new ApplicationException(ErrorCodes.HOST_UNKNOWN,"Unknown Host");
+            throw new ApplicationException(ErrorCodes.HOST_UNKNOWN, "Unknown Host");
         }
         String dbNames = connectionDetails.getDbNames();
         String[] dbNamesList = dbNames.split(",");
         String username = connectionDetails.getUsername();
         String password = connectionDetails.getPassword();
-        for(String dbName : dbNamesList) {
+        for (String dbName : dbNamesList) {
             dbName = dbName.trim();
             DB db = mongo.getDB(dbName);
-            boolean loginStatus=false;
+            boolean loginStatus = false;
             try {
                 // Hack. Checking server connectivity status by fetching collection names on selected db
                 db.getCollectionNames();//this line will throw exception in two cases.1)On Invalid mongo host Address,2)Invalid authorization to fetch collection names
@@ -87,13 +87,13 @@ public class AuthServiceImpl implements AuthService {
             } catch (MongoException me) {
                 loginStatus = db.authenticate(username, password.toCharArray());//login using given username and password.This line will throw exception if invalid mongo host address
             }
-            if(loginStatus) {
+            if (loginStatus) {
                 connectionDetails.addToAuthenticatedDbNames(dbName);
             }
         }
-        if(connectionDetails.getAuthenticatedDbNames().isEmpty()) {
-            throw  new ApplicationException(("".equals(username) && "".equals(password)) ?
-                                        ErrorCodes.NEED_AUTHORISATION : ErrorCodes.INVALID_USERNAME, "Invalid UserName or Password");
+        if (connectionDetails.getAuthenticatedDbNames().isEmpty()) {
+            throw new ApplicationException(("".equals(username) && "".equals(password)) ?
+                    ErrorCodes.NEED_AUTHORISATION : ErrorCodes.INVALID_USERNAME, "Invalid UserName or Password");
         }
         return mongo;
     }
@@ -101,16 +101,16 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public MongoConnectionDetails getMongoConnectionDetails(String connectionId) throws ApplicationException {
         String[] split = connectionId.split("_");
-        if(split.length != 2) {
+        if (split.length != 2) {
             throw new ApplicationException(ErrorCodes.INVALID_CONNECTION, "Invalid Connection");
         }
         String connectionDetailsHashCode = String.valueOf(split[1]);
         Collection<MongoConnectionDetails> mongoConnectionDetailsList = allConnectionDetails.get(connectionDetailsHashCode);
-        if(mongoConnectionDetailsList == null) {
+        if (mongoConnectionDetailsList == null) {
             throw new ApplicationException(ErrorCodes.INVALID_CONNECTION, "Invalid Connection");
         }
-        for(MongoConnectionDetails mongoConnectionDetails : mongoConnectionDetailsList) {
-            if(connectionId.equals(mongoConnectionDetails.getConnectionId())) {
+        for (MongoConnectionDetails mongoConnectionDetails : mongoConnectionDetailsList) {
+            if (connectionId.equals(mongoConnectionDetails.getConnectionId())) {
                 return mongoConnectionDetails;
             }
         }
@@ -120,16 +120,16 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public Mongo getMongoInstance(String connectionId) throws ApplicationException {
         String[] split = connectionId.split("_");
-        if(split.length != 2) {
+        if (split.length != 2) {
             throw new ApplicationException(ErrorCodes.INVALID_CONNECTION, "Invalid Connection");
         }
         String connectionDetailsHashCode = String.valueOf(split[1]);
         Collection<MongoConnectionDetails> mongoConnectionDetailsList = allConnectionDetails.get(connectionDetailsHashCode);
-        if(mongoConnectionDetailsList == null) {
+        if (mongoConnectionDetailsList == null) {
             throw new ApplicationException(ErrorCodes.INVALID_CONNECTION, "Invalid Connection");
         }
-        for(MongoConnectionDetails mongoConnectionDetails : mongoConnectionDetailsList) {
-            if(connectionId.equals(mongoConnectionDetails.getConnectionId())) {
+        for (MongoConnectionDetails mongoConnectionDetails : mongoConnectionDetailsList) {
+            if (connectionId.equals(mongoConnectionDetails.getConnectionId())) {
                 return mongoConnectionDetails.getMongo();
             }
         }
@@ -139,18 +139,18 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public void disconnectConnection(String connectionId) throws ApplicationException {
         String[] split = connectionId.split("_");
-        if(split.length != 2) {
+        if (split.length != 2) {
             throw new ApplicationException(ErrorCodes.INVALID_CONNECTION, "Invalid Connection");
         }
         String connectionDetailsHashCode = String.valueOf(split[1]);
         Collection<MongoConnectionDetails> mongoConnectionDetailsList = allConnectionDetails.get(connectionDetailsHashCode);
-        if(mongoConnectionDetailsList == null) {
+        if (mongoConnectionDetailsList == null) {
             throw new ApplicationException(ErrorCodes.INVALID_CONNECTION, "Invalid Connection");
         }
         Iterator<MongoConnectionDetails> mongoConnectionDetailsIterator = mongoConnectionDetailsList.iterator();
         while (mongoConnectionDetailsIterator.hasNext()) {
             MongoConnectionDetails mongoConnectionDetails = mongoConnectionDetailsIterator.next();
-            if(connectionId.equals(mongoConnectionDetails.getConnectionId())) {
+            if (connectionId.equals(mongoConnectionDetails.getConnectionId())) {
                 mongoConnectionDetailsIterator.remove();
                 return;
             }
@@ -159,11 +159,11 @@ public class AuthServiceImpl implements AuthService {
     }
 
     private void sanitizeConnectionDetails(ConnectionDetails connectionDetails) {
-        if("localhost".equals(connectionDetails.getHostIp())) {
+        if ("localhost".equals(connectionDetails.getHostIp())) {
             connectionDetails.setHostIp("127.0.0.1");
         }
         String dbNames = connectionDetails.getDbNames();
-        if(dbNames == null || dbNames.isEmpty()) {
+        if (dbNames == null || dbNames.isEmpty()) {
             connectionDetails.setDbNames("admin");
         }
     }

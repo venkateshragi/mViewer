@@ -36,7 +36,7 @@ import javax.ws.rs.core.MediaType;
  * Defines resources for getting statistics of mongo Server and statistics of a
  * particualr database present in mongo and statistics of a collection present
  * inside a database.
- * <p>
+ * <p/>
  * The resources also form a error JSON response when any exception occur while
  * performing the operation.
  *
@@ -45,93 +45,85 @@ import javax.ws.rs.core.MediaType;
  */
 @Path("/stats")
 public class StatisticsController extends BaseController {
-	private final static Logger logger = Logger.getLogger(StatisticsController.class);
+    private final static Logger logger = Logger.getLogger(StatisticsController.class);
 
     private AuthService authService = AuthServiceImpl.getInstance();
 
-	/**
-	 * Default Constructor
-	 */
-	public StatisticsController() {
-	}
+    /**
+     * Default Constructor
+     */
+    public StatisticsController() {
+    }
 
-	/**
-	 * Get Statistics of Mongo Server.
-	 *
-	 * @param connectionId
-	 *            Mongo Db Configuration provided by user to connect to.
-	 * @param request
-	 *            Get the HTTP request context to extract session parameters
-	 * @return String of JSON Format with server Stats.
-	 */
-	@GET
-	@Produces(MediaType.APPLICATION_JSON)
-	public String getServerStats(@QueryParam("connectionId") final String connectionId, @Context final HttpServletRequest request) throws JSONException {
+    /**
+     * Get Statistics of Mongo Server.
+     *
+     * @param connectionId Mongo Db Configuration provided by user to connect to.
+     * @param request      Get the HTTP request context to extract session parameters
+     * @return String of JSON Format with server Stats.
+     */
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    public String getServerStats(@QueryParam("connectionId") final String connectionId, @Context final HttpServletRequest request) throws JSONException {
 
-		String response = new ResponseTemplate().execute(logger, connectionId, request, new ResponseCallback() {
-			public Object execute() throws Exception {
-				Mongo mongoInstance = authService.getMongoInstance(connectionId);
-				// Get Server Stats
-				CommandResult cd = mongoInstance.getDB("admin").command("serverStatus");
-				return cd;
-			}
-		});
-		return response;
-	}
+        String response = new ResponseTemplate().execute(logger, connectionId, request, new ResponseCallback() {
+            public Object execute() throws Exception {
+                Mongo mongoInstance = authService.getMongoInstance(connectionId);
+                // Get Server Stats
+                CommandResult cd = mongoInstance.getDB("admin").command("serverStatus");
+                return cd;
+            }
+        });
+        return response;
+    }
 
-	/**
-	 * GET Statistics of a particular database.
-	 *
-	 * @param dbName
-	 *            : Name of Database for which to get DbStats.
-	 * @param connectionId
-	 *            Mongo Db Configuration provided by user to connect to.
-	 * @return : String of JSON Format with Db Stats.
-	 */
-	@GET
-	@Path("/db/{dbName}")
-	@Produces(MediaType.APPLICATION_JSON)
-	public String getDbStats(@PathParam("dbName") final String dbName, @QueryParam("connectionId") final String connectionId, @Context final HttpServletRequest request) throws JSONException {
+    /**
+     * GET Statistics of a particular database.
+     *
+     * @param dbName       : Name of Database for which to get DbStats.
+     * @param connectionId Mongo Db Configuration provided by user to connect to.
+     * @return : String of JSON Format with Db Stats.
+     */
+    @GET
+    @Path("/db/{dbName}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public String getDbStats(@PathParam("dbName") final String dbName, @QueryParam("connectionId") final String connectionId, @Context final HttpServletRequest request) throws JSONException {
 
-		String response = new ResponseTemplate().execute(logger, connectionId, request, new ResponseCallback() {
-			public Object execute() throws Exception {
-				DatabaseService databaseService = new DatabaseServiceImpl(connectionId);
-				JSONArray dbStats = databaseService.getDbStats(dbName);
-				return dbStats;
-			}
-		});
-		return response;
-	}
+        String response = new ResponseTemplate().execute(logger, connectionId, request, new ResponseCallback() {
+            public Object execute() throws Exception {
+                DatabaseService databaseService = new DatabaseServiceImpl(connectionId);
+                JSONArray dbStats = databaseService.getDbStats(dbName);
+                return dbStats;
+            }
+        });
+        return response;
+    }
 
-	/**
-	 * GET Statistics of Collections in a Database present in mongo.
-	 *
-	 * @param dbName
-	 *            : Name of Database
-	 * @param collectionName
-	 *            : Name of Collection
-	 * @param request
-	 *            : Get the HTTP request context to extract session parameters
-	 * @param connectionId
-	 *            Mongo Db Configuration provided by user to connect to.
-	 * @return : A String of JSON Format with key <result> and value Collection
-	 *         Stats.
-	 */
-	@GET
-	@Path("/db/{dbName}/collection/{collectionName}")
-	@Produces(MediaType.APPLICATION_JSON)
-	public String getCollStats(@PathParam("dbName") final String dbName, @PathParam("collectionName") final String collectionName, @QueryParam("connectionId") final String connectionId,
-			@Context final HttpServletRequest request) throws JSONException {
+    /**
+     * GET Statistics of Collections in a Database present in mongo.
+     *
+     * @param dbName         : Name of Database
+     * @param collectionName : Name of Collection
+     * @param request        : Get the HTTP request context to extract session parameters
+     * @param connectionId   Mongo Db Configuration provided by user to connect to.
+     * @return : A String of JSON Format with key <result> and value Collection
+     *         Stats.
+     */
+    @GET
+    @Path("/db/{dbName}/collection/{collectionName}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public String getCollStats(@PathParam("dbName") final String dbName, @PathParam("collectionName") final String collectionName, @QueryParam("connectionId") final String connectionId,
+                               @Context final HttpServletRequest request) throws JSONException {
 
-		String response = new ResponseTemplate().execute(logger, connectionId, request, new ResponseCallback() {
-			public Object execute() throws Exception {
+        String response = new ResponseTemplate().execute(logger, connectionId, request, new ResponseCallback() {
+            public Object execute() throws Exception {
 
-				CollectionService collectionService = new CollectionServiceImpl(connectionId);
-				// Get the result;
-				JSONArray collectionStats = collectionService.getCollStats(dbName, collectionName);
-				return collectionStats;
-			}
-		});
-		return response;
-	}
+                CollectionService collectionService = new CollectionServiceImpl(connectionId);
+                // Get the result;
+                JSONArray collectionStats = collectionService.getCollStats(dbName, collectionName);
+                return collectionStats;
+            }
+        });
+        return response;
+    }
 }

@@ -43,7 +43,7 @@ import java.util.Set;
  * service to get list of all databases present and Statistics of a particular
  * database.
  *
-* @author Srinath Anantha
+ * @author Srinath Anantha
  */
 public class DatabaseServiceImpl implements DatabaseService {
 
@@ -80,7 +80,7 @@ public class DatabaseServiceImpl implements DatabaseService {
     public List<String> getDbList() throws DatabaseException {
         try {
             Set<String> authenticatedDbNames = connectionDetails.getAuthenticatedDbNames();
-            if(!connectionDetails.isAdminLogin()) {
+            if (!connectionDetails.isAdminLogin()) {
                 return new ArrayList<String>(authenticatedDbNames);
             }
             return mongoInstance.getDatabaseNames();

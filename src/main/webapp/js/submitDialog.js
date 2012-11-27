@@ -19,7 +19,7 @@
  * @module dialog-box
  */
 
-YUI.add('submit-dialog', function (Y) {
+YUI.add('submit-dialog', function(Y) {
     YUI.namespace('com.imaginea.mongoV');
     var MV = YUI.com.imaginea.mongoV;
 
@@ -110,49 +110,49 @@ YUI.add('submit-dialog', function (Y) {
         }
 
         var sumbitHandlerMap = {
-            "addColDialogSubmitHandler":addCollection,
-            "addGridFSDialogSubmitHandler":addGridFS,
-            "addDBDialogSubmitHandler":addDB,
-            "addDocDialogSubmitHandler":addDocument,
-            "addUserDialogSubmitHandler":addUser,
-            "addIndexDialogSubmitHandler":addIndex
+            "addColDialogSubmitHandler": addCollection,
+            "addGridFSDialogSubmitHandler": addGridFS,
+            "addDBDialogSubmitHandler": addDB,
+            "addDocDialogSubmitHandler": addDocument,
+            "addUserDialogSubmitHandler": addUser,
+            "addIndexDialogSubmitHandler": addIndex
         };
 
         var dialogBox = $("#" + form).data("dialogBox");
         if (!dialogBox) {
             dialogBox = new YAHOO.widget.Dialog(form, {
-                width:"25em",
-                fixedcenter:true,
-                visible:false,
-                draggable:true,
-                zIndex:2000,
-                effect:{
-                    effect:YAHOO.widget.ContainerEffect.SLIDE,
-                    duration:0.25
+                width: "25em",
+                fixedcenter: true,
+                visible: false,
+                draggable: true,
+                zIndex: 2000,
+                effect: {
+                    effect: YAHOO.widget.ContainerEffect.SLIDE,
+                    duration: 0.25
                 },
-                constraintoviewport:true,
-                buttons:[
+                constraintoviewport: true,
+                buttons: [
                     {
-                        text:"Submit",
-                        handler:function () {
+                        text: "Submit",
+                        handler: function() {
                             var doSubmit = (sumbitHandlerMap[form + "SubmitHandler"]).call(this);
                             if (doSubmit) {
                                 this.submit();
                             }
                         },
-                        isDefault:true
+                        isDefault: true
                     },
                     {
-                        text:"Cancel",
-                        handler:cancelCurrent
+                        text: "Cancel",
+                        handler: cancelCurrent
                     }
                 ]
             });
             dialogBox.callback = {
-                success:successHandler,
-                failure:failureHandler
+                success: successHandler,
+                failure: failureHandler
             };
-            dialogBox.beforeSubmitEvent.subscribe(function () {
+            dialogBox.beforeSubmitEvent.subscribe(function() {
                 (sumbitHandlerMap[form + "SubmitHandler"]).call(this);
             });
             dialogBox.render();
@@ -162,5 +162,5 @@ YUI.add('submit-dialog', function (Y) {
         return dialogBox;
     };
 }, '3.3.0', {
-    requires:["utility", "node", "alert-dialog"]
+    requires: ["utility", "node", "alert-dialog"]
 });

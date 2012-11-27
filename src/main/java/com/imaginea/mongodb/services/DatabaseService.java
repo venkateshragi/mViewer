@@ -28,73 +28,54 @@ import java.util.List;
  * about controlling the current instance. Also provides service to get list of
  * all databases present and Statistics of a particular database.
  *
-* @author Srinath Anantha
- *
+ * @author Srinath Anantha
  */
 public interface DatabaseService {
 
-	/**
-	 * Gets the list of databases present in the current mongo instance
-	 *
-	 * @return List of All Databases present in MongoDb
-	 *
-	 * @throws DatabaseException
-	 *             If any error while getting database list.
-	 */
+    /**
+     * Gets the list of databases present in the current mongo instance
+     *
+     * @return List of All Databases present in MongoDb
+     * @throws DatabaseException If any error while getting database list.
+     */
 
-	public List<String> getDbList() throws DatabaseException;
+    public List<String> getDbList() throws DatabaseException;
 
-	/**
-	 * Return Stats of a particular Database in current mongo instance
-	 *
-	 * @param dbName
-	 *            Name of Database
-	 * @return Array of JSON Objects each containing a key value pair in Db
-	 *         Stats.
-	 * @exception JSONException
-	 *                While parsing JSON
-	 * @exception DatabaseException
-	 *                Error while performing this operation
-	 * @exception ValidationException
-	 *                throw super type of EmptyDatabaseNameException
-	 */
-	public JSONArray getDbStats(String dbName) throws DatabaseException, ValidationException, JSONException;
+    /**
+     * Return Stats of a particular Database in current mongo instance
+     *
+     * @param dbName Name of Database
+     * @return Array of JSON Objects each containing a key value pair in Db
+     *         Stats.
+     * @throws JSONException       While parsing JSON
+     * @throws DatabaseException   Error while performing this operation
+     * @throws ValidationException throw super type of EmptyDatabaseNameException
+     */
+    public JSONArray getDbStats(String dbName) throws DatabaseException, ValidationException, JSONException;
 
-	/**
-	 * Creates a Database with the specified name in mongo database to which
-	 * user is connected to.
-	 *
-	 * @param dbName
-	 *            Name of Database to be created
-	 * @return Success if Created else throws Exception
-	 *
-	 * @exception DatabaseException
-	 *                throw super type of
-	 *                DuplicateDatabaseException,InsertDatabaseException
-	 * @exception ValidationException
-	 *                throw super type of EmptyDatabaseNameException
-	 *
-	 *
-	 */
+    /**
+     * Creates a Database with the specified name in mongo database to which
+     * user is connected to.
+     *
+     * @param dbName Name of Database to be created
+     * @return Success if Created else throws Exception
+     * @throws DatabaseException   throw super type of
+     *                             DuplicateDatabaseException,InsertDatabaseException
+     * @throws ValidationException throw super type of EmptyDatabaseNameException
+     */
 
-	public String createDb(String dbName) throws DatabaseException, ValidationException;
+    public String createDb(String dbName) throws DatabaseException, ValidationException;
 
-	/**
-	 * Deletes a Database with the specified name in mongo database to which
-	 * user is connected to.
-	 *
-	 * @param dbName
-	 *            Name of Database to be deleted
-	 * @return Success if deleted else throws Exception
-	 *
-	 * @exception DatabaseException
-	 *                throw super type of
-	 *                UndefinedDatabaseException,DeleteDatabaseException
-	 * @exception ValidationException
-	 *                throw super type of EmptyDatabaseNameException
-	 *
-	 *
-	 */
-	public String dropDb(String dbName) throws DatabaseException, ValidationException;
+    /**
+     * Deletes a Database with the specified name in mongo database to which
+     * user is connected to.
+     *
+     * @param dbName Name of Database to be deleted
+     * @return Success if deleted else throws Exception
+     * @throws DatabaseException   throw super type of
+     *                             UndefinedDatabaseException,DeleteDatabaseException
+     * @throws ValidationException throw super type of EmptyDatabaseNameException
+     */
+    public String dropDb(String dbName) throws DatabaseException, ValidationException;
 
 }

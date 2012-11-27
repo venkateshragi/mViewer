@@ -52,8 +52,8 @@ public class DatabaseController extends BaseController {
      * this request and sent it to client. In case of any exception from the
      * service files an error object if formed.
      *
-     * @param connectionId  Mongo Db Configuration provided by user to connect to.
-     * @param request Get the HTTP request context to extract session parameters
+     * @param connectionId Mongo Db Configuration provided by user to connect to.
+     * @param request      Get the HTTP request context to extract session parameters
      * @return String of JSON Format with list of all Databases.
      */
     @GET
@@ -77,12 +77,12 @@ public class DatabaseController extends BaseController {
      * JSON response for this request and sent it to client. In case of any
      * exception from the service files an error object if formed.
      *
-     * @param dbName  Name of Database for which to perform create/drop operation
-     *                depending on action patameter
-     * @param action  Query Paramater with value PUT for identifying a create
-     *                database request and value DELETE for dropping a database.
-     * @param request Get the HTTP request context to extract session parameters
-     * @param connectionId  Mongo Db Configuration provided by user to connect to.
+     * @param dbName       Name of Database for which to perform create/drop operation
+     *                     depending on action patameter
+     * @param action       Query Paramater with value PUT for identifying a create
+     *                     database request and value DELETE for dropping a database.
+     * @param request      Get the HTTP request context to extract session parameters
+     * @param connectionId Mongo Db Configuration provided by user to connect to.
      * @return : String with status of operation performed.
      */
     @POST

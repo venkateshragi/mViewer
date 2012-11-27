@@ -66,7 +66,7 @@ public class DocumentServiceImpl implements DocumentService {
      * @param dbName         Name of Database
      * @param collectionName Name of Collection from which to get all Documents
      * @param command        Name of the Command to be executed
-     * @param queryStr          query to be performed. In case of empty query {} return all
+     * @param queryStr       query to be performed. In case of empty query {} return all
      * @param keys           Keys to be present in the resulted docs.
      * @param limit          Number of docs to show.
      * @param skip           Docs to skip from the front.

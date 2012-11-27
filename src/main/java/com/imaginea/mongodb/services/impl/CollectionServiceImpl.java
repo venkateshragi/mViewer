@@ -35,7 +35,7 @@ import java.util.Set;
  * Also provides service to get list of all collections present and Statistics
  * of a particular collection.
  *
-* @author Srinath Anantha
+ * @author Srinath Anantha
  */
 public class CollectionServiceImpl implements CollectionService {
 
@@ -94,12 +94,12 @@ public class CollectionServiceImpl implements CollectionService {
 
             while (it.hasNext()) {
                 String coll = it.next();
-                    collList.add(coll);
+                collList.add(coll);
             }
             //For a newly added database there will be no system.users, So we are manually creating the system.users
-            if(collList.contains("system.indexes")&&!collList.contains("system.users")) {
+            if (collList.contains("system.indexes") && !collList.contains("system.users")) {
                 DBObject options = new BasicDBObject();
-                mongoInstance.getDB(dbName).createCollection("system.users",options);
+                mongoInstance.getDB(dbName).createCollection("system.users", options);
                 collList.add("system.users");
             }
         } catch (MongoException m) {
@@ -248,7 +248,7 @@ public class CollectionServiceImpl implements CollectionService {
             }
             if (!mongoInstance.getDB(dbName).getCollectionNames().contains(collectionName)) {
                 throw new CollectionException(ErrorCodes.COLLECTION_DOES_NOT_EXIST,
-                    "Collection with name [" + collectionName + "] DOES NOT EXIST in Database [" + dbName + "]");
+                        "Collection with name [" + collectionName + "] DOES NOT EXIST in Database [" + dbName + "]");
             }
             CommandResult stats = mongoInstance.getDB(dbName).getCollection(collectionName).getStats();
 

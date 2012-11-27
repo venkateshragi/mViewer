@@ -107,7 +107,7 @@ public class ConnectionDetails {
         result = 31 * result + (username != null ? username.hashCode() : 0);
         result = 31 * result + (password != null ? password.hashCode() : 0);
         result = 31 * result + (dbNames != null ? dbNames.hashCode() : 0);
-        if(result == Integer.MIN_VALUE) {
+        if (result == Integer.MIN_VALUE) {
             return Integer.MAX_VALUE;
         }
         return Math.abs(result);

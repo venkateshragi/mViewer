@@ -25,52 +25,43 @@
 package com.imaginea.mongodb.exceptions;
 
 
-
 /**
  * Defines all the Exceptions generated while performing any operation on
  * Databases in MongoDb. This class extends MongoException which is the General
  * Exception for Databases,Collections and Documents in MongoDb.
- *
+ * <p/>
  * Also a field <errorCode> of type <String> is introduced which gives more info
  * about the error.
  *
  * @author Rachit Mittal
- *
  */
 public class DatabaseException extends ApplicationException {
 
-	private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
 
+    /**
+     * Creates a new DatabaseException with errorcode and message.
+     *
+     * @param errorCode : ErrorCode of the Exception thrown
+     * @param message   : A description about the Error.
+     */
 
-	/**
-	 * Creates a new DatabaseException with errorcode and message.
-	 *
-	 * @param errorCode
-	 *            : ErrorCode of the Exception thrown
-	 * @param message
-	 *            : A description about the Error.
-	 */
+    public DatabaseException(String errorCode, String message) {
+        super(errorCode, message);
+    }
 
-	public DatabaseException(String errorCode, String message) {
-		super(errorCode,message);
-	}
+    /**
+     * Creates a new DatabaseException with errorcode and message and appending
+     * the cause of a caught exception.
+     *
+     * @param errorCode : ErrorCode of the Exception thrown
+     * @param message   : A description about the Error.
+     * @param cause     : Cause of the previous Exception. This is appended in the new
+     *                  DatabaseException formed here.
+     */
 
-	/**
-	 * Creates a new DatabaseException with errorcode and message and appending
-	 * the cause of a caught exception.
-	 *
-	 * @param errorCode
-	 *            : ErrorCode of the Exception thrown
-	 * @param message
-	 *            : A description about the Error.
-	 *
-	 * @param cause
-	 *            : Cause of the previous Exception. This is appended in the new
-	 *            DatabaseException formed here.
-	 */
-
-	public DatabaseException(String errorCode, String message, Throwable cause) {
-		super(errorCode,message, cause);
-	}
+    public DatabaseException(String errorCode, String message, Throwable cause) {
+        super(errorCode, message, cause);
+    }
 }

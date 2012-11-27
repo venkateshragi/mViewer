@@ -23,27 +23,26 @@ import com.mongodb.Mongo;
  * usrname , mongoIP and mongoPort. <mappingKey> maps to <tokenID>.
  *
  * @author Rachit Mittal
- *
  */
 public class SessionMongoInstanceProvider implements MongoInstanceProvider {
 
-	private Mongo mongoInstance;
+    private Mongo mongoInstance;
 
-	/**
-	 * Sets Mongo Instance according to what obtained in LoginController class.
-	 *
-	 * @param userMappingKey
-	 */
-	public SessionMongoInstanceProvider(String userMappingKey) {
-		mongoInstance = LoginController.mongoConfigToInstanceMapping.get(userMappingKey);
-	}
+    /**
+     * Sets Mongo Instance according to what obtained in LoginController class.
+     *
+     * @param userMappingKey
+     */
+    public SessionMongoInstanceProvider(String userMappingKey) {
+        mongoInstance = LoginController.mongoConfigToInstanceMapping.get(userMappingKey);
+    }
 
-	/**
-	 * Return MongoInstance
-	 */
+    /**
+     * Return MongoInstance
+     */
 
-	public Mongo getMongoInstance() {
-		return mongoInstance;
-	}
+    public Mongo getMongoInstance() {
+        return mongoInstance;
+    }
 
 }

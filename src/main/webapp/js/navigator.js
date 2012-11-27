@@ -21,11 +21,11 @@
         function addChildren(node, regionManager) {
             node.all('* input, * ul li, * textarea, * button, * select, * a').each(
 
-            function(item) {
-                if (!item.hasClass('non-navigable')) {
-                    regionManager.add(item);
-                }
-            });
+                function(item) {
+                    if (!item.hasClass('non-navigable')) {
+                        regionManager.add(item);
+                    }
+                });
         }
 
         Navigator.prototype = {
@@ -125,14 +125,14 @@
                     var parentTR = null;
                     var effectTR = null;
                     switch (eventObject.keyCode) {
-                    case arrowKeys.down:
-                        parentTR = findParentTR();
-                        effectTR = (parentTR) ? parentTR.next() : null;
-                        break;
-                    case arrowKeys.up:
-                        parentTR = findParentTR();
-                        effectTR = (parentTR) ? parentTR.previous() : null;
-                        break;
+                        case arrowKeys.down:
+                            parentTR = findParentTR();
+                            effectTR = (parentTR) ? parentTR.next() : null;
+                            break;
+                        case arrowKeys.up:
+                            parentTR = findParentTR();
+                            effectTR = (parentTR) ? parentTR.previous() : null;
+                            break;
                     }
                     if (effectTR) {
                         sm.recordLastArrowNavigation();
@@ -158,7 +158,7 @@
                         }
                     }
                 } else {
-	                self.clearStyles();
+                    self.clearStyles();
                 }
             },
             selectElement: function(self) {
@@ -184,9 +184,9 @@
                             }
                         }
                     } else if ('SELECT' === selectedNodeName) {
-	                    selectedElement.simulate('mousedown');
+                        selectedElement.simulate('mousedown');
                     } else {
-	                    selectedElement.simulate('click');
+                        selectedElement.simulate('click');
                     }
                 }
             },

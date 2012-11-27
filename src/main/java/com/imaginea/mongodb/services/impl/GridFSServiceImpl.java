@@ -124,7 +124,7 @@ public class GridFSServiceImpl implements GridFSService {
         try {
             if (!databaseService.getDbList().contains(dbName)) {
                 throw new DatabaseException(ErrorCodes.DB_DOES_NOT_EXISTS,
-                    "Database with dbName [ " + dbName + "] does not exist");
+                        "Database with dbName [ " + dbName + "] does not exist");
             }
 
             DBObject queryObj = (DBObject) JSON.parse(query);
@@ -177,7 +177,7 @@ public class GridFSServiceImpl implements GridFSService {
             if (!databaseService.getDbList().contains(dbName)) {
                 throw new DatabaseException(ErrorCodes.DB_DOES_NOT_EXISTS,
 
-                    "Database with dbName [ " + dbName + "] does not exist");
+                        "Database with dbName [ " + dbName + "] does not exist");
             }
             Object docId = JSON.parse(_id);
             BasicDBObject objectId = new BasicDBObject("_id", docId);
