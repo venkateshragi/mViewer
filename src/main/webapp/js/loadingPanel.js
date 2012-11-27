@@ -35,10 +35,10 @@ YUI.add('loading-panel', function(Y) {
         MV.loadingPanel.setHeader(msg);
         MV.loadingPanel.setBody("<img src='images/loading.gif'>");
         MV.loadingPanel.show();
-    }
+    };
     MV.hideLoadingPanel = function() {
         MV.loadingPanel.hide();
-    }
+    };
 }, '3.3.0', {
     requires: []
 });

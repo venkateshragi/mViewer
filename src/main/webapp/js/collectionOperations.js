@@ -19,7 +19,7 @@
  */
 YUI({
     filter: 'raw'
-}).use("loading-panel", "alert-dialog", "query-executor", "utility", "submit-dialog", "yes-no-dialog", "io", "node", "node-menunav", "json-parse", "event-delegate", "node-event-simulate", "stylize", "custom-datatable", function(Y) {
+}).use("loading-panel", "alert-dialog", "query-executor", "utility", "submit-dialog", "yes-no-dialog", "io", "node", "node-menunav", "json-parse", "event-delegate", "node-event-simulate", "custom-datatable", function(Y) {
         var MV = YUI.com.imaginea.mongoV,
             sm = MV.StateManager,
             collDiv = Y.one("#collNames ul.lists"),
@@ -41,7 +41,7 @@ YUI({
             Y.one("#systemCollections").unplug(Y.Plugin.NodeMenuNav);
 
             MV.createDatatable(MV.URLMap.dbStatistics(), Y.one("#currentDB").get("value"));
-            MV.toggleClass(e.currentTarget, Y.all("#dbNames li"));
+            MV.selectDatabase(e.currentTarget);
             MV.hideQueryForm();
             MV.showLoadingPanel("Loading Collections...");
             Y.log("Initiating request to load collections.", "info");
@@ -225,9 +225,7 @@ YUI({
             var label = $(event.currentTarget._node).closest("ul").closest("li")[0].attributes["label"].value;
             var index = parseInt(event.currentTarget._node.attributes["index"].value);
             Y.one("#currentColl").set("value", label);
-            MV.toggleClass(sm.currentCollAsNode(), Y.all("#collNames li"));
-            MV.toggleClass(sm.currentCollAsNode(), Y.all("#bucketNames li"));
-            MV.toggleClass(sm.currentCollAsNode(), Y.all("#systemCollections li"));
+            MV.selectDBItem(sm.currentCollAsNode());
             switch (index) {
                 case 1:
                     // Add Document
@@ -260,9 +258,7 @@ YUI({
             var label = $(event.currentTarget._node).closest("ul").closest("li")[0].attributes["label"].value;
             var index = parseInt(event.currentTarget._node.attributes["index"].value);
             Y.one("#currentBucket").set("value", label);
-            MV.toggleClass(sm.currentBucketAsNode(), Y.all("#collNames li"));
-            MV.toggleClass(sm.currentBucketAsNode(), Y.all("#bucketNames li"));
-            MV.toggleClass(sm.currentCollAsNode(), Y.all("#systemCollections li"));
+            MV.selectDBItem(sm.currentBucketAsNode());
             switch (index) {
                 case 1:
                     // Add File
@@ -299,7 +295,7 @@ YUI({
                 on: {
                     success: function(ioId, responseObj) {
                         var parsedResponse = Y.JSON.parse(responseObj.responseText);
-                        response = parsedResponse.response.result;
+                        var response = parsedResponse.response.result;
                         if (response !== undefined) {
                             Y.log(response, "info");
                             MV.showAlertMessage(response, MV.infoIcon);

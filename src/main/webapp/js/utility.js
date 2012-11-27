@@ -56,11 +56,32 @@ YUI.add('utility', function(Y) {
     MV.deleteFileEvent = new YAHOO.util.CustomEvent("DeleteFile");
     MV.deleteDocEvent = new YAHOO.util.CustomEvent("DeleteDoc");
 
+    MV.selectHeader = function(node) {
+        if (MV.selectedHeader) {
+            MV.selectedHeader.removeClass('nav-link-sel');
+        }
+        $(node._node).closest('a').addClass('nav-link-sel');
+        MV.selectedHeader = $(node._node).closest('a');
+    };
+
+    MV.selectDatabase = function(node) {
+        if (MV.selectedDB) {
+            MV.selectedDB.removeClass('sel');
+        }
+        $(node._node).closest('li').addClass('sel');
+        MV.selectedDB = $(node._node).closest('li');
+    };
+
+    MV.selectDBItem = function(node) {
+        if (MV.selectedDBItem) {
+            MV.selectedDBItem.removeClass('sel');
+        }
+        $(node._node).closest('li').addClass('sel');
+        MV.selectedDBItem = $(node._node).closest('li');
+    };
+
     MV.StateManager = (function() {
-        var self = this;
-        var stateVariables = ['currentDB', 'currentColl', 'currentBucket', 'host', 'port', 'connectionId', 'newName'];
-        var i = 0;
-        var exports = {};
+        var self = this, stateVariables = ['currentDB', 'currentColl', 'currentBucket', 'host', 'port', 'connectionId', 'newName'], exports = {}, i=0;
 
         function getVal(key) {
             return Y.one('#' + key).get("value");
@@ -71,9 +92,8 @@ YUI.add('utility', function(Y) {
         }
 
         function deliverEvent(eventName, eventArgs) {
-            var i = 0;
             var callbackArray = gRegistry[eventName];
-            for (; i < callbackArray.length; i++) {
+            for (var i = 0; i < callbackArray.length; i++) {
                 callbackArray[i].call(this, eventArgs);
             }
         }
