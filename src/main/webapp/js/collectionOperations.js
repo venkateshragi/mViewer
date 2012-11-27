@@ -262,7 +262,7 @@ YUI({
             Y.one("#currentBucket").set("value", label);
             MV.toggleClass(sm.currentBucketAsNode(), Y.all("#collNames li"));
             MV.toggleClass(sm.currentBucketAsNode(), Y.all("#bucketNames li"));
-            MV.toggleClass(sm.currentCollAsNode(), Y.all("#systemCollections li"));
+            MV.toggleClass(sm.currentBucketAsNode(), Y.all("#systemCollections li"));
             switch (index) {
                 case 1:
                     // Add File
@@ -299,7 +299,7 @@ YUI({
                 on: {
                     success: function(ioId, responseObj) {
                         var parsedResponse = Y.JSON.parse(responseObj.responseText);
-                        response = parsedResponse.response.result;
+                        var response = parsedResponse.response.result;
                         if (response !== undefined) {
                             Y.log(response, "info");
                             MV.showAlertMessage(response, MV.infoIcon);
