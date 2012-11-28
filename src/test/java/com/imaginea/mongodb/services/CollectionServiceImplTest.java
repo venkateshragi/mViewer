@@ -180,7 +180,7 @@ public class CollectionServiceImplTest extends TestingTemplate {
 								mongoInstance.getDB(dbName).getCollection(collectionName).drop();
 							}
 							// Insert collection using service
-							testCollService.insertCollection(dbName, collectionName, true, 100000, 100);
+							testCollService.insertCollection(dbName, collectionName, true, 100000, 100, true);
 							// Check if collection exists in get List of
 							// collections
 							Set<String> collectionList = mongoInstance.getDB(dbName).getCollectionNames();

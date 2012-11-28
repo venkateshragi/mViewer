@@ -82,10 +82,13 @@ YUI({
                                          <a index="1" class="yui3-menuitem-content onclick">Add Document</a>\
                                      </li>\
                                      <li class="yui3-menuitem">\
-                                         <a index="2" class="yui3-menuitem-content onclick">Drop Collection</a>\
+                                          <a index="2" class="yui3-menuitem-content onclick">Drop Collection</a>\
+                                      </li>\
+                                     <li class="yui3-menuitem">\
+                                         <a index="3" class="yui3-menuitem-content onclick">Update Collection</a>\
                                      </li>\
                                      <li class="yui3-menuitem">\
-                                         <a index="3" class="yui3-menuitem-content onclick">Statistics</a>\
+                                         <a index="4" class="yui3-menuitem-content onclick">Statistics</a>\
                                      </li>\
                                  </ul>\
                              </div>\
@@ -236,13 +239,51 @@ YUI({
                     MV.showSubmitDialog("addDocDialog", addDocument, showError);
                     break;
                 case 2:
-                    // Delete
+                    // Drop Collection
                     MV.showYesNoDialog("Do you really want to drop the Collection - " + Y.one("#currentColl").get("value") + "?", dropCollection, function() {
                         this.hide();
                     });
                     break;
                 case 3:
-                    // click to view details
+                    // Update collection
+                    var showErrorMessage = function(responseObject) {
+                        MV.showAlertMessage("Failed to update collection!", MV.warnIcon);
+                        Y.log("Collection creation failed. Response Status: [0]".format(responseObject.statusText), "error");
+                    };
+                    MV.showSubmitDialog("addColDialog", updateCollection, showErrorMessage);
+                    setTimeout(function() {
+                        Y.one("#newCollName").set("value", label);
+                        // Set hidden field updateColl to true to update existing collection
+                        Y.one("#updateColl").set("value", true);
+                        Y.one("#newCollName").focus();
+                        Y.io(MV.URLMap.isCappedCollection(), {
+                            method: "GET",
+                            on: {
+                                success: function(ioId, responseObject) {
+                                    var parsedResponse, isCapped;
+                                    try {
+                                        parsedResponse = Y.JSON.parse(responseObject.responseText);
+                                        isCapped = parsedResponse.response.result;
+                                        if (isCapped) {
+                                            $("#isCapped").attr('checked', 'checked');
+                                            $("#cappedSection").removeClass('disabled');
+                                            $("#cappedSection input").removeAttr('disabled');
+                                        } else {
+                                            $("#isCapped").removeAttr('checked');
+                                            $("#cappedSection").addClass('disabled');
+                                            $("#cappedSection input").attr('disabled', 'disabled');
+                                        }
+                                    } catch (e) {
+                                        Y.log("Could not parse the JSON response to get the keys", "error");
+                                        MV.showAlertMessage("Invalid JSON Response!", MV.warnIcon);
+                                    }
+                                }
+                            }
+                        });
+                    }, 300);
+                    break;
+                case 4:
+                    // View collections Statistics
                     MV.hideQueryForm();
                     MV.createDatatable(MV.URLMap.collStatistics(), Y.one("#currentColl").get("value"));
                     break;
@@ -367,6 +408,28 @@ YUI({
                 error = parsedResponse.response.error;
                 MV.showAlertMessage("Could not add Document ! [0]", MV.warnIcon, error.code);
                 Y.log("Could not add Document! [0]".format(MV.errorCodeMap[error.code]), "error");
+            }
+        }
+
+        /**
+         * The function handles the successful sending of edit Collection request.
+         * It parses the response and checks if the collection is successfully edited. If not,
+         * then prompt the user
+         * @param responseObject The response Object
+         */
+        function updateCollection(responseObject) {
+            var parsedResponse = Y.JSON.parse(responseObject.responseText),
+                response = parsedResponse.response.result,
+                error;
+            if (response !== undefined) {
+                MV.showAlertMessage(response, MV.infoIcon);
+                Y.log("[0] created in [1]".format(Y.one("#newName").get("value"), Y.one("#currentDB").get("value")), "info");
+                sm.clearCurrentColl();
+                Y.one("#" + Y.one("#currentDB").get("value")).simulate("click");
+            } else {
+                error = parsedResponse.response.error;
+                MV.showAlertMessage("Could not add Collection! [0]", MV.warnIcon, error.code);
+                Y.log("Could not add Collection! [0]".format(MV.errorCodeMap[error.code]), "error");
             }
         }
 

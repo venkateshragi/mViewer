@@ -95,10 +95,14 @@ YUI({
                 case 1:
                     // add collection
                     showErrorMessage = function(responseObject) {
-                        MV.showAlertMessage("Collection creation failed! Please check if app server is runnning.", MV.warnIcon);
+                        MV.showAlertMessage("Collection creation failed!", MV.warnIcon);
                         Y.log("Collection creation failed. Response Status: [0]".format(responseObject.statusText), "error");
                     };
                     MV.showSubmitDialog("addColDialog", addCollection, showErrorMessage);
+                    setTimeout(function() {
+                        // Set hidden field updateColl to false to add new collection
+                        Y.one("#updateColl").set("value", false);
+                    }, 300);
                     break;
                 case 2:
                     // add gridfs store
@@ -111,7 +115,7 @@ YUI({
                         }
                     };
                     showErrorMessage = function(responseObject) {
-                        MV.showAlertMessage("GridFS bucket creation failed! Please check if app server is runnning.", MV.warnIcon);
+                        MV.showAlertMessage("GridFS bucket creation failed!", MV.warnIcon);
                         Y.log("GridFS bucket creation failed. Response Status: [0]".format(responseObject.statusText), "error");
                     };
                     MV.showSubmitDialog("addGridFSDialog", onSuccess, showErrorMessage);

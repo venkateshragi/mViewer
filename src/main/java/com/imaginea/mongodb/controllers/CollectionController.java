@@ -18,7 +18,9 @@ package com.imaginea.mongodb.controllers;
 import com.imaginea.mongodb.exceptions.ErrorCodes;
 import com.imaginea.mongodb.exceptions.InvalidHTTPRequestException;
 import com.imaginea.mongodb.services.CollectionService;
+import com.imaginea.mongodb.services.impl.AuthServiceImpl;
 import com.imaginea.mongodb.services.impl.CollectionServiceImpl;
+import com.mongodb.Mongo;
 import org.apache.log4j.Logger;
 
 import javax.servlet.http.HttpServletRequest;
@@ -53,6 +55,33 @@ public class CollectionController extends BaseController {
      * response for this request and sent it to client. In case of any exception
      * from the service files an error object if formed.
      *
+     * @param dbName             Name of database
+     * @param selectedCollection Name of selected Collection
+     * @param connectionId       Mongo Db Configuration provided by user to connect to.
+     * @param request            Get the HTTP request context to extract session parameters
+     * @return String of JSON Format with list of all collections.
+     */
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/{collectionName}/isCapped")
+    public String isCappedCollection(@PathParam("dbName") final String dbName, @PathParam("collectionName") final String selectedCollection,
+                                     @QueryParam("connectionId") final String connectionId, @Context final HttpServletRequest request) {
+
+        String response = new ResponseTemplate().execute(logger, connectionId, request, new ResponseCallback() {
+            public Object execute() throws Exception {
+                Mongo mongoInstance = AuthServiceImpl.getInstance().getMongoInstance(connectionId);
+                return mongoInstance.getDB(dbName).getCollection(selectedCollection).isCapped();
+            }
+        });
+        return response;
+    }
+
+    /**
+     * Maps GET Request to get list of collections inside databases present in
+     * mongo db to a service function that returns the list. Also forms the JSON
+     * response for this request and sent it to client. In case of any exception
+     * from the service files an error object if formed.
+     *
      * @param dbName       Name of database
      * @param connectionId Mongo Db Configuration provided by user to connect to.
      * @param request      Get the HTTP request context to extract session parameters
@@ -79,37 +108,33 @@ public class CollectionController extends BaseController {
      * forms the JSON response for this request and sent it to client. In case
      * of any exception from the service files an error object if formed.
      *
-     * @param dbName         Name of Database
-     * @param capped         Specify if the collection is capped
-     * @param size           Specify the size of collection
-     * @param maxDocs        specify maximum no of documents in the collection
-     * @param collectionName Name of Database for which to perform create/drop operation
-     *                       depending on action patameter
-     * @param action         Query Paramater with value PUT for identifying a create
-     *                       database request and value DELETE for dropping a database.
-     * @param request        Get the HTTP request context to extract session parameters
-     * @param connectionId   Mongo Db Configuration provided by user to connect to.
+     * @param dbName             Name of Database
+     * @param isCapped           Specify if the collection is capped
+     * @param capSize            Specify the capSize of collection
+     * @param maxDocs            specify maximum no of documents in the collection
+     * @param selectedCollection Name of collection for which to perform create/drop operation
+     *                           depending on action parameter
+     * @param action             Query Parameter with value PUT for identifying a create
+     *                           database request and value DELETE for dropping a database.
+     * @param request            Get the HTTP request context to extract session parameters
+     * @param connectionId       MongoDB Configuration provided by user to connect to.
      * @return String with status of operation performed.
      */
     @POST
     @Path("/{collectionName}")
     @Produces(MediaType.APPLICATION_JSON)
-    public String postCollRequest(@PathParam("dbName") final String dbName, @PathParam("collectionName") final String collectionName, @FormParam("isCapped") String capped,
-                                  @QueryParam("collSize") final int size, @QueryParam("collMaxSize") final int maxDocs, @QueryParam("action") final String action, @QueryParam("connectionId") final String connectionId,
+    public String postCollRequest(@PathParam("dbName") final String dbName, @PathParam("collectionName") final String selectedCollection,
+                                  @FormParam("newCollName") final String newCollName, @FormParam("updateColl") final String updateColl,
+                                  @FormParam("isCapped") final String isCapped, @FormParam("capSize") final int capSize,
+                                  @FormParam("maxDocs") final int maxDocs, @FormParam("autoIndexId") final String autoIndexId,
+                                  @QueryParam("connectionId") final String connectionId, @QueryParam("action") final String action,
                                   @Context final HttpServletRequest request) {
 
         if (action == null) {
             InvalidHTTPRequestException e = new InvalidHTTPRequestException(ErrorCodes.ACTION_PARAMETER_ABSENT, "ACTION_PARAMETER_ABSENT");
             return formErrorResponse(logger, e);
         }
-        // Reassign isCapped according to value from UI
-        boolean capp = false;
-        if (capped == null) {
-            capp = false;
-        } else if (capped.equals("on")) {
-            capp = true;
-        }
-        final boolean iscapped = capp;
+
         String response = new ResponseTemplate().execute(logger, connectionId, request, new ResponseCallback() {
             public Object execute() throws Exception {
                 CollectionService collectionService = new CollectionServiceImpl(connectionId);
@@ -123,12 +148,15 @@ public class CollectionController extends BaseController {
                 }
                 switch (method) {
                     case PUT: {
-                        status = collectionService.insertCollection(dbName, collectionName, iscapped, size, maxDocs);
-
+                        if (updateColl.equals("false")) {
+                            status = collectionService.insertCollection(dbName, newCollName, (isCapped != null && isCapped.equals("on")), capSize, maxDocs, (autoIndexId != null && autoIndexId.equals("on")));
+                        } else {
+                            status = collectionService.updateCollection(dbName, selectedCollection, newCollName, (isCapped != null && isCapped.equals("on")), capSize, maxDocs, (autoIndexId != null && autoIndexId.equals("on")));
+                        }
                         break;
                     }
                     case DELETE: {
-                        status = collectionService.deleteCollection(dbName, collectionName);
+                        status = collectionService.deleteCollection(dbName, selectedCollection);
                         break;
                     }
                     default: {

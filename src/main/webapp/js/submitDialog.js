@@ -33,11 +33,17 @@ YUI.add('submit-dialog', function(Y) {
         function addCollection() {
             Y.log("Submit handler for add collection called", "info");
             var newCollInfo = this.getData();
-            if (newCollInfo.name === "") {
-                MV.showAlertMessage("Enter the collection name!", MV.warnIcon);
+            if (newCollInfo.newCollName === "") {
+                MV.showAlertMessage("Name should be entered to create a Collection!", MV.warnIcon);
+                return false;
+            } else if (newCollInfo.isCapped === true && newCollInfo.capSize === "") {
+                MV.showAlertMessage("Size should be entered to create a Capped Collection!", MV.warnIcon);
                 return false;
             } else {
-                Y.one("#newName").set("value", newCollInfo.name);
+                var updateColl = Y.one("#updateColl").get("value");
+                if (updateColl === "false") {
+                    Y.one("#currentColl").set("value", newCollInfo.newCollName);
+                }
                 Y.one("#" + form + " .bd form").setAttribute("action", MV.URLMap.insertColl());
             }
             return true;
@@ -161,6 +167,21 @@ YUI.add('submit-dialog', function(Y) {
         dialogBox.show();
         return dialogBox;
     };
+
+    function updateCappedSection(event) {
+        var isChecked = event.currentTarget._node.checked;
+        if (isChecked) {
+            $("#cappedSection").removeClass('disabled');
+            $("#cappedSection input").removeAttr('disabled');
+        } else {
+            $("#cappedSection").addClass('disabled');
+            $("#cappedSection input").attr('disabled', 'disabled');
+        }
+    }
+
+    // Add change listener to capped checkbox in Add Collection Dialog
+    Y.delegate("click", updateCappedSection, "#addColDialog", "input[name = isCapped]");
+
 }, '3.3.0', {
     requires: ["utility", "node", "alert-dialog"]
 });

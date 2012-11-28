@@ -13,6 +13,14 @@ body {
     font-size: 12px;
 }
 
+input {
+    height: 20px;
+    border: 1px solid #B2D4D3;
+    border-radius: 3px;
+    padding-left: 5px;
+    vertical-align: middle;
+}
+
 /*Login Screen*/
 
 .loginScreen {
@@ -39,13 +47,6 @@ body {
 div.loginFormContents div {
     padding-bottom: 10px;
     padding-right: 10px;
-}
-
-div.loginFormContents input {
-    height: 20px;
-    border: 1px solid #B2D4D3;
-    border-radius: 3px;
-    padding-left: 5px;
 }
 
 .loginHelp {
@@ -812,6 +813,14 @@ textarea .disabled {
 #bucketNames {
     position: static;
     display: none;
+}
+
+#cappedSection {
+    margin-left: 15px;
+}
+
+#cappedSection.disabled {
+    opacity: 0.4;
 }
 
 #uploadResponse {
