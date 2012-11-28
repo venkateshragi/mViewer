@@ -51,11 +51,11 @@ public interface CollectionService {
      * Creates a collection inside a database in mongo to which user is
      * connected to.
      *
-     * @param dbName         Name of Database in which to insert a collection
-     * @param collectionName Name of Collection to be inserted
-     * @param capped         Specify if the collection is capped
-     * @param size           Specify the size of collection
-     * @param maxDocs        specify maximum no of documents in the collection
+     * @param dbName      Name of Database in which to insert a collection
+     * @param newCollName New collection name
+     * @param capped      Specify if the collection is capped
+     * @param size        Specify the size of collection
+     * @param maxDocs     specify maximum no of documents in the collection
      * @return Success if Insertion is successful else throw exception
      * @throws DatabaseException   throw super type of UndefinedDatabaseException
      * @throws ValidationException throw super type of
@@ -63,7 +63,26 @@ public interface CollectionService {
      * @throws CollectionException throw super type of
      *                             DuplicateCollectionException,InsertCollectionException
      */
-    public String insertCollection(String dbName, String collectionName, boolean capped, int size, int maxDocs) throws DatabaseException, CollectionException, ValidationException;
+    public String insertCollection(String dbName, String newCollName, boolean capped, int size, int maxDocs, boolean autoIndexId) throws DatabaseException, CollectionException, ValidationException;
+
+    /**
+     * Creates a collection inside a database in mongo to which user is
+     * connected to.
+     *
+     * @param dbName             Name of Database in which to insert a collection
+     * @param selectedCollection Collection on which the operation is performed
+     * @param newCollName        New collection name
+     * @param capped             Specify if the collection is capped
+     * @param size               Specify the size of collection
+     * @param maxDocs            specify maximum no of documents in the collection
+     * @return Success if Insertion is successful else throw exception
+     * @throws DatabaseException   throw super type of UndefinedDatabaseException
+     * @throws ValidationException throw super type of
+     *                             EmptyDatabaseNameException,EmptyCollectionNameException
+     * @throws CollectionException throw super type of
+     *                             DuplicateCollectionException,InsertCollectionException
+     */
+    public String updateCollection(String dbName, String selectedCollection, String newCollName, boolean capped, int size, int maxDocs, boolean autoIndexId) throws DatabaseException, CollectionException, ValidationException;
 
     /**
      * Deletes a collection inside a database in mongo to which user is

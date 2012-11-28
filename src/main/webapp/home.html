@@ -203,7 +203,7 @@
                     <span id="infoIcon"></span>
                     <span id="infoText" class="infoText"></span>
                 </span>
-           <!-- <button id="console" class="bttn navigable">Show Console</button>-->
+            <!-- <button id="console" class="bttn navigable">Show Console</button>-->
         </div>
         <div class="generalInfo" style="display:none"> &nbsp;</div>
         <div class="left-cont gen-float">
@@ -299,10 +299,10 @@
 <div id="simpleDialogContainer"></div>
 <div id="alertDialogContainer"></div>
 <div id="addDBDialog" class="yui-pe-content">
-    <div class="hd">Please enter DB name</div>
+    <div class="hd">Add Database</div>
     <div class="bd">
         <form method="POST">
-            <label class="dialogLabel" for="name">DB Name:</label>
+            <label class="dialogLabel">DB Name:</label>
             <input value="" type="text" name="name"/>
 
             <div class="clear"></div>
@@ -310,32 +310,46 @@
     </div>
 </div>
 <div id="addColDialog" class="yui-pe-content">
-    <div class="hd">Please enter collection details</div>
+    <div class="hd">Add Collection</div>
     <div class="bd">
         <form method="POST">
-            <label class="dialogLabel" for="name">Name:</label><input
-            type="text" name="name"/>
+            <label class="dialogLabel">Name:</label>
+            <input type="text" id="newCollName" name="newCollName" title="Enter name of the collection"/>
+            <input type="hidden" id="updateColl" name="updateColl" value="false">
+`
+            <div class="clear"></div>
+            <label class="dialogLabel">Capped: <input type="checkbox" id="isCapped" name="isCapped"
+                                                      title="Enable to create a capped collection"/></label>
 
             <div class="clear"></div>
-            <label class="dialogLabel" for="isCapped">Capped: <input type="checkbox" name="isCapped"/></label>
 
-            <div class="clear"></div>
-            <label class="dialogLabel" for="collSize">Size (in bytes):</label><input
-            value="0" type="text" name="collSize"/>
+            <div id="cappedSection" class="disabled">
+                <label class="dialogLabel">Size (bytes):</label><input type="text" name="capSize"
+                                                                       disabled="disabled"
+                                                                       title="Enter maximum size in bytes as the cap for the collection"/>
 
-            <div class="clear"></div>
-            <label class="dialogLabel" for="collMaxSize">Max Documents:</label><input
-            value="0" type="text" name="collMaxSize"/>
+                <div class="clear"></div>
+                <label class="dialogLabel">Max Documents:</label><input type="text" name="maxDocs"
+                                                                        disabled="disabled"
+                                                                        placeholder='optional'
+                                                                        title="Enter maximum number of documents for capped collections"/>
+
+                <div class="clear"></div>
+                <label class="dialogLabel">Auto Index Id: <input type="checkbox" name="autoIndexId"
+                                                                 checked="checked"
+                                                                 disabled="disabled"
+                                                                 title="Enable to automatically create index on _id"/></label>
+            </div>
 
             <div class="clear"></div>
         </form>
     </div>
 </div>
 <div id="addGridFSDialog" class="yui-pe-content">
-    <div class="hd">Please enter the GridFS details</div>
+    <div class="hd">Add GridFS</div>
     <div class="bd">
         <form method="GET">
-            <label class="dialogLabel" for="name">Bucket Name:</label>
+            <label class="dialogLabel">Bucket Name:</label>
             <input type="text" name="name" value=""/>
 
             <div class="clear"></div>
@@ -343,7 +357,7 @@
     </div>
 </div>
 <div id="addDocDialog" class="yui-pe-content">
-    <div class="hd">Please enter Document</div>
+    <div class="hd">Add Document</div>
     <div class="bd">
         <form method="POST">
             <label class="dialogLabel">JSON format: </label>
@@ -356,7 +370,7 @@
 </div>
 
 <div id="addUserDialog" class="yui-pe-content">
-    <div class="hd">Please enter user credentials</div>
+    <div class="hd">Add User</div>
     <div class="bd">
         <form method="POST">
             <label class="dialogLabel" for="addUser_user_name">Username:</label><input type="text"
@@ -376,7 +390,7 @@
 </div>
 
 <div id="addIndexDialog" class="yui-pe-content">
-    <div class="hd">Please enter Index</div>
+    <div class="hd">Add Index</div>
     <div class="bd">
         <form method="POST">
             <label class="dialogLabel" for="index_colname">Collection Name:</label><input name="index_colname"
@@ -391,7 +405,7 @@
 
 
 <div id="addFileDialog" class="yui-pe-content">
-    <div class="hd">Select the files to be added</div>
+    <div class="hd">Add Files</div>
     <div class="bd">
         <form id="fileupload" method="POST" enctype="multipart/form-data">
 

@@ -236,7 +236,7 @@ public class CollectionControllerTest extends TestingTemplate {
 							}
 
 							// if capped = false , size irrelevant
-							String collList = testCollResource.postCollRequest(dbName, collName, "off", 0, 0, "PUT", testDbInfo, request);
+							String collList = testCollResource.postCollRequest(dbName, collName, collName, "false", "off", 0, 0, "on", "PUT", testDbInfo, request);
 							DBObject response = (BasicDBObject) JSON.parse(collList);
 
 							if (dbName == null) {
@@ -318,7 +318,7 @@ public class CollectionControllerTest extends TestingTemplate {
 							}
 
 							// if capped = false , size irrelevant
-							String collList = testCollResource.postCollRequest(dbName, collName, "off", 0, 0, "DELETE", testDbInfo, request);
+							String collList = testCollResource.postCollRequest(dbName, collName, collName, "false", "off" , 0, 0, "on", "DELETE", testDbInfo, request);
 							DBObject response = (BasicDBObject) JSON.parse(collList);
 
 							if (dbName == null) {

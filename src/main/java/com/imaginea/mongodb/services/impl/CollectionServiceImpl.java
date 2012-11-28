@@ -113,11 +113,11 @@ public class CollectionServiceImpl implements CollectionService {
      * Creates a collection inside a database in mongo to which user is
      * connected to.
      *
-     * @param dbName         Name of Database in which to insert a collection
-     * @param collectionName Name of Collection to be inserted
-     * @param capped         Specify if the collection is capped
-     * @param size           Specify the size of collection
-     * @param maxDocs        specify maximum no of documents in the collection
+     * @param dbName      Name of Database in which to insert a collection
+     * @param newCollName Name of Collection to be added/renamed to
+     * @param capped      Specify if the collection is capped
+     * @param size        Specify the size of collection
+     * @param maxDocs     specify maximum no of documents in the collection
      * @return Success if Insertion is successful else throw exception
      * @throws DatabaseException   throw super type of UndefinedDatabaseException
      * @throws ValidationException throw super type of
@@ -125,28 +125,29 @@ public class CollectionServiceImpl implements CollectionService {
      * @throws CollectionException throw super type of
      *                             DuplicateCollectionException,InsertCollectionException
      */
-    public String insertCollection(String dbName, String collectionName, boolean capped, int size, int maxDocs) throws DatabaseException, CollectionException, ValidationException {
+    public String insertCollection(String dbName, String newCollName, boolean capped, int size, int maxDocs, boolean autoIndexId) throws DatabaseException, CollectionException, ValidationException {
 
         if (dbName == null) {
-            throw new DatabaseException(ErrorCodes.DB_NAME_EMPTY, "Database name is null");
+            throw new DatabaseException(ErrorCodes.DB_NAME_EMPTY, "Database name should be provided");
 
         }
         if (dbName.equals("")) {
-            throw new DatabaseException(ErrorCodes.DB_NAME_EMPTY, "Database Name Empty");
+            throw new DatabaseException(ErrorCodes.DB_NAME_EMPTY, "Database name cannot be empty");
         }
 
-        if (collectionName == null) {
-            throw new CollectionException(ErrorCodes.COLLECTION_NAME_EMPTY, "Collection name is null");
+        if (newCollName == null) {
+            throw new CollectionException(ErrorCodes.COLLECTION_NAME_EMPTY, "Collection name should be provided");
         }
-        if (collectionName.equals("")) {
-            throw new CollectionException(ErrorCodes.COLLECTION_NAME_EMPTY, "Collection Name Empty");
+        if (newCollName.equals("")) {
+            throw new CollectionException(ErrorCodes.COLLECTION_NAME_EMPTY, "Collection name cannot be empty");
         }
         try {
             if (!databaseService.getDbList().contains(dbName)) {
                 throw new DatabaseException(ErrorCodes.DB_DOES_NOT_EXISTS, "Db with name [" + dbName + "] doesn't exist.");
             }
-            if (mongoInstance.getDB(dbName).getCollectionNames().contains(collectionName)) {
-                throw new CollectionException(ErrorCodes.COLLECTION_ALREADY_EXISTS, "Collection [" + collectionName + "] Already exists in Database [" + dbName + "]");
+            DB db = mongoInstance.getDB(dbName);
+            if (db.getCollectionNames().contains(newCollName)) {
+                throw new CollectionException(ErrorCodes.COLLECTION_ALREADY_EXISTS, "Collection [" + newCollName + "] already exists in Database [" + dbName + "]");
             }
 
             DBObject options = new BasicDBObject();
@@ -154,12 +155,106 @@ public class CollectionServiceImpl implements CollectionService {
             if (capped) {
                 options.put("size", size);
                 options.put("max", maxDocs);
+                options.put("autoIndexId", autoIndexId);
             }
-            mongoInstance.getDB(dbName).createCollection(collectionName, options);
+            mongoInstance.getDB(dbName).createCollection(newCollName, options);
         } catch (MongoException m) {
             throw new CollectionException(ErrorCodes.COLLECTION_CREATION_EXCEPTION, m.getMessage());
         }
-        String result = "Collection [" + collectionName + "] added to Database [" + dbName + "].";
+        String result = "Collection [" + newCollName + "] was successfully added to Database [" + dbName + "].";
+        return result;
+    }
+
+    /**
+     * Creates a collection inside a database in mongo to which user is
+     * connected to.
+     *
+     * @param dbName                 Name of Database in which to insert a collection
+     * @param selectedCollectionName Collection on which the operation is performed
+     * @param newCollName            Name of Collection to be added/renamed to
+     * @param capped                 Specify if the collection is capped
+     * @param size                   Specify the size of collection
+     * @param maxDocs                specify maximum no of documents in the collection
+     * @return Success if Insertion is successful else throw exception
+     * @throws DatabaseException   throw super type of UndefinedDatabaseException
+     * @throws ValidationException throw super type of
+     *                             EmptyDatabaseNameException,EmptyCollectionNameException
+     * @throws CollectionException throw super type of
+     *                             DuplicateCollectionException,InsertCollectionException
+     */
+    public String updateCollection(String dbName, String selectedCollectionName, String newCollName, boolean capped, int size, int maxDocs, boolean autoIndexId) throws DatabaseException, CollectionException, ValidationException {
+
+        if (dbName == null) {
+            throw new DatabaseException(ErrorCodes.DB_NAME_EMPTY, "Database name should be provided");
+
+        }
+        if (dbName.equals("")) {
+            throw new DatabaseException(ErrorCodes.DB_NAME_EMPTY, "Database name cannot be empty");
+        }
+
+        if (selectedCollectionName == null || newCollName == null) {
+            throw new CollectionException(ErrorCodes.COLLECTION_NAME_EMPTY, "Collection name should be provided");
+        }
+        if (selectedCollectionName.equals("") || newCollName.equals("")) {
+            throw new CollectionException(ErrorCodes.COLLECTION_NAME_EMPTY, "Collection name cannot be empty");
+        }
+        String result = "No updates were specified!";
+        try {
+            if (!databaseService.getDbList().contains(dbName)) {
+                throw new DatabaseException(ErrorCodes.DB_DOES_NOT_EXISTS, "Db with name [" + dbName + "] doesn't exist.");
+            }
+
+            boolean convertedToCapped = false, convertedToNormal = false, renamed = false;
+            DB db = mongoInstance.getDB(dbName);
+            DBCollection selectedCollection = db.getCollection(selectedCollectionName);
+            if (!selectedCollection.isCapped() && capped) {
+                DBObject options = new BasicDBObject();
+                options.put("convertToCapped", selectedCollectionName);
+                options.put("size", size);
+                options.put("max", maxDocs);
+                options.put("autoIndexId", autoIndexId);
+                CommandResult commandResult = db.command(options);
+                String errMsg = (String) commandResult.get("errmsg");
+                if (errMsg != null) {
+                    return "Failed to convert [" + selectedCollectionName + "] to capped Collection! " + errMsg;
+                }
+                convertedToCapped = true;
+            }
+
+            if (selectedCollection.isCapped() && !capped) {
+                DBObject options = new BasicDBObject();
+                options.put("capped", false);
+                DBCollection tempCollection = db.createCollection(selectedCollectionName + "_temp", options);
+                DBCursor cur = selectedCollection.find();
+                while (cur.hasNext()) {
+                    DBObject obj = cur.next();
+                    tempCollection.insert(obj);
+                }
+                selectedCollection.drop();
+                tempCollection.rename(selectedCollectionName);
+                convertedToNormal = true;
+            }
+
+            if (!selectedCollectionName.equals(newCollName)) {
+                if (db.getCollectionNames().contains(newCollName)) {
+                    throw new CollectionException(ErrorCodes.COLLECTION_ALREADY_EXISTS, "Collection [" + newCollName + "] already exists in Database [" + dbName + "]");
+                }
+                selectedCollection = db.getCollection(selectedCollectionName);
+                selectedCollection.rename(newCollName);
+                renamed = true;
+            }
+            if ((convertedToNormal || convertedToCapped) && renamed) {
+                result = "Collection [" + selectedCollectionName + "] was successfully updated.";
+            } else if (convertedToCapped) {
+                result = "Collection [" + selectedCollectionName + "] was successfully converted to capped collection";
+            } else if (convertedToNormal) {
+                result = "Capped Collection [" + selectedCollectionName + "] was successfully converted to normal collection";
+            } else if (renamed) {
+                result = "Collection [" + selectedCollectionName + "] was successfully renamed to '" + newCollName + "'";
+            }
+        } catch (MongoException m) {
+            throw new CollectionException(ErrorCodes.COLLECTION_CREATION_EXCEPTION, m.getMessage());
+        }
         return result;
     }
 
@@ -204,7 +299,7 @@ public class CollectionServiceImpl implements CollectionService {
         } catch (MongoException m) {
             throw new CollectionException(ErrorCodes.COLLECTION_DELETION_EXCEPTION, m.getMessage());
         }
-        String result = "Collection [" + collectionName + "] has been deleted from Database [" + dbName + "].";
+        String result = "Collection [" + collectionName + "] was successfully deleted from Database [" + dbName + "].";
 
         return result;
     }
