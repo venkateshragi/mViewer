@@ -86,15 +86,21 @@ public class GridFSController extends BaseController {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("getfiles")
-    public String getFileList(@PathParam("dbName") final String dbName, @PathParam("bucketName") final String bucketName, @QueryParam("query") final String query,
-                              @QueryParam("fields") final String keys, @QueryParam("limit") final String limit, @QueryParam("skip") final String skip,
-                              @QueryParam("connectionId") final String connectionId, @Context final HttpServletRequest request) {
+    public String getFileList(@PathParam("dbName") final String dbName,
+                              @PathParam("bucketName") final String bucketName,
+                              @QueryParam("query") final String query,
+                              @QueryParam("fields") final String keys,
+                              @QueryParam("limit") final String limit,
+                              @QueryParam("skip") final String skip,
+                              @QueryParam("sortBy") final String sortBy,
+                              @QueryParam("connectionId") final String connectionId,
+                              @Context final HttpServletRequest request) {
         String response = new ResponseTemplate().execute(logger, connectionId, request, new ResponseCallback() {
             public Object execute() throws Exception {
                 GridFSService gridFSService = new GridFSServiceImpl(connectionId);
                 int startIndex = query.indexOf("("), endIndex = query.lastIndexOf(")");
                 String jsonStr = query.substring(startIndex + 1, endIndex);
-                JSONObject result = gridFSService.getFileList(dbName, bucketName, jsonStr, keys, skip, limit);
+                JSONObject result = gridFSService.getFileList(dbName, bucketName, jsonStr, keys, skip, limit, sortBy);
                 return result;
             }
         });
