@@ -165,7 +165,7 @@ YUI.add('query-executor', function(Y) {
             "<div id='parametersDiv'>",
             "<label for='skip'> Skip(No. of records) </label><br/><input id='skip' type='text' name='skip' value='0'/><br/>",
             "<label for='limit'> Max page size: </label><br/><span><select id='limit' name='limit'><option value='10'>10</option><option value='25'>25</option><option value='50'>50</option></select></span><br/>  ",
-            "<label for='sort'> Sort by fields </label><br/><input id='sort' type='text' name='sort' value='_id:1'/><br/><br/>",
+            "<label for='sort'> Sort by fields </label><br/><input id='sort' type='text' name='sort' value='_id:-1'/><br/><br/>",
             "<button id='execQueryButton' class='bttn'>Execute Query</button>",
             "</div>"
         ].join('\n');

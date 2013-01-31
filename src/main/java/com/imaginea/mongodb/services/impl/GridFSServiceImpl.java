@@ -104,8 +104,9 @@ public class GridFSServiceImpl implements GridFSService {
      * @param fields
      * @param skip
      * @param limit      @returns JSON representation of list of all files as a String.
+     * @param sortBy
      */
-    public JSONObject getFileList(String dbName, String bucketName, String query, String fields, String skip, String limit) throws ValidationException, DatabaseException, CollectionException {
+    public JSONObject getFileList(String dbName, String bucketName, String query, String fields, String skip, String limit, String sortBy) throws ValidationException, DatabaseException, CollectionException {
         if (dbName == null) {
             throw new DatabaseException(ErrorCodes.DB_NAME_EMPTY, "Database Name Is Null");
         }
@@ -130,15 +131,14 @@ public class GridFSServiceImpl implements GridFSService {
             DBObject queryObj = (DBObject) JSON.parse(query);
             int filesLimit = Integer.parseInt(limit);
             int filesSkip = Integer.parseInt(skip);
+            DBObject sortObj = (DBObject) JSON.parse(sortBy);
 
             GridFS gridFS = new GridFS(mongoInstance.getDB(dbName), bucketName);
             Field field = GridFS.class.getDeclaredField("_filesCollection");
             field.setAccessible(true);
             DBCollection filesCollection = (DBCollection) field.get(gridFS);
             // Partial Keys cant be fetched for a file
-            DBCursor cursor = filesCollection.find(queryObj, null).sort(new BasicDBObject("uploadDate", -1));
-            cursor.limit(filesLimit);
-            cursor.skip(filesSkip);
+            DBCursor cursor = filesCollection.find(queryObj, null).sort(sortObj).skip(filesSkip).limit(filesLimit);
 
             Iterator<DBObject> it = cursor.iterator();
 
@@ -147,8 +147,9 @@ public class GridFSServiceImpl implements GridFSService {
                 fileList.add(it.next());
             }
 
-            long count = mongoInstance.getDB(dbName).getCollection(bucketName + ".files").count(queryObj);
+            long count = filesCollection.count(queryObj);
             result.put("documents", fileList);
+            result.put("editable", true);
             result.put("count", count);
         } catch (Exception m) {
             throw new CollectionException(ErrorCodes.GET_COLLECTION_LIST_EXCEPTION, m.getMessage());

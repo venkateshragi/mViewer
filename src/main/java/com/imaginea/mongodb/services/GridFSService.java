@@ -51,8 +51,9 @@ public interface GridFSService {
      * @param keys
      * @param skip
      * @param limit      @returns JSON representation of list of all files as a String.
+     * @param sortBy
      */
-    public JSONObject getFileList(String dbName, String bucketName, String query, String keys, String skip, String limit) throws ValidationException, DatabaseException, CollectionException;
+    public JSONObject getFileList(String dbName, String bucketName, String query, String keys, String skip, String limit, String sortBy) throws ValidationException, DatabaseException, CollectionException;
 
     /**
      * Service handler for retrieving the specified file stored in GridFS.
