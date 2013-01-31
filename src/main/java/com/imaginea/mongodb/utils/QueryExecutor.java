@@ -79,7 +79,7 @@ public class QueryExecutor {
 
     public static JSONObject executeFind(DBCollection dbCollection, String queryStr, DBObject keysObj, DBObject sortObj, int limit, int skip) throws JSONException {
         DBObject queryObj = (DBObject) JSON.parse(queryStr);
-        DBCursor cursor = dbCollection.find(queryObj, keysObj).sort(sortObj).limit(limit).skip(skip);
+        DBCursor cursor = dbCollection.find(queryObj, keysObj).sort(sortObj).skip(skip).limit(limit);
         ArrayList<DBObject> dataList = new ArrayList<DBObject>();
         if (cursor.hasNext()) {
             while (cursor.hasNext()) {
