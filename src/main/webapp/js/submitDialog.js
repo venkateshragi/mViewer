@@ -69,18 +69,15 @@ YUI.add('submit-dialog', function(Y) {
             } else {
                 Y.one("#newName").set("value", newDBInfo.name);
                 Y.one("#" + form + " .bd form").setAttribute("action", MV.URLMap.insertDB());
-                MV.showAlertMessage("New Database Inserted succesfully", MV.warnIcon);
-                Y.log("New Database Inserted succesfully", "error");
-
+                MV.showAlertMessage("New Database '"+newDBInfo.name+"' added successfully", MV.warnIcon);
             }
             return true;
         }
 
         function addDocument() {
             var newDoc = this.getData().document;
-            if(newDoc === "") {
-                MV.showAlertMessage("Empty Document is passed", MV.warnIcon);
-                Y.log("Empty Document is passed", "error");
+            if (newDoc === "") {
+                MV.showAlertMessage("Enter a valid Document", MV.warnIcon);
                 return false;
             }
             try {
@@ -88,7 +85,6 @@ YUI.add('submit-dialog', function(Y) {
                 Y.one("#" + form + " .bd form").setAttribute("action", MV.URLMap.insertDoc());
             } catch (e) {
                 MV.showAlertMessage("Enter the document in valid JSON format", MV.warnIcon);
-                Y.log("New Document format not JSON", "error");
                 return false;
             }
             return true;
