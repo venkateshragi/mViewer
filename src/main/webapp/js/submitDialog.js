@@ -69,12 +69,20 @@ YUI.add('submit-dialog', function(Y) {
             } else {
                 Y.one("#newName").set("value", newDBInfo.name);
                 Y.one("#" + form + " .bd form").setAttribute("action", MV.URLMap.insertDB());
+                MV.showAlertMessage("New Database Inserted succesfully", MV.warnIcon);
+                Y.log("New Database Inserted succesfully", "error");
+
             }
             return true;
         }
 
         function addDocument() {
             var newDoc = this.getData().document;
+            if(newDoc === "") {
+                MV.showAlertMessage("Empty Document is passed", MV.warnIcon);
+                Y.log("Empty Document is passed", "error");
+                return false;
+            }
             try {
                 Y.JSON.parse(newDoc);
                 Y.one("#" + form + " .bd form").setAttribute("action", MV.URLMap.insertDoc());
