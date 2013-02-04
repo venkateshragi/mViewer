@@ -1,4 +1,4 @@
-(function () {
+(function() {
 
     /**
      * This will hopefully be obsolete when YUI 2.9 is released.
@@ -21,7 +21,7 @@
     /*
      * Fix scope when calling parsers.
      */
-    DS.prototype.parseJSONData = function (oRequest, oFullResponse) {
+    DS.prototype.parseJSONData = function(oRequest, oFullResponse) {
         var oParsedResponse = {
             results: [],
             meta: {}
@@ -40,48 +40,48 @@
                 i, len, j, v, key, parser, path;
 
             // Function to convert the schema's fields into walk paths
-            var buildPath = function (needle) {
-                    var path = null,
-                        keys = [],
-                        i = 0;
-                    if (needle) {
-                        // Strip the ["string keys"] and [1] array indexes
-                        needle = needle.
-                        replace(/\[(['"])(.*?)\1\]/g, function (x, $1, $2) {
+            var buildPath = function(needle) {
+                var path = null,
+                    keys = [],
+                    i = 0;
+                if (needle) {
+                    // Strip the ["string keys"] and [1] array indexes
+                    needle = needle.
+                        replace(/\[(['"])(.*?)\1\]/g,function(x, $1, $2) {
                             keys[i] = $2;
                             return '.@' + (i++);
                         }).
-                        replace(/\[(\d+)\]/g, function (x, $1) {
+                        replace(/\[(\d+)\]/g,function(x, $1) {
                             keys[i] = parseInt($1, 10) | 0;
                             return '.@' + (i++);
                         }).
                         replace(/^\./, ''); // remove leading dot
-                        // If the cleaned needle contains invalid characters, the
-                        // path is invalid
-                        if (!/[^\w\.\$@]/.test(needle)) {
-                            path = needle.split('.');
-                            for (i = path.length - 1; i >= 0; --i) {
-                                if (path[i].charAt(0) === '@') {
-                                    path[i] = keys[parseInt(path[i].substr(1), 10)];
-                                }
+                    // If the cleaned needle contains invalid characters, the
+                    // path is invalid
+                    if (!/[^\w\.\$@]/.test(needle)) {
+                        path = needle.split('.');
+                        for (i = path.length - 1; i >= 0; --i) {
+                            if (path[i].charAt(0) === '@') {
+                                path[i] = keys[parseInt(path[i].substr(1), 10)];
                             }
                         }
-
                     }
-                    return path;
-                };
+
+                }
+                return path;
+            };
 
 
             // Function to walk a path and return the pot of gold
-            var walkPath = function (path, origin) {
-                    var v = origin,
-                        i = 0,
-                        len = path.length;
-                    for (; i < len && v; ++i) {
-                        v = v[path[i]];
-                    }
-                    return v;
-                };
+            var walkPath = function(path, origin) {
+                var v = origin,
+                    i = 0,
+                    len = path.length;
+                for (; i < len && v; ++i) {
+                    v = v[path[i]];
+                }
+                return v;
+            };
 
             // Parse the response
             // Step 1. Pull the resultsList from oFullResponse (default assumes
@@ -193,20 +193,20 @@
      * paginating only top-level nodes.
      */
 
-    DT.prototype.load = function (oConfig) {
+    DT.prototype.load = function(oConfig) {
         oConfig = oConfig || {};
 
         (oConfig.datasource || this._oDataSource).sendRequest(
-        oConfig.request || this.get('initialRequest'), oConfig.callback || {
-            success: this.onDataReturnInitializeTable,
-            failure: this.onDataReturnInitializeTable,
-            scope: this,
-            argument: this.getState()
-        });
+            oConfig.request || this.get('initialRequest'), oConfig.callback || {
+                success: this.onDataReturnInitializeTable,
+                failure: this.onDataReturnInitializeTable,
+                scope: this,
+                argument: this.getState()
+            });
     };
 
     var origInitAttributes = DT.prototype.initAttributes;
-    DT.prototype.initAttributes = function () {
+    DT.prototype.initAttributes = function() {
         origInitAttributes.apply(this, arguments);
 
         /**
@@ -226,7 +226,7 @@
      * Override to provide option to display all returned records, even if
      * that is more than what paginator says is visible.
      */
-    DT.prototype.render = function () {
+    DT.prototype.render = function() {
 
         this._oChainRender.stop();
 
@@ -238,10 +238,10 @@
         // Paginator is enabled, show a subset of Records and update Paginator UI
         if (oPaginator && this.get('displayAllRecords')) {
             allRecords = this._oRecordSet.getRecords(
-            oPaginator.getStartIndex());
+                oPaginator.getStartIndex());
         } else if (oPaginator) {
             allRecords = this._oRecordSet.getRecords(
-            oPaginator.getStartIndex(), oPaginator.getRowsPerPage());
+                oPaginator.getStartIndex(), oPaginator.getRowsPerPage());
         }
         // Not paginated, show all records
         else {
@@ -263,7 +263,7 @@
 
             // Set up the loop Chain to render rows
             this._oChainRender.add({
-                method: function (oArg) {
+                method: function(oArg) {
                     if ((this instanceof DT) && this._sId) {
                         var i = oArg.nCurrentRecord,
                             endRecordIndex = ((oArg.nCurrentRecord + oArg.nLoopLength) > nRecordsLength) ? nRecordsLength : (oArg.nCurrentRecord + oArg.nLoopLength),
@@ -295,7 +295,7 @@
 
             // Post-render tasks
             this._oChainRender.add({
-                method: function (oArg) {
+                method: function(oArg) {
                     if ((this instanceof DT) && this._sId) {
                         while (elTbody.rows.length > nRecordsLength) {
                             elTbody.removeChild(elTbody.lastChild);
@@ -317,7 +317,7 @@
             var nTotal = elTbody.rows.length;
             if (nTotal > 0) {
                 this._oChainRender.add({
-                    method: function (oArg) {
+                    method: function(oArg) {
                         if ((this instanceof DT) && this._sId) {
                             var i = oArg.nCurrent,
                                 loopN = oArg.nLoopLength,

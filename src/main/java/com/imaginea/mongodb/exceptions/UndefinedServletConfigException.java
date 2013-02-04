@@ -32,48 +32,40 @@ import javax.servlet.ServletException;
  * extract mongo config parameters from the servlet config. Documents.
  *
  * @author Rachit Mittal
- *
  */
 public class UndefinedServletConfigException extends ServletException {
 
-	private static final long serialVersionUID = 1L;
-	private String errorCode;
+    private static final long serialVersionUID = 1L;
+    private String errorCode;
 
-	/**
-	 * Creates a new UndefinedDocumentExcepton with errorcode and message.
-	 *
-	 *
-	 * @param message
-	 *            : A description about the Error.
-	 *
-	 */
-	public UndefinedServletConfigException(String message) {
-		super(message);
-		this.errorCode = ErrorCodes.SERVLET_CONFIG_NOT_SET;
-	}
+    /**
+     * Creates a new UndefinedDocumentExcepton with errorcode and message.
+     *
+     * @param message : A description about the Error.
+     */
+    public UndefinedServletConfigException(String message) {
+        super(message);
+        this.errorCode = ErrorCodes.SERVLET_CONFIG_NOT_SET;
+    }
 
-	/**
-	 * Creates a new UndefinedDocumentExcepton along with cause of caught
-	 * Exception to be appended.
-	 *
-	 *
-	 * @param message
-	 *            : A description about the Error.
-	 *
-	 * @param cause
-	 *            : Cause of the previous Exception. This is appended in the new
-	 *            UndefinedServletConfigException formed here.
-	 */
-	public UndefinedServletConfigException(String message,
-			Throwable cause) {
-		super(message, cause);
-		this.errorCode = ErrorCodes.SERVLET_CONFIG_NOT_SET;
+    /**
+     * Creates a new UndefinedDocumentExcepton along with cause of caught
+     * Exception to be appended.
+     *
+     * @param message : A description about the Error.
+     * @param cause   : Cause of the previous Exception. This is appended in the new
+     *                UndefinedServletConfigException formed here.
+     */
+    public UndefinedServletConfigException(String message,
+                                           Throwable cause) {
+        super(message, cause);
+        this.errorCode = ErrorCodes.SERVLET_CONFIG_NOT_SET;
 
-	}
+    }
 
 
-	public String getErrorCode() {
-		return errorCode;
-	}
+    public String getErrorCode() {
+        return errorCode;
+    }
 
 }

@@ -17,30 +17,32 @@
 YUI({
     filter: 'raw'
 }).use("console", "console-filters", "dd-plugin", function(Y) {
-	// Overriding the default collapse behaviour to hide the console    
-	Y.Console.prototype._onCollapseClick = function() {
-		this.hide();
-	};
-	// creating a console screen
-	var globalConsole = new Y.Console({
-		logSource: Y.Global,
-		style:"seperate",
-		strings: {
-			title: 'Console',
-			pause: 'Pause',
-			clear: 'Clear',
-			collapse: 'Close'
-		},
-		visible: false
-	}).plug(Y.Plugin.ConsoleFilters).plug(Y.Plugin.Drag, {
-		handles: ['.yui3-console-hd']
-	}).render();
-    /**
-     * Event listener for show/hide console button
-     */
-	function showConsole(e, globalConsole) {
-		globalConsole.show();
-		globalConsole.syncUI(); // to handle any UI changes queued while hidden.
-	}
-    Y.on('click', showConsole, '#console', null, globalConsole);
-});
+        // Overriding the default collapse behaviour to hide the console
+        Y.Console.prototype._onCollapseClick = function() {
+            this.hide();
+        };
+        // creating a console screen
+        var globalConsole = new Y.Console({
+            logSource: Y.Global,
+            style: "seperate",
+            strings: {
+                title: 'Console',
+                pause: 'Pause',
+                clear: 'Clear',
+                collapse: 'Close'
+            },
+            visible: false
+        }).plug(Y.Plugin.ConsoleFilters).plug(Y.Plugin.Drag, {
+                handles: ['.yui3-console-hd']
+            }).render();
+
+        /**
+         * Event listener for show/hide console button
+         */
+        function showConsole(e, globalConsole) {
+            globalConsole.show();
+            globalConsole.syncUI(); // to handle any UI changes queued while hidden.
+        }
+
+        Y.on('click', showConsole, '#console', null, globalConsole);
+    });

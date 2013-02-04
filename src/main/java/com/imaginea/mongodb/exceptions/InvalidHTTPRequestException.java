@@ -30,7 +30,6 @@ package com.imaginea.mongodb.exceptions;
  * authenticated user.
  *
  * @author Rachit Mittal
- *
  */
 public class InvalidHTTPRequestException extends ApplicationException {
     private static final long serialVersionUID = 1L;
@@ -38,11 +37,8 @@ public class InvalidHTTPRequestException extends ApplicationException {
     /**
      * Creates a new InvalidHTTPRequestException with errorcode and message.
      *
-     * @param errorCode
-     *            : ErrorCode of the Exception thrown
-     * @param message
-     *            : A description about the Error.
-     *
+     * @param errorCode : ErrorCode of the Exception thrown
+     * @param message   : A description about the Error.
      */
     public InvalidHTTPRequestException(String errorCode, String message) {
         super(errorCode, message);
@@ -52,17 +48,13 @@ public class InvalidHTTPRequestException extends ApplicationException {
      * Creates a new InvalidHTTPRequestException along with cause of caught
      * Exception to be appended.
      *
-     * @param errorCode
-     *            : ErrorCode of the Exception thrown
-     * @param message
-     *            : A description about the Error.
-     *
-     * @param cause
-     *            : Cause of the previous Exception. This is appended in the new
-     *            InvalidHTTPRequestException formed here.
+     * @param errorCode : ErrorCode of the Exception thrown
+     * @param message   : A description about the Error.
+     * @param cause     : Cause of the previous Exception. This is appended in the new
+     *                  InvalidHTTPRequestException formed here.
      */
     public InvalidHTTPRequestException(String errorCode, String message,
-            Throwable cause) {
+                                       Throwable cause) {
         super(errorCode, message, cause);
 
     }

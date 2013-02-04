@@ -16,12 +16,14 @@
 
 package com.imaginea.mongodb.services.impl;
 
-import com.imaginea.mongodb.services.DatabaseService;
-import com.imaginea.mongodb.utils.MongoInstanceProvider;
-import com.imaginea.mongodb.utils.SessionMongoInstanceProvider;
+import com.imaginea.mongodb.domain.ConnectionDetails;
+import com.imaginea.mongodb.domain.MongoConnectionDetails;
+import com.imaginea.mongodb.exceptions.ApplicationException;
 import com.imaginea.mongodb.exceptions.DatabaseException;
 import com.imaginea.mongodb.exceptions.ErrorCodes;
 import com.imaginea.mongodb.exceptions.ValidationException;
+import com.imaginea.mongodb.services.AuthService;
+import com.imaginea.mongodb.services.DatabaseService;
 import com.mongodb.CommandResult;
 import com.mongodb.DB;
 import com.mongodb.Mongo;
@@ -30,6 +32,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -40,19 +43,17 @@ import java.util.Set;
  * service to get list of all databases present and Statistics of a particular
  * database.
  *
-* @author Srinath Anantha
+ * @author Srinath Anantha
  */
 public class DatabaseServiceImpl implements DatabaseService {
 
     /**
-     * Instance variable used to get a mongo instance after binding to an
-     * implementation.
-     */
-    private MongoInstanceProvider mongoInstanceProvider;
-    /**
      * Mongo Instance to communicate with mongo
      */
     private Mongo mongoInstance;
+    private ConnectionDetails connectionDetails;
+
+    private static final AuthService AUTH_SERVICE = AuthServiceImpl.getInstance();
 
     /**
      * Creates an instance of MongoInstanceProvider which is used to get a mongo
@@ -60,11 +61,12 @@ public class DatabaseServiceImpl implements DatabaseService {
      * based on a userMappingKey which is recieved from the database request
      * dispatcher and is obtained from tokenId of user.
      *
-     * @param dbInfo A combination of username,mongoHost and mongoPort
+     * @param connectionId A combination of username,mongoHost and mongoPort
      */
-    public DatabaseServiceImpl(String dbInfo) {
-        mongoInstanceProvider = new SessionMongoInstanceProvider(dbInfo);
-
+    public DatabaseServiceImpl(String connectionId) throws ApplicationException {
+        MongoConnectionDetails mongoConnectionDetails = AUTH_SERVICE.getMongoConnectionDetails(connectionId);
+        mongoInstance = mongoConnectionDetails.getMongo();
+        connectionDetails = mongoConnectionDetails.getConnectionDetails();
     }
 
     /**
@@ -76,16 +78,15 @@ public class DatabaseServiceImpl implements DatabaseService {
      */
 
     public List<String> getDbList() throws DatabaseException {
-
-        mongoInstance = mongoInstanceProvider.getMongoInstance();
-        List<String> dbNames;
         try {
-            dbNames = mongoInstance.getDatabaseNames();
+            Set<String> authenticatedDbNames = connectionDetails.getAuthenticatedDbNames();
+            if (!connectionDetails.isAdminLogin()) {
+                return new ArrayList<String>(authenticatedDbNames);
+            }
+            return mongoInstance.getDatabaseNames();
         } catch (MongoException m) {
             throw new DatabaseException(ErrorCodes.GET_DB_LIST_EXCEPTION, m.getMessage());
         }
-        return dbNames;
-
     }
 
     /**
@@ -100,8 +101,6 @@ public class DatabaseServiceImpl implements DatabaseService {
      */
 
     public String createDb(String dbName) throws DatabaseException, ValidationException {
-        mongoInstance = mongoInstanceProvider.getMongoInstance();
-
         if (dbName == null) {
             throw new DatabaseException(ErrorCodes.DB_NAME_EMPTY, "Database name is null");
 
@@ -111,12 +110,13 @@ public class DatabaseServiceImpl implements DatabaseService {
         }
 
         try {
-            boolean dbAlreadyPresent = mongoInstance.getDatabaseNames().contains(dbName);
+            boolean dbAlreadyPresent = getDbList().contains(dbName);
             if (dbAlreadyPresent) {
                 throw new DatabaseException(ErrorCodes.DB_ALREADY_EXISTS, "DB with name '" + dbName + "' ALREADY EXISTS");
             }
 
             mongoInstance.getDB(dbName).getCollectionNames();
+            connectionDetails.addToAuthenticatedDbNames(dbName);
         } catch (MongoException e) {
 
             throw new DatabaseException("DB_CREATION_EXCEPTION", e.getMessage());
@@ -137,7 +137,6 @@ public class DatabaseServiceImpl implements DatabaseService {
      * @throws ValidationException throw super type of EmptyDatabaseNameException
      */
     public String dropDb(String dbName) throws DatabaseException, ValidationException {
-        mongoInstance = mongoInstanceProvider.getMongoInstance();
         if (dbName == null) {
             throw new DatabaseException(ErrorCodes.DB_NAME_EMPTY, "Database name is null");
 
@@ -146,7 +145,7 @@ public class DatabaseServiceImpl implements DatabaseService {
             throw new DatabaseException(ErrorCodes.DB_NAME_EMPTY, "Database Name Empty");
         }
         try {
-            boolean dbPresent = mongoInstance.getDatabaseNames().contains(dbName);
+            boolean dbPresent = getDbList().contains(dbName);
             if (!dbPresent) {
                 throw new DatabaseException(ErrorCodes.DB_DOES_NOT_EXISTS, "DB with name '" + dbName + "'  DOES NOT EXIST");
             }
@@ -174,11 +173,8 @@ public class DatabaseServiceImpl implements DatabaseService {
      */
 
     public JSONArray getDbStats(String dbName) throws DatabaseException, ValidationException, JSONException {
-
-        mongoInstance = mongoInstanceProvider.getMongoInstance();
         if (dbName == null) {
             throw new DatabaseException(ErrorCodes.DB_NAME_EMPTY, "Database name is null");
-
         }
         if (dbName.equals("")) {
             throw new DatabaseException(ErrorCodes.DB_NAME_EMPTY, "Database Name Empty");
@@ -186,7 +182,8 @@ public class DatabaseServiceImpl implements DatabaseService {
 
         JSONArray dbStats = new JSONArray();
         try {
-            boolean dbPresent = mongoInstance.getDatabaseNames().contains(dbName);
+            List<String> dbList = getDbList();
+            boolean dbPresent = dbList.contains(dbName);
             if (!dbPresent) {
                 throw new DatabaseException(ErrorCodes.DB_DOES_NOT_EXISTS, "DB with name '" + dbName + "'  DOES NOT EXIST");
             }

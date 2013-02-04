@@ -15,14 +15,17 @@
  */
 package com.imaginea.mongodb.controllers;
 
-import com.mongodb.Mongo;
 import org.apache.log4j.Logger;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
+import java.util.Set;
 
 /**
  * Listens at a disconnect Request made by the user and destroys user id from the
@@ -37,41 +40,34 @@ import javax.ws.rs.core.MediaType;
 @Path("/disconnect")
 public class LogoutController extends BaseController {
 
-	private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-	/**
-	 * Define Logger for this class
-	 */
-	private static Logger logger = Logger.getLogger(LogoutController.class);
+    /**
+     * Define Logger for this class
+     */
+    private static Logger logger = Logger.getLogger(LogoutController.class);
 
-	/**
-	 * Listens to a disconnect reuest made by user to end his session from mViewer.
-	 *
-	 * @param dbInfo
-	 *            Mongo Db Configuration provided by user to connect to.
-	 * @return Logout status
-	 *
-	 */
-	@GET
-	@Produces(MediaType.APPLICATION_JSON)
-	public String doGet(@QueryParam("dbInfo") final String dbInfo) {
-		String response = ErrorTemplate.execute(logger, new ResponseCallback() {
-			public Object execute() throws Exception {
-				// Not checking in disconnect if session has dbInfo or not
-				Mongo m = LoginController.mongoConfigToInstanceMapping.get(dbInfo);
-				if (m != null) {
-					int noOfActiveUsers = LoginController.mongoConfigToUsersMapping.get(dbInfo);
-					if (noOfActiveUsers == 0) {
-						m.close();
-						LoginController.mongoConfigToInstanceMapping.remove(dbInfo);
-					} else {
-						LoginController.mongoConfigToUsersMapping.put(dbInfo, noOfActiveUsers - 1);
-					}
-				}
-				String status = "User Logged Out";
-				return status;
-			}
-		});
-		return response;
-	}
+    /**
+     * Listens to a disconnect reuest made by user to end his session from mViewer.
+     *
+     * @param connectionId Mongo Db Configuration provided by user to connect to.
+     * @return Logout status
+     */
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    public String doGet(@QueryParam("connectionId") final String connectionId, @Context final HttpServletRequest request) {
+        String response = ErrorTemplate.execute(logger, new ResponseCallback() {
+            public Object execute() throws Exception {
+                authService.disconnectConnection(connectionId);
+                HttpSession session = request.getSession();
+                Set<String> existingConnectionIdsInSession = (Set<String>) session.getAttribute("existingConnectionIdsInSession");
+                if (existingConnectionIdsInSession != null) {
+                    existingConnectionIdsInSession.remove(connectionId);
+                }
+                String status = "User Logged Out";
+                return status;
+            }
+        });
+        return response;
+    }
 }

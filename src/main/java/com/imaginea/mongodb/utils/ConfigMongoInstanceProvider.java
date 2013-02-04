@@ -16,16 +16,17 @@
 
 package com.imaginea.mongodb.utils;
 
+import com.imaginea.mongodb.exceptions.MongoHostUnknownException;
+import com.mongodb.Mongo;
+import com.mongodb.MongoException;
+import com.mongodb.MongoInternalException;
+
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.UnknownHostException;
 import java.util.Properties;
-import com.imaginea.mongodb.exceptions.MongoHostUnknownException;
-import com.mongodb.Mongo;
-import com.mongodb.MongoException;
-import com.mongodb.MongoInternalException;
 
 /**
  * Provides an Implementation for MongoInstanceProvider that provides instance
@@ -33,70 +34,65 @@ import com.mongodb.MongoInternalException;
  * operations on MonogDb Resources {Db,collection,document}.
  *
  * @author Rachit Mittal
- *
  */
 
 public class ConfigMongoInstanceProvider implements MongoInstanceProvider {
 
-	private Mongo mongoInstance;
+    private Mongo mongoInstance;
 
-	private String mongoHost;
-	private int mongoPort;
+    private String mongoHost;
+    private int mongoPort;
 
-	private Process p;
+    private Process p;
 
-	/**
-	 * Get the initial MongoIP and mongoPort from config file and returns a
-	 * MongoInstance.
-	 *
-	 * @throws MongoHostUnknownException
-	 *             : Mongo Host Unknown
-	 * @throws IOException
-	 * @throws FileNotFoundException
-	 *
-	 */
-	public ConfigMongoInstanceProvider() throws Exception {
-		try {
+    /**
+     * Get the initial MongoIP and mongoPort from config file and returns a
+     * MongoInstance.
+     *
+     * @throws MongoHostUnknownException : Mongo Host Unknown
+     * @throws IOException
+     * @throws FileNotFoundException
+     */
+    public ConfigMongoInstanceProvider() throws Exception {
+        try {
 
-			Properties prop = new Properties();
-			String fileName = "src/test/resources/mongo.config";
-			InputStream is = new FileInputStream(fileName);
-			prop.load(is);
+            Properties prop = new Properties();
+            String fileName = "src/test/resources/mongo.config";
+            InputStream is = new FileInputStream(fileName);
+            prop.load(is);
 
-			if (prop != null) {
-				mongoHost = prop.getProperty("mongoHost");
-				mongoPort = Integer.parseInt(prop.getProperty("mongoPort"));
-				mongoInstance = new Mongo(mongoHost, mongoPort);
-			}
-			System.out.println(mongoInstance.getDatabaseNames());
+            if (prop != null) {
+                mongoHost = prop.getProperty("mongoHost");
+                mongoPort = Integer.parseInt(prop.getProperty("mongoPort"));
+                mongoInstance = new Mongo(mongoHost, mongoPort);
+            }
+            System.out.println(mongoInstance.getDatabaseNames());
 
-		} catch (MongoInternalException e) {
-			throw new MongoHostUnknownException("HOST_UNKNOWN" + "Change your mongo data directory path or mongod path in ConfigMongoInstanceProvider", e);
-		} catch (UnknownHostException e) {
-			throw new MongoHostUnknownException("HOST_UNKNOWN", e);
-		} catch (MongoException e) {
-			throw new MongoHostUnknownException("HOST_UNKNOWN", e);
-		} catch (Exception e) {
+        } catch (MongoInternalException e) {
+            throw new MongoHostUnknownException("HOST_UNKNOWN" + "Change your mongo data directory path or mongod path in ConfigMongoInstanceProvider", e);
+        } catch (UnknownHostException e) {
+            throw new MongoHostUnknownException("HOST_UNKNOWN", e);
+        } catch (MongoException e) {
+            throw new MongoHostUnknownException("HOST_UNKNOWN", e);
+        } catch (Exception e) {
 
-			throw new Exception("ANY_OTHER_EXCEPTION", e);
+            throw new Exception("ANY_OTHER_EXCEPTION", e);
 
-		}
-	}
+        }
+    }
 
-	/**
-	 *
-	 * @return mongo Instance
-	 */
+    /**
+     * @return mongo Instance
+     */
 
-	public Mongo getMongoInstance() {
-		return mongoInstance;
-	}
+    public Mongo getMongoInstance() {
+        return mongoInstance;
+    }
 
-	/**
-	 * Destroys Mongo Process
-	 *
-	 */
-	public void killMongoProcess() {
-		p.destroy();
-	}
+    /**
+     * Destroys Mongo Process
+     */
+    public void killMongoProcess() {
+        p.destroy();
+    }
 }

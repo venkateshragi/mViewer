@@ -1,16 +1,10 @@
 package com.imaginea.mongodb.controllers;
 
-import java.io.FileNotFoundException;
-
+import com.imaginea.mongodb.exceptions.*;
 import org.apache.log4j.Logger;
 import org.json.JSONObject;
 
-import com.imaginea.mongodb.exceptions.ApplicationException;
-import com.imaginea.mongodb.exceptions.CollectionException;
-import com.imaginea.mongodb.exceptions.DatabaseException;
-import com.imaginea.mongodb.exceptions.DocumentException;
-import com.imaginea.mongodb.exceptions.ErrorCodes;
-import com.imaginea.mongodb.exceptions.ValidationException;
+import java.io.FileNotFoundException;
 
 /**
  * Defined an Error Template to catch more exceptions here while Testing. and

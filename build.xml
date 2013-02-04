@@ -1,4 +1,4 @@
-<project name="mViewer" default="dist" xmlns:ac="antlib:net.sf.antcontrib" xmlns:jsl="antlib:com.googlecode.jslint4java" xmlns:ivy="antlib:org.apache.ivy.ant">
+<project name="mViewer" default="dist" xmlns:jsl="antlib:com.googlecode.jslint4java">
 
 
 	<property name="app.name" value="mViewer" />
@@ -106,7 +106,7 @@
 		</copy>
 		<mkdir dir="${app.dir}/js" />
 		<copy toDir="${app.dir}/js">
-			<fileset dir="/js">
+			<fileset dir="${js.src.dir}">
 			</fileset>
 		</copy>
 		<mkdir dir="${app.dir}/WEB-INF" />

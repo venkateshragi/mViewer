@@ -10,23 +10,23 @@
         DT = YAHOO.widget.DataTable;
 
     DS.TYPE_TREELIST = 9;
-/*
+    /*
 
-    Each element in this._open contains information about an openable,
-    top-level node and is the root of a tree of open (or previously opened)
-    items.  Each node in a tree contains the following data:
+     Each element in this._open contains information about an openable,
+     top-level node and is the root of a tree of open (or previously opened)
+     items.  Each node in a tree contains the following data:
 
-        index:      {Number} sorting key; the index of the node
-        open:       null if never opened, true if open, false otherwise
-        ds:         {DataSource} source for child nodes
-        childTotal: {Number} total number of child nodes
-        children:   {Array} (recursive) child nodes which are or have been opened
-        parent:     {Object} parent item
+     index:      {Number} sorting key; the index of the node
+     open:       null if never opened, true if open, false otherwise
+     ds:         {DataSource} source for child nodes
+     childTotal: {Number} total number of child nodes
+     children:   {Array} (recursive) child nodes which are or have been opened
+     parent:     {Object} parent item
 
-    Each level is sorted by index to allow simple traversal in display
-    order.
+     Each level is sorted by index to allow simple traversal in display
+     order.
 
- */
+     */
 
     /**
      * <p>TreebleDataSource converts a tree of DataSources into a flat list of
@@ -125,7 +125,7 @@
         util.TreebleDataSource.superclass.constructor.call(this, oLiveData, oConfigs);
     };
 
-    function populateOpen( /* object */ parent, /* array */ open, /* array */ data, /* int */ startIndex, /* string */ childNodesKey) {
+    function populateOpen(/* object */ parent, /* array */ open, /* array */ data, /* int */ startIndex, /* string */ childNodesKey) {
         var j;
         for (j = 0; j < open.length; j++) {
             if (open[j].index >= startIndex) {
@@ -182,7 +182,7 @@
 
     // TODO: worth switching to binary search?
 
-    function searchOpen( /* array */ list, /* int */ nodeIndex) {
+    function searchOpen(/* array */ list, /* int */ nodeIndex) {
         var i;
         for (i = 0; i < list.length; i++) {
             if (list[i].index === nodeIndex) {
@@ -193,7 +193,7 @@
         return false;
     }
 
-    function getNode( /* array */ path) {
+    function getNode(/* array */ path) {
         var open = this._open;
         var last = path.length - 1;
         var i;
@@ -205,10 +205,8 @@
         return searchOpen(open, path[last]);
     }
 
-    function countVisibleNodes(
-
-    // not sent by initiator
-    /* array */ open) {
+    function countVisibleNodes(// not sent by initiator
+                               /* array */ open) {
         var total = 0;
         if (!open) {
             open = this._open;
@@ -248,10 +246,8 @@
         checkFinished.call(this);
     }
 
-    function getVisibleSlicesPgTop( /* int */ skip, /* int */ show, /* DataSource */ ds, /* array */ open,
-
-    // not sent by initiator
-    /* array */ path) {
+    function getVisibleSlicesPgTop(/* int */ skip, /* int */ show, /* DataSource */ ds, /* array */ open, // not sent by initiator
+                                   /* array */ path) {
         open = open.concat({
             index: -1,
             open: true,
@@ -288,7 +284,7 @@
 
                 if (m + delta === skip + show) {
                     slices = slices.concat(
-                    getVisibleSlicesPgTop(0, node.childTotal, node.ds, node.children, path.concat(node.index)));
+                        getVisibleSlicesPgTop(0, node.childTotal, node.ds, node.children, path.concat(node.index)));
                 }
 
                 return slices;
@@ -308,7 +304,7 @@
 
             if (send && node.childTotal > 0) {
                 slices = slices.concat(
-                getVisibleSlicesPgTop(0, node.childTotal, node.ds, node.children, path.concat(node.index)));
+                    getVisibleSlicesPgTop(0, node.childTotal, node.ds, node.children, path.concat(node.index)));
             }
 
             prev = node.index;
@@ -316,10 +312,8 @@
         }
     }
 
-    function getVisibleSlicesPgAll( /* int */ skip, /* int */ show, /* DataSource */ rootDS, /* array */ open,
-
-    // not sent by initiator
-    /* array */ path, /* node */ parent, /* int */ pre, /* bool */ send, /* array */ slices) {
+    function getVisibleSlicesPgAll(/* int */ skip, /* int */ show, /* DataSource */ rootDS, /* array */ open, // not sent by initiator
+                                   /* array */ path, /* node */ parent, /* int */ pre, /* bool */ send, /* array */ slices) {
         if (!parent) {
             path = [];
             parent = null;
@@ -397,7 +391,7 @@
         return information;
     }
 
-    function requestSlices( /* object */ request) {
+    function requestSlices(/* object */ request) {
         var i, req;
         for (i = 0; i < this._slices.length; i++) {
             var slice = this._slices[i];
@@ -448,7 +442,7 @@
         }
     }
 
-    function findRequest( /* DataSource */ ds) {
+    function findRequest(/* DataSource */ ds) {
         var i;
         for (i = 0; i < this._req.length; i++) {
             var req = this._req[i];
@@ -514,7 +508,7 @@
         DS.issueCallback(this._callback.callback, [this._callback.request, oParsedResponse], true, this._callback.caller);
     }
 
-    function setNodeInfo( /* array */ list, /* int */ offset, /* array */ path, /* datasource */ ds) {
+    function setNodeInfo(/* array */ list, /* int */ offset, /* array */ path, /* datasource */ ds) {
         var depth = path.length,
             i;
         for (i = 0; i < list.length; i++) {
@@ -524,7 +518,7 @@
         }
     }
 
-    function searchTxId( /* array */ req, /* int */ id, /* int */ fallbackIndex) {
+    function searchTxId(/* array */ req, /* int */ id, /* int */ fallbackIndex) {
         var i;
         for (i = 0; i < req.length; i++) {
             if (req[i].txId === id) {

@@ -52,18 +52,18 @@ public class DatabaseController extends BaseController {
      * this request and sent it to client. In case of any exception from the
      * service files an error object if formed.
      *
-     * @param dbInfo  Mongo Db Configuration provided by user to connect to.
-     * @param request Get the HTTP request context to extract session parameters
+     * @param connectionId Mongo Db Configuration provided by user to connect to.
+     * @param request      Get the HTTP request context to extract session parameters
      * @return String of JSON Format with list of all Databases.
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public String getDbList(@QueryParam("dbInfo") final String dbInfo, @Context final HttpServletRequest request) {
+    public String getDbList(@QueryParam("connectionId") final String connectionId, @Context final HttpServletRequest request) {
 
-        String response = new ResponseTemplate().execute(logger, dbInfo, request, new ResponseCallback() {
+        String response = new ResponseTemplate().execute(logger, connectionId, request, new ResponseCallback() {
             public Object execute() throws Exception {
                 // TODO Using Service Provider
-                DatabaseService databaseService = new DatabaseServiceImpl(dbInfo);
+                DatabaseService databaseService = new DatabaseServiceImpl(connectionId);
                 List<String> dbNames = databaseService.getDbList();
                 return dbNames;
             }
@@ -77,27 +77,27 @@ public class DatabaseController extends BaseController {
      * JSON response for this request and sent it to client. In case of any
      * exception from the service files an error object if formed.
      *
-     * @param dbName  Name of Database for which to perform create/drop operation
-     *                depending on action patameter
-     * @param action  Query Paramater with value PUT for identifying a create
-     *                database request and value DELETE for dropping a database.
-     * @param request Get the HTTP request context to extract session parameters
-     * @param dbInfo  Mongo Db Configuration provided by user to connect to.
+     * @param dbName       Name of Database for which to perform create/drop operation
+     *                     depending on action patameter
+     * @param action       Query Paramater with value PUT for identifying a create
+     *                     database request and value DELETE for dropping a database.
+     * @param request      Get the HTTP request context to extract session parameters
+     * @param connectionId Mongo Db Configuration provided by user to connect to.
      * @return : String with status of operation performed.
      */
     @POST
     @Path("/{dbName}")
     @Produces(MediaType.APPLICATION_JSON)
-    public String postDbRequest(@PathParam("dbName") final String dbName, @QueryParam("action") final String action, @QueryParam("dbInfo") final String dbInfo,
+    public String postDbRequest(@PathParam("dbName") final String dbName, @QueryParam("action") final String action, @QueryParam("connectionId") final String connectionId,
                                 @Context final HttpServletRequest request) {
 
         if (action == null) {
             InvalidHTTPRequestException e = new InvalidHTTPRequestException(ErrorCodes.ACTION_PARAMETER_ABSENT, "ACTION_PARAMETER_ABSENT");
             return formErrorResponse(logger, e);
         }
-        String response = new ResponseTemplate().execute(logger, dbInfo, request, new ResponseCallback() {
+        String response = new ResponseTemplate().execute(logger, connectionId, request, new ResponseCallback() {
             public Object execute() throws Exception {
-                DatabaseService databaseService = new DatabaseServiceImpl(dbInfo);
+                DatabaseService databaseService = new DatabaseServiceImpl(connectionId);
                 String status = null;
                 RequestMethod method = null;
                 for (RequestMethod m : RequestMethod.values()) {

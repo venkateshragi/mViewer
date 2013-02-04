@@ -39,7 +39,7 @@ YUI.add('custom-datatable', function(Y) {
     MV.createDatatable = function(path, name) {
         MV.mainBody.set("innerHTML", "");
         /**
-         * <p>The function is used to make the column configuration for the datatable  
+         * <p>The function is used to make the column configuration for the datatable
          * @param colKey
          * <dd>(required)The column name</dd>
          **/
@@ -64,27 +64,27 @@ YUI.add('custom-datatable', function(Y) {
             columnset: cols,
             width: "685px"
         }).plug(Y.Plugin.DataTableDataSource, {
-            datasource: ds,
-            initialRequest: ""
-        });
+                datasource: ds,
+                initialRequest: ""
+            });
 
         ds.sendRequest({
             callback: {
-                success: function (e) {
-                	 MV.header.addClass('tab-cont');
-                     MV.header.set("innerHTML", "Statistics : " + name);
-                     dt.render("#" + MV.mainBody.get('id'));
-                     Y.log("Statistics successfully loaded","info");
+                success: function(e) {
+                    MV.header.addClass('tab-cont');
+                    MV.header.set("innerHTML", "Statistics : " + name);
+                    dt.render("#" + MV.mainBody.get('id'));
+                    Y.log("Statistics successfully loaded", "info");
                 },
-                failure:function(e){
-                	var parsedResponse = Y.JSON.parse(e.data.response),
-                		error = parsedResponse.response.error; 
-                	Y.log("Could not get the statistics, Error message: [0], Error Code: [1]".format(error.message, error.code), "error");
-                	MV.showAlertMessage("Could not get the statistics. [0]", MV.warnIcon, error.code);
+                failure: function(e) {
+                    var parsedResponse = Y.JSON.parse(e.data.response),
+                        error = parsedResponse.response.error;
+                    Y.log("Could not get the statistics, Error message: [0], Error Code: [1]".format(error.message, error.code), "error");
+                    MV.showAlertMessage("Could not get the statistics. [0]", MV.warnIcon, error.code);
                 }
             }
         });
     };
 }, '3.3.0', {
-    requires: ["utility", "alert-dialog","io-base", "node", "json-parse", "datatable-scroll", "datasource-io", "datasource-jsonschema", "datatable-datasource", "event-delegate"]
+    requires: ["utility", "alert-dialog", "io-base", "node", "json-parse", "datatable-scroll", "datasource-io", "datasource-jsonschema", "datatable-datasource", "event-delegate"]
 });

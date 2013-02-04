@@ -15,11 +15,9 @@
  */
 package com.imaginea.mongodb.services;
 
-import com.imaginea.mongodb.exceptions.CollectionException;
-import com.imaginea.mongodb.exceptions.DatabaseException;
-import com.imaginea.mongodb.exceptions.DocumentException;
-import com.imaginea.mongodb.exceptions.ValidationException;
+import com.imaginea.mongodb.exceptions.*;
 import com.mongodb.DBObject;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 /**
@@ -37,7 +35,8 @@ public interface DocumentService {
      *
      * @param dbName         Name of Database
      * @param collectionName Name of Collection from which to get all Documents
-     * @param query          query to be performed. In case of empty query {} return all
+     * @param command        Name of the Command to be executed
+     * @param queryStr       query to be performed. In case of empty query {} return all
      *                       docs.
      * @param keys           Keys to be present in the resulted docs.
      * @param limit          Number of docs to show.
@@ -50,8 +49,8 @@ public interface DocumentService {
      * @throws DocumentException   exception while performing get doc list
      */
 
-    public JSONObject getQueriedDocsList(String dbName, String collectionName, DBObject query, DBObject keys, int limit, int skip) throws DatabaseException, CollectionException,
-        DocumentException, ValidationException;
+    public JSONObject getQueriedDocsList(String dbName, String collectionName, String command, String queryStr, String keys, String sortBy, int limit, int skip) throws ApplicationException, CollectionException,
+            DocumentException, ValidationException, JSONException;
 
     /**
      * Insert a document inside a collection in a database in mongo to which
@@ -77,7 +76,7 @@ public interface DocumentService {
      *
      * @param dbName         Name of Database
      * @param collectionName Name of Collection from which to get all Documents
-     * @param _id             Id of Document to be updated
+     * @param _id            Id of Document to be updated
      * @param newData        new Document value.
      * @return Update status
      * @throws DatabaseException   throw super type of UndefinedDatabaseException

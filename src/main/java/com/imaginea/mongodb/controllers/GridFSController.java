@@ -18,9 +18,9 @@ package com.imaginea.mongodb.controllers;
 import com.imaginea.mongodb.exceptions.ApplicationException;
 import com.imaginea.mongodb.exceptions.DocumentException;
 import com.imaginea.mongodb.exceptions.ErrorCodes;
-import com.imaginea.mongodb.utils.ApplicationUtils;
 import com.imaginea.mongodb.services.GridFSService;
 import com.imaginea.mongodb.services.impl.GridFSServiceImpl;
+import com.imaginea.mongodb.utils.ApplicationUtils;
 import com.sun.jersey.multipart.FormDataBodyPart;
 import com.sun.jersey.multipart.FormDataParam;
 import org.apache.log4j.Logger;
@@ -48,10 +48,10 @@ public class GridFSController extends BaseController {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("create")
     public String createGridFSStore(@PathParam("dbName") final String dbName, @PathParam("bucketName") final String bucketName,
-                                    @QueryParam("dbInfo") final String dbInfo, @Context final HttpServletRequest request) {
-        String response = new ResponseTemplate().execute(logger, dbInfo, request, new ResponseCallback() {
+                                    @QueryParam("connectionId") final String connectionId, @Context final HttpServletRequest request) {
+        String response = new ResponseTemplate().execute(logger, connectionId, request, new ResponseCallback() {
             public Object execute() throws Exception {
-                GridFSService gridFSService = new GridFSServiceImpl(dbInfo);
+                GridFSService gridFSService = new GridFSServiceImpl(connectionId);
                 String result = gridFSService.createStore(dbName, bucketName);
                 return result;
             }
@@ -63,10 +63,10 @@ public class GridFSController extends BaseController {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/count")
     public String getCount(@PathParam("dbName") final String dbName, @PathParam("bucketName") final String bucketName,
-                                    @QueryParam("dbInfo") final String dbInfo, @Context final HttpServletRequest request) {
-        String response = new ResponseTemplate().execute(logger, dbInfo, request, new ResponseCallback() {
+                           @QueryParam("connectionId") final String connectionId, @Context final HttpServletRequest request) {
+        String response = new ResponseTemplate().execute(logger, connectionId, request, new ResponseCallback() {
             public Object execute() throws Exception {
-                GridFSService gridFSService = new GridFSServiceImpl(dbInfo);
+                GridFSService gridFSService = new GridFSServiceImpl(connectionId);
                 JSONObject result = gridFSService.getCount(dbName, bucketName);
                 return result;
             }
@@ -77,22 +77,30 @@ public class GridFSController extends BaseController {
     /**
      * Request handler for getting the list of files stored in GridFS of specified database.
      *
-     * @param dbName     Name of Database
-     * @param bucketName Name of GridFS Bucket
-     * @param dbInfo     Mongo Db Configuration provided by user to connect to.
-     * @param request    Get the HTTP request context to extract session parameters
+     * @param dbName       Name of Database
+     * @param bucketName   Name of GridFS Bucket
+     * @param connectionId Mongo Db Configuration provided by user to connect to.
+     * @param request      Get the HTTP request context to extract session parameters
      * @returns JSON representation of list of all files as a String.
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("getfiles")
-    public String getFileList(@PathParam("dbName") final String dbName, @PathParam("bucketName") final String bucketName, @QueryParam("query") final String query,
-                              @QueryParam("fields") final String keys, @QueryParam("limit") final String limit, @QueryParam("skip") final String skip,
-                              @QueryParam("dbInfo") final String dbInfo, @Context final HttpServletRequest request) {
-        String response = new ResponseTemplate().execute(logger, dbInfo, request, new ResponseCallback() {
+    public String getFileList(@PathParam("dbName") final String dbName,
+                              @PathParam("bucketName") final String bucketName,
+                              @QueryParam("query") final String query,
+                              @QueryParam("fields") final String keys,
+                              @QueryParam("limit") final String limit,
+                              @QueryParam("skip") final String skip,
+                              @QueryParam("sortBy") final String sortBy,
+                              @QueryParam("connectionId") final String connectionId,
+                              @Context final HttpServletRequest request) {
+        String response = new ResponseTemplate().execute(logger, connectionId, request, new ResponseCallback() {
             public Object execute() throws Exception {
-                GridFSService gridFSService = new GridFSServiceImpl(dbInfo);
-                JSONObject result =  gridFSService.getFileList(dbName, bucketName, query, keys, skip, limit);
+                GridFSService gridFSService = new GridFSServiceImpl(connectionId);
+                int startIndex = query.indexOf("("), endIndex = query.lastIndexOf(")");
+                String jsonStr = query.substring(startIndex + 1, endIndex);
+                JSONObject result = gridFSService.getFileList(dbName, bucketName, jsonStr, keys, skip, limit, sortBy);
                 return result;
             }
         });
@@ -106,16 +114,16 @@ public class GridFSController extends BaseController {
      * @param bucketName     Name of GridFS Bucket
      * @param id             ObjectId of the file to be retrieved
      * @param download       is download request
-     * @param dbInfo         Mongo Db Configuration provided by user to connect to.
+     * @param connectionId   Mongo Db Configuration provided by user to connect to.
      * @param servletRequest Get the HTTP request context to extract session parameters
      * @returns Requested multipartfile for viewing or download based on 'download' param.
      */
     @GET
     @Path("getfile")
     public Response getFile(@PathParam("dbName") final String dbName, @PathParam("bucketName") final String bucketName, @QueryParam("id") final String id,
-                            @QueryParam("download") final boolean download, @QueryParam("dbInfo") final String dbInfo,
-                            @Context final HttpServletRequest servletRequest, @Context HttpServletResponse servletResponse) {
-        GridFSService gridFSService = new GridFSServiceImpl(dbInfo);
+                            @QueryParam("download") final boolean download, @QueryParam("connectionId") final String connectionId,
+                            @Context final HttpServletRequest servletRequest, @Context HttpServletResponse servletResponse) throws ApplicationException {
+        GridFSService gridFSService = new GridFSServiceImpl(connectionId);
         File fileObject = null;
         try {
             fileObject = gridFSService.getFile(dbName, bucketName, id);
@@ -140,7 +148,7 @@ public class GridFSController extends BaseController {
      * @param fileDialogData formDataBodyPart representing the containing form
      * @param formData       formDataBodyPart of the uploaded file
      * @param inputStream    inputStream of the uploaded file
-     * @param dbInfo         Mongo Db Configuration provided by user to connect to.
+     * @param connectionId   Mongo Db Configuration provided by user to connect to.
      * @param request        HTTP request context to extract session parameters
      * @returns Success message with additional file details such as name, size,
      * download url & deletion url as JSON Array string.
@@ -153,12 +161,12 @@ public class GridFSController extends BaseController {
                              @FormDataParam("addFileDialog") final FormDataBodyPart fileDialogData,
                              @FormDataParam("files") final FormDataBodyPart formData,
                              @FormDataParam("files") final InputStream inputStream,
-                             @QueryParam("dbInfo") final String dbInfo, @Context final HttpServletRequest request) {
+                             @QueryParam("connectionId") final String connectionId, @Context final HttpServletRequest request) {
 
-        String response = new ResponseTemplate().execute(logger, dbInfo, request, new ResponseCallback() {
+        String response = new ResponseTemplate().execute(logger, connectionId, request, new ResponseCallback() {
             public Object execute() throws Exception {
-                GridFSService gridFSService = new GridFSServiceImpl(dbInfo);
-                return gridFSService.insertFile(dbName, bucketName, dbInfo, inputStream, formData);
+                GridFSService gridFSService = new GridFSServiceImpl(connectionId);
+                return gridFSService.insertFile(dbName, bucketName, connectionId, inputStream, formData);
             }
         }, false);
         return response;
@@ -167,23 +175,23 @@ public class GridFSController extends BaseController {
     /**
      * Request handler for dropping a file from GridFS.
      *
-     * @param dbName     Name of Database
-     * @param bucketName Name of GridFS Bucket
-     * @param _id        Object id of file to be deleted
-     * @param dbInfo     Mongo Db Configuration provided by user to connect to.
-     * @param request    Get the HTTP request context to extract session parameters
+     * @param dbName       Name of Database
+     * @param bucketName   Name of GridFS Bucket
+     * @param _id          Object id of file to be deleted
+     * @param connectionId Mongo Db Configuration provided by user to connect to.
+     * @param request      Get the HTTP request context to extract session parameters
      * @returns Status message.
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("dropfile")
     public String dropFile(@PathParam("dbName") final String dbName, @PathParam("bucketName") final String bucketName,
-                           @QueryParam("id") final String _id, @QueryParam("dbInfo") final String dbInfo,
+                           @QueryParam("id") final String _id, @QueryParam("connectionId") final String connectionId,
                            @Context final HttpServletRequest request) {
 
-        String response = new ResponseTemplate().execute(logger, dbInfo, request, new ResponseCallback() {
+        String response = new ResponseTemplate().execute(logger, connectionId, request, new ResponseCallback() {
             public Object execute() throws Exception {
-                GridFSService gridFSService = new GridFSServiceImpl(dbInfo);
+                GridFSService gridFSService = new GridFSServiceImpl(connectionId);
                 String result = null;
                 if ("".equals(_id)) {
                     ApplicationException e = new DocumentException(ErrorCodes.DOCUMENT_DOES_NOT_EXIST, "File Data Missing in Request Body");
@@ -200,20 +208,20 @@ public class GridFSController extends BaseController {
     /**
      * Request handler for dropping all files from a GridFS bucket.
      *
-     * @param dbName     Name of Database
-     * @param bucketName Name of GridFS Bucket
-     * @param dbInfo     Mongo Db Configuration provided by user to connect to.
-     * @param request    Get the HTTP request context to extract session parameters
+     * @param dbName       Name of Database
+     * @param bucketName   Name of GridFS Bucket
+     * @param connectionId Mongo Db Configuration provided by user to connect to.
+     * @param request      Get the HTTP request context to extract session parameters
      * @return String with Status of operation performed.
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("dropbucket")
     public String dropBucket(@PathParam("dbName") final String dbName, @PathParam("bucketName") final String bucketName,
-                             @QueryParam("dbInfo") final String dbInfo, @Context final HttpServletRequest request) {
-        String response = new ResponseTemplate().execute(logger, dbInfo, request, new ResponseCallback() {
+                             @QueryParam("connectionId") final String connectionId, @Context final HttpServletRequest request) {
+        String response = new ResponseTemplate().execute(logger, connectionId, request, new ResponseCallback() {
             public Object execute() throws Exception {
-                GridFSService gridFSService = new GridFSServiceImpl(dbInfo);
+                GridFSService gridFSService = new GridFSServiceImpl(connectionId);
                 String result = gridFSService.dropBucket(dbName, bucketName);
                 return result;
             }

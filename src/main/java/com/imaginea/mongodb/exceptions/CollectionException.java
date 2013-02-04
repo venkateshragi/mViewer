@@ -28,26 +28,22 @@ package com.imaginea.mongodb.exceptions;
  * Defines all the Exceptions generated while performing any operation on
  * Collections in MongoDb. This class extends MongoException which is the
  * General Exception for Databases,Collections and Documents in MongoDb.
- *
- *
+ * <p/>
+ * <p/>
  * Also a field <errorCode> of type <String> is introduced which gives more info
  * about the error.
  *
  * @author Rachit Mittal
- *
  */
 public class CollectionException extends ApplicationException {
 
     private static final long serialVersionUID = 1L;
 
     /**
-     *
      * Defines a Collection Exception and also sets errorCode.
      *
-     * @param errorCode
-     *            the errorcode for the message
-     * @param message
-     *            the error message
+     * @param errorCode the errorcode for the message
+     * @param message   the error message
      */
     public CollectionException(String errorCode, String message) {
         super(errorCode, message);
@@ -57,13 +53,10 @@ public class CollectionException extends ApplicationException {
      * Defines a Collection Exception along with cause of caught Exception to be
      * appended and also sets errorCode.
      *
-     * @param errorCode
-     *            : ErrorCode of the Exception thrown
-     * @param message
-     *            : A description about the Exception. *
-     * @param cause
-     *            : Cause of the caught Exception to be appended in the new
-     *            CollectionException formed here.
+     * @param errorCode : ErrorCode of the Exception thrown
+     * @param message   : A description about the Exception. *
+     * @param cause     : Cause of the caught Exception to be appended in the new
+     *                  CollectionException formed here.
      */
 
     public CollectionException(String errorCode, String message, Throwable cause) {

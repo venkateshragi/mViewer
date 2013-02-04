@@ -30,21 +30,18 @@ package com.imaginea.mongodb.exceptions;
  * name, empty collection name or no document data.
  *
  * @author Rachit Mittal
- *
  */
 public class ValidationException extends ApplicationException {
 
-	private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-	/**
-	 * Creates a new ValidationException with errorcode and message.
-	 *
-	 * @param errorCode
-	 *            : ErrorCode of the Exception thrown
-	 * @param message
-	 *            : A description about the Error.
-	 */
-	public ValidationException(String errorCode, String message) {
-		super(errorCode,message);
-	}
+    /**
+     * Creates a new ValidationException with errorcode and message.
+     *
+     * @param errorCode : ErrorCode of the Exception thrown
+     * @param message   : A description about the Error.
+     */
+    public ValidationException(String errorCode, String message) {
+        super(errorCode, message);
+    }
 }

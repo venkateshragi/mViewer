@@ -15,135 +15,88 @@
  */
 package com.imaginea.mongodb.controllers;
 
+import com.imaginea.mongodb.domain.ConnectionDetails;
+import com.imaginea.mongodb.domain.MongoConnectionDetails;
 import com.imaginea.mongodb.exceptions.ApplicationException;
 import com.imaginea.mongodb.exceptions.ErrorCodes;
-import com.mongodb.DB;
+import com.imaginea.mongodb.services.impl.DatabaseServiceImpl;
 import com.mongodb.Mongo;
-import com.mongodb.MongoException;
 import org.apache.log4j.Logger;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
-import javax.ws.rs.FormParam;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
+import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Authenticates User to Mongo Db by checking the user in <system.users>
  * collection of admin database.
- * <p>
+ * <p/>
  * Here we also create a map of a mongo configuration which is mongo host and
  * mongoPort provided by user to a mongo Instance. This mongo Instance is used
  * for requests made to this database configuration. Also stores a map of active
  * users on a given mongo configuration for closing the mongo instance at time
  * of disconnect.
  *
- *
  * @author Rachit Mittal
  * @since 10 July 2011
- *
  */
 
 @Path("/login")
 public class LoginController extends BaseController {
-	private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-	public static Map<String, Mongo> mongoConfigToInstanceMapping = new HashMap<String, Mongo>();
-	public static Map<String, Integer> mongoConfigToUsersMapping = new HashMap<String, Integer>();
-	private static Logger logger = Logger.getLogger(LoginController.class);
+    public static Map<String, Mongo> mongoConfigToInstanceMapping = new HashMap<String, Mongo>();
+    public static Map<String, Integer> mongoConfigToUsersMapping = new HashMap<String, Integer>();
+    private static Logger logger = Logger.getLogger(LoginController.class);
 
-	/**
-	 * Authenticates User by verifying Mongo config details against admin
-	 * database and authenticating user to that Db. A facility for guest login
-	 * is also allowed when both fields username and password are empty.
-	 * <p>
-	 * Also stores a mongo instance based on database configuration.
-	 *
-	 * @param request
-	 *            Request made by user for authentication
-	 * @param user
-	 *            Name of user as in admin database in mongo
-	 * @param password
-	 *            password of user as in admin database in mongo
-	 * @param host
-	 *            mongo host to connect to
-	 * @param mongoPort
-	 *            mongo Port to connect to
-	 *
-	 *
-	 *
-	 */
+    /**
+     * Authenticates User by verifying Mongo config details against admin
+     * database and authenticating user to that Db. A facility for guest login
+     * is also allowed when both fields username and password are empty.
+     * <p/>
+     * Also stores a mongo instance based on database configuration.
+     *
+     * @param request   Request made by user for authentication
+     * @param user      Name of user as in admin database in mongo
+     * @param password  password of user as in admin database in mongo
+     * @param host      mongo host to connect to
+     * @param mongoPort mongo Port to connect to
+     */
 
-	@POST
-	@Produces(MediaType.APPLICATION_JSON)
-	public String authenticateUser(@FormParam("username") String user, @FormParam("password") final String password, @FormParam("host") String host, @FormParam("port") final String mongoPort,
-			@Context final HttpServletRequest request) {
+    @POST
+    @Produces(MediaType.APPLICATION_JSON)
+    public String authenticateUser(final @FormParam("username") String user, @FormParam("password") final String password, final @FormParam("host") String host, @FormParam("port") final String mongoPort,
+                                   @FormParam("databases") final String databases, @Context final HttpServletRequest request) {
 
-		final String mongoHost = host;
-		final String username = user;
-		String response = ErrorTemplate.execute(logger, new ResponseCallback() {
-			public Object execute() throws Exception {
-				if ("".equals(mongoHost) || "".equals(mongoPort)) {
-					ApplicationException e = new ApplicationException(ErrorCodes.MISSING_LOGIN_FIELDS, "Missing Login Fields");
-					return formErrorResponse(logger, e);
-				}
-                Mongo mongo = new Mongo(mongoHost, Integer.parseInt(mongoPort));
-                // Hack. Checking server connectivity status by fetching database names
-                boolean loginStatus = false;
-
-                // Authorize User using <admin> Db
-                DB db = mongo.getDB("admin");
-                try {
-                    mongo.getDatabaseNames();
-                } catch (MongoException me) {
-                    loginStatus = db.authenticate(username, password.toCharArray());
-                    if (!loginStatus) {
-                        ApplicationException e = new ApplicationException(("".equals(username) && "".equals(password)) ?
-                                ErrorCodes.NEED_AUTHORISATION : ErrorCodes.INVALID_USERNAME, "Invalid UserName or Password");
-                        return formErrorResponse(logger, e);
-                    }
+        String response = ErrorTemplate.execute(logger, new ResponseCallback() {
+            public Object execute() throws Exception {
+                if ("".equals(host) || "".equals(mongoPort)) {
+                    ApplicationException e = new ApplicationException(ErrorCodes.MISSING_LOGIN_FIELDS, "Missing Login Fields");
+                    return formErrorResponse(logger, e);
                 }
-                // Add mongo Configuration Key to key dbInfo in session
-				String mongoConfigKey = mongoHost + "_" + mongoPort;
-				HttpSession session = request.getSession();
+                HttpSession session = request.getSession();
+                Set<String> existingConnectionIdsInSession = (Set<String>) session.getAttribute("existingConnectionIdsInSession");
 
-				Object dbInfo = session.getAttribute("dbInfo");
-				if (dbInfo == null) {
-					List<String> mongosInSession = new ArrayList<String>();
-					mongosInSession.add(mongoConfigKey);
-					session.setAttribute("dbInfo", mongosInSession);
-				} else {
-					@SuppressWarnings("unchecked")
-					List<String> mongosInSession = (List<String>) dbInfo;
-					mongosInSession.add(mongoConfigKey);
-					session.setAttribute("dbInfo", mongosInSession);
-				}
-
-				// Store a MongoInstance
-				if (!mongoConfigToInstanceMapping.containsKey(mongoConfigKey)) {
-					mongoConfigToInstanceMapping.put(mongoConfigKey, mongo);
-				}
-				Object usersPresent = mongoConfigToUsersMapping.get(mongoConfigKey);
-				int noOfUsers = 0;
-				if (usersPresent == null) {
-					mongoConfigToUsersMapping.put(mongoConfigKey, noOfUsers);
-				}
-				noOfUsers = mongoConfigToUsersMapping.get(mongoConfigKey) + 1;
-				mongoConfigToUsersMapping.put(mongoConfigKey, noOfUsers);
-
+                ConnectionDetails connectionDetails = new ConnectionDetails(host, Integer.parseInt(mongoPort), user, password, databases);
+                String connectionId = authService.authenticate(connectionDetails, existingConnectionIdsInSession);
+                if (existingConnectionIdsInSession == null) {
+                    existingConnectionIdsInSession = new HashSet<String>();
+                    session.setAttribute("existingConnectionIdsInSession", existingConnectionIdsInSession);
+                }
+                existingConnectionIdsInSession.add(connectionId);
                 JSONObject tempResult = new JSONObject();
                 JSONObject jsonResponse = new JSONObject();
                 try {
                     tempResult.put("result", "Login Success");
+                    tempResult.put("connectionId", connectionId);
                     jsonResponse.put("response", tempResult);
                 } catch (JSONException e) {
                     logger.error(e);
@@ -151,6 +104,31 @@ public class LoginController extends BaseController {
                 return jsonResponse;
             }
         }, false);
-		return response;
-	}
+        return response;
+    }
+
+    @Path("/details")
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    public String getConnectionDetails(@QueryParam("connectionId") final String connectionId, @Context final HttpServletRequest request) {
+        String response = new ResponseTemplate().execute(logger, connectionId, request, new ResponseCallback() {
+            public Object execute() throws Exception {
+                MongoConnectionDetails mongoConnectionDetails = authService.getMongoConnectionDetails(connectionId);
+                ConnectionDetails connectionDetails = mongoConnectionDetails.getConnectionDetails();
+                JSONObject jsonResponse = new JSONObject();
+                try {
+                    jsonResponse.put("username", connectionDetails.getUsername());
+                    jsonResponse.put("host", connectionDetails.getHostIp());
+                    jsonResponse.put("port", connectionDetails.getHostPort());
+                    jsonResponse.put("dbNames", new DatabaseServiceImpl(connectionId).getDbList());
+                    jsonResponse.put("authMode", connectionDetails.isAuthMode());
+                    jsonResponse.put("hasAdminLoggedIn", connectionDetails.isAdminLogin());
+                } catch (JSONException e) {
+                    logger.error(e);
+                }
+                return jsonResponse;
+            }
+        });
+        return response;
+    }
 }
