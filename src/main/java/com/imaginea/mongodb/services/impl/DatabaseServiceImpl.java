@@ -122,8 +122,7 @@ public class DatabaseServiceImpl implements DatabaseService {
             throw new DatabaseException("DB_CREATION_EXCEPTION", e.getMessage());
         }
 
-        String result = "Created DB with name '" + dbName + "'";
-        return result;
+        return ("Created DB with name '" + dbName + "'");
     }
 
     /**
@@ -156,8 +155,7 @@ public class DatabaseServiceImpl implements DatabaseService {
             throw new DatabaseException("DB_DELETION_EXCEPTION", e.getMessage());
         }
 
-        String result = "Successfully dropped DB '" + dbName + "'. The page will reload now.";
-        return result;
+        return ("Successfully dropped DB '" + dbName + "'. The page will reload now.");
     }
 
     /**

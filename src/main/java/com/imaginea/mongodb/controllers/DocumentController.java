@@ -104,8 +104,7 @@ public class DocumentController extends BaseController {
                         String jsonStr = query.substring(startIndex + 1, endIndex);
                         int docsLimit = Integer.parseInt(limit);
                         int docsSkip = Integer.parseInt(skip);
-                        JSONObject result = documentService.getQueriedDocsList(dbName, collection, command, jsonStr, fields, sortBy, docsLimit, docsSkip);
-                        return result;
+                        return (documentService.getQueriedDocsList(dbName, collection, command, jsonStr, fields, sortBy, docsLimit, docsSkip));
                     }
                 });
 

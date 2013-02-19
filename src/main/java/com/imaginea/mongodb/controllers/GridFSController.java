@@ -52,8 +52,8 @@ public class GridFSController extends BaseController {
         String response = new ResponseTemplate().execute(logger, connectionId, request, new ResponseCallback() {
             public Object execute() throws Exception {
                 GridFSService gridFSService = new GridFSServiceImpl(connectionId);
-                String result = gridFSService.createStore(dbName, bucketName);
-                return result;
+
+                return (gridFSService.createStore(dbName, bucketName));
             }
         });
         return response;
@@ -67,8 +67,8 @@ public class GridFSController extends BaseController {
         String response = new ResponseTemplate().execute(logger, connectionId, request, new ResponseCallback() {
             public Object execute() throws Exception {
                 GridFSService gridFSService = new GridFSServiceImpl(connectionId);
-                JSONObject result = gridFSService.getCount(dbName, bucketName);
-                return result;
+
+                return ( gridFSService.getCount(dbName, bucketName));
             }
         });
         return response;
@@ -222,8 +222,7 @@ public class GridFSController extends BaseController {
         String response = new ResponseTemplate().execute(logger, connectionId, request, new ResponseCallback() {
             public Object execute() throws Exception {
                 GridFSService gridFSService = new GridFSServiceImpl(connectionId);
-                String result = gridFSService.dropBucket(dbName, bucketName);
-                return result;
+                return (gridFSService.dropBucket(dbName, bucketName));
             }
         });
         return response;

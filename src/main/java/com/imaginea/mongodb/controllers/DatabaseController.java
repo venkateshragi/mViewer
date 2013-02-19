@@ -64,8 +64,7 @@ public class DatabaseController extends BaseController {
             public Object execute() throws Exception {
                 // TODO Using Service Provider
                 DatabaseService databaseService = new DatabaseServiceImpl(connectionId);
-                List<String> dbNames = databaseService.getDbList();
-                return dbNames;
+                return databaseService.getDbList();
             }
         });
         return response;

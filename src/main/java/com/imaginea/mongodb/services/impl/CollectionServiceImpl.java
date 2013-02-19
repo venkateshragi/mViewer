@@ -161,8 +161,7 @@ public class CollectionServiceImpl implements CollectionService {
         } catch (MongoException m) {
             throw new CollectionException(ErrorCodes.COLLECTION_CREATION_EXCEPTION, m.getMessage());
         }
-        String result = "Collection [" + newCollName + "] was successfully added to Database [" + dbName + "].";
-        return result;
+        return ( "Collection [" + newCollName + "] was successfully added to Database [" + dbName + "].");
     }
 
     /**

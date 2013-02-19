@@ -64,8 +64,8 @@ public class LogoutController extends BaseController {
                 if (existingConnectionIdsInSession != null) {
                     existingConnectionIdsInSession.remove(connectionId);
                 }
-                String status = "User Logged Out";
-                return status;
+
+                return ("User Logged Out");
             }
         });
         return response;
