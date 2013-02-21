@@ -159,7 +159,7 @@ YUI({
                 if (parsedResult) {
                     for (index = 0; index < parsedResult.length; index++) {
                         var collectionName = parsedResult[index];
-                        var formattedName = collectionName.length > 20 ? collectionName.substring(0, 20) + "..." : collectionName;
+                        var formattedName = collectionName.length > 19 ? collectionName.substring(0, 17) + "..." : collectionName;
                         var id;
                         if (collectionName == 'system.users') {
 
@@ -174,9 +174,9 @@ YUI({
                             var pos = collectionName.lastIndexOf(".files");
                             if (pos > 0) {
                                 collectionName = collectionName.substring(0, pos);
-                                formattedName = collectionName.length > 20 ? collectionName.substring(0, 20) + "..." : collectionName;
+                                formattedName = collectionName.length > 19 ? collectionName.substring(0, 17) + "..." : collectionName;
                                 id = MV.getBucketElementId(collectionName);
-                                gridFSBuckets += bucketTemplate.format(collectionName, id, formattedName, collectionName, id + "_subMenu", id + "_subMenu");
+                                gridFSBuckets += bucketTemplate.format(collectionName, id, collectionName, formattedName, id + "_subMenu", id + "_subMenu");
                                 hasFiles = true;
                             }
                             // Issue 17 https://github.com/Imaginea/mViewer/issues/17

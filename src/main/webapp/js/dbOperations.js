@@ -202,7 +202,7 @@ YUI({
                         var spanDataDbName = dbName;
                         var subMenuHref = dbName + "_subMenu";
                         var subMenuId = dbName + "_subMenu"
-                        var formattedName = dbName.length > 20 ? dbName.substring(0, 20) + "..." : dbName;
+                        var formattedName = dbName.length > 19 ? dbName.substring(0, 17) + "..." : dbName;
                         dbNames += dbTemplate.format(menuDataDbName, spanId, spanDataDbName, formattedName, subMenuHref, subMenuId);
                     }
                     if (index === 0) {
