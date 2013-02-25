@@ -62,6 +62,20 @@ YUI.add('utility', function(Y) {
         connectionId: ""
     };
 
+    MV.headerConstants = {
+        STATISTICS : "Statistics",
+        SERVER_STATS : "Server Statistics",
+        QUERY_RESPONSE : "Query Response"
+    };
+
+    MV.setHeader = function(value){
+        MV.header.set("innerHTML", value);
+    };
+
+    MV.clearHeader = function(){
+        MV.header.set("innerHTML", "");
+    };
+
     MV.openFileEvent = new YAHOO.util.CustomEvent("OpenFile");
     MV.deleteFileEvent = new YAHOO.util.CustomEvent("DeleteFile");
     MV.deleteDocEvent = new YAHOO.util.CustomEvent("DeleteDoc");
