@@ -79,7 +79,7 @@ public class GridFSServiceImpl implements GridFSService {
      *
      * @param dbName     Name of Database
      * @param bucketName Name of GridFS Bucket
-     * @returns Status message.
+     * @return Status message.
      */
     public String createStore(String dbName, String bucketName) throws DatabaseException, CollectionException {
         if (dbName == null) {
@@ -110,8 +110,9 @@ public class GridFSServiceImpl implements GridFSService {
      * @param query
      * @param fields
      * @param skip
-     * @param limit      @returns JSON representation of list of all files as a String.
+     * @param limit
      * @param sortBy
+     * @return JSON representation of list of all files as a String.
      */
     public JSONObject getFileList(String dbName, String bucketName, String query, String fields, String skip, String limit, String sortBy) throws ValidationException, DatabaseException, CollectionException {
         if (dbName == null) {
@@ -171,7 +172,7 @@ public class GridFSServiceImpl implements GridFSService {
      * @param dbName     Name of Database
      * @param bucketName Name of GridFS Bucket
      * @param _id        ObjectId of the file to be retrieved
-     * @returns Requested multipartfile for viewing or download based on 'download' param.
+     * @return Requested multipartfile for viewing or download based on 'download' param.
      */
     public File getFile(String dbName, String bucketName, String _id) throws ValidationException, DatabaseException, CollectionException {
         if (dbName == null) {
@@ -211,7 +212,7 @@ public class GridFSServiceImpl implements GridFSService {
      * @param formData    formDataBodyPart of the uploaded file
      * @param inputStream inputStream of the uploaded file
      * @param connectionId ConnectionId of the connection
-     * @returns Success message with additional file details such as name, size,
+     * @return Success message with additional file details such as name, size,
      * download url & deletion url as JSON Array string.
      */
     public JSONArray insertFile(String dbName, String bucketName, String connectionId, InputStream inputStream, FormDataBodyPart formData) throws DatabaseException, CollectionException, DocumentException, ValidationException {
@@ -262,7 +263,7 @@ public class GridFSServiceImpl implements GridFSService {
      * @param dbName     Name of Database
      * @param bucketName Name of GridFS Bucket
      * @param _id        Object id of file to be deleted
-     * @returns Status message.
+     * @return Status message.
      */
     public String deleteFile(String dbName, String bucketName, String _id) throws DatabaseException, DocumentException, CollectionException, ValidationException {
         if (dbName == null) {
@@ -338,7 +339,7 @@ public class GridFSServiceImpl implements GridFSService {
      *
      * @param dbName     Name of Database
      * @param bucketName Name of GridFS Bucket
-     * @returns Status message.
+     * @return Status message.
      */
     public String dropBucket(String dbName, String bucketName) throws DatabaseException, DocumentException, CollectionException, ValidationException {
         if (dbName == null) {
@@ -377,7 +378,7 @@ public class GridFSServiceImpl implements GridFSService {
      *
      * @param dbName     Name of Database
      * @param bucketName Name of GridFS Bucket
-     * @returns Status message.
+     * @return Status message.
      */
     public JSONObject getCount(String dbName, String bucketName) throws DatabaseException, DocumentException, ValidationException, CollectionException {
         if (dbName == null) {
