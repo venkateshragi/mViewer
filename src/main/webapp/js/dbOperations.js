@@ -278,13 +278,6 @@ YUI({
             active : 0
         });
 
-
-
-        /*$(".left-cont .buffer .list-head").click(function(eventObject) {
-            if(eventObject.target.tagName !== "BUTTON") {
-                $(this).siblings(".buffer-content").toggle();
-            }
-        });*/
         // Make a request to load Database names when the page loads
         Y.on("load", requestConnectionDetails);
     });

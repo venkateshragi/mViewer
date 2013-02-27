@@ -71,7 +71,7 @@ public class CollectionServiceImpl implements CollectionService {
      * @throws CollectionException exception while performing get list operation on
      *                             collection
      */
-    public Set<String> getCollList(String dbName) throws ValidationException, DatabaseException, CollectionException {
+    public Set<String> getCollList(String dbName) throws DatabaseException, CollectionException {
 
         if (dbName == null) {
             throw new DatabaseException(ErrorCodes.DB_NAME_EMPTY, "Database Name Is Null");
@@ -88,8 +88,7 @@ public class CollectionServiceImpl implements CollectionService {
                 throw new DatabaseException(ErrorCodes.DB_DOES_NOT_EXISTS, "Database with dbName [ " + dbName + "] does not exist");
             }
 
-            Set<String> collectionList = new HashSet<String>();
-            collectionList = mongoInstance.getDB(dbName).getCollectionNames();
+            Set<String> collectionList = mongoInstance.getDB(dbName).getCollectionNames();
             Iterator<String> it = collectionList.iterator();
 
             while (it.hasNext()) {

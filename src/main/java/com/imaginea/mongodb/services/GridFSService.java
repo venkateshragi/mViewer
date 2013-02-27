@@ -25,6 +25,7 @@ import org.json.JSONObject;
 
 import java.io.File;
 import java.io.InputStream;
+import java.util.Set;
 
 /**
  * Declares service methods for performing CRUD operations on files stored in GridFS.
@@ -105,4 +106,13 @@ public interface GridFSService {
      * @returns Status message.
      */
     public JSONObject getCount(String dbName, String bucketName) throws DatabaseException, DocumentException, ValidationException, CollectionException;
+
+    /**
+     * returns all the gridfs buckets for the db
+     * @param dbName
+     * @return
+     * @throws DatabaseException
+     * @throws CollectionException
+     */
+    Set<String> getAllBuckets(String dbName) throws DatabaseException, CollectionException;
 }

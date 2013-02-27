@@ -17,6 +17,7 @@ package com.imaginea.mongodb.services.impl;
 
 import com.imaginea.mongodb.exceptions.*;
 import com.imaginea.mongodb.services.AuthService;
+import com.imaginea.mongodb.services.CollectionService;
 import com.imaginea.mongodb.services.DatabaseService;
 import com.imaginea.mongodb.services.GridFSService;
 import com.imaginea.mongodb.utils.JSON;
@@ -35,7 +36,9 @@ import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Set;
 
 /**
  * Defines services definitions for performing operations like create/drop on
@@ -53,6 +56,7 @@ public class GridFSServiceImpl implements GridFSService {
     private Mongo mongoInstance;
 
     private DatabaseService databaseService;
+    private CollectionService collectionService;
 
     private static final AuthService AUTH_SERVICE = AuthServiceImpl.getInstance();
 
@@ -67,6 +71,7 @@ public class GridFSServiceImpl implements GridFSService {
     public GridFSServiceImpl(String connectionId) throws ApplicationException {
         mongoInstance = AUTH_SERVICE.getMongoInstance(connectionId);
         databaseService = new DatabaseServiceImpl(connectionId);
+        collectionService = new CollectionServiceImpl(connectionId);
     }
 
     /**
@@ -89,10 +94,12 @@ public class GridFSServiceImpl implements GridFSService {
         if (bucketName.equals("")) {
             throw new CollectionException(ErrorCodes.COLLECTION_NAME_EMPTY, "Bucket Name Empty");
         }
-
-        new GridFS(mongoInstance.getDB(dbName), bucketName);
-
-        return "GridFS bucket [" + bucketName + "] added to database [" + dbName + "].";
+        if(getAllBuckets(dbName).contains(bucketName)){
+            return "There is already a GridFS bucket with name [" + bucketName + "].";
+        } else {
+            new GridFS(mongoInstance.getDB(dbName), bucketName);
+            return "GridFS bucket [" + bucketName + "] added to database [" + dbName + "].";
+        }
     }
 
     /**
@@ -299,6 +306,31 @@ public class GridFSServiceImpl implements GridFSService {
         }
         result = "File [" + gridFSDBFile.getFilename() + "] has been deleted.";
         return result;
+    }
+
+    @Override
+    public Set<String> getAllBuckets(String dbName) throws DatabaseException, CollectionException {
+        if (dbName == null) {
+            throw new DatabaseException(ErrorCodes.DB_NAME_EMPTY, "Database name is null");
+
+        }
+        if (dbName.equals("")) {
+            throw new DatabaseException(ErrorCodes.DB_NAME_EMPTY, "Database Name Empty");
+        }
+
+        if (!databaseService.getDbList().contains(dbName)) {
+            throw new DatabaseException(ErrorCodes.DB_DOES_NOT_EXISTS, "DB [" + dbName + "] DOES NOT EXIST");
+        }
+
+        Set<String> collList = collectionService.getCollList(dbName);
+        Set<String> bucketsList = new HashSet<String>();
+        for (String collection : collList) {
+            int pos = collection.lastIndexOf(".files");
+            if( pos > 0 ) {
+                  bucketsList.add(collection.substring(0,pos));
+            }
+        }
+        return bucketsList;
     }
 
     /**
