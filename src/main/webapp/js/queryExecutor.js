@@ -23,7 +23,7 @@ YUI.add('query-executor', function(Y) {
                 },
                 failure: function(ioId, responseObject) {
                     MV.hideLoadingPanel();
-                    MV.showAlertMessage("Unexpected Error: Could not load the query Box", MV.warnIcon);
+                    MV.showAlertMessage("Could not load the query Box", MV.warnIcon);
                     Y.log("Could not send the request to get the keys in the collection. Response Status: [0]".format(responseObject.statusText), "error");
                 }
             }
@@ -50,12 +50,12 @@ YUI.add('query-executor', function(Y) {
                                 successHandler(result);
                             } else {
                                 MV.hideLoadingPanel();
-                                MV.showAlertMessage("Error executing query: [0]".format(error.message), MV.warnIcon);
+                                MV.showAlertMessage(error.message, MV.warnIcon);
                             }
                         },
                         failure: function(request, response) {
                             MV.hideLoadingPanel();
-                            MV.showAlertMessage("Error executing query: [0]".format(response.responseText), MV.warnIcon);
+                            MV.showAlertMessage(response.responseText, MV.warnIcon);
                         }
                     }
                 });
@@ -77,7 +77,7 @@ YUI.add('query-executor', function(Y) {
                     },
                     failure: function(ioId, responseObject) {
                         MV.hideLoadingPanel();
-                        MV.showAlertMessage("Unexpected Error: Could not load the query Box", MV.warnIcon);
+                        MV.showAlertMessage("Could not load the query Box", MV.warnIcon);
                         Y.log("Could not send the request to get the keys in the collection. Response Status: [0]".format(responseObject.statusText), "error");
                     }
                 }
@@ -295,11 +295,6 @@ YUI.add('query-executor', function(Y) {
             if (query === "") {
                 query = "{}";
             }
-
-            //replace the single quotes (') in the query string by double quotes (")
-            query = query.replace(/'/g, '"');
-            query = query.replace(/\r/g, '');
-            query = query.replace(/\n/g, '');
 
             try {
                 for (index = 0; index < fields.size(); index++) {
