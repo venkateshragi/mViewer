@@ -136,8 +136,9 @@ public class DocumentController extends BaseController {
                 Mongo mongoInstance = authService.getMongoInstance(connectionId);
                 long count = mongoInstance.getDB(dbName).getCollection(collectionName).count();
                 DBCursor cursor = mongoInstance.getDB(dbName).getCollection(collectionName).find();
-                if (!allKeys)
+                if (!allKeys) {
                     cursor.limit(10);
+                }
                 DBObject doc = new BasicDBObject();
                 Set<String> completeSet = new HashSet<String>();
                 while (cursor.hasNext()) {
