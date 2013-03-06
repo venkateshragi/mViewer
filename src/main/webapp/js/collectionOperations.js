@@ -71,10 +71,10 @@ YUI({
                 var collTemplate = '' +
                     '<li class="yui3-menuitem" data-collection-name="[0]"> \
                          <span class="yui3-menu-label"> \
-                             <a id=[1] data-collection-name="[2]" href="javascript:void(0)" class="collectionLabel navigable">[3]</a> \
-                             <a href="#[4]" class="yui3-menu-toggle"></a>\
+                             <a id=[1] data-collection-name="[2]" title=[3] href="javascript:void(0)" class="collectionLabel navigable"><span class="wrap_listitem">[4]</span></a> \
+                             <a href="#[5]" class="yui3-menu-toggle"></a>\
                          </span>\
-                         <div id="[5]" class="yui3-menu menu-width">\
+                         <div id="[6]" class="yui3-menu menu-width">\
                              <div class="yui3-menu-content">\
                                  <ul>\
                                      <li class="yui3-menuitem">\
@@ -96,10 +96,10 @@ YUI({
                 var bucketTemplate = '' +
                     '<li class="yui3-menuitem" data-bucket-name="[0]"> \
                          <span class="yui3-menu-label"> \
-                             <a id=[1] data-bucket-name="[2]" href="javascript:void(0)" class="collectionLabel navigable">[3]</a> \
-                             <a href="#[4]" class="yui3-menu-toggle"></a>\
+                             <a id=[1] data-bucket-name="[2]" title=[3] href="javascript:void(0)" class="collectionLabel navigable"><span class="wrap_listitem">[4]</span></a> \
+                             <a href="#[5]" class="yui3-menu-toggle"></a>\
                          </span>\
-                         <div id="[5]" class="yui3-menu menu-width">\
+                         <div id="[6]" class="yui3-menu menu-width">\
                              <div class="yui3-menu-content">\
                                  <ul>\
                                      <li class="yui3-menuitem">\
@@ -118,10 +118,10 @@ YUI({
                 var usersTemplate = '' +
                     '<li class="yui3-menuitem" data-collection-name="[0]"> \
                     <span class="yui3-menu-label"> \
-                        <a id=[1] data-collection-name="[2]" href="javascript:void(0)" class="collectionLabel navigable">[3]</a> \
-                        <a href="#[4]" class="yui3-menu-toggle"></a>\
+                        <a id=[1] data-collection-name="[2]" title=[3] href="javascript:void(0)" class="collectionLabel navigable"><span class="wrap_listitem">[4]</span></a> \
+                        <a href="#[5]" class="yui3-menu-toggle"></a>\
                     </span>\
-                    <div id="[5]" class="yui3-menu menu-width">\
+                    <div id="[6]" class="yui3-menu menu-width">\
                         <div class="yui3-menu-content">\
                             <ul>\
                                 <li class="yui3-menuitem">\
@@ -137,10 +137,10 @@ YUI({
                 var indexesTemplate = '' +
                     '<li class="yui3-menuitem" data-collection-name="[0]"> \
                     <span class="yui3-menu-label"> \
-                        <a id=[1] data-collection-name="[2]" href="javascript:void(0)" class="collectionLabel navigable">[3]</a> \
-                        <a href="#[4]" class="yui3-menu-toggle"></a>\
+                        <a id=[1] data-collection-name="[2]" title=[3] href="javascript:void(0)" class="collectionLabel navigable"><span class="wrap_listitem">[4]</span></a> \
+                        <a href="#[5]" class="yui3-menu-toggle"></a>\
                     </span>\
-                    <div id="[5]" class="yui3-menu menu-width">\
+                    <div id="[6]" class="yui3-menu menu-width">\
                         <div class="yui3-menu-content">\
                             <ul>\
                                 <li class="yui3-menuitem">\
@@ -158,30 +158,27 @@ YUI({
                 if (parsedResult) {
                     for (index = 0; index < parsedResult.length; index++) {
                         var collectionName = parsedResult[index];
-                        var formattedName = collectionName.length > 18 ? collectionName.substring(0, 15) + "..." : collectionName;
                         var id;
                         if (collectionName == 'system.users') {
-
                             id = MV.getCollectionElementId(collectionName);
-                            systemCollections += usersTemplate.format(collectionName, id, collectionName, formattedName, id + "_subMenu", id + "_subMenu");
+                            systemCollections += usersTemplate.format(collectionName, id, collectionName, collectionName, collectionName, id + "_subMenu", id + "_subMenu");
                             hasUsersAndIndexes = true;
                         } else if (collectionName == 'system.indexes') {
                             id = MV.getCollectionElementId(collectionName);
-                            systemCollections += indexesTemplate.format(collectionName, id, collectionName, formattedName, id + "_subMenu", id + "_subMenu");
+                            systemCollections += indexesTemplate.format(collectionName, id, collectionName, collectionName, collectionName, id + "_subMenu", id + "_subMenu");
                             hasUsersAndIndexes = true;
                         } else {
                             var pos = collectionName.lastIndexOf(".files");
                             if (pos > 0) {
                                 collectionName = collectionName.substring(0, pos);
-                                formattedName = collectionName.length > 18 ? collectionName.substring(0, 15) + "..." : collectionName;
                                 id = MV.getBucketElementId(collectionName);
-                                gridFSBuckets += bucketTemplate.format(collectionName, id, collectionName, formattedName, id + "_subMenu", id + "_subMenu");
+                                gridFSBuckets += bucketTemplate.format(collectionName, id, collectionName, collectionName, collectionName, id + "_subMenu", id + "_subMenu");
                                 hasFiles = true;
                             }
                             // Issue 17 https://github.com/Imaginea/mViewer/issues/17
                             if (pos < 0 && collectionName.search(".chunks") < 0) {
                                 id = MV.getCollectionElementId(collectionName);
-                                collections += collTemplate.format(collectionName, id, collectionName, formattedName, id + "_subMenu", id + "_subMenu");
+                                collections += collTemplate.format(collectionName, id, collectionName, collectionName, collectionName, id + "_subMenu", id + "_subMenu");
                                 hasCollections = true;
                             }
                         }

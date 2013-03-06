@@ -169,10 +169,10 @@ YUI({
                     var dbTemplate = '' +
                         '<li class="yui3-menuitem" data-db-name=[0]> \
                                 <span class="yui3-menu-label"> \
-                                      <a id=[1] data-db-name=[2] href="javascript:void(0)" class="dbLabel navigable">[3]</a> \
-                                      <a href="#[4]" class="yui3-menu-toggle"></a>\
+                                      <a id=[1] data-db-name=[2] href="javascript:void(0)" title=[3] class="dbLabel navigable"><span class="wrap_listitem">[4]</span></a> \
+                                      <a href="#[5]" class="yui3-menu-toggle"></a>\
                                 </span>\
-                                <div id="[5]" class="yui3-menu menu-width">\
+                                <div id="[6]" class="yui3-menu menu-width">\
                                     <div class="yui3-menu-content">\
                                         <ul>\
                                             <li class="yui3-menuitem">\
@@ -193,13 +193,10 @@ YUI({
                                 </li>';
                     for (index = 0; index < result.dbNames.length; index++) {
                         var dbName = result.dbNames[index];
-                        var menuDataDbName = dbName;
                         var spanId = MV.getDatabaseElementId(dbName);
-                        var spanDataDbName = dbName;
                         var subMenuHref = dbName + "_subMenu";
-                        var subMenuId = dbName + "_subMenu"
-                        var formattedName = dbName.length > 18 ? dbName.substring(0, 15) + "..." : dbName;
-                        dbNames += dbTemplate.format(menuDataDbName, spanId, spanDataDbName, formattedName, subMenuHref, subMenuId);
+                        var subMenuId = dbName + "_subMenu";
+                        dbNames += dbTemplate.format(dbName, spanId, dbName, dbName, dbName, subMenuHref, subMenuId);
                     }
                     if (index === 0) {
                         dbDiv.set("innerHTML", "No Databases");
