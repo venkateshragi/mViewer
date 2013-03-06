@@ -35,12 +35,12 @@ YUI({
             edit: "edit"
         };
 
-        var idMap = {};
+        var idMap = {}, queryExecutor;
 
         var initQueryBox = function(event) {
             MV.appInfo.currentColl = event.currentTarget.getAttribute("data-collection-name");
             MV.selectDBItem(event.currentTarget);
-            MV.loadQueryBox(MV.URLMap.getDocKeys(), MV.URLMap.getDocs(), sm.currentColl(), showTabView);
+            queryExecutor = MV.loadQueryBox(MV.URLMap.getDocKeys(), MV.URLMap.getDocs(), sm.currentColl(), showTabView);
         };
 
         /**
@@ -238,7 +238,8 @@ YUI({
                             var index = getButtonIndex(targetNode);
                             toggleSaveEdit(targetNode, index, actionMap.save);
                             MV.showAlertMessage("Document updated successfully.", MV.infoIcon);
-                            Y.one('#execQueryButton').simulate('click');
+                            // Re-execute the cached find query to update the view with the new resultSet
+                            queryExecutor.executeCachedQuery();
                         } else {
                             var error = parsedResponse.response.error;
                             MV.showAlertMessage("Could not update Document ! [0]", MV.warnIcon, error.code);
@@ -293,7 +294,8 @@ YUI({
                                 var response = parsedResponse.response.result;
                                 if (response !== undefined) {
                                     MV.showAlertMessage("Document deleted successfully.", MV.infoIcon);
-                                    Y.one('#execQueryButton').simulate('click');
+                                    // Re-execute the cached find query to update the view with the new resultSet
+                                    queryExecutor.executeCachedQuery();
                                 } else {
                                     var error = parsedResponse.response.error;
                                     MV.showAlertMessage("Could not delete the document with _id [0]. [1]".format(docId, MV.errorCodeMap[error.code]), MV.warnIcon);
@@ -309,7 +311,7 @@ YUI({
                 this.hide();
             };
             if (args[0].eventObj.currentTarget.hasClass('deletebtn') || args[0].eventObj.currentTarget.hasClass('delete-icon')) {
-                MV.showYesNoDialog("Do you really want to drop the document ?", sendDeleteDocRequest, function() {
+                MV.showYesNoDialog("Delete Document", "Are you sure you want to drop the document ?", sendDeleteDocRequest, function() {
                     this.hide();
                 });
             } else {
@@ -359,9 +361,9 @@ YUI({
 
         function editDoc(eventObject) {
             if (!allKeysSelected()) {
-                MV.showYesNoDialog("To edit a document you need check all keys in query box. Click YES to do so, NO to cancel", function() {
-                    Y.one('#selectAll').simulate('click');
-                    Y.one('#execQueryButton').simulate('click');
+                MV.showYesNoDialog("Edit Document", "To edit a document you need check all keys in query box. Click YES to do so, NO to cancel", function() {
+                    // Re-execute the cached find query to update the view with the new resultSet
+                    queryExecutor.executeCachedQuery(true);
                     this.hide();
                 }, function() {
                     this.hide();

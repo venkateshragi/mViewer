@@ -18,7 +18,7 @@ YUI.add('query-executor', function(Y) {
             on: {
                 success: function(ioId, responseObject) {
                     populateQueryBox(ioId, responseObject);
-                    executeQuery(null);
+                    _executeQuery(null);
                     // Now sending request to fetch all keys
                     populateAllKeys();
                 },
@@ -34,7 +34,7 @@ YUI.add('query-executor', function(Y) {
          *The function is an event handler for the execute query button. It gets the query parameters from UI components
          *and sends a request to get the documents
          */
-        function executeQuery() {
+        function _executeQuery() {
             var queryParams = getQueryParameters(false);
             execute(queryParams);
         }
@@ -43,7 +43,7 @@ YUI.add('query-executor', function(Y) {
          *The function is an event handler for the execute query button. It gets the query parameters from cache
          *and sends a request to get the documents
          */
-        function executeCachedQuery() {
+        function _executeCachedQuery() {
             var queryParams = getQueryParameters(true);
             execute(queryParams);
         }
@@ -63,7 +63,7 @@ YUI.add('query-executor', function(Y) {
                             if (result && !error) {
                                 //TotalCount may vary from request to request. so update the same in cache.
                                 queryParams.totalCount = result.count;
-                                setQueryParameters(queryParams);
+                                cacheFindQuery(queryParams);
                                 //Update the pagination anchors accordingly
                                 updateAnchors(result.count, result.editable);
                                 successHandler(result);
@@ -199,7 +199,7 @@ YUI.add('query-executor', function(Y) {
         ].join('\n');
 
         function initListeners() {
-            Y.on("click", executeQuery, "#execQueryButton");
+            Y.on("click", _executeQuery, "#execQueryButton");
             Y.on("click", handleSelect, "#selectAll");
             Y.on("click", handleSelect, "#unselectAll");
             Y.on("click", handlePagination, "#first");
@@ -209,19 +209,19 @@ YUI.add('query-executor', function(Y) {
             Y.on("keyup", function(eventObject) {
                 // insert a ctrl + enter listener for query evaluation
                 if (eventObject.ctrlKey && eventObject.keyCode === 13) {
-                    executeQuery();
+                    _executeQuery();
                 }
             }, "#queryBox");
             Y.on("keyup", function(eventObject) {
                 // insert a ctrl + enter listener for query evaluation on skip field
                 if (eventObject.ctrlKey && eventObject.keyCode === 13) {
-                    executeQuery();
+                    _executeQuery();
                 }
             }, "#skip");
             Y.on("keyup", function(eventObject) {
                 // insert a ctrl + enter listener for query evaluation on limit field
                 if (eventObject.ctrlKey && eventObject.keyCode === 13) {
-                    executeQuery();
+                    _executeQuery();
                 }
             }, "#limit");
         }
@@ -258,7 +258,7 @@ YUI.add('query-executor', function(Y) {
             }
             //update skip value in the cache query parameters
             queryParameters.skip = skipValue;
-            executeCachedQuery();
+            _executeCachedQuery();
         }
 
         function updateAnchors(count, showPaginated) {
@@ -310,8 +310,22 @@ YUI.add('query-executor', function(Y) {
          * Stores the query parameters in the cache.
          * @param queryParams
          */
-        function setQueryParameters(queryParams) {
-            cachedQueryParams = queryParams;
+        function cacheFindQuery(queryParams) {
+            var commandStr = queryParams.query.substr(0, queryParams.query.indexOf("("));
+            var command = commandStr.substr(commandStr.lastIndexOf(".") + 1);
+            if (command && (command === "find" || "findOne")) {
+                cachedQueryParams = queryParams;
+            }
+        }
+
+        function _populateCheckedFields(queryParameters) {
+            var fields = Y.all('#fields input'), item;
+            for (var index = 0; index < fields.size(); index++) {
+                item = fields.item(index);
+                if (item.get("checked")) {
+                    queryParameters.checkedFields.push(item.get("name"));
+                }
+            }
         }
 
         /**
@@ -330,17 +344,25 @@ YUI.add('query-executor', function(Y) {
                 queryParameters.skip = parseInt(Y.one('#skip').get("value").trim());
                 queryParameters.sortBy = "{" + Y.one('#sort').get("value") + "}";
                 //populate checked keys of a collection from UI
-                var fields = Y.all('#fields input'), item;
-                for (var index = 0; index < fields.size(); index++) {
-                    item = fields.item(index);
-                    if (item.get("checked")) {
-                        queryParameters.checkedFields.push(item.get("name"));
-                    }
-                }
+                _populateCheckedFields(queryParameters);
                 if (queryParameters.query === "") {
                     queryParameters.query = "{}";
                 }
                 return queryParameters;
+            }
+        }
+
+        return {
+            executeQuery: function() {
+                _executeQuery();
+            },
+            executeCachedQuery: function(selectAllFields) {
+                if (selectAllFields) {
+                    Y.one('#selectAll').simulate('click');
+                    var queryParameters = getQueryParameters(true);
+                    _populateCheckedFields(queryParameters);
+                }
+                _executeCachedQuery();
             }
         }
     };
