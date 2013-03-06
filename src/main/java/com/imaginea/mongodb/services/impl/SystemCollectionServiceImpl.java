@@ -25,7 +25,6 @@ package com.imaginea.mongodb.services.impl;
  */
 
 
-import com.imaginea.mongodb.domain.ConnectionDetails;
 import com.imaginea.mongodb.domain.MongoConnectionDetails;
 import com.imaginea.mongodb.exceptions.ApplicationException;
 import com.imaginea.mongodb.exceptions.DatabaseException;
@@ -120,7 +119,7 @@ public class SystemCollectionServiceImpl implements SystemCollectionService {
             throw new DatabaseException(ErrorCodes.USERNAME_IS_EMPTY, "Username is empty");
         }
         mongoInstance.getDB(dbName).removeUser(username);
-        return "User: " + username + " is deleted from the DB: " + dbName;
+        return "User: " + username + " deleted from the DB: " + dbName;
     }
 
     /**
@@ -133,8 +132,6 @@ public class SystemCollectionServiceImpl implements SystemCollectionService {
 
     @Override
     public String removeAllUsers(String dbName) throws DatabaseException {
-
-
         if (dbName == null) {
             throw new DatabaseException(ErrorCodes.DB_NAME_EMPTY, "Database name is null");
         }
@@ -148,7 +145,7 @@ public class SystemCollectionServiceImpl implements SystemCollectionService {
             }
             return "All users are dropped from the DB: " + dbName;
         } else {
-            return "No users to drop from the DB: " + dbName;
+            return "The DB:" + dbName + "does not have any users";
         }
     }
 
@@ -184,7 +181,7 @@ public class SystemCollectionServiceImpl implements SystemCollectionService {
             throw new DatabaseException(ErrorCodes.KEYS_EMPTY, "Index keys are Empty");
         }
         mongoInstance.getDB(dbName).getCollection(collectionName).ensureIndex(keys);
-        return "New index is successfully added for the collection: " + collectionName + " in the DB: " + dbName;
+        return "Index successfully added to the collection: " + dbName + ":" + collectionName;
     }
 
     /**
@@ -208,7 +205,7 @@ public class SystemCollectionServiceImpl implements SystemCollectionService {
         for (String collection : collectionNames) {
             mongoInstance.getDB(dbName).getCollection(collection).dropIndexes();
         }
-        return "Indexes are dropped on all collections from DB: " + dbName;
+        return "All indexes are dropped from DB: " + dbName;
     }
 
     /**
@@ -243,6 +240,6 @@ public class SystemCollectionServiceImpl implements SystemCollectionService {
         }
         mongoInstance.getDB(dbName).getCollection(collectionName).dropIndexes(indexName);
 
-        return "Index: " + indexName + " is dropped from the collection: " + collectionName + " and DB: " + dbName;
+        return "Index: " + indexName + " dropped from the collection: " + dbName + ":" + collectionName;
     }
 }

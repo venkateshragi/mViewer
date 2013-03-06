@@ -39,12 +39,12 @@ YUI({
             edit: "edit"
         };
 
-        var idMap = {};
+        var idMap = {}, queryExecutor;
 
         var initQueryBox = function(event) {
             MV.appInfo.currentColl = event.currentTarget.getAttribute("data-collection-name");
             MV.selectDBItem(event.currentTarget);
-            MV.loadQueryBox(MV.URLMap.getDocKeys(), MV.URLMap.getDocs(), sm.currentColl(), showTabView);
+            queryExecutor = MV.loadQueryBox(MV.URLMap.getDocKeys(), MV.URLMap.getDocs(), sm.currentColl(), showTabView);
         };
 
         /**
@@ -95,8 +95,6 @@ YUI({
                 "<div class='actionsDiv'>",
                 "<button id='edit[3]'class='bttn editbtn non-navigable'>edit</button>",
                 "<button id='delete[4]'class='bttn deletebtn non-navigable'>delete</button>",
-                "<button id='save[5]'class='bttn savebtn non-navigable invisible'>save</button>",
-                "<button id='cancel[6]'class='bttn cancelbtn non-navigable invisible'>cancel</button>",
                 "</div>" ,
                 "</div>"
             ].join('\n');
@@ -116,7 +114,7 @@ YUI({
                 if (documents[i].name == "_id_") {
                     jsonView += nonEditableTemplate.format(i, i, Y.JSON.stringify(documents[i], null, 4));
                 } else {
-                    jsonView += template.format(i, i, Y.JSON.stringify(documents[i], null, 4), i, i, i, i);
+                    jsonView += template.format(i, i, Y.JSON.stringify(documents[i], null, 4), i, i);
                 }
             }
             if (i === 0) {
@@ -136,8 +134,6 @@ YUI({
                 Y.on("click", function(e) {
                     MV.deleteDocEvent.fire({eventObj: e});
                 }, "#delete" + i);
-                Y.on("click", saveDoc, "#save" + i);
-                Y.on("click", cancelSave, "#cancel" + i);
             }
             for (i = 0; i < documents.length; i++) {
                 fitToContent(500, document.getElementById("ta" + i));
@@ -169,19 +165,6 @@ YUI({
                 if (resetAll) {
                     Y.all('tr.selected').each(function(item) {
                         item.removeClass(trSelectionClass);
-                    });
-                }
-            }, 'div.jsonBuffer');
-
-            Y.on('keyup', function(eventObject) {
-                var firstItem;
-                // escape edit mode
-                if (eventObject.keyCode === 27) {
-                    Y.all("button.savebtn").each(function(item) {
-                        toggleSaveEdit(item, getButtonIndex(item), actionMap.save);
-                        if (!(firstItem)) {
-                            firstItem = item;
-                        }
                     });
                 }
             }, 'div.jsonBuffer');
@@ -220,7 +203,7 @@ YUI({
          */
         function deleteUserOrIndex(type, args) {
             var btnIndex;
-            var collname = sm.currentColl();
+            var collName = sm.currentColl();
             var sendDeleteDocRequest = function() {
                 var targetNode = args[0].eventObj.currentTarget;
                 var index = getButtonIndex(targetNode);
@@ -230,7 +213,7 @@ YUI({
                 var username, nameSpace, indexName;
 
                 //if the collection is from system.users then we need to remove the user
-                if (collname == MV.users) {
+                if (collName == MV.users) {
                     username = parsedDoc.user;
                     var request = Y.io(MV.URLMap.removeUser(),
                         // configuration for dropping the document
@@ -243,7 +226,8 @@ YUI({
                                     var response = parsedResponse.response.result;
                                     if (response !== undefined) {
                                         MV.showAlertMessage(response, MV.infoIcon);
-                                        Y.one('#execQueryButton').simulate('click');
+                                        // Re-execute the cached find query to update the view with the new resultSet
+                                        queryExecutor.executeCachedQuery();
                                     }
                                     else {
                                         var error = parsedResponse.response.error;
@@ -260,7 +244,7 @@ YUI({
 
                 }
                 //If the collection is from system.indexes we need to remove the index
-                else if (collname == MV.indexes) {
+                else if (collName == MV.indexes) {
                     //Send the name space and the name of the index
                     nameSpace = parsedDoc.ns;
                     indexName = parsedDoc.name;
@@ -276,7 +260,8 @@ YUI({
                                     var response = parsedResponse.response.result;
                                     if (response !== undefined) {
                                         MV.showAlertMessage(response, MV.infoIcon);
-                                        Y.one('#execQueryButton').simulate('click');
+                                        // Re-execute the cached find query to update the view with the new resultSet
+                                        queryExecutor.executeCachedQuery();
                                     }
                                     else {
                                         var error = parsedResponse.response.error;
@@ -291,61 +276,23 @@ YUI({
                             }
                         });
                 }
-
                 this.hide();
             };
             if (args[0].eventObj.currentTarget.hasClass('deletebtn') || args[0].eventObj.currentTarget.hasClass('delete-icon')) {
-                var alertmsg = "Do you really want to drop the ";
-                if (collname == MV.users) {
-                    alertmsg = alertmsg.concat("user ?");
-
+                var alertMsg = "Are you sure you want to drop the ", header;
+                if (collName == MV.users) {
+                    alertMsg = alertMsg.concat("user ?");
+                    header = "Drop User";
                 }
-                else if (collname == MV.indexes) {
-                    alertmsg = alertmsg.concat("index ?");
+                else if (collName == MV.indexes) {
+                    alertMsg = alertMsg.concat("index ?");
+                    header = "Drop Index";
                 }
-                MV.showYesNoDialog(alertmsg, sendDeleteDocRequest, function() {
+                MV.showYesNoDialog(header, alertMsg, sendDeleteDocRequest, function() {
                     this.hide();
                 });
-            } else {
-                //get the sibling save/edit bttn and toggle using that
-                btnIndex = getButtonIndex(args[0].eventObj.currentTarget);
-                toggleSaveEdit(Y.one('#delete' + btnIndex).get('parentNode').one('button'), btnIndex, actionMap.save);
             }
         }
-
-        /**
-         * The function is an event handler for the save button click.
-         * @param eventObject The event Object
-         */
-
-        function saveDoc(eventObject) {
-            var targetNode = eventObject.currentTarget;
-            var index = getButtonIndex(targetNode);
-            var textArea = Y.one('#doc' + index).one("pre").one("textarea");
-            var doc = textArea.get("value");
-            doc = doc.replace(/'/g, '"');
-            try {
-                var parsedDoc = Y.JSON.parse(doc);
-                sendUpdateDocRequest(Y.JSON.stringify(parsedDoc), idMap[index].docId, eventObject);
-            } catch (e) {
-                MV.showAlertMessage("The document entered is not in the correct JSON format", MV.warnIcon);
-                textArea.focus();
-            }
-        }
-
-        /**
-         * The function is an event handler for the cancel button click
-         * @param eventObject The event Object
-         */
-
-        function cancelSave(eventObject) {
-            var targetNode = eventObject.currentTarget;
-            var index = getButtonIndex(targetNode);
-            var textArea = Y.one('#doc' + index).one("pre").one("textarea");
-            textArea.set("value", idMap[index].originalDoc);
-            toggleSaveEdit(targetNode, index, actionMap.save);
-        }
-
 
         /**
          * The function is an event handler for the edit button click
@@ -413,7 +360,7 @@ YUI({
                         break;
                     case 2:
                         // Drop All the users present in the database
-                        MV.showYesNoDialog("Do you want to drop all the users ?", dropUsers, function() {
+                        MV.showYesNoDialog("Drop Users", "Are you sure you want to drop all the users ?", dropUsers, function() {
                             this.hide();
                         });
                         break;
@@ -431,7 +378,7 @@ YUI({
                         MV.showSubmitDialog("addIndexDialog", addIndex, showError);
                         break;
                     case 2:
-                        MV.showYesNoDialog("Do you want to drop Indexes on all the collections ?", dropAllIndexes, function() {
+                        MV.showYesNoDialog("Drop Indexes", "Are you sure you want to drop Indexes on all the collections ?", dropAllIndexes, function() {
                             this.hide();
                         });
                         break;

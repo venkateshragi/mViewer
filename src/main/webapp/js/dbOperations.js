@@ -119,7 +119,7 @@ YUI({
                     break;
                 case 3:
                     // Delete database
-                    dialog = MV.showYesNoDialog("Do you really want to drop the Database?", sendDropDBRequest, function(dialog) {
+                    dialog = MV.showYesNoDialog("Drop Database", "Are you sure you want to drop the Database?", sendDropDBRequest, function() {
                         this.hide();
                     });
                     break;

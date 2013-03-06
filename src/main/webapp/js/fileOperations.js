@@ -200,7 +200,7 @@ YUI({
                 this.hide();
             };
 
-            MV.showYesNoDialog("Do you really want to drop the file ?", sendDeleteFileRequest, function() {
+            MV.showYesNoDialog("Delete File", "Are you sure you want to delete the file ?", sendDeleteFileRequest, function() {
                 this.hide();
             });
         }

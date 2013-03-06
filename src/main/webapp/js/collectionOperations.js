@@ -232,7 +232,7 @@ YUI({
                     break;
                 case 2:
                     // Drop Collection
-                    MV.showYesNoDialog("Do you really want to drop the Collection - " + MV.appInfo.currentColl + "?", dropCollection, function() {
+                    MV.showYesNoDialog("Drop Collection", "Are you sure you want to drop the Collection - " + MV.appInfo.currentColl + "?", dropCollection, function() {
                         this.hide();
                     });
                     break;
@@ -303,7 +303,7 @@ YUI({
                     break;
                 case 2:
                     // Delete
-                    MV.showYesNoDialog("Do you really want to drop all files in this bucket - " + MV.appInfo.currentBucket + "?", sendDropBucketRequest, function() {
+                    MV.showYesNoDialog("Drop Bucket", "Are you sure you want to drop all files in this bucket - " + MV.appInfo.currentBucket + "?", sendDropBucketRequest, function() {
                         this.hide();
                     });
                     break;
