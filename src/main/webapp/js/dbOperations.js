@@ -18,7 +18,7 @@ YUI({
 }).use("loading-panel", "alert-dialog", "utility", "submit-dialog", "yes-no-dialog", "io-base", "node", "node-menunav", "json-parse", "event-delegate", "node-event-simulate", "custom-datatable", function(Y) {
         // TODO: make loading panel module
         var dbDiv = Y.one('#dbNames ul.lists');
-        dbDiv.delegate('click', handleClickEvent, 'a.onclick');
+        dbDiv.delegate('click', handleMenuClickEvent, 'a.onclick');
         YUI.namespace('com.imaginea.mongoV');
         var MV = YUI.com.imaginea.mongoV;
         var sm = YUI.com.imaginea.mongoV.StateManager;
@@ -34,9 +34,12 @@ YUI({
                 response = parsedResponse.response.result,
                 error;
             if (response !== undefined) {
-                MV.showAlertMessage(response, MV.infoIcon);
                 sm.clearCurrentColl();
+                /**
+                 * The alert message need to be shown after simulating the click event,otherwise the message will be hidden by click event
+                 */
                 Y.one("#" + MV.getDatabaseElementId(MV.appInfo.currentDB)).simulate("click");
+                MV.showAlertMessage(response, MV.infoIcon);
             } else {
                 error = parsedResponse.response.error;
                 MV.showAlertMessage("Could not add Collection! [0]", MV.warnIcon, error.code);
@@ -82,7 +85,8 @@ YUI({
          * @param args the arguments containing information about which menu item was clicked
          */
 
-        function handleClickEvent(event) {
+        function handleMenuClickEvent(event) {
+            sm.publish(sm.events.actionTriggered);
             var dialog, showErrorMessage;
             var label = $(event.currentTarget._node).closest("ul").closest("li")[0].attributes["data-db-name"].value;
             var index = parseInt(event.currentTarget._node.attributes["index"].value);
@@ -107,8 +111,8 @@ YUI({
                         var parsedResponse = Y.JSON.parse(response.responseText);
                         var result = parsedResponse.response.result;
                         if (result !== undefined) {
-                            MV.showAlertMessage(result, MV.infoIcon);
                             Y.one("#" + MV.getDatabaseElementId(MV.appInfo.currentDB)).simulate("click");
+                            MV.showAlertMessage(result, MV.infoIcon);
                         }
                     };
                     showErrorMessage = function(responseObject) {
@@ -207,7 +211,7 @@ YUI({
                     menu.plug(Y.Plugin.NodeMenuNav, { autoSubmenuDisplay: false, mouseOutHideDelay: 0 });
                     menu.set("style.display", "block");
                     MV.hideLoadingPanel();
-                    sm.publish(sm.events.dbsChanged);
+                    sm.publish(sm.events.dbListUpdated);
                 } else {
                     MV.hideLoadingPanel();
                     var error = parsedResponse.response.error;
