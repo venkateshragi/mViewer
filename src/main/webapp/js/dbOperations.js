@@ -39,7 +39,7 @@ YUI({
                 Y.one("#" + MV.getDatabaseElementId(MV.appInfo.currentDB)).simulate("click");
             } else {
                 error = parsedResponse.response.error;
-                MV.showAlertMessage("Could not add Collection! [0]", MV.warnIcon, error.code);
+                MV.showAlertMessage(MV.getErrorMsgFromServerError(error), MV.warnIcon);
                 Y.log("Could not add Collection! [0]".format(MV.errorCodeMap[error.code]), "error");
             }
         }
@@ -267,15 +267,15 @@ YUI({
 
         $('#dbBuffer').accordion({
             header: "div.list-head",
-            heightStyle : "content",
+            heightStyle: "content",
             collapsible: true
         });
 
         $('#dbOperations').accordion({
             header: "div.list-head",
-            heightStyle : "content",
+            heightStyle: "content",
             collapsible: true,
-            active : 0
+            active: 0
         });
 
         // Make a request to load Database names when the page loads
