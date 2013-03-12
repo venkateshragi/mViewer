@@ -94,7 +94,7 @@ public class GridFSServiceImpl implements GridFSService {
             throw new CollectionException(ErrorCodes.COLLECTION_NAME_EMPTY, "Bucket Name Empty");
         }
         if (getAllBuckets(dbName).contains(bucketName)) {
-            return "There is already a GridFS bucket with name [" + bucketName + "].";
+            throw new CollectionException(ErrorCodes.COLLECTION_ALREADY_EXISTS, "Collection [" + bucketName + "] already exists in Database [" + dbName + "]");
         } else {
             new GridFS(mongoInstance.getDB(dbName), bucketName);
             return "GridFS bucket [" + bucketName + "] added to database [" + dbName + "].";
