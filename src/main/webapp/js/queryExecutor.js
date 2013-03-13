@@ -2,11 +2,18 @@ YUI.add('query-executor', function(Y) {
     YUI.namespace('com.imaginea.mongoV');
     var MV = YUI.com.imaginea.mongoV;
     var successHandler, currentSelection;
+    var sm = MV.StateManager;
 
     MV.loadQueryBox = function(keysUrl, dataUrl, selectedCollection, sHandler) {
 
+        var cachedQueryParams = {};
         successHandler = sHandler;
         currentSelection = selectedCollection;
+        var keys = [];
+
+        function _getKeys(){
+            return keys;
+        }
 
         /**
          * It sends request to get the keys from first 10 records only. Updates all key with another request.
@@ -17,45 +24,64 @@ YUI.add('query-executor', function(Y) {
             on: {
                 success: function(ioId, responseObject) {
                     populateQueryBox(ioId, responseObject);
-                    executeQuery(null);
+                    _executeQuery(null);
                     // Now sending request to fetch all keys
                     populateAllKeys();
                 },
                 failure: function(ioId, responseObject) {
                     MV.hideLoadingPanel();
-                    MV.showAlertMessage("Unexpected Error: Could not load the query Box", MV.warnIcon);
+                    MV.showAlertMessage("Could not load the query Box", MV.warnIcon);
                     Y.log("Could not send the request to get the keys in the collection. Response Status: [0]".format(responseObject.statusText), "error");
                 }
             }
         });
 
         /**
-         *The function is an event handler for the execute query button. It gets the query parameters
+         *The function is an event handler for the execute query button. It gets the query parameters from UI components
          *and sends a request to get the documents
-         * @param {Object} event The event object
          */
-        function executeQuery(event) {
-            var queryParams = getQueryParameters();
-            if (queryParams !== undefined) {
+        function _executeQuery() {
+            var queryParams = _getQueryParameters(false);
+            execute(queryParams);
+        }
+
+        /**
+         *The function is an event handler for the execute query button. It gets the query parameters from cache
+         *and sends a request to get the documents
+         */
+        function _executeCachedQuery() {
+            var queryParams = _getQueryParameters(true);
+            execute(queryParams);
+        }
+
+        function execute(queryParams) {
+            var queryStr = "&query=[0]&limit=[1]&skip=[2]&fields=[3]&sortBy=[4]".format(
+                encodeURIComponent(queryParams.query), queryParams.limit, queryParams.skip, queryParams.checkedFields, queryParams.sortBy);
+            if (queryStr !== undefined) {
                 MV.showLoadingPanel("Loading Documents...");
                 Y.io(dataUrl, {
                     method: "GET",
-                    data: queryParams,
+                    data: queryStr,
                     on: {
                         success: function(request, response) {
                             var parsedResponse = Y.JSON.parse(response.responseText).response;
                             var result = parsedResponse.result, error = parsedResponse.error;
                             if (result && !error) {
+                                //TotalCount may vary from request to request. so update the same in cache.
+                                queryParams.totalCount = result.count;
+                                postExecuteQueryProcess(queryParams);
+                                //Update the pagination anchors accordingly
                                 updateAnchors(result.count, result.editable);
+                                sm.publish(sm.events.queryExecuted);
                                 successHandler(result);
                             } else {
                                 MV.hideLoadingPanel();
-                                MV.showAlertMessage("Error executing query: [0]".format(error.message), MV.warnIcon);
+                                MV.showAlertMessage(error.message, MV.warnIcon);
                             }
                         },
                         failure: function(request, response) {
                             MV.hideLoadingPanel();
-                            MV.showAlertMessage("Error executing query: [0]".format(response.responseText), MV.warnIcon);
+                            MV.showAlertMessage(response.responseText, MV.warnIcon);
                         }
                     }
                 });
@@ -69,15 +95,15 @@ YUI.add('query-executor', function(Y) {
                 on: {
                     success: function(ioId, responseObject) {
                         var parsedResponse = Y.JSON.parse(responseObject.responseText);
-                        var keys = parsedResponse.response.result.keys;
+                        keys = parsedResponse.response.result.keys;
                         if (keys !== undefined) {
-                            var innerHTML = formatKeys(keys);
+                            var innerHTML = _formatKeys(keys);
                             Y.one('#fields').set('innerHTML', innerHTML);
                         }
                     },
                     failure: function(ioId, responseObject) {
                         MV.hideLoadingPanel();
-                        MV.showAlertMessage("Unexpected Error: Could not load the query Box", MV.warnIcon);
+                        MV.showAlertMessage("Could not load the query Box", MV.warnIcon);
                         Y.log("Could not send the request to get the keys in the collection. Response Status: [0]".format(responseObject.statusText), "error");
                     }
                 }
@@ -93,7 +119,6 @@ YUI.add('query-executor', function(Y) {
          */
         function populateQueryBox(ioId, responseObject) {
             var parsedResponse, keys, count, queryForm, error;
-            Y.log("Preparing to show QueryBox", "info");
             try {
                 parsedResponse = Y.JSON.parse(responseObject.responseText);
                 keys = parsedResponse.response.result.keys;
@@ -102,12 +127,11 @@ YUI.add('query-executor', function(Y) {
                     document.getElementById('queryExecutor').style.display = 'block';
                     queryForm = Y.one('#queryForm');
                     queryForm.addClass('form-cont');
-                    MV.header.set("innerHTML", "");
+                    MV.clearHeader();
                     MV.mainBody.empty(true);
                     queryForm.set("innerHTML", getForm(keys, count));
                     MV.mainBody.set("innerHTML", paginatorTemplate.format(count < 25 ? count : 25, count));
                     initListeners();
-                    Y.log("QueryBox loaded", "info");
                 } else {
                     error = parsedResponse.response.error;
                     Y.log("Could not get keys. Message: [0]".format(error.message), "error");
@@ -129,7 +153,7 @@ YUI.add('query-executor', function(Y) {
                     "<a id='unselectAll' href='javascript:void(0)'>Unselect All</a>"
                 ].join('\n');
                 checkList = "<div id='checkListDiv'><div class='queryBoxlabels'><label for='fields' >Attributes</label>" + selectTemplate + "</div><div><ul id='fields' class='checklist'>";
-                checkList += formatKeys(keys);
+                checkList += _formatKeys(keys);
                 checkList += "</ul>";
                 checkList += "</div>";
                 checkList += "</div>";
@@ -137,7 +161,7 @@ YUI.add('query-executor', function(Y) {
             return upperPartTemplate.format(currentSelection) + checkList + lowerPartTemplate;
         };
 
-        function formatKeys(keys) {
+        function _formatKeys(keys) {
             var checkList = "";
             for (var index = 0; index < keys.length; index++) {
                 checkList += checkListTemplate.format(keys[index], keys[index], keys[index], keys[index]);
@@ -182,7 +206,7 @@ YUI.add('query-executor', function(Y) {
         ].join('\n');
 
         function initListeners() {
-            Y.on("click", executeQuery, "#execQueryButton");
+            Y.on("click", _executeQuery, "#execQueryButton");
             Y.on("click", handleSelect, "#selectAll");
             Y.on("click", handleSelect, "#unselectAll");
             Y.on("click", handlePagination, "#first");
@@ -192,19 +216,19 @@ YUI.add('query-executor', function(Y) {
             Y.on("keyup", function(eventObject) {
                 // insert a ctrl + enter listener for query evaluation
                 if (eventObject.ctrlKey && eventObject.keyCode === 13) {
-                    Y.one('#execQueryButton').simulate('click');
+                    _executeQuery();
                 }
             }, "#queryBox");
             Y.on("keyup", function(eventObject) {
                 // insert a ctrl + enter listener for query evaluation on skip field
                 if (eventObject.ctrlKey && eventObject.keyCode === 13) {
-                    Y.one('#execQueryButton').simulate('click');
+                    _executeQuery();
                 }
             }, "#skip");
             Y.on("keyup", function(eventObject) {
                 // insert a ctrl + enter listener for query evaluation on limit field
                 if (eventObject.ctrlKey && eventObject.keyCode === 13) {
-                    Y.one('#execQueryButton').simulate('click');
+                    _executeQuery();
                 }
             }, "#limit");
         }
@@ -227,46 +251,57 @@ YUI.add('query-executor', function(Y) {
             var href = event.currentTarget.get("href");
             if (href == null || href == undefined || href == "")
                 return;
+            var queryParameters = _getQueryParameters(true);
+            var skipValue = queryParameters.skip, limitValue = queryParameters.limit, countValue = queryParameters.totalCount;
             var id = event.currentTarget.get("id");
-            var skip = Y.one('#skip'), limit = Y.one('#limit'), count = Y.one('#countLabel');
-            var skipValue = parseInt(skip.get('value')), limitValue = parseInt(limit.get('value')), countValue = parseInt(count.get('text'));
             if (id === "first") {
-                skip.set('value', 0);
+                skipValue = 0;
             } else if (id === "prev") {
-                skip.set('value', (skipValue - limitValue) < 0 ? 0 : (skipValue - limitValue));
+                skipValue = (skipValue - limitValue) < 0 ? 0 : (skipValue - limitValue);
             } else if (id === "next") {
-                skip.set('value', skipValue + limitValue);
+                skipValue = skipValue + limitValue;
             } else if (id === "last") {
-                skip.set('value', countValue - limitValue);
+                var docCountInLastPage = (countValue % limitValue == 0) ? limitValue : (countValue % limitValue);
+                skipValue = countValue - docCountInLastPage;
             }
-            Y.one('#execQueryButton').simulate('click');
-            updateAnchors(countValue, true);
+            //update skip value in the cache query parameters
+            queryParameters.skip = skipValue;
+            _executeCachedQuery();
         }
 
         function updateAnchors(count, showPaginated) {
             var first = Y.one('#first'), prev = Y.one('#prev'), next = Y.one('#next'), last = Y.one('#last');
             var start = Y.one('#startLabel'), end = Y.one('#endLabel'), countLabel = Y.one('#countLabel');
-            var skip = parseInt(Y.one('#skip').get('value')), limit = parseInt(Y.one('#limit').get('value'));
-            if (skip == 0 || !showPaginated)
+            // Get the cached query parameter values
+            var queryParameters = _getQueryParameters(true);
+            var skipValue = queryParameters.skip, limitValue = queryParameters.limit;
+            if (skipValue == 0 || skipValue >= count || !showPaginated)
                 disableAnchor(first);
             else
                 enableAnchor(first);
-            if (skip + limit <= limit || !showPaginated)
+            if (skipValue >= count || skipValue + limitValue <= limitValue || !showPaginated)
                 disableAnchor(prev);
             else
                 enableAnchor(prev);
-            if (skip >= count - limit || !showPaginated)
+            if (skipValue >= count - limitValue || !showPaginated)
                 disableAnchor(next);
             else
                 enableAnchor(next);
-            if (skip + limit >= count || !showPaginated)
+            if (skipValue + limitValue >= count || !showPaginated)
                 disableAnchor(last);
             else
                 enableAnchor(last);
-            var size = showPaginated ? skip + limit : count;
-            start.set('text', count != 0 ? skip + 1 : 0);
-            end.set('text', count <= size ? count : skip + limit);
-            countLabel.set('text', count);
+            //Check if the skip value is greater than the totalCount of resultSet for the executedQuery
+            if (skipValue < count) {
+                var size = showPaginated ? skipValue + limitValue : count;
+                start.set('text', count != 0 ? skipValue + 1 : 0);
+                end.set('text', count <= size ? count : skipValue + limitValue);
+                countLabel.set('text', count);
+            } else {
+                start.set('text', 0);
+                end.set('text', 0);
+                countLabel.set('text', 0);
+            }
         }
 
         function enableAnchor(obj) {
@@ -279,41 +314,90 @@ YUI.add('query-executor', function(Y) {
             obj.setStyle('color', 'grey');
         }
 
+        function getCommand(queryParams) {
+            var commandStr = queryParams.query.substr(0, queryParams.query.indexOf("("));
+            return commandStr.substr(commandStr.lastIndexOf(".") + 1);
+        }
+
         /**
-         * This function gets the query parameters from the query box. It takes the
-         * query string, the limit value, skip value and the fields selected and return a
-         * query parameter string which will be added to the request URL
-         * @returns {String} Query prameter string
+         * Stores the query parameters in the cache.
+         * @param queryParams
+         */
+        function postExecuteQueryProcess(queryParams) {
+            var command = getCommand(queryParams);
+            if (command && (command === "find" || command === "findOne")) {
+                cachedQueryParams = queryParams;
+            } else if (command === "drop") {
+                Y.one("#" + MV.getDatabaseElementId(MV.appInfo.currentDB)).simulate("click");
+            }
+        }
+
+        function _populateCheckedFields(queryParameters) {
+            var fields = Y.all('#fields input'), item;
+            for (var index = 0; index < fields.size(); index++) {
+                item = fields.item(index);
+                if (item.get("checked")) {
+                    queryParameters.checkedFields.push(item.get("name"));
+                }
+            }
+        }
+
+        /**
+         * This function gets the query parameters from the query box or cache.
+         * @param fromCache fetches values from cache when true else from the query box
+         * @returns {String} Query parameters
          *
          */
-        function getQueryParameters() {
-            var parsedQuery, query = Y.one('#queryBox').get("value").trim(),
-                limit = Y.one('#limit').get("value"),
-                skip = Y.one('#skip').get("value").trim(),
-                fields = Y.all('#fields input'),
-                sortBy = "{" + Y.one('#sort').get("value") + "}",
-                index = 0, checkedFields = [], item;
-
-            if (query === "") {
-                query = "{}";
-            }
-
-            //replace the single quotes (') in the query string by double quotes (")
-            query = query.replace(/'/g, '"');
-            query = query.replace(/\r/g, '');
-            query = query.replace(/\n/g, '');
-
-            try {
-                for (index = 0; index < fields.size(); index++) {
-                    item = fields.item(index);
-                    if (item.get("checked")) {
-                        checkedFields.push(item.get("name"));
-                    }
+        function _getQueryParameters(fromCache) {
+            if (fromCache) {
+                return cachedQueryParams;
+            } else {
+                var queryParameters = { query: "", limit: 0, skip: 0, checkedFields: [], sortBy: "", totalCount: 0};
+                queryParameters.query = Y.one('#queryBox').get("value").trim();
+                queryParameters.limit = parseInt(Y.one('#limit').get("value"));
+                queryParameters.skip = parseInt(Y.one('#skip').get("value").trim());
+                queryParameters.sortBy = "{" + Y.one('#sort').get("value") + "}";
+                //populate checked keys of a collection from UI
+                _populateCheckedFields(queryParameters);
+                if (queryParameters.query === "") {
+                    queryParameters.query = "{}";
                 }
-                return ("&query=[0]&limit=[1]&skip=[2]&fields=[3]&sortBy=[4]".format(query, limit, skip, checkedFields, sortBy));
-            } catch (error) {
-                Y.log("Could not parse query. Reason: [0]".format(error), "error");
-                MV.showAlertMessage("Failed:Could not parse query. [0]".format(error), MV.warnIcon);
+                return queryParameters;
+            }
+        }
+
+        return {
+            executeQuery: function() {
+                _executeQuery();
+            },
+
+            executeCachedQuery: function(selectAllFields) {
+                if (selectAllFields) {
+                    Y.one('#selectAll').simulate('click');
+                    var queryParameters = _getQueryParameters(true);
+                    _populateCheckedFields(queryParameters);
+                }
+                _executeCachedQuery();
+            },
+
+            getQueryParameters: function(fromCache) {
+                return _getQueryParameters(fromCache);
+            },
+
+            adjustQueryParamsOnDelete: function(numberOfDocs) {
+                var queryParams = _getQueryParameters(true);
+                queryParams.totalCount = queryParams.totalCount - numberOfDocs;
+                if (queryParams.skip == queryParams.totalCount) {
+                    queryParams.skip = queryParams.skip - queryParams.limit;
+                }
+            },
+
+            getKeys : function(){
+                return _getKeys();
+            },
+
+            formatKeys : function(keys){
+                return _formatKeys(keys)
             }
         }
     };

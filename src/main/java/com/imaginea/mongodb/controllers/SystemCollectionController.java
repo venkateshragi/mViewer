@@ -81,7 +81,7 @@ public class SystemCollectionController extends BaseController {
                     readOnly = true;
                 }
 
-                return (systemCollectionService.addUser(dbName, username, password, readOnly));
+                return systemCollectionService.addUser(dbName, username, password, readOnly);
             }
         });
         return response;
@@ -107,11 +107,8 @@ public class SystemCollectionController extends BaseController {
 
         String response = new ResponseTemplate().execute(logger, connectionId, request, new ResponseCallback() {
             public Object execute() throws Exception {
-
                 SystemCollectionService systemCollectionService = new SystemCollectionServiceImpl(connectionId);
-
-
-                return (systemCollectionService.removeUser(dbName, username));
+                return systemCollectionService.removeUser(dbName, username);
             }
         });
 
@@ -136,10 +133,8 @@ public class SystemCollectionController extends BaseController {
 
         String response = new ResponseTemplate().execute(logger, connectionId, request, new ResponseCallback() {
             public Object execute() throws Exception {
-
                 SystemCollectionService systemCollectionService = new SystemCollectionServiceImpl(connectionId);
-
-                return (systemCollectionService.removeAllUsers(dbName));
+                return systemCollectionService.removeAllUsers(dbName);
             }
         });
 
@@ -167,12 +162,10 @@ public class SystemCollectionController extends BaseController {
 
         String response = new ResponseTemplate().execute(logger, connectionId, request, new ResponseCallback() {
             public Object execute() throws Exception {
-
                 //Convert the json keys into a DB object
                 DBObject keys = (DBObject) JSON.parse(index_keys);
                 SystemCollectionService systemCollectionService = new SystemCollectionServiceImpl(connectionId);
-
-                return (systemCollectionService.addIndex(dbName, collectionName, keys));
+                return systemCollectionService.addIndex(dbName, collectionName, keys);
             }
 
         });
@@ -198,9 +191,7 @@ public class SystemCollectionController extends BaseController {
             @Override
             public Object execute() throws Exception {
                 SystemCollectionService systemCollectionService = new SystemCollectionServiceImpl(connectionId);
-
-                return (systemCollectionService.removeIndexes(dbName));
-
+                return systemCollectionService.removeIndexes(dbName);
             }
         });
         return response;
@@ -227,12 +218,9 @@ public class SystemCollectionController extends BaseController {
             @Override
             public Object execute() throws Exception {
                 SystemCollectionService systemCollectionService = new SystemCollectionServiceImpl(connectionId);
-                String collectionName;
                 //The collection name is obtained by removing the DB name from the namespace.
-                collectionName = nameSpace.replace(dbName + ".", "");
-
-                return (systemCollectionService.removeIndex(dbName, collectionName, indexName));
-
+                String collectionName = nameSpace.replace(dbName + ".", "");
+                return systemCollectionService.removeIndex(dbName, collectionName, indexName);
             }
         });
         return response;

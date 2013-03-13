@@ -29,6 +29,8 @@
     <LINK rel="stylesheet" type="text/css"
           href="lib/yui2/build/container/assets/skins/sam/container.css"/>
     <link href="css/fileupload.css" rel="stylesheet" type="text/css">
+    <!-- CSS for basic widgets provided by jQuery-->
+    <link rel="stylesheet" href="lib/jQuery/css/jquery-ui-1.9.1.css" />
     <!-- Bootstrap Image Gallery styles -->
     <LINK rel="stylesheet" href="lib/jQuery/css/bootstrap-image-gallery.min.css"/>
     <!-- CSS to style the file input field as button and adjust the Bootstrap progress bars -->
@@ -67,9 +69,8 @@
     <script type="text/javascript" src="lib/yui2/build/dragdrop/dragdrop-min.js"></script>
 
     <!-- jQuery files-->
-    <script src="lib/jQuery/jquery-1.7.2.js"></script>
-    <!-- The jQuery UI widget factory, can be omitted if jQuery UI is already included -->
-    <script src="lib/jQuery/fileupload/jquery.ui.widget.js"></script>
+    <script src="lib/jQuery/jquery-1.9.1.js"></script>
+    <script src="lib/jQuery/jquery-ui-1.9.1.js"></script>
     <!-- The Templates plugin is included to render the upload/download listings -->
     <script src="lib/jQuery/templates/tmpl.min.js"></script>
     <!-- The Load Image plugin is included for the preview images and image resizing functionality -->
@@ -87,6 +88,7 @@
     <!-- The localization script -->
     <script src="lib/jQuery/fileupload/locale.js"></script>
 
+
     <!--Custom JS   -->
     <script type="text/javascript" src="js/loadingPanel.js"></script>
     <script type="text/javascript" src="js/treeblePaginator.js"></script>
@@ -97,7 +99,7 @@
     <script type="text/javascript" src="js/dataTable.js"></script>
     <script type="text/javascript" src="js/uploadDialog.js"></script>
     <script type="text/javascript" src="js/submitDialog.js"></script>
-    <script type="text/javascript" src="js/simpleDialog.js"></script>
+    <script type="text/javascript" src="js/confirmationDialog.js"></script>
     <script type="text/javascript" src="js/queryExecutor.js"></script>
     <script type="text/javascript" src="js/dbOperations.js"></script>
     <script type="text/javascript" src="js/collectionOperations.js"></script>
@@ -114,7 +116,7 @@
     <script id="template-upload" type="text/x-tmpl">
         {% for (var i=0, file; file=o.files[i]; i++) { %}
         <tr class="template-upload fade" style="display:block">
-            <td class="name" style="width:120px"><span class="wrap">{%=file.name%}</span></td>
+            <td class="name" style="width:120px"><span title="{%=file.name%}" class="wrap_filename">{%=file.name%}</span></td>
             <td class="size" style="width:60px"><span>{%=o.formatFileSize(file.size)%}</span></td>
             {% if (file.error) { %}
             <td class="error" colspan="2"><span class="label label-important">{%=locale.fileupload.error%}</span>
@@ -156,7 +158,7 @@
             </td>
             {% } else { %}
             <td class="name" style="width:212px">
-                <a href="{%=file.url%}" title="{%=file.name%}" target="_blank">{%=file.name%}</a>
+                <a href="{%=file.url%}" title="{%=file.name%}" target="_blank"><span title="{%=file.name%}" class="wrap_filelink">{%=file.name%}</span></a>
             </td>
             <td class="success"><span>Success</span></td>
             <td class="size" style="width:60px"><span>{%=o.formatFileSize(file.size)%}</span></td>
@@ -209,9 +211,8 @@
         <div class="left-cont gen-float">
             <div id="dbBuffer" class="buffer navigable dbBuffer">
                 <div class="list-head">
-                    <label class="db">Databases
-                        <button id="createDB" title="Add new DB"></button>
-                    </label>
+                    <div class="db-header-label"><label class="db">Databases</label></div>
+                    <button id="createDB" title="Add new DB"></button>
                 </div>
                 <div id="dbNames" class="yui3-menu yui3-splitbuttonnav">
                     <div class="yui3-menu-content" style="border:none">
@@ -222,38 +223,40 @@
                 </div>
             </div>
 
-            <div id="collectionBuffer" class="buffer navigable collectionBuffer">
-                <div class="list-head">
-                    <label class="collections">Collections</label>
-                </div>
-                <div id="collNames" class="yui3-menu yui3-splitbuttonnav">
-                    <div class="yui3-menu-content" style="border:none">
-                        <ul class="lists">
-                        </ul>
+            <div id="dbOperations" style="display: none">
+                <div id="collectionBuffer" class="buffer navigable collectionBuffer">
+                    <div class="list-head">
+                        <label class="collections">Collections</label>
+                    </div>
+                    <div id="collNames" class="dbOperation yui3-menu yui3-splitbuttonnav">
+                        <div class="yui3-menu-content" style="border:none">
+                            <ul class="lists">
+                            </ul>
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            <div id="gridFSBuffer" class="buffer navigable collectionBuffer">
-                <div class="list-head">
-                    <label class="gridFS">GridFS</label>
-                </div>
-                <div id="bucketNames" class="yui3-menu yui3-splitbuttonnav">
-                    <div class="yui3-menu-content" style="border:none">
-                        <ul class="lists">
-                        </ul>
+                <div id="gridFSBuffer" class="buffer navigable collectionBuffer">
+                    <div class="list-head">
+                        <label class="gridFS">GridFS</label>
+                    </div>
+                    <div id="bucketNames" class="dbOperation yui3-menu yui3-splitbuttonnav">
+                        <div class="yui3-menu-content" style="border:none">
+                            <ul class="lists">
+                            </ul>
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            <div id="systemCollectionsBuffer" class="buffer navigable collectionBuffer">
-                <div class="list-head">
-                    <label class="collections">Users & Indexes</label>
-                </div>
-                <div id="systemCollections" class="yui3-menu yui3-splitbuttonnav">
-                    <div class="yui3-menu-content" style="border:none">
-                        <ul class="lists">
-                        </ul>
+                <div id="systemCollectionsBuffer" class="buffer navigable collectionBuffer">
+                    <div class="list-head">
+                        <label class="collections">Users & Indexes</label>
+                    </div>
+                    <div id="systemCollections" class="dbOperation yui3-menu yui3-splitbuttonnav">
+                        <div class="yui3-menu-content" style="border:none">
+                            <ul class="lists">
+                            </ul>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -296,7 +299,7 @@
     </div>
 
 </div>
-<div id="simpleDialogContainer"></div>
+<div id="confirmationDialogContainer"></div>
 <div id="alertDialogContainer"></div>
 <div id="addDBDialog" class="yui-pe-content">
     <div class="hd">Add Database</div>
@@ -316,7 +319,6 @@
             <label class="dialogLabel">Name:</label>
             <input type="text" id="newCollName" name="newCollName" title="Enter name of the collection"/>
             <input type="hidden" id="updateColl" name="updateColl" value="false">
-`
             <div class="clear"></div>
             <label class="dialogLabel">Capped: <input type="checkbox" id="isCapped" name="isCapped"
                                                       title="Enable to create a capped collection"/></label>

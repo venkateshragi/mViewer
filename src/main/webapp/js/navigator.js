@@ -13,7 +13,7 @@
             var navigatorCallback = function() {
                 self.init();
             };
-            sm.subscribe(navigatorCallback, [sm.events.collectionsChanged, sm.events.dbsChanged, sm.events.queryFired]);
+            sm.subscribe(navigatorCallback, [sm.events.collectionListUpdated, sm.events.dbListUpdated, sm.events.queryExecuted, sm.events.actionTriggered]);
             this._bindKeysYUI();
             this.init();
         }
@@ -30,7 +30,6 @@
 
         Navigator.prototype = {
             init: function() {
-                Y.log("About to init the navigator", "debug");
                 var selectorString = this.selectorString;
                 var self = this;
                 this.regions = [];
@@ -164,7 +163,6 @@
             selectElement: function(self) {
                 self.hideCommandBar();
                 if (selectedElement) {
-                    Y.log(selectedElement, "debug");
                     var selectedNodeName = selectedElement.get('nodeName');
                     if ('INPUT' === selectedNodeName || 'TEXTAREA' === selectedNodeName) {
                         selectedElement.focus();

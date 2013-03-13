@@ -22,6 +22,8 @@
 YUI.add('submit-dialog', function(Y) {
     YUI.namespace('com.imaginea.mongoV');
     var MV = YUI.com.imaginea.mongoV;
+    var sm = MV.StateManager;
+    var activeDialog = null;
 
     MV.showSubmitDialog = function Dialog(form, successHandler, failureHandler) {
         YAHOO.util.Dom.removeClass(form, "yui-pe-content");
@@ -31,10 +33,19 @@ YUI.add('submit-dialog', function(Y) {
         }
 
         function addCollection() {
-            Y.log("Submit handler for add collection called", "info");
+            if (!sm.currentDB()) {
+                MV.showAlertMessage("No Database Selected!", MV.warnIcon);
+                return false;
+            }
             var newCollInfo = this.getData();
             if (newCollInfo.newCollName === "") {
                 MV.showAlertMessage("Name should be entered to create a Collection!", MV.warnIcon);
+                return false;
+            } else if (newCollInfo.newCollName.match(/[!@#$%^&*,";:()\{\}\[\]'<>?|\/\\]/g) != null) {
+                MV.showAlertMessage(MV.errorCodeMap.INVALID_NAME, MV.warnIcon);
+                return false;
+            } else if (newCollInfo.newCollName.match(/^\.|\.$/) != null) {
+                MV.showAlertMessage(MV.errorCodeMap.INVALID_NAME_ENDINGS, MV.warnIcon);
                 return false;
             } else if (newCollInfo.isCapped === true && newCollInfo.capSize === "") {
                 MV.showAlertMessage("Size should be entered to create a Capped Collection!", MV.warnIcon);
@@ -50,10 +61,19 @@ YUI.add('submit-dialog', function(Y) {
         }
 
         function addGridFS() {
-            Y.log("Submit handler for adding gridFS bucket called", "info");
+            if (!sm.currentDB()) {
+                MV.showAlertMessage("No Database Selected!", MV.warnIcon);
+                return false;
+            }
             var newCollInfo = this.getData();
             if (newCollInfo.name === "") {
                 MV.showAlertMessage("Enter the bucket name!", MV.warnIcon);
+                return false;
+            } else if (newCollInfo.name.match(/^\.|\.$/) != null) {
+                MV.showAlertMessage(MV.errorCodeMap.INVALID_NAME_ENDINGS, MV.warnIcon);
+                return false;
+            } else if (newCollInfo.name.match(/[!@#$%^&*,";:()\{\}\[\]'<>?|\/\\]/g) != null) {
+                MV.showAlertMessage(MV.errorCodeMap.INVALID_NAME, MV.warnIcon);
                 return false;
             } else {
                 Y.one("#" + form + " .bd form").setAttribute("action", MV.URLMap.addGridFS(newCollInfo.name));
@@ -66,31 +86,43 @@ YUI.add('submit-dialog', function(Y) {
             if (newDBInfo.name === "") {
                 MV.showAlertMessage("Enter the database name!", MV.warnIcon);
                 return false;
+            } else if (newDBInfo.name.match(/[!@#$%^&*,";:()\{\}\[\]'<>?|\/\\]/g) != null) {
+                MV.showAlertMessage(MV.errorCodeMap.INVALID_NAME, MV.warnIcon);
+                return false;
+            } else if (newDBInfo.name.match(/^\.|\.$/) != null) {
+                MV.showAlertMessage(MV.errorCodeMap.INVALID_NAME_ENDINGS, MV.warnIcon);
+                return false;
             } else {
                 MV.appInfo.newName = newDBInfo.name;
                 Y.one("#" + form + " .bd form").setAttribute("action", MV.URLMap.insertDB());
-                MV.showAlertMessage("New Database '"+newDBInfo.name+"' added successfully", MV.warnIcon);
+                MV.showAlertMessage("New Database '" + newDBInfo.name + "' added successfully", MV.warnIcon);
             }
             return true;
         }
 
         function addDocument() {
+            if (!sm.currentDB()) {
+                MV.showAlertMessage("No Database Selected!", MV.warnIcon);
+                return false;
+            }
+            if (!sm.currentColl()) {
+                MV.showAlertMessage("No Collection Selected in the Database!", MV.warnIcon);
+                return false;
+            }
             var newDoc = this.getData().document;
             if (newDoc === "") {
-                MV.showAlertMessage("Enter a valid Document", MV.warnIcon);
+                MV.showAlertMessage("Enter a valid JSON Document", MV.warnIcon);
                 return false;
             }
-            try {
-                Y.JSON.parse(newDoc);
-                Y.one("#" + form + " .bd form").setAttribute("action", MV.URLMap.insertDoc());
-            } catch (e) {
-                MV.showAlertMessage("Enter the document in valid JSON format", MV.warnIcon);
-                return false;
-            }
+            Y.one("#" + form + " .bd form").setAttribute("action", MV.URLMap.insertDoc());
             return true;
         }
 
         function addUser() {
+            if (!sm.currentDB()) {
+                MV.showAlertMessage("No Database Selected!", MV.warnIcon);
+                return false;
+            }
             var userName = this.getData().addUser_user_name;
             var password = this.getData().addUser_password;
 
@@ -107,15 +139,11 @@ YUI.add('submit-dialog', function(Y) {
         }
 
         function addIndex() {
-            var indexDocument = this.getData().index_keys;
-            try {
-                Y.JSON.parse(indexDocument);
-                Y.one("#" + form + " .bd form").setAttribute("action", MV.URLMap.addIndex());
-            } catch (e) {
-                MV.showAlertMessage("Please enter the new index in JSON format", MV.warnIcon);
-                Y.log("New Index format not JSON", "error");
+            if (!sm.currentDB()) {
+                MV.showAlertMessage("No Database Selected!", MV.warnIcon);
                 return false;
             }
+            Y.one("#" + form + " .bd form").setAttribute("action", MV.URLMap.addIndex());
             return true;
         }
 
@@ -128,6 +156,9 @@ YUI.add('submit-dialog', function(Y) {
             "addIndexDialogSubmitHandler": addIndex
         };
 
+        if (activeDialog && activeDialog.id !== form) {
+            activeDialog.cancel();
+        }
         var dialogBox = $("#" + form).data("dialogBox");
         if (!dialogBox) {
             dialogBox = new YAHOO.widget.Dialog(form, {
@@ -141,6 +172,7 @@ YUI.add('submit-dialog', function(Y) {
                     duration: 0.25
                 },
                 constraintoviewport: true,
+                hideaftersubmit: false,
                 buttons: [
                     {
                         text: "Submit",
@@ -159,7 +191,12 @@ YUI.add('submit-dialog', function(Y) {
                 ]
             });
             dialogBox.callback = {
-                success: successHandler,
+                success: function(response) {
+                    var success = successHandler(response);
+                    if (success) {
+                        hideActiveDialog();
+                    }
+                },
                 failure: failureHandler
             };
             dialogBox.beforeSubmitEvent.subscribe(function() {
@@ -168,9 +205,18 @@ YUI.add('submit-dialog', function(Y) {
             dialogBox.render();
             $("#" + form).data("dialogBox", dialogBox);
         }
+        activeDialog = dialogBox;
         dialogBox.show();
         return dialogBox;
     };
+
+    var hideActiveDialog = function() {
+        if (activeDialog) {
+            activeDialog.cancel();
+        }
+    };
+
+    sm.subscribe(hideActiveDialog, [sm.events.actionTriggered]);
 
     function updateCappedSection(event) {
         var isChecked = event.currentTarget._node.checked;

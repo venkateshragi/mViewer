@@ -18,7 +18,7 @@ YUI({
 }).use("loading-panel", "alert-dialog", "utility", "submit-dialog", "yes-no-dialog", "io-base", "node", "node-menunav", "json-parse", "event-delegate", "node-event-simulate", "custom-datatable", function(Y) {
         // TODO: make loading panel module
         var dbDiv = Y.one('#dbNames ul.lists');
-        dbDiv.delegate('click', handleClickEvent, 'a.onclick');
+        dbDiv.delegate('click', handleMenuClickEvent, 'a.onclick');
         YUI.namespace('com.imaginea.mongoV');
         var MV = YUI.com.imaginea.mongoV;
         var sm = YUI.com.imaginea.mongoV.StateManager;
@@ -34,15 +34,40 @@ YUI({
                 response = parsedResponse.response.result,
                 error;
             if (response !== undefined) {
-                MV.showAlertMessage(response, MV.infoIcon);
-                Y.log("[0] created in [1]".format(MV.appInfo.newName, MV.appInfo.currentDB), "info");
                 sm.clearCurrentColl();
+                /**
+                 * The alert message need to be shown after simulating the click event,otherwise the message will be hidden by click event
+                 */
                 Y.one("#" + MV.getDatabaseElementId(MV.appInfo.currentDB)).simulate("click");
+                MV.showAlertMessage(response, MV.infoIcon);
             } else {
                 error = parsedResponse.response.error;
-                MV.showAlertMessage("Could not add Collection! [0]", MV.warnIcon, error.code);
-                Y.log("Could not add Collection! [0]".format(MV.errorCodeMap[error.code]), "error");
+                MV.showAlertMessage("Could not add Collection! " + error.message, MV.warnIcon);
+                Y.log("Could not add Collection! " + error.message, "error");
+                return false;
             }
+            return true;
+        }
+
+        /**
+         * The function handles the successful sending of add gridFS request.
+         * It parses the response and checks if the gridFS is successfully added. If not, the prompt the user
+         * @param response
+         */
+        function addGridFSBucket(response) {
+            var parsedResponse = Y.JSON.parse(response.responseText);
+            var result = parsedResponse.response.result,
+                error;
+            if (result !== undefined) {
+                Y.one("#" + MV.getDatabaseElementId(MV.appInfo.currentDB)).simulate("click");
+                MV.showAlertMessage(result, MV.infoIcon);
+            } else {
+                error = parsedResponse.response.error;
+                MV.showAlertMessage("Could not add gridFS bucket! " + error.message, MV.warnIcon);
+                Y.log("Could not add gridFS bucket! " + error.message, "error");
+                return false;
+            }
+            return true;
         }
 
         /**
@@ -53,7 +78,6 @@ YUI({
         function sendDropDBRequest() {
             //"this" refers to the Yes/No dialog box
             this.hide();
-            Y.log("Preparing to send request to drop DB", "info");
             var request = Y.io(MV.URLMap.dropDB(), {
                 method: "POST",
                 on: {
@@ -61,7 +85,6 @@ YUI({
                         var parsedResponse = Y.JSON.parse(responseObject.responseText),
                             error;
                         if (parsedResponse.response.result !== undefined) {
-                            Y.log("[0] dropped".format(MV.appInfo.currentDB), "info");
                             MV.appInfo.currentDB = "";
                             alert(parsedResponse.response.result);
                             window.location.reload();
@@ -85,7 +108,8 @@ YUI({
          * @param args the arguments containing information about which menu item was clicked
          */
 
-        function handleClickEvent(event) {
+        function handleMenuClickEvent(event) {
+            sm.publish(sm.events.actionTriggered);
             var dialog, showErrorMessage;
             var label = $(event.currentTarget._node).closest("ul").closest("li")[0].attributes["data-db-name"].value;
             var index = parseInt(event.currentTarget._node.attributes["index"].value);
@@ -106,23 +130,15 @@ YUI({
                     break;
                 case 2:
                     // add gridfs store
-                    var onSuccess = function(response) {
-                        var parsedResponse = Y.JSON.parse(response.responseText);
-                        var result = parsedResponse.response.result;
-                        if (result !== undefined) {
-                            MV.showAlertMessage(result, MV.infoIcon);
-                            Y.one("#" + MV.getDatabaseElementId(MV.appInfo.currentDB)).simulate("click");
-                        }
-                    };
                     showErrorMessage = function(responseObject) {
                         MV.showAlertMessage("GridFS bucket creation failed!", MV.warnIcon);
                         Y.log("GridFS bucket creation failed. Response Status: [0]".format(responseObject.statusText), "error");
                     };
-                    MV.showSubmitDialog("addGridFSDialog", onSuccess, showErrorMessage);
+                    MV.showSubmitDialog("addGridFSDialog", addGridFSBucket, showErrorMessage);
                     break;
                 case 3:
                     // Delete database
-                    dialog = MV.showYesNoDialog("Do you really want to drop the Database?", sendDropDBRequest, function(dialog) {
+                    dialog = MV.showYesNoDialog("Drop Database", "Are you sure you want to drop the Database?", sendDropDBRequest, function() {
                         this.hide();
                     });
                     break;
@@ -158,7 +174,6 @@ YUI({
          *  @param responseObject The response Object
          */
         function showConnectionDetails(ioId, responseObject) {
-            Y.log("Response Recieved of get DB request", "info");
             try {
                 var parsedResponse = Y.JSON.parse(responseObject.responseText);
                 var result = parsedResponse.response.result;
@@ -173,10 +188,10 @@ YUI({
                     var dbTemplate = '' +
                         '<li class="yui3-menuitem" data-db-name=[0]> \
                                 <span class="yui3-menu-label"> \
-                                      <a id=[1] data-db-name=[2] href="javascript:void(0)" class="dbLabel navigable">[3]</a> \
-                                      <a href="#[4]" class="yui3-menu-toggle"></a>\
+                                      <a id=[1] data-db-name=[2] href="javascript:void(0)" title=[3] class="dbLabel navigable"><span class="wrap_listitem">[4]</span></a> \
+                                      <a href="#[5]" class="yui3-menu-toggle"></a>\
                                 </span>\
-                                <div id="[5]" class="yui3-menu menu-width">\
+                                <div id="[6]" class="yui3-menu menu-width">\
                                     <div class="yui3-menu-content">\
                                         <ul>\
                                             <li class="yui3-menuitem">\
@@ -197,13 +212,10 @@ YUI({
                                 </li>';
                     for (index = 0; index < result.dbNames.length; index++) {
                         var dbName = result.dbNames[index];
-                        var menuDataDbName = dbName;
                         var spanId = MV.getDatabaseElementId(dbName);
-                        var spanDataDbName = dbName;
                         var subMenuHref = dbName + "_subMenu";
-                        var subMenuId = dbName + "_subMenu"
-                        var formattedName = dbName.length > 20 ? dbName.substring(0, 20) + "..." : dbName;
-                        dbNames += dbTemplate.format(menuDataDbName, spanId, spanDataDbName, formattedName, subMenuHref, subMenuId);
+                        var subMenuId = dbName + "_subMenu";
+                        dbNames += dbTemplate.format(dbName, spanId, dbName, dbName, dbName, subMenuHref, subMenuId);
                     }
                     if (index === 0) {
                         dbDiv.set("innerHTML", "No Databases");
@@ -214,8 +226,7 @@ YUI({
                     menu.plug(Y.Plugin.NodeMenuNav, { autoSubmenuDisplay: false, mouseOutHideDelay: 0 });
                     menu.set("style.display", "block");
                     MV.hideLoadingPanel();
-                    Y.log("Database Names succesfully loaded", "info");
-                    sm.publish(sm.events.dbsChanged);
+                    sm.publish(sm.events.dbListUpdated);
                 } else {
                     MV.hideLoadingPanel();
                     var error = parsedResponse.response.error;
@@ -248,6 +259,7 @@ YUI({
             if (error) {
                 MV.showAlertMessage("DB creation failed ! [0].".format(error.message), MV.warnIcon);
                 Y.log("DB creation failed. Response Status: [0]".format(error.message), "error");
+                return false;
             } else {
                 MV.showLoadingPanel("Loading Databases...");
                 var request = Y.io(MV.URLMap.getConnectionDetails(),
@@ -259,16 +271,30 @@ YUI({
                             failure: displayError
                         }
                     });
-                Y.log("Sending request to load DB names", "info");
             }
+            return true;
         }
 
         /**
          * The function shows a dialog that takes input (i.e. Db name) from user
          */
-        function createDB() {
+        function createDB(event) {
             MV.showSubmitDialog("addDBDialog", requestConnectionDetails, null);
+            event.stopPropagation();
         }
+
+        $('#dbBuffer').accordion({
+            header: "div.list-head",
+            heightStyle: "content",
+            collapsible: true
+        });
+
+        $('#dbOperations').accordion({
+            header: "div.list-head",
+            heightStyle: "content",
+            collapsible: true,
+            active: 0
+        });
 
         // Make a request to load Database names when the page loads
         Y.on("load", requestConnectionDetails);

@@ -32,7 +32,7 @@ YUI({
                 MV.hideQueryForm();
                 showServerStats();
                 MV.header.addClass('tab-cont');
-                MV.header.set("innerHTML", "Server Statistics");
+                MV.setHeader(MV.headerConstants.SERVER_STATS);
             } else if (menuOpt === 'graphs') {
                 window.open(MV.URLMap.graphs(), '_newtab');
             } else if (menuOpt === 'help') {
@@ -75,7 +75,6 @@ YUI({
                         var response = parsedResponse.response.result;
                         if (response !== undefined) {
                             window.location = "index.html";
-                            Y.log("Successfully logging out.", "info");
                         } else {
                             var error = parsedResponse.response.error;
                             MV.showAlertMessage("Cannot disconnect! [0]", MV.warnIcon, error.code);

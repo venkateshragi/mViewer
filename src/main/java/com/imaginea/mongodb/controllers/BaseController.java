@@ -125,9 +125,9 @@ public class BaseController {
                         response = "{\"code\":" + "\"" + ErrorCodes.JSON_EXCEPTION + "\"," + "\"message\": \"Error while forming JSON Object\"}";
                     }
                 } else if (dispatcherResponse instanceof JSONObject) {
-                    response = ((JSONObject) dispatcherResponse).toString();
+                    response = dispatcherResponse.toString();
                 } else if (dispatcherResponse instanceof JSONArray) {
-                    response = ((JSONArray) dispatcherResponse).toString();
+                    response = dispatcherResponse.toString();
                 } else if (dispatcherResponse instanceof String) {
                     response = dispatcherResponse.toString();
                 }
@@ -149,7 +149,7 @@ public class BaseController {
                 MongoHostUnknownException e = new MongoHostUnknownException("Unknown host", m);
                 response = formErrorResponse(logger, e);
             } catch (MongoException m) {
-                MongoHostUnknownException e = new MongoHostUnknownException("Unknown host", m);
+                MongoHostUnknownException e = new MongoHostUnknownException(m.getMessage(), m.getCause());
                 response = formErrorResponse(logger, e);
             } catch (DatabaseException e) {
                 response = formErrorResponse(logger, e);

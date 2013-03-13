@@ -35,12 +35,13 @@ YUI({
             edit: "edit"
         };
 
-        var idMap = {};
+        var idMap = {}, queryExecutor;
 
         var initQueryBox = function(event) {
+            sm.publish(sm.events.actionTriggered);
             MV.appInfo.currentColl = event.currentTarget.getAttribute("data-collection-name");
             MV.selectDBItem(event.currentTarget);
-            MV.loadQueryBox(MV.URLMap.getDocKeys(), MV.URLMap.getDocs(), sm.currentColl(), showTabView);
+            queryExecutor = MV.loadQueryBox(MV.URLMap.getDocKeys(), MV.URLMap.getDocs(), sm.currentColl(), showTabView);
         };
 
         /**
@@ -53,8 +54,7 @@ YUI({
             MV.deleteDocEvent.subscribe(deleteDoc);
 
             try {
-                Y.log("Preparing the data tabs...", "info");
-                MV.header.set("innerHTML", "Contents of Collection : " + MV.appInfo.currentColl);
+                MV.setHeader(MV.headerConstants.QUERY_RESPONSE);
                 tabView.appendTo(MV.mainBody.get('id'));
                 var treebleData = MV.getTreebleDataForDocs(response);
                 var treeble = MV.getTreeble(treebleData, "document");
@@ -68,9 +68,7 @@ YUI({
                 treeble.subscribe("rowMouseoverEvent", treeble.onEventHighlightRow);
                 treeble.subscribe("rowMouseoutEvent", treeble.onEventUnhighlightRow);
                 populateJSONTab(response);
-                sm.publish(sm.events.queryFired);
                 MV.hideLoadingPanel();
-                Y.log("Loaded data tabs.", "info");
             } catch (error) {
                 MV.hideLoadingPanel();
                 Y.log("Failed to initailise data tabs. Reason: [0]".format(error), "error");
@@ -166,7 +164,6 @@ YUI({
                     });
                 }
             }, 'div.jsonBuffer');
-            Y.log("The documents written on the JSON tab", "debug");
         }
 
         /**
@@ -240,9 +237,22 @@ YUI({
                             var targetNode = eventObject.currentTarget;
                             var index = getButtonIndex(targetNode);
                             toggleSaveEdit(targetNode, index, actionMap.save);
+                            var savedKeys = queryExecutor.getKeys();
+                            var newKeys = []
+                            for(var index = 0; index < response.keys.length; index++){
+                                var key = response.keys[index];
+                                if(savedKeys.indexOf(key) == -1){
+                                    newKeys.push(key);
+                                }
+                            }
+                            if(newKeys.length > 0){
+                                var innerHTML = Y.one('#fields').get('innerHTML');
+                                innerHTML = innerHTML + queryExecutor.formatKeys(newKeys);
+                                Y.one('#fields').set('innerHTML', innerHTML);
+                            }
                             MV.showAlertMessage("Document updated successfully.", MV.infoIcon);
-                            Y.one('#execQueryButton').simulate('click');
-                            Y.log("Document update to [0]".format(response), "info");
+                            // Re-execute the cached find query to update the view with the new resultSet
+                            queryExecutor.executeCachedQuery(true);
                         } else {
                             var error = parsedResponse.response.error;
                             MV.showAlertMessage("Could not update Document ! [0]", MV.warnIcon, error.code);
@@ -297,8 +307,9 @@ YUI({
                                 var response = parsedResponse.response.result;
                                 if (response !== undefined) {
                                     MV.showAlertMessage("Document deleted successfully.", MV.infoIcon);
-                                    Y.log("Document with _id= [0] deleted. Response: [1]".format(docId, response), "info");
-                                    Y.one('#execQueryButton').simulate('click');
+                                    // Re-execute the cached find query to update the view with the new resultSet
+                                    queryExecutor.adjustQueryParamsOnDelete(1);
+                                    queryExecutor.executeCachedQuery();
                                 } else {
                                     var error = parsedResponse.response.error;
                                     MV.showAlertMessage("Could not delete the document with _id [0]. [1]".format(docId, MV.errorCodeMap[error.code]), MV.warnIcon);
@@ -314,7 +325,7 @@ YUI({
                 this.hide();
             };
             if (args[0].eventObj.currentTarget.hasClass('deletebtn') || args[0].eventObj.currentTarget.hasClass('delete-icon')) {
-                MV.showYesNoDialog("Do you really want to drop the document ?", sendDeleteDocRequest, function() {
+                MV.showYesNoDialog("Delete Document", "Are you sure you want to delete the document ?", sendDeleteDocRequest, function() {
                     this.hide();
                 });
             } else {
@@ -336,7 +347,7 @@ YUI({
             var doc = textArea.get("value");
             try {
                 var parsedDoc = Y.JSON.parse(doc);
-                sendUpdateDocRequest(Y.JSON.stringify(parsedDoc), idMap[index].docId, eventObject);
+                sendUpdateDocRequest(encodeURIComponent(doc), idMap[index].docId, eventObject);
             } catch (e) {
                 var message = e.message.substr(e.message.indexOf(":") + 1);
                 MV.showAlertMessage("Invalid Document format: " + message, MV.warnIcon);
@@ -364,9 +375,9 @@ YUI({
 
         function editDoc(eventObject) {
             if (!allKeysSelected()) {
-                MV.showYesNoDialog("To edit a document you need check all keys in query box. Click YES to do so, NO to cancel", function() {
-                    Y.one('#selectAll').simulate('click');
-                    Y.one('#execQueryButton').simulate('click');
+                MV.showYesNoDialog("Edit Document", "To edit a document you need check all keys in query box. Click YES to do so, NO to cancel", function() {
+                    // Re-execute the cached find query to update the view with the new resultSet
+                    queryExecutor.executeCachedQuery(true);
                     this.hide();
                 }, function() {
                     this.hide();

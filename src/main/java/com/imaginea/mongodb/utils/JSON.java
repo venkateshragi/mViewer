@@ -32,7 +32,7 @@ public class JSON extends com.mongodb.util.JSON {
      */
     public static Object parse(String s, BSONCallback c) {
         if (s == null || (s = s.trim()).equals("")) {
-            return (DBObject) null;
+            return null;
         }
 
         JSONParser p = new JSONParser(s, c);

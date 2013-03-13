@@ -25,8 +25,8 @@ YUI({
             collDiv = Y.one("#collNames ul.lists"),
             systemCollDiv = Y.one("#systemCollections ul.lists"),
             gridFSDiv = Y.one("#bucketNames ul.lists");
-        collDiv.delegate('click', handleCollectionClickEvent, 'a.onclick');
-        gridFSDiv.delegate('click', handleBucketClickEvent, 'a.onclick');
+        collDiv.delegate('click', handleCollectionMenuClickEvent, 'a.onclick');
+        gridFSDiv.delegate('click', handleBucketMenuClickEvent, 'a.onclick');
 
         /**
          * Click event handler on the database name. It sets the current DB and
@@ -34,6 +34,7 @@ YUI({
          * @param e The event Object
          */
         function requestCollNames(e) {
+            sm.publish(sm.events.actionTriggered);
             MV.appInfo.currentDB = e.currentTarget.getAttribute("data-db-name");
             MV.appInfo.currentColl = "";
             Y.one("#collNames").unplug(Y.Plugin.NodeMenuNav);
@@ -44,7 +45,6 @@ YUI({
             MV.selectDatabase(e.currentTarget);
             MV.hideQueryForm();
             MV.showLoadingPanel("Loading Collections...");
-            Y.log("Initiating request to load collections.", "info");
             var request = Y.io(MV.URLMap.getColl(), {
                 // configuration for loading the collections
                 method: "GET",
@@ -53,6 +53,7 @@ YUI({
                     failure: displayError
                 }
             });
+            $("#dbOperations").show();
         }
 
         /**
@@ -63,7 +64,6 @@ YUI({
          * @param responseObject The response Object
          */
         function displayCollectionNames(oId, responseObject) {
-            Y.log("Response Recieved of get collection request", "info");
             var parsedResponse, parsedResult, info, index, error, collections = "", gridFSBuckets = "", systemCollections = "";
             try {
                 parsedResponse = Y.JSON.parse(responseObject.responseText);
@@ -72,10 +72,10 @@ YUI({
                 var collTemplate = '' +
                     '<li class="yui3-menuitem" data-collection-name="[0]"> \
                          <span class="yui3-menu-label"> \
-                             <a id=[1] data-collection-name="[2]" href="javascript:void(0)" class="collectionLabel navigable">[3]</a> \
-                             <a href="#[4]" class="yui3-menu-toggle"></a>\
+                             <a id=[1] data-collection-name="[2]" title=[3] href="javascript:void(0)" class="collectionLabel navigable"><span class="wrap_listitem">[4]</span></a> \
+                             <a href="#[5]" class="yui3-menu-toggle"></a>\
                          </span>\
-                         <div id="[5]" class="yui3-menu menu-width">\
+                         <div id="[6]" class="yui3-menu menu-width">\
                              <div class="yui3-menu-content">\
                                  <ul>\
                                      <li class="yui3-menuitem">\
@@ -97,10 +97,10 @@ YUI({
                 var bucketTemplate = '' +
                     '<li class="yui3-menuitem" data-bucket-name="[0]"> \
                          <span class="yui3-menu-label"> \
-                             <a id=[1] data-bucket-name="[2]" href="javascript:void(0)" class="collectionLabel navigable">[3]</a> \
-                             <a href="#[4]" class="yui3-menu-toggle"></a>\
+                             <a id=[1] data-bucket-name="[2]" title=[3] href="javascript:void(0)" class="collectionLabel navigable"><span class="wrap_listitem">[4]</span></a> \
+                             <a href="#[5]" class="yui3-menu-toggle"></a>\
                          </span>\
-                         <div id="[5]" class="yui3-menu menu-width">\
+                         <div id="[6]" class="yui3-menu menu-width">\
                              <div class="yui3-menu-content">\
                                  <ul>\
                                      <li class="yui3-menuitem">\
@@ -119,10 +119,10 @@ YUI({
                 var usersTemplate = '' +
                     '<li class="yui3-menuitem" data-collection-name="[0]"> \
                     <span class="yui3-menu-label"> \
-                        <a id=[1] data-collection-name="[2]" href="javascript:void(0)" class="collectionLabel navigable">[3]</a> \
-                        <a href="#[4]" class="yui3-menu-toggle"></a>\
+                        <a id=[1] data-collection-name="[2]" title=[3] href="javascript:void(0)" class="collectionLabel navigable"><span class="wrap_listitem">[4]</span></a> \
+                        <a href="#[5]" class="yui3-menu-toggle"></a>\
                     </span>\
-                    <div id="[5]" class="yui3-menu menu-width">\
+                    <div id="[6]" class="yui3-menu menu-width">\
                         <div class="yui3-menu-content">\
                             <ul>\
                                 <li class="yui3-menuitem">\
@@ -138,10 +138,10 @@ YUI({
                 var indexesTemplate = '' +
                     '<li class="yui3-menuitem" data-collection-name="[0]"> \
                     <span class="yui3-menu-label"> \
-                        <a id=[1] data-collection-name="[2]" href="javascript:void(0)" class="collectionLabel navigable">[3]</a> \
-                        <a href="#[4]" class="yui3-menu-toggle"></a>\
+                        <a id=[1] data-collection-name="[2]" title=[3] href="javascript:void(0)" class="collectionLabel navigable"><span class="wrap_listitem">[4]</span></a> \
+                        <a href="#[5]" class="yui3-menu-toggle"></a>\
                     </span>\
-                    <div id="[5]" class="yui3-menu menu-width">\
+                    <div id="[6]" class="yui3-menu menu-width">\
                         <div class="yui3-menu-content">\
                             <ul>\
                                 <li class="yui3-menuitem">\
@@ -159,30 +159,27 @@ YUI({
                 if (parsedResult) {
                     for (index = 0; index < parsedResult.length; index++) {
                         var collectionName = parsedResult[index];
-                        var formattedName = collectionName.length > 20 ? collectionName.substring(0, 20) + "..." : collectionName;
                         var id;
                         if (collectionName == 'system.users') {
-
                             id = MV.getCollectionElementId(collectionName);
-                            systemCollections += usersTemplate.format(collectionName, id, collectionName, formattedName, id + "_subMenu", id + "_subMenu");
+                            systemCollections += usersTemplate.format(collectionName, id, collectionName, collectionName, collectionName, id + "_subMenu", id + "_subMenu");
                             hasUsersAndIndexes = true;
                         } else if (collectionName == 'system.indexes') {
                             id = MV.getCollectionElementId(collectionName);
-                            systemCollections += indexesTemplate.format(collectionName, id, collectionName, formattedName, id + "_subMenu", id + "_subMenu");
+                            systemCollections += indexesTemplate.format(collectionName, id, collectionName, collectionName, collectionName, id + "_subMenu", id + "_subMenu");
                             hasUsersAndIndexes = true;
                         } else {
                             var pos = collectionName.lastIndexOf(".files");
                             if (pos > 0) {
                                 collectionName = collectionName.substring(0, pos);
-                                formattedName = collectionName.length > 20 ? collectionName.substring(0, 20) + "..." : collectionName;
                                 id = MV.getBucketElementId(collectionName);
-                                gridFSBuckets += bucketTemplate.format(collectionName, id, formattedName, collectionName, id + "_subMenu", id + "_subMenu");
+                                gridFSBuckets += bucketTemplate.format(collectionName, id, collectionName, collectionName, collectionName, id + "_subMenu", id + "_subMenu");
                                 hasFiles = true;
                             }
                             // Issue 17 https://github.com/Imaginea/mViewer/issues/17
                             if (pos < 0 && collectionName.search(".chunks") < 0) {
                                 id = MV.getCollectionElementId(collectionName);
-                                collections += collTemplate.format(collectionName, id, collectionName, formattedName, id + "_subMenu", id + "_subMenu");
+                                collections += collTemplate.format(collectionName, id, collectionName, collectionName, collectionName, id + "_subMenu", id + "_subMenu");
                                 hasCollections = true;
                             }
                         }
@@ -197,16 +194,12 @@ YUI({
 
                     var menu1 = Y.one("#collNames");
                     menu1.plug(Y.Plugin.NodeMenuNav, { autoSubmenuDisplay: false, mouseOutHideDelay: 0 });
-                    menu1.set("style.display", "block");
                     var menu2 = Y.one("#bucketNames");
                     menu2.plug(Y.Plugin.NodeMenuNav, { autoSubmenuDisplay: false, mouseOutHideDelay: 0 });
-                    menu2.set("style.display", "block");
                     var menu3 = Y.one("#systemCollections");
                     menu3.plug(Y.Plugin.NodeMenuNav, { autoSubmenuDisplay: false, mouseOutHideDelay: 0 });
-                    menu3.set("style.display", "block");
-                    sm.publish(sm.events.collectionsChanged);
+                    sm.publish(sm.events.collectionListUpdated);
                     MV.hideLoadingPanel();
-                    Y.log("Collection Names succesfully loaded", "info");
                 } else {
                     error = parsedResponse.response.error;
                     Y.log("Could not load collections. Message: [0]".format(error.message), "error");
@@ -224,7 +217,8 @@ YUI({
          * @param eventType The event type
          * @param args the arguments containing information about which menu item was clicked
          */
-        function handleCollectionClickEvent(event) {
+        function handleCollectionMenuClickEvent(event) {
+            sm.publish(sm.events.actionTriggered);
             var label = $(event.currentTarget._node).closest("ul").closest("li")[0].attributes["data-collection-name"].value;
             var index = parseInt(event.currentTarget._node.attributes["index"].value);
             MV.appInfo.currentColl = label;
@@ -240,7 +234,7 @@ YUI({
                     break;
                 case 2:
                     // Drop Collection
-                    MV.showYesNoDialog("Do you really want to drop the Collection - " + MV.appInfo.currentColl + "?", dropCollection, function() {
+                    MV.showYesNoDialog("Drop Collection", "Are you sure you want to drop the Collection - " + MV.appInfo.currentColl + "?", dropCollection, function() {
                         this.hide();
                     });
                     break;
@@ -295,7 +289,8 @@ YUI({
          * @param eventType The event type
          * @param args the arguments containing information about which menu item was clicked
          */
-        function handleBucketClickEvent(event) {
+        function handleBucketMenuClickEvent(event) {
+            sm.publish(sm.events.actionTriggered);
             var label = $(event.currentTarget._node).closest("ul").closest("li")[0].attributes["data-bucket-name"].value;
             var index = parseInt(event.currentTarget._node.attributes["index"].value);
             MV.appInfo.currentBucket = label;
@@ -311,7 +306,7 @@ YUI({
                     break;
                 case 2:
                     // Delete
-                    MV.showYesNoDialog("Do you really want to drop all files in this bucket - " + MV.appInfo.currentBucket + "?", sendDropBucketRequest, function() {
+                    MV.showYesNoDialog("Drop Bucket", "Are you sure you want to drop all files in this bucket - " + MV.appInfo.currentBucket + "?", sendDropBucketRequest, function() {
                         this.hide();
                     });
                     break;
@@ -331,16 +326,14 @@ YUI({
         function sendDropBucketRequest() {
             //"this" refers to the Yes/No dialog box
             this.hide();
-            Y.log("Preparing to send request to drop bucket", "info");
             var request = Y.io(MV.URLMap.dropBucket(), {
                 on: {
                     success: function(ioId, responseObj) {
                         var parsedResponse = Y.JSON.parse(responseObj.responseText);
                         var response = parsedResponse.response.result;
                         if (response !== undefined) {
-                            Y.log(response, "info");
-                            MV.showAlertMessage(response, MV.infoIcon);
                             Y.one("#" + MV.getDatabaseElementId(MV.appInfo.currentDB)).simulate("click");
+                            MV.showAlertMessage(response, MV.infoIcon);
                         } else {
                             var error = parsedResponse.response.error;
                             MV.showAlertMessage("Could not delete all files : [0]", MV.warnIcon, error.code);
@@ -374,10 +367,9 @@ YUI({
                                 response = parsedResponse.response.result,
                                 error;
                             if (response !== undefined) {
-                                MV.showAlertMessage(response, MV.infoIcon);
-                                Y.log("[0] dropped. Response: [1]".format(MV.appInfo.currentColl, response), "info");
                                 sm.clearCurrentColl();
                                 Y.one("#" + MV.getDatabaseElementId(MV.appInfo.currentDB)).simulate("click");
+                                MV.showAlertMessage(response, MV.infoIcon);
                             } else {
                                 error = parsedResponse.response.error;
                                 MV.showAlertMessage("Could not drop: [0]. [1]".format(MV.appInfo.currentColl, MV.errorCodeMap[error.code]), MV.warnIcon);
@@ -401,14 +393,15 @@ YUI({
                 response = parsedResponse.response.result,
                 error;
             if (response !== undefined) {
-                MV.showAlertMessage("New document added successfully to collection '[0]'".format(MV.appInfo.currentColl), MV.infoIcon);
-                Y.log("New document added to [0]".format(MV.appInfo.currentColl, "info"));
                 Y.one("#" + MV.getCollectionElementId(MV.appInfo.currentColl)).simulate("click");
+                MV.showAlertMessage("New document added successfully to collection '[0]'".format(MV.appInfo.currentColl), MV.infoIcon);
             } else {
                 error = parsedResponse.response.error;
-                MV.showAlertMessage("Could not add Document ! [0]", MV.warnIcon, error.code);
-                Y.log("Could not add Document! [0]".format(MV.errorCodeMap[error.code]), "error");
+                MV.showAlertMessage("Could not add Document : " + error.message, MV.warnIcon);
+                Y.log("Could not add Document : " + error.message, "error");
+                return false;
             }
+            return true;
         }
 
         /**
@@ -422,15 +415,19 @@ YUI({
                 response = parsedResponse.response.result,
                 error;
             if (response !== undefined) {
-                MV.showAlertMessage(response, MV.infoIcon);
-                Y.log("[0] created in [1]".format(MV.appInfo.newName, MV.appInfo.currentDB), "info");
                 sm.clearCurrentColl();
+                /**
+                 * The alert message need to be shown after simulating the click event,otherwise the message will be hidden by click event
+                 */
                 Y.one("#" + MV.getDatabaseElementId(MV.appInfo.currentDB)).simulate("click");
+                MV.showAlertMessage(response, MV.infoIcon);
             } else {
                 error = parsedResponse.response.error;
                 MV.showAlertMessage("Could not update Collection! [0]", MV.warnIcon, error.code);
                 Y.log("Could not update Collection! [0]".format(MV.errorCodeMap[error.code]), "error");
+                return false;
             }
+            return true;
         }
 
         /**

@@ -7,8 +7,7 @@ YUI.add('utility', function(Y) {
     // format function can be added
     if (typeof String.prototype.format !== 'function') {
         String.prototype.format = function() {
-            var formatted = this,
-                i;
+            var formatted = this,i;
             for (i = 0; i < arguments.length; i++) {
                 formatted = formatted.replace("[" + i + "]", arguments[i]);
             }
@@ -60,6 +59,20 @@ YUI.add('utility', function(Y) {
         port: "",
         newName: "",
         connectionId: ""
+    };
+
+    MV.headerConstants = {
+        STATISTICS: "Statistics",
+        SERVER_STATS: "Server Statistics",
+        QUERY_RESPONSE: "Query Response"
+    };
+
+    MV.setHeader = function(value) {
+        MV.header.set("innerHTML", value);
+    };
+
+    MV.clearHeader = function() {
+        MV.header.set("innerHTML", "");
     };
 
     MV.openFileEvent = new YAHOO.util.CustomEvent("OpenFile");
@@ -179,7 +192,7 @@ YUI.add('utility', function(Y) {
             }
 
             for (; i < eventNames.length; i++) {
-                eventName = eventNames[i];
+                var eventName = eventNames[i];
                 if (gRegistry[eventName] === undefined) {
                     gRegistry[eventName] = [];
                 }
@@ -196,10 +209,10 @@ YUI.add('utility', function(Y) {
             return new Date().getTime().toString();
         };
         exports.events = {
-            collectionsChanged: 1,
-            dbsChanged: 2,
-            queryFired: 3,
-            openFile: 4
+            dbListUpdated: 1,
+            collectionListUpdated: 2,
+            actionTriggered : 3,
+            queryExecuted: 4
         };
         return exports;
 
@@ -324,6 +337,11 @@ YUI.add('utility', function(Y) {
         }
     };
 
+    MV.getErrorMsgFromServerError = function(error) {
+        var messageJSONStr = error.message.substr(error.message.indexOf(":") + 1);
+        return Y.JSON.parse(messageJSONStr).errmsg;
+    }
+
     MV.errorCodeMap = {
         "HOST_UNKNOWN": "Connection Failed ! Please check if MongoDB is running at the given host and port !",
         "MISSING_LOGIN_FIELDS": "Please fill in all the login fields !",
@@ -333,6 +351,8 @@ YUI.add('utility', function(Y) {
         "NEED_AUTHORISATION": "mongod is running in secure mode. Please enter username and password.",
         "INVALID_SESSION": "Your session has timed out ! Please login again.",
         "INVALID_CONNECTION": "You are currently not connected to Mongo DB ! Please Connect.",
+        "INVALID_NAME": "Name cannot contain following special characters [!@#$%^&*(),;:\"{}[]'<>?/\\|]!",
+        "INVALID_NAME_ENDINGS": "Name cannot begin or end with a '.'",
         "GET_DB_LIST_EXCEPTION": "Could not load the DB list ! Please check if mongo is still running and then refresh the page.",
         "GET_COLLECTION_LIST_EXCEPTION": "Please check if mongod is still running and then refresh the page.",
         "DB_DELETION_EXCEPTION": "Please check if mongo is running and then refresh the page and try again.",
@@ -347,7 +367,6 @@ YUI.add('utility', function(Y) {
         "DOCUMENT_CREATION_EXCEPTION": "Please check if mongod is running and refresh the page.",
         "DOCUMENT_UPDATE_EXCEPTION": "Please check if mongod is running and refresh the page.",
         "DOCUMENT_DOES_NOT_EXIST": "Document does not exist !",
-        "INVALID_USER": "Your session is corrupted or timed out ! Please login again from the login page.",
         "DB_INFO_ABSENT": "Mongo Config details are not provided in session ! Please login again from the login page.",
         "GET_DB_STATS_EXCEPTION": "Please check if mongod is running and refresh the page.",
         "GET_COLL_STATS_EXCEPTION": "Please check if mongod is running and refresh the page.",
