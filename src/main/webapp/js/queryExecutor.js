@@ -55,6 +55,7 @@ YUI.add('query-executor', function(Y) {
         }
 
         function execute(queryParams) {
+            sm.publish(sm.events.actionTriggered);
             var queryStr = "&query=[0]&limit=[1]&skip=[2]&fields=[3]&sortBy=[4]".format(
                 encodeURIComponent(queryParams.query), queryParams.limit, queryParams.skip, queryParams.checkedFields, queryParams.sortBy);
             if (queryStr !== undefined) {
