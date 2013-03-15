@@ -143,9 +143,9 @@ public class GridFSController extends BaseController {
         String contentType = ApplicationUtils.getContentType(fileObject);
         Response.ResponseBuilder response = Response.ok(fileObject, contentType);
         if (download) {
-            response.header("Content-Disposition", "attachment; filename=" + fileObject.getName());
+            response.header("Content-Disposition", "attachment; filename='" + fileObject.getName() + "'");
         } else {
-            response.header("Content-Disposition", "filename=" + fileObject.getName());
+            response.header("Content-Disposition", "filename='" + fileObject.getName() + "'");
         }
         return response.build();
     }
