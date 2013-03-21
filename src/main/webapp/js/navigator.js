@@ -230,6 +230,10 @@ YUI.add('navigator', function (Y) {
             var highlightedElement = this.getHighlightedElement();
             this.clearText();
             this.clearStyles();
+            var self = this;
+            var setFocus = function() {
+                self.searchInput.focus();
+            };
             if (highlightedElement) {
                 var selectedNodeName = highlightedElement.get('nodeName');
                 if ('INPUT' === selectedNodeName || 'TEXTAREA' === selectedNodeName) {
@@ -241,13 +245,19 @@ YUI.add('navigator', function (Y) {
                             currentNavigableChild.simulate('mousedown');
                         } else {
                             currentNavigableChild.simulate('click');
+                            // TODO Instead of checking for anchor tag, we need to have a better way to decide
+                            // if the focus needs to be reset to the searchInput or not after the click
+                            selectedNodeName = currentNavigableChild.get('nodeName');
+                            if ('A' === selectedNodeName) {
+                                setTimeout(setFocus, 500);
+                            }
                         }
                     } else {
                         highlightedElement.simulate('click');
-                        this.searchInput.focus();
+                        setTimeout(setFocus, 500);
                     }
                 } else if ('SELECT' === selectedNodeName) {
-                    highlightedElement.focus();
+                    highlightedElement.simulate('mousedown');
                 } else {
                     highlightedElement.simulate('click');
                 }

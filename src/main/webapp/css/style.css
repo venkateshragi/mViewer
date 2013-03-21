@@ -23,7 +23,7 @@ input {
 
 .ui-accordion .ui-accordion-content {
     padding: 0px;
-    border-top:1px solid;
+    border-top: 1px solid;
 }
 
 #dbOperations .dbOperation {
@@ -208,15 +208,21 @@ ul.lists li:hover, ul.lists li.sel:hover, .nav-link-home:hover {
     cursor: pointer;
 }
 
-ul.lists li:hover span.yui3-menu-label-active *, ul.lists li.yui3-menuitem-active:hover * {
-    color: #fff !important;
-    text-decoration: none !important;
+.shadow, * input:focus, button:focus, textarea:focus, a:focus, select:focus, tr.selected {
+    box-shadow: 0 0 2px 2px highlight !important;
+    -webkit-box-shadow: 0 0 2px 2px rgb(255, 255, 255);
+    -moz-box-shadow: 0 0 2px 2px highlight !important;
+    outline: none;
 }
 
-ul.lists li * {
-    color: #000 !important;
-    padding: 0px;
-    margin: 0px;
+.highlighted {
+    border: 2px solid #007700;
+    text-decoration-color: #007700;
+}
+
+ul.lists li:hover span.yui3-menu-label-active *, ul.lists li.yui3-menuitem-active:hover *,  ul.lists li.simulatedHover.highlighted * {
+    color: #fff !important;
+    text-decoration: none !important;
 }
 
 ul.lists li {
@@ -233,7 +239,7 @@ ul.lists li {
     border: none !important;
 }
 
-ul.lists li:hover .yui3-menu-toggle {
+ul.lists li:hover .yui3-menu-toggle, ul.lists li.simulatedHover.highlighted .yui3-menu-toggle {
     opacity: 1 !important;
 }
 
@@ -303,7 +309,7 @@ ul.lists li.sel {
     background: #D0E4F7;
 }
 
-ul.lists li:hover {
+ul.lists li:hover, ul.lists li.simulatedHover.highlighted {
     list-style-image: url('../images/bullet_inverted.png');
 }
 
@@ -496,6 +502,7 @@ textarea {
     font-weight: bold;
     margin-top: 2px;
     cursor: pointer;
+    min-width: 50px;
 }
 
 .bttn:hover {
@@ -621,8 +628,9 @@ table tr td {
 
 .docDiv {
     display: inline-block;
-    width: 99%;
+    width: 98%;
     position: relative;
+    margin: 4px;
 }
 
 .textAreaDiv {
@@ -636,7 +644,7 @@ table tr td {
     display: inline;
     float: right;
     position: absolute;
-    right: 20px;
+    right: 35px;
     top: 20px;
 }
 
@@ -919,6 +927,7 @@ textarea .disabled {
 
 .searchBox {
     border: 1px solid #a9a9a9;
+    border-radius: 0px 3px 3px 0px;
     left: 0px;
     bottom: 0px;
     padding: 5px;
@@ -938,37 +947,12 @@ textarea .disabled {
     width: 137px;
 }
 
-.shadow-original {
-    -moz-box-shadow: 3px 3px 4px #000;
-    -webkit-box-shadow: 3px 3px 4px #000;
-    box-shadow: 3px 3px 4px #000;
-    /* For IE 8 */
-    -ms-filter: "progid:DXImageTransform.Microsoft.Shadow(Strength=4, Direction=135, Color='#000000')";
-    /* For IE 5.5 - 7 */
-    filter: progid:DXImageTransform.Microsoft.Shadow(Strength = 4, Direction = 135, Color = '#000000');
-}
-
-.shadow, * input:focus, button:focus, textarea:focus, a:focus, select:focus, tr.selected {
-    border: 1px solid #CCCCCC;
-    box-shadow: 0 0 2px 2px highlight !important;
-    -webkit-box-shadow: 0 0 2px 2px rgb(255, 255, 255);
-    -moz-box-shadow: 0 0 2px 2px highlight !important;
-    outline: none;
-}
-
-.highlighted {
-    border: 2px solid #007700;
-    text-decoration: underline;
-    text-decoration-color: #007700;
-}
-
 div.navigable ul.lists li {
     cursor: pointer;
 }
 
 div.buffer {
     overflow-y: hidden;
-    margin: 2px;
     overflow-x: hidden;
 }
 
