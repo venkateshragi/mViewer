@@ -177,7 +177,7 @@ a.logo {
 
 ul.nav-link-top {
     list-style-type: none;
-    margin-left: 40px;
+    margin-left: 10px;
 }
 
 ul.nav-link-top li {
@@ -189,7 +189,7 @@ ul.nav-link-top li a {
     color: #F7F7F7;
     padding: 22px 15px;
     font-weight: bold;
-    font-size: 13px;
+    font-size: 12px;
     height: 30px;
     line-height: 60px;
     cursor: pointer;
@@ -212,7 +212,7 @@ ul.lists li:hover, ul.lists li.sel:hover, .nav-link-home:hover {
 
 .shadow, * input:focus, button:focus, textarea:focus, a:focus, select:focus, tr.selected {
     box-shadow: 0 0 2px 2px highlight !important;
-    -webkit-box-shadow: 0 0 2px 2px rgb(255, 255, 255);
+    -webkit-box-shadow: 0 0 2px 2px highlight !important;
     -moz-box-shadow: 0 0 2px 2px highlight !important;
     outline: none;
 }
@@ -931,14 +931,10 @@ textarea .disabled {
 }
 
 .searchBox {
-    border: 1px solid #a9a9a9;
-    border-radius: 0px 3px 3px 0px;
-    left: 0px;
-    bottom: 0px;
-    padding: 5px;
-    position: fixed;
+    padding-top: 20px;
+    color: lightgray;
     font-weight: bold;
-    background-color: #c0c0c0;
+    float:left;
 }
 
 *html .searchBox {
@@ -949,7 +945,7 @@ textarea .disabled {
 
 .assistText {
     border: 1px solid #888888;
-    width: 137px;
+    width: 250px;
 }
 
 div.navigable ul.lists li {
