@@ -141,9 +141,11 @@ a:hover {
 
 .nav-bar {
     background: #161616;
-    width: 100%;
+    width: inherit;
     height: 60px;
-    padding: 0 10px;
+    padding: 0 11px;
+    position: fixed;
+    z-index: 2000;
 }
 
 .nav-link-home {
@@ -347,14 +349,19 @@ ul.nav-link-right li label {
     width: 920px;
     border: 1px solid #B2D4D3;
     background: #fbfbfb;
+    top:90px;
+    position: relative;
 }
 
 .title-head {
     background: #D0E4F7;
     height: 30px;
-    padding: 0 10px;
-    position: relative;
+    padding: 0 11px;
     text-align: center;
+    position: fixed;
+    z-index: 2000;
+    top:60px;
+    width: inherit;
 }
 
 .title-head label {
@@ -687,9 +694,8 @@ table tr td {
 #paginator {
     float: right;
     margin-top: 5px;
-    z-index: 1000;
-    position: absolute;
-    right: 120px;
+    position: inherit;
+    margin-right: 32px;
 }
 
 #first, #prev {
@@ -706,7 +712,6 @@ table tr td {
 
 #last {
     margin-left: 10px;
-    margin-right: 95px;
 }
 
 #execQueryButton {
