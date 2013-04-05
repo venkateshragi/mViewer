@@ -95,7 +95,7 @@ public class TestingTemplate extends BaseController {
     protected String loginAndGetConnectionId(HttpServletRequest request) {
         String response = new LoginController().authenticateUser(getMongoUsername(), getMongoPassword(), getMongoHost(), String.valueOf(getMongoPort()), null, request);
         BasicDBObject responseObject = (BasicDBObject) JSON.parse(response);
-        return (String) ((BasicDBObject) responseObject.get("response")).get("connectionId");
+        return (String) ((BasicDBObject)((BasicDBObject) responseObject.get("response")).get("result")).get("connectionId");
     }
 
     protected static void logout(String connectionId, HttpServletRequest request) {
